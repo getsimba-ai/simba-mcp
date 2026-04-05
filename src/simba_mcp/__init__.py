@@ -1,4 +1,4 @@
-"""Simba MCP Server — connect AI assistants to Simba MMM."""
+"""SIMBA MCP Server — connect AI assistants to SIMBA MMM."""
 
 __version__ = "0.1.0"
 

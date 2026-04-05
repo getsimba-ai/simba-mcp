@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to the Simba MCP Server will be documented in this file.
+All notable changes to the SIMBA MCP Server will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ### Added
 
-- Initial release of the Simba MCP Server.
+- Initial release of the SIMBA MCP Server.
 - 11 MCP tools: `get_data_schema`, `upload_data`, `list_models`, `create_model`, `get_model_status`, `get_model_results`, `run_optimizer`, `get_optimizer_results`, `get_scenario_template`, `run_scenario`, `get_scenario_results`.
 - Async HTTP client (`SimbaAPIClient`) wrapping Simba API v1.
 - Support for stdio, Streamable HTTP, and SSE transport modes.

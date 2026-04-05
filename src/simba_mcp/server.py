@@ -1,5 +1,5 @@
 """
-Simba MCP Server — exposes Simba's API v1 as MCP tools.
+SIMBA MCP Server — exposes Simba's API v1 as MCP tools.
 
 Tools allow AI assistants (Claude, Cursor, etc.) to interact with
 Marketing Mix Models: upload data, create models, check status,

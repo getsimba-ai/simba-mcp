@@ -1,6 +1,6 @@
 ---
 name: Bug Report
-about: Report a bug in the Simba MCP Server
+about: Report a bug in the SIMBA MCP Server
 labels: bug
 ---
 

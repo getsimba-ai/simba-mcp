@@ -18,7 +18,7 @@ from .server import mcp
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Simba MCP Server")
+    parser = argparse.ArgumentParser(description="SIMBA MCP Server")
     parser.add_argument(
         "--transport",
         default="stdio",

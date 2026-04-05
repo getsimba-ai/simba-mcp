@@ -1,4 +1,4 @@
-# Simba MCP Server — Marketing Mix Modeling for AI Assistants
+# SIMBA MCP Server — Marketing Mix Modeling for AI Assistants
 
 [![PyPI](https://img.shields.io/pypi/v/simba-mcp)](https://pypi.org/project/simba-mcp/)
 [![CI](https://github.com/getsimba-ai/simba-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/getsimba-ai/simba-mcp/actions/workflows/ci.yml)
@@ -16,7 +16,7 @@ An open-source [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) 
 
 ## Resources
 
-- **[getsimba.ai](https://getsimba.ai)** — Simba platform (features, pricing, demos)
+- **[getsimba.ai](https://getsimba.ai)** — SIMBA platform (features, pricing, demos)
 - **[getsimba-ai/simba-mmm](https://github.com/getsimba-ai/simba-mmm)** — full documentation on MMM concepts, data requirements, model configuration, incrementality measurement, and more
 
 ## Installation
@@ -181,4 +181,4 @@ uvicorn "simba_mcp.server:create_app()" --host 0.0.0.0 --port 8100
 
 MIT — see [LICENSE](LICENSE) for details.
 
-Built by [Simba](https://getsimba.ai) on [PyMC-Marketing](https://www.pymc-marketing.io/).
+Built by [SIMBA](https://getsimba.ai) on [PyMC-Marketing](https://www.pymc-marketing.io/).
