@@ -17,12 +17,20 @@ MAX_RETRIES = 3
 BACKOFF_BASE = 0.5
 RETRIABLE_STATUS_CODES = frozenset({429, 500, 502, 503, 504})
 
+AUTH_HELP = (
+    "This MCP server requires a Simba account. "
+    "If you're already a customer, create an API key at Profile > API Keys in the Simba UI. "
+    "Not a customer yet? Book a call to get started: "
+    "https://calendly.com/niall-oulton"
+)
+
 
 class SimbaAPIClient:
     """Thin async wrapper around Simba's API v1 endpoints."""
 
     def __init__(self, base_url: str, api_key: str):
         self.base_url = base_url.rstrip("/")
+        self._api_key = api_key
         self._headers = {"Authorization": f"Bearer {api_key}"}
         self._client: httpx.AsyncClient | None = None
 
@@ -46,10 +54,18 @@ class SimbaAPIClient:
             except Exception:
                 error_body = {"error": response.text or response.reason_phrase}
             error_body["_status_code"] = response.status_code
+            if response.status_code in (401, 403):
+                error_body["_help"] = AUTH_HELP
             return error_body
         return response.json()
 
     async def _request(self, method: str, path: str, **kwargs) -> dict[str, Any]:
+        if not self._api_key:
+            return {
+                "error": "SIMBA_API_KEY is not set. " + AUTH_HELP,
+                "_status_code": 401,
+                "_help": AUTH_HELP,
+            }
         client = await self._get_client()
         last_exc: Exception | None = None
         for attempt in range(MAX_RETRIES):

@@ -14,6 +14,10 @@ An open-source [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) 
 - **Built on PyMC** — transparent Bayesian models with uncertainty quantification, adstock effects, saturation curves, and lift test calibration under the hood
 - **Any MCP client** — works with Claude Desktop, Cursor IDE, Claude Code, or any Model Context Protocol-compatible client
 
+## Prerequisites
+
+> **This MCP server requires a [Simba](https://getsimba.ai) account.** You'll need an active subscription and API key to connect. If you're not already a customer, **[book a call](https://calendly.com/niall-oulton)** to get set up with a demo and access.
+
 ## Resources
 
 - **[getsimba.ai](https://getsimba.ai)** — SIMBA platform (features, pricing, demos)
@@ -143,7 +147,9 @@ Try these with any connected AI assistant:
 
 ## API Key Setup
 
-The MCP server authenticates with the same API keys used by the Simba REST API. Create a key with the required scopes:
+The MCP server authenticates with the same API keys used by the Simba REST API. You'll need an active Simba account — **[book a call](https://calendly.com/niall-oulton)** if you don't have one yet.
+
+Once you have access, create a key with the required scopes:
 
 1. Go to **Profile > API Keys** in the Simba UI
 2. Click **Create Key**
