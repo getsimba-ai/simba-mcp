@@ -1,8 +1,8 @@
-# Contributing to Simba MCP Server
+# Contributing to SIMBA MCP Server
 
 Thanks for your interest in contributing! This guide covers the basics for getting set up and submitting changes.
 
-For broader contribution guidelines across the Simba project, see the [main repo's contributing guide](https://github.com/getsimba-ai/simba-mmm/blob/main/CONTRIBUTING.md).
+For broader contribution guidelines across the SIMBA project, see the [main repo's contributing guide](https://github.com/getsimba-ai/simba-mmm/blob/main/CONTRIBUTING.md).
 
 ## Development Setup
 
