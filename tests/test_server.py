@@ -59,10 +59,12 @@ class TestLifespan:
 
     @pytest.mark.anyio
     async def test_lifespan_warns_without_api_key(self, caplog):
-        """A warning is logged when SIMBA_API_KEY is empty."""
+        """A warning is logged when SIMBA_API_KEY is empty, with booking link."""
         env = {"SIMBA_API_URL": "http://test:9999", "SIMBA_API_KEY": ""}
         with patch.dict(os.environ, env, clear=False):
             os.environ.pop("SIMBA_API_KEY", None)
             async with app_lifespan(mcp) as ctx:
                 assert ctx.client is not None
-        assert any("SIMBA_API_KEY" in r.message for r in caplog.records)
+        warnings = [r.message for r in caplog.records if "SIMBA_API_KEY" in r.message]
+        assert len(warnings) == 1
+        assert "calendly.com" in warnings[0]

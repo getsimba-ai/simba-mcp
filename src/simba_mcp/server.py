@@ -33,7 +33,11 @@ async def app_lifespan(server: FastMCP) -> AsyncIterator[AppContext]:
     base_url = os.environ.get("SIMBA_API_URL", "http://localhost:5005")
     api_key = os.environ.get("SIMBA_API_KEY", "")
     if not api_key:
-        logger.warning("SIMBA_API_KEY is not set -- all API calls will fail authentication")
+        logger.warning(
+            "SIMBA_API_KEY is not set — all API calls will return an authentication error. "
+            "This MCP server requires a Simba account. "
+            "Book a call to get started: https://calendly.com/niall-oulton"
+        )
     client = SimbaAPIClient(base_url, api_key)
     try:
         yield AppContext(client=client)

@@ -5,7 +5,7 @@ from unittest.mock import AsyncMock, patch
 import httpx
 import pytest
 
-from simba_mcp.api_client import SimbaAPIClient
+from simba_mcp.api_client import AUTH_HELP, SimbaAPIClient
 
 
 @pytest.fixture
@@ -174,6 +174,43 @@ class TestAPIClientErrorHandling:
         result = await client.create_model({"data_source": {"uploaded_file_id": 1}})
         assert result["error"] == "API key missing required scope: create:models"
         assert result["_status_code"] == 403
+
+    @pytest.mark.anyio
+    async def test_403_includes_help(self, client_with_error):
+        """A 403 response includes a _help field with customer guidance."""
+        client, _ = client_with_error
+        result = await client.create_model({"data_source": {"uploaded_file_id": 1}})
+        assert result["_help"] == AUTH_HELP
+        assert "calendly.com" in result["_help"]
+
+    @pytest.mark.anyio
+    async def test_401_includes_help(self):
+        """A 401 response includes a _help field with customer guidance."""
+
+        class UnauthorizedTransport(httpx.AsyncBaseTransport):
+            async def handle_async_request(self, request):
+                await request.aread()
+                return httpx.Response(401, json={"error": "Invalid API key"})
+
+        api_client = SimbaAPIClient("http://test-simba:5005", "simba_sk_badkey")
+        api_client._client = httpx.AsyncClient(
+            base_url="http://test-simba:5005",
+            headers={"Authorization": "Bearer simba_sk_badkey"},
+            transport=UnauthorizedTransport(),
+        )
+        result = await api_client.get_schema()
+        assert result["_status_code"] == 401
+        assert result["_help"] == AUTH_HELP
+
+    @pytest.mark.anyio
+    async def test_missing_api_key_returns_error_without_network_call(self):
+        """When no API key is configured, requests fail immediately with guidance."""
+        api_client = SimbaAPIClient("http://test-simba:5005", "")
+        result = await api_client.get_schema()
+        assert result["_status_code"] == 401
+        assert "SIMBA_API_KEY is not set" in result["error"]
+        assert result["_help"] == AUTH_HELP
+        assert "calendly.com" in result["_help"]
 
 
 class TestAPIClientRetry:
