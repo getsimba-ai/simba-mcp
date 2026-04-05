@@ -1,6 +1,0 @@
-Align branding to SIMBA in titles and prominent positions
-
-Match the main simba-mmm repo convention: SIMBA in titles, headings,
-and brand-prominent positions; Simba in normal prose and link text.
-Updated across README, CONTRIBUTING, SECURITY, CHANGELOG, CODE_OF_CONDUCT,
-issue templates, pyproject.toml, server docstrings, and CLI help text.

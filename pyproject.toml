@@ -5,7 +5,7 @@ description = "Model Context Protocol (MCP) server for SIMBA — connect Claude,
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.11"
-authors = [{ name = "SIMBA", email = "hello@getsimba.ai" }]
+authors = [{ name = "SIMBA", email = "info@1749.io" }]
 keywords = ["mcp", "model-context-protocol", "marketing-mix-model", "mmm", "bayesian", "simba", "pymc", "budget-optimization", "media-attribution", "roi"]
 classifiers = [
     "Development Status :: 4 - Beta",
