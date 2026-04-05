@@ -1,0 +1,5 @@
+Fix CI: move dev deps to optional-dependencies for pip compatibility
+
+pip does not support --dependency-group. Move dev dependencies from
+[dependency-groups] to [project.optional-dependencies] and use
+pip install -e ".[dev]" everywhere.

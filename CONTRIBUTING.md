@@ -16,8 +16,7 @@ python -m venv .venv
 source .venv/bin/activate  # or .venv\Scripts\activate on Windows
 
 # Install the package in editable mode with dev dependencies
-pip install -e .
-pip install --dependency-group dev
+pip install -e ".[dev]"
 ```
 
 ## Running Tests
