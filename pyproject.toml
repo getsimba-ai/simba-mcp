@@ -1,12 +1,12 @@
 [project]
 name = "simba-mcp"
 version = "0.1.0"
-description = "MCP server for Simba Marketing Mix Modeling — connect AI assistants to your MMM models"
+description = "Model Context Protocol (MCP) server for Simba — connect Claude, Cursor, and AI assistants to Bayesian Marketing Mix Models (MMM)"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.11"
 authors = [{ name = "Simba", email = "hello@getsimba.ai" }]
-keywords = ["mcp", "marketing-mix-model", "mmm", "bayesian", "simba"]
+keywords = ["mcp", "model-context-protocol", "marketing-mix-model", "mmm", "bayesian", "simba", "pymc", "budget-optimization", "media-attribution", "roi"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
