@@ -6,9 +6,26 @@ dist/
 build/
 .eggs/
 *.egg
+
 .venv/
 venv/
 .env
+
 .pytest_cache/
 .ruff_cache/
 .mypy_cache/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDEs
+.idea/
+.vscode/
+.cursor/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
