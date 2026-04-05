@@ -8,4 +8,4 @@ In summary: be respectful, be constructive, and be welcoming. Harassment, discri
 
 ## Reporting
 
-If you experience or witness unacceptable behavior, please email **conduct@getsimba.ai**.
+If you experience or witness unacceptable behavior, please email **info@1749.io**.
