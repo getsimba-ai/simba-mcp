@@ -6,7 +6,7 @@ Marketing Mix Models: upload data, create models, check status,
 get results, and run budget optimizations.
 
 Run locally:  simba-mcp
-Run remote:   uvicorn simba_mcp.server:app --host 0.0.0.0 --port 8100
+Run remote:   uvicorn "simba_mcp.server:create_app()" --host 0.0.0.0 --port 8100
 """
 
 import logging
@@ -408,8 +408,11 @@ async def get_scenario_results(
 
 
 # ---------------------------------------------------------------------------
-# ASGI app for uvicorn deployment
+# ASGI app for uvicorn deployment (lazy to avoid overhead in stdio mode)
 # ---------------------------------------------------------------------------
 
-mcp.settings.streamable_http_path = "/"
-app = mcp.streamable_http_app()
+
+def create_app():
+    """Create the ASGI app for uvicorn/Streamable HTTP deployment."""
+    mcp.settings.streamable_http_path = "/"
+    return mcp.streamable_http_app()

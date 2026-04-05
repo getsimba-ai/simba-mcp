@@ -1,10 +1,16 @@
 # Simba MCP Server
 
 [![PyPI](https://img.shields.io/pypi/v/simba-mcp)](https://pypi.org/project/simba-mcp/)
+[![CI](https://github.com/getsimba-ai/simba-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/getsimba-ai/simba-mcp/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 
-[Simba](https://simba-mmm.com) is a Bayesian Marketing Mix Modeling (MMM) platform. This [MCP server](https://modelcontextprotocol.io/) lets AI assistants interact with your Marketing Mix Models directly — upload data, build models, check results, and run budget optimizations through natural language in Claude, Cursor, or Claude Code.
+[Simba](https://getsimba.ai) is a Bayesian Marketing Mix Modeling (MMM) platform. This [MCP server](https://modelcontextprotocol.io/) lets AI assistants interact with your Marketing Mix Models directly — upload data, build models, check results, and run budget optimizations through natural language in Claude, Cursor, or Claude Code.
+
+## See Also
+
+- **[getsimba.ai](https://getsimba.ai)** — the main Simba website (features, pricing, demos)
+- **[getsimba-ai/simba-mmm](https://github.com/getsimba-ai/simba-mmm)** — platform repo with full documentation on MMM concepts, data requirements, model configuration, optimization, and scenario planning
 
 ## Installation
 
@@ -31,7 +37,7 @@ Add to your Cursor MCP settings (`.cursor/mcp.json` in the workspace or global s
       "command": "uvx",
       "args": ["simba-mcp"],
       "env": {
-        "SIMBA_API_URL": "https://app.simba-mmm.com",
+        "SIMBA_API_URL": "https://app.getsimba.ai",
         "SIMBA_API_KEY": "simba_sk_..."
       }
     }
@@ -50,7 +56,7 @@ Add to your Claude Code MCP config:
       "command": "uvx",
       "args": ["simba-mcp"],
       "env": {
-        "SIMBA_API_URL": "https://app.simba-mmm.com",
+        "SIMBA_API_URL": "https://app.getsimba.ai",
         "SIMBA_API_KEY": "simba_sk_..."
       }
     }
@@ -74,7 +80,7 @@ response = client.beta.messages.create(
     mcp_servers=[
         {
             "type": "url",
-            "url": "https://app.simba-mmm.com/mcp",
+            "url": "https://app.getsimba.ai/mcp",
             "name": "simba",
             "authorization_token": "simba_sk_...",
         }
@@ -161,7 +167,7 @@ simba-mcp --transport streamable-http --port 8100
 simba-mcp --transport sse --port 8100
 
 # Or via uvicorn directly
-uvicorn simba_mcp.server:app --host 0.0.0.0 --port 8100
+uvicorn "simba_mcp.server:create_app()" --host 0.0.0.0 --port 8100
 ```
 
 ## License

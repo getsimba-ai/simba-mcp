@@ -4,11 +4,18 @@ Async HTTP client for the Simba API v1.
 Wraps all API v1 endpoints so MCP tools stay thin and declarative.
 """
 
+import asyncio
+import logging
 from typing import Any
 
 import httpx
 
+logger = logging.getLogger(__name__)
+
 DEFAULT_TIMEOUT = 60.0
+MAX_RETRIES = 3
+BACKOFF_BASE = 0.5
+RETRIABLE_STATUS_CODES = frozenset({429, 500, 502, 503, 504})
 
 
 class SimbaAPIClient:
@@ -44,8 +51,29 @@ class SimbaAPIClient:
 
     async def _request(self, method: str, path: str, **kwargs) -> dict[str, Any]:
         client = await self._get_client()
-        response = await client.request(method, path, **kwargs)
-        return await self._parse_response(response)
+        last_exc: Exception | None = None
+        for attempt in range(MAX_RETRIES):
+            try:
+                response = await client.request(method, path, **kwargs)
+                if response.status_code in RETRIABLE_STATUS_CODES and attempt < MAX_RETRIES - 1:
+                    delay = BACKOFF_BASE * (2**attempt)
+                    logger.warning(
+                        "Retryable %d from %s %s (attempt %d/%d, retrying in %.1fs)",
+                        response.status_code, method, path, attempt + 1, MAX_RETRIES, delay,
+                    )
+                    await asyncio.sleep(delay)
+                    continue
+                return await self._parse_response(response)
+            except httpx.TransportError as exc:
+                last_exc = exc
+                if attempt < MAX_RETRIES - 1:
+                    delay = BACKOFF_BASE * (2**attempt)
+                    logger.warning(
+                        "Transport error on %s %s (attempt %d/%d, retrying in %.1fs): %s",
+                        method, path, attempt + 1, MAX_RETRIES, delay, exc,
+                    )
+                    await asyncio.sleep(delay)
+        raise last_exc  # type: ignore[misc]
 
     # -- Ingest --
 
@@ -54,15 +82,14 @@ class SimbaAPIClient:
 
     async def upload_csv(self, csv_content: str, name: str = "") -> dict:
         """Upload CSV text content. For MCP, CSV arrives as a string."""
-        client = await self._get_client()
         params = {"name": name} if name else {}
-        response = await client.post(
+        return await self._request(
+            "POST",
             "/api/v1/ingest",
             content=csv_content.encode("utf-8"),
             headers={"Content-Type": "text/csv"},
             params=params,
         )
-        return await self._parse_response(response)
 
     # -- Models --
 
