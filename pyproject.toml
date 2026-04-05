@@ -5,7 +5,7 @@ description = "MCP server for Simba Marketing Mix Modeling — connect AI assist
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.11"
-authors = [{ name = "Simba", email = "hello@simba-mmm.com" }]
+authors = [{ name = "Simba", email = "hello@getsimba.ai" }]
 keywords = ["mcp", "marketing-mix-model", "mmm", "bayesian", "simba"]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -23,9 +23,9 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://simba-mmm.com"
-Repository = "https://github.com/getsimba-ai/mcp-server"
-Documentation = "https://docs.simba-mmm.com"
+Homepage = "https://getsimba.ai"
+Repository = "https://github.com/getsimba-ai/simba-mcp"
+Documentation = "https://github.com/getsimba-ai/simba-mmm"
 
 [project.scripts]
 simba-mcp = "simba_mcp.__main__:main"
