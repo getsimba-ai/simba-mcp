@@ -59,7 +59,12 @@ class SimbaAPIClient:
                     delay = BACKOFF_BASE * (2**attempt)
                     logger.warning(
                         "Retryable %d from %s %s (attempt %d/%d, retrying in %.1fs)",
-                        response.status_code, method, path, attempt + 1, MAX_RETRIES, delay,
+                        response.status_code,
+                        method,
+                        path,
+                        attempt + 1,
+                        MAX_RETRIES,
+                        delay,
                     )
                     await asyncio.sleep(delay)
                     continue
@@ -70,7 +75,12 @@ class SimbaAPIClient:
                     delay = BACKOFF_BASE * (2**attempt)
                     logger.warning(
                         "Transport error on %s %s (attempt %d/%d, retrying in %.1fs): %s",
-                        method, path, attempt + 1, MAX_RETRIES, delay, exc,
+                        method,
+                        path,
+                        attempt + 1,
+                        MAX_RETRIES,
+                        delay,
+                        exc,
                     )
                     await asyncio.sleep(delay)
         raise last_exc  # type: ignore[misc]

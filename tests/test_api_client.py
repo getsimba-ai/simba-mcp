@@ -1,7 +1,9 @@
 """Unit tests for the MCP API client — verifies correct HTTP calls without a real server."""
 
-import pytest
+from unittest.mock import AsyncMock, patch
+
 import httpx
+import pytest
 
 from simba_mcp.api_client import SimbaAPIClient
 
@@ -14,12 +16,14 @@ def mock_transport():
     class MockTransport(httpx.AsyncBaseTransport):
         async def handle_async_request(self, request: httpx.Request) -> httpx.Response:
             body = await request.aread()
-            requests.append({
-                "method": request.method,
-                "url": str(request.url),
-                "headers": dict(request.headers),
-                "body": body,
-            })
+            requests.append(
+                {
+                    "method": request.method,
+                    "url": str(request.url),
+                    "headers": dict(request.headers),
+                    "body": body,
+                }
+            )
             return httpx.Response(200, json={"ok": True})
 
     return MockTransport(), requests
@@ -45,7 +49,9 @@ class TestAPIClientAuth:
         client, requests = client_with_mock
         await client.get_schema()
         assert len(requests) == 1
-        assert "bearer simba_sk_testkey123" in requests[0]["headers"].get("authorization", "").lower()
+        assert (
+            "bearer simba_sk_testkey123" in requests[0]["headers"].get("authorization", "").lower()
+        )
 
     @pytest.mark.anyio
     async def test_base_url_used(self, client_with_mock):
@@ -141,7 +147,7 @@ class TestAPIClientErrorHandling:
 
         class ErrorTransport(httpx.AsyncBaseTransport):
             async def handle_async_request(self, request: httpx.Request) -> httpx.Response:
-                body = await request.aread()
+                await request.aread()
                 requests.append({"method": request.method, "url": str(request.url)})
                 return httpx.Response(
                     403,
@@ -168,3 +174,122 @@ class TestAPIClientErrorHandling:
         result = await client.create_model({"data_source": {"uploaded_file_id": 1}})
         assert result["error"] == "API key missing required scope: create:models"
         assert result["_status_code"] == 403
+
+
+class TestAPIClientRetry:
+    """Tests for retry logic with exponential backoff."""
+
+    @staticmethod
+    def _make_client(transport):
+        api_client = SimbaAPIClient("http://test-simba:5005", "simba_sk_testkey123")
+        api_client._client = httpx.AsyncClient(
+            base_url="http://test-simba:5005",
+            headers={"Authorization": "Bearer simba_sk_testkey123"},
+            transport=transport,
+        )
+        return api_client
+
+    @pytest.mark.anyio
+    async def test_retries_on_server_error_then_succeeds(self):
+        """A 502 on attempt 1 is retried and succeeds on attempt 2."""
+        call_count = 0
+
+        class RetryTransport(httpx.AsyncBaseTransport):
+            async def handle_async_request(self, request):
+                nonlocal call_count
+                call_count += 1
+                await request.aread()
+                if call_count == 1:
+                    return httpx.Response(502, json={"error": "bad gateway"})
+                return httpx.Response(200, json={"ok": True})
+
+        client = self._make_client(RetryTransport())
+        with patch("asyncio.sleep", new_callable=AsyncMock):
+            result = await client.get_schema()
+        assert result == {"ok": True}
+        assert call_count == 2
+
+    @pytest.mark.anyio
+    async def test_retries_on_429_then_succeeds(self):
+        """A 429 rate-limit response is retried."""
+        call_count = 0
+
+        class RateLimitTransport(httpx.AsyncBaseTransport):
+            async def handle_async_request(self, request):
+                nonlocal call_count
+                call_count += 1
+                await request.aread()
+                if call_count <= 2:
+                    return httpx.Response(429, json={"error": "rate limited"})
+                return httpx.Response(200, json={"ok": True})
+
+        client = self._make_client(RateLimitTransport())
+        with patch("asyncio.sleep", new_callable=AsyncMock):
+            result = await client.get_schema()
+        assert result == {"ok": True}
+        assert call_count == 3
+
+    @pytest.mark.anyio
+    async def test_gives_up_after_max_retries(self):
+        """After MAX_RETRIES attempts of 500, the error response is returned."""
+
+        class AlwaysFailTransport(httpx.AsyncBaseTransport):
+            async def handle_async_request(self, request):
+                await request.aread()
+                return httpx.Response(500, json={"error": "server error"})
+
+        client = self._make_client(AlwaysFailTransport())
+        with patch("asyncio.sleep", new_callable=AsyncMock):
+            result = await client.get_schema()
+        assert result["_status_code"] == 500
+
+    @pytest.mark.anyio
+    async def test_retries_on_transport_error_then_succeeds(self):
+        """A transient network error is retried and succeeds on attempt 2."""
+        call_count = 0
+
+        class FlakeyTransport(httpx.AsyncBaseTransport):
+            async def handle_async_request(self, request):
+                nonlocal call_count
+                call_count += 1
+                await request.aread()
+                if call_count == 1:
+                    raise httpx.ConnectError("connection refused")
+                return httpx.Response(200, json={"ok": True})
+
+        client = self._make_client(FlakeyTransport())
+        with patch("asyncio.sleep", new_callable=AsyncMock):
+            result = await client.get_schema()
+        assert result == {"ok": True}
+        assert call_count == 2
+
+    @pytest.mark.anyio
+    async def test_raises_after_max_transport_errors(self):
+        """Persistent transport errors are raised after exhausting retries."""
+
+        class DeadTransport(httpx.AsyncBaseTransport):
+            async def handle_async_request(self, request):
+                await request.aread()
+                raise httpx.ConnectError("connection refused")
+
+        client = self._make_client(DeadTransport())
+        with patch("asyncio.sleep", new_callable=AsyncMock):
+            with pytest.raises(httpx.ConnectError):
+                await client.get_schema()
+
+    @pytest.mark.anyio
+    async def test_non_retriable_status_not_retried(self):
+        """A 403 is not retried — it's returned immediately."""
+        call_count = 0
+
+        class ForbiddenTransport(httpx.AsyncBaseTransport):
+            async def handle_async_request(self, request):
+                nonlocal call_count
+                call_count += 1
+                await request.aread()
+                return httpx.Response(403, json={"error": "forbidden"})
+
+        client = self._make_client(ForbiddenTransport())
+        result = await client.get_schema()
+        assert result["_status_code"] == 403
+        assert call_count == 1
