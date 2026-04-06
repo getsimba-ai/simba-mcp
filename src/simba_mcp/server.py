@@ -1,12 +1,12 @@
 """
-SIMBA MCP Server — exposes Simba's API v1 as MCP tools.
+Simba MCP Server — exposes Simba's API v1 as MCP tools.
 
 Tools allow AI assistants (Claude, Cursor, etc.) to interact with
 Marketing Mix Models: upload data, create models, check status,
 get results, and run budget optimizations.
 
 Run locally:  simba-mcp
-Run remote:   uvicorn "simba_mcp.server:create_app()" --host 0.0.0.0 --port 8100
+Run remote:   uvicorn simba_mcp.server:app --host 0.0.0.0 --port 8100
 """
 
 import logging
@@ -33,11 +33,7 @@ async def app_lifespan(server: FastMCP) -> AsyncIterator[AppContext]:
     base_url = os.environ.get("SIMBA_API_URL", "http://localhost:5005")
     api_key = os.environ.get("SIMBA_API_KEY", "")
     if not api_key:
-        logger.warning(
-            "SIMBA_API_KEY is not set — all API calls will return an authentication error. "
-            "This MCP server requires a Simba account. "
-            "Book a call to get started: https://calendly.com/niall-oulton"
-        )
+        logger.warning("SIMBA_API_KEY is not set -- all API calls will fail authentication")
     client = SimbaAPIClient(base_url, api_key)
     try:
         yield AppContext(client=client)
@@ -97,6 +93,12 @@ async def upload_data(
     with date, KPI, multiplier, hierarchy, media activity/spend columns,
     and optional control variables.
 
+    IMPORTANT:
+    - CSV only (not Excel). Maximum file size: 50 MB.
+    - Minimum 52 rows required (104+ recommended for robust estimation).
+    - Media columns must follow naming: {channel}_activity and {channel}_spend.
+    - Use 0 for inactive periods, not blank or NA.
+
     Args:
         csv_content: The full CSV text content (not base64, just raw CSV text).
         name: Optional dataset name for identification.
@@ -122,6 +124,9 @@ async def list_models(
 
     Returns model name, hash, status (pending/under way/complete/failed),
     type (mmm/var), hierarchy value, and timestamps.
+
+    NOTE: All other endpoints use model_hash (string, e.g. "f835671a25") as the
+    identifier — not the numeric id. Use the model_hash from this response.
 
     Args:
         include_unsaved: Include draft/unsaved models (default false).
@@ -243,6 +248,11 @@ async def get_model_results(
     params, optimizer, predictions, model_stats, decay_curves,
     response_curves, marginal_curves, actual_vs_model.
 
+    IMPORTANT: Channel names in results may contain spaces (e.g. "Digital impressions").
+    These exact names (case-sensitive, space-sensitive) must be used as dictionary keys
+    in run_optimizer bounds, laydown_weights, and period_cpm. Always check channel_summary
+    first to get the exact channel names before calling run_optimizer.
+
     Args:
         model_hash: The model hash.
         sections: Comma-separated list of sections to include.
@@ -277,6 +287,18 @@ async def run_optimizer(
     Finds the optimal budget allocation across channels to maximize
     predicted revenue within the given constraints.
 
+    IMPORTANT:
+    - Channel names must exactly match model results (case-sensitive, space-sensitive).
+      Call get_model_results with sections="channel_summary" first to get exact names.
+    - bounds values are percentages of total_budget (0-100), not currency amounts.
+    - laydown_weights and period_cpm must be ARRAYS of length num_periods, not scalars.
+      Wrong: {"TV": 10}. Correct: {"TV": [10, 10, 10, 10]}.
+    - The same channel keys must appear in all three: bounds, laydown_weights, and period_cpm.
+    - All period_cpm values must be positive (> 0).
+    - laydown_weights per channel must sum to a positive value.
+
+    Returns 202 (async). Use get_optimizer_results to poll until status is "complete".
+
     Args:
         model_hash: Hash of a completed model.
         total_budget: Total budget in currency units.
@@ -288,8 +310,6 @@ async def run_optimizer(
                         Example: {"TV": [1, 1, 1, 1]} for uniform distribution.
         period_cpm: Per-channel cost-per-metric for each period (arrays of length num_periods).
                    Example: {"TV": [10, 10, 10, 10]}.
-
-    Returns immediately with status. Use get_optimizer_results to poll.
     """
     payload = {
         "total_budget": total_budget,
@@ -343,6 +363,10 @@ async def get_scenario_template(
     per media channel. Use this to understand what a scenario plan
     should look like before calling run_scenario.
 
+    WARNING: Template data may contain NaN or null values for channels without
+    historical data. You MUST replace NaN/null with 0 before passing to run_scenario,
+    otherwise the prediction will fail downstream.
+
     Args:
         model_hash: Hash of a completed model.
         periods_forward: Number of future periods to generate (default 12).
@@ -369,11 +393,17 @@ async def run_scenario(
     predicts the KPI outcome. Use get_scenario_template first to get
     the expected format and channel names.
 
-    This is async — returns immediately. Poll get_scenario_results for output.
+    IMPORTANT: Before submitting, replace any NaN/null values in scenario_data with 0.
+    The template from get_scenario_template may contain NaN for channels without
+    historical data, which will cause the prediction to fail.
+
+    This is async (returns 202). Poll get_scenario_results until status is
+    "complete" or "failed".
 
     Args:
         model_hash: Hash of a completed model.
         scenario_data: Array of period rows, each a dict with "Date" and channel columns.
+                      Dates should be ISO 8601 strings (e.g. "2025-01-06").
                       Example: [{"Date": "2025-01-06", "TV_Impressions": 50000, "Search_Clicks": 1200}]
         spend_metadata: Optional per-channel spend info for ROI calculation. Each entry:
                        {"channel": "TV_Impressions", "metric": "impressions", "cpm": 25.0,
@@ -405,6 +435,9 @@ async def get_scenario_results(
     channel contributions, confidence intervals, and base components
     (intercept, seasonality, trend).
 
+    NOTE: Failed scenarios return status "failed" with an error message in the
+    JSON body (not an HTTP error). Always check the status field.
+
     Args:
         model_hash: Hash of the model the scenario was run on.
     """
@@ -412,11 +445,8 @@ async def get_scenario_results(
 
 
 # ---------------------------------------------------------------------------
-# ASGI app for uvicorn deployment (lazy to avoid overhead in stdio mode)
+# ASGI app for uvicorn deployment
 # ---------------------------------------------------------------------------
 
-
-def create_app():
-    """Create the ASGI app for uvicorn/Streamable HTTP deployment."""
-    mcp.settings.streamable_http_path = "/"
-    return mcp.streamable_http_app()
+mcp.settings.streamable_http_path = "/"
+app = mcp.streamable_http_app()

@@ -4,6 +4,15 @@ All notable changes to the SIMBA MCP Server will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.1.2 — 2026-04-06
+
+### Added
+
+- Enriched MCP tool descriptions with inline gotchas (channel name matching, array requirements, NaN cleaning, async polling patterns) so AI agents get tips automatically.
+- README: Gotchas & Tips section covering the 6 most common pitfalls.
+- README: Common Errors table with causes and fixes.
+- README: Direct API Access section with MCP vs API comparison, Python and curl quick-start examples.
+
 ## 0.1.1 — 2026-04-06
 
 ### Fixed
