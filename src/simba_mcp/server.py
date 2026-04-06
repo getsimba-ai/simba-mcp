@@ -125,8 +125,8 @@ async def list_models(
     Returns model name, hash, status (pending/under way/complete/failed),
     type (mmm/var), hierarchy value, and timestamps.
 
-    NOTE: All other endpoints use model_hash (string, e.g. "f835671a25") as the
-    identifier — not the numeric id. Use the model_hash from this response.
+    NOTE: All other model endpoints use model_hash (string, e.g. "f835671a25")
+    as the identifier. Use the model_hash from this response.
 
     Args:
         include_unsaved: Include draft/unsaved models (default false).
