@@ -1,12 +1,12 @@
 """
-SIMBA MCP Server — exposes Simba's API v1 as MCP tools.
+Simba MCP Server — exposes Simba's API v1 as MCP tools.
 
 Tools allow AI assistants (Claude, Cursor, etc.) to interact with
 Marketing Mix Models: upload data, create models, check status,
 get results, and run budget optimizations.
 
 Run locally:  simba-mcp
-Run remote:   uvicorn "simba_mcp.server:create_app()" --host 0.0.0.0 --port 8100
+Run remote:   uvicorn simba_mcp.server:app --host 0.0.0.0 --port 8100
 """
 
 import logging
@@ -97,6 +97,12 @@ async def upload_data(
     with date, KPI, multiplier, hierarchy, media activity/spend columns,
     and optional control variables.
 
+    IMPORTANT:
+    - CSV only (not Excel). Maximum file size: 50 MB.
+    - Minimum 52 rows required (104+ recommended for robust estimation).
+    - Media columns must follow naming: {channel}_activity and {channel}_spend.
+    - Use 0 for inactive periods, not blank or NA.
+
     Args:
         csv_content: The full CSV text content (not base64, just raw CSV text).
         name: Optional dataset name for identification.
@@ -122,6 +128,9 @@ async def list_models(
 
     Returns model name, hash, status (pending/under way/complete/failed),
     type (mmm/var), hierarchy value, and timestamps.
+
+    NOTE: All other model endpoints use model_hash (string, e.g. "f835671a25")
+    as the identifier. Use the model_hash from this response.
 
     Args:
         include_unsaved: Include draft/unsaved models (default false).
@@ -243,6 +252,11 @@ async def get_model_results(
     params, optimizer, predictions, model_stats, decay_curves,
     response_curves, marginal_curves, actual_vs_model.
 
+    IMPORTANT: Channel names in results may contain spaces (e.g. "Digital impressions").
+    These exact names (case-sensitive, space-sensitive) must be used as dictionary keys
+    in run_optimizer bounds, laydown_weights, and period_cpm. Always check channel_summary
+    first to get the exact channel names before calling run_optimizer.
+
     Args:
         model_hash: The model hash.
         sections: Comma-separated list of sections to include.
@@ -277,12 +291,18 @@ async def run_optimizer(
     Finds the optimal budget allocation across channels to maximize
     predicted revenue within the given constraints.
 
-    IMPORTANT: Channel names in bounds, laydown_weights, and period_cpm must
-    match the media channel names from get_model_results (channel_summary section).
-    Use get_scenario_template to discover channel names and their average CPM values.
+    IMPORTANT:
+    - Channel names must exactly match model results (case-sensitive, space-sensitive).
+      Call get_model_results with sections="channel_summary" first to get exact names,
+      or use get_scenario_template to discover channel names and their average CPM values.
+    - bounds values are percentages of total_budget (0-100), not currency amounts.
+    - laydown_weights and period_cpm must be ARRAYS of length num_periods, not scalars.
+      Wrong: {"TV": 10}. Correct: {"TV": [10, 10, 10, 10]}.
+    - The same channel keys must appear in all three: bounds, laydown_weights, and period_cpm.
+    - All period_cpm values must be positive (> 0).
+    - laydown_weights per channel must sum to a positive value (weights are normalized internally).
 
-    All three dicts (bounds, laydown_weights, period_cpm) must have the same
-    set of channel keys, and array values must have length equal to num_periods.
+    Returns 202 (async). Use get_optimizer_results to poll until status is "complete".
 
     Args:
         model_hash: Hash of a completed model.
@@ -303,8 +323,6 @@ async def run_optimizer(
                    of length num_periods with positive values. Get baseline CPM from
                    get_scenario_template (avg_cpu_by_channel field).
                    Example: {"TV_Impressions": [10.5, 10.5, 10.5, 10.5]}
-
-    Returns immediately with status. Use get_optimizer_results to poll for results.
     """
     payload = {
         "total_budget": total_budget,
@@ -363,6 +381,10 @@ async def get_scenario_template(
     - Baseline activity values per channel (rows — use as starting point for scenarios)
     - Media vs control channel classification
 
+    WARNING: Template data may contain NaN or null values for channels without
+    historical data. You MUST replace NaN/null with 0 before passing to run_scenario,
+    otherwise the prediction will fail downstream.
+
     Args:
         model_hash: Hash of a completed model.
         periods_forward: Number of future periods to generate (default 12).
@@ -389,8 +411,12 @@ async def run_scenario(
     predicts the KPI outcome. Use get_scenario_template first to get
     the expected format, channel names, and baseline values.
 
-    This is async — returns immediately with status "pending".
-    You MUST poll get_scenario_results afterwards to get the actual prediction output.
+    IMPORTANT: Before submitting, replace any NaN/null values in scenario_data with 0.
+    The template from get_scenario_template may contain NaN for channels without
+    historical data, which will cause the prediction to fail.
+
+    This is async (returns 202 with status "pending"). Poll get_scenario_results
+    until status is "complete" or "failed".
 
     Workflow: get_scenario_template -> modify values -> run_scenario -> poll get_scenario_results
 
@@ -432,6 +458,9 @@ async def get_scenario_results(
     channel contributions, confidence intervals, and base components
     (intercept, seasonality, trend).
 
+    NOTE: Failed scenarios return status "failed" with an error message in the
+    JSON body (not an HTTP error). Always check the status field.
+
     Args:
         model_hash: Hash of the model the scenario was run on.
     """
@@ -443,7 +472,16 @@ async def get_scenario_results(
 # ---------------------------------------------------------------------------
 
 
-def create_app():
+def _create_app():
     """Create the ASGI app for uvicorn/Streamable HTTP deployment."""
     mcp.settings.streamable_http_path = "/"
     return mcp.streamable_http_app()
+
+
+def __getattr__(name: str):
+    """Lazy module-level attribute access to avoid creating the HTTP app in stdio mode."""
+    if name == "app":
+        global app
+        app = _create_app()
+        return app
+    raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
