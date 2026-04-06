@@ -44,7 +44,7 @@ testpaths = ["tests"]
 target-version = "py311"
 line-length = 100
 
-[dependency-groups]
+[project.optional-dependencies]
 dev = [
     "pytest>=8.0",
     "anyio>=4.0",
