@@ -468,8 +468,20 @@ async def get_scenario_results(
 
 
 # ---------------------------------------------------------------------------
-# ASGI app for uvicorn deployment
+# ASGI app for uvicorn deployment (lazy to avoid overhead in stdio mode)
 # ---------------------------------------------------------------------------
 
-mcp.settings.streamable_http_path = "/"
-app = mcp.streamable_http_app()
+
+def _create_app():
+    """Create the ASGI app for uvicorn/Streamable HTTP deployment."""
+    mcp.settings.streamable_http_path = "/"
+    return mcp.streamable_http_app()
+
+
+def __getattr__(name: str):
+    """Lazy module-level attribute access to avoid creating the HTTP app in stdio mode."""
+    if name == "app":
+        global app
+        app = _create_app()
+        return app
+    raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
