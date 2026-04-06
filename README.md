@@ -1,27 +1,10 @@
-# SIMBA MCP Server — Marketing Mix Modeling for AI Assistants
+# Simba MCP Server
 
 [![PyPI](https://img.shields.io/pypi/v/simba-mcp)](https://pypi.org/project/simba-mcp/)
-[![CI](https://github.com/getsimba-ai/simba-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/getsimba-ai/simba-mcp/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 
-An open-source [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that connects AI assistants to [Simba](https://getsimba.ai), a Bayesian Marketing Mix Modeling (MMM) platform built on [PyMC-Marketing](https://www.pymc-marketing.io/). Upload marketing data, build MMM models, measure channel ROI, optimize budgets, and run scenario forecasts — all through natural language in Claude, Cursor, or Claude Code.
-
-## Why use this?
-
-- **Marketing Mix Modeling via AI** — ask your AI assistant to build a Bayesian MMM, measure media attribution, or optimize your marketing budget instead of writing code
-- **Full MMM workflow** — data upload, model fitting, channel contribution analysis, response curves, budget optimization, and scenario planning in one integration
-- **Built on PyMC** — transparent Bayesian models with uncertainty quantification, adstock effects, saturation curves, and lift test calibration under the hood
-- **Any MCP client** — works with Claude Desktop, Cursor IDE, Claude Code, or any Model Context Protocol-compatible client
-
-## Prerequisites
-
-> **This MCP server requires a [Simba](https://getsimba.ai) account.** You'll need an active subscription and API key to connect. If you're not already a customer, **[book a call](https://calendly.com/niall-oulton)** to get set up with a demo and access.
-
-## Resources
-
-- **[getsimba.ai](https://getsimba.ai)** — SIMBA platform (features, pricing, demos)
-- **[getsimba-ai/simba-mmm](https://github.com/getsimba-ai/simba-mmm)** — full documentation on MMM concepts, data requirements, model configuration, incrementality measurement, and more
+[Simba](https://simba-mmm.com) is a Bayesian Marketing Mix Modeling (MMM) platform. This [MCP server](https://modelcontextprotocol.io/) lets AI assistants interact with your Marketing Mix Models directly — upload data, build models, check results, and run budget optimizations through natural language in Claude, Cursor, or Claude Code.
 
 ## Installation
 
@@ -48,7 +31,7 @@ Add to your Cursor MCP settings (`.cursor/mcp.json` in the workspace or global s
       "command": "uvx",
       "args": ["simba-mcp"],
       "env": {
-        "SIMBA_API_URL": "https://demo.simba-mmm.com",
+        "SIMBA_API_URL": "https://app.simba-mmm.com",
         "SIMBA_API_KEY": "simba_sk_..."
       }
     }
@@ -67,7 +50,7 @@ Add to your Claude Code MCP config:
       "command": "uvx",
       "args": ["simba-mcp"],
       "env": {
-        "SIMBA_API_URL": "https://demo.simba-mmm.com",
+        "SIMBA_API_URL": "https://app.simba-mmm.com",
         "SIMBA_API_KEY": "simba_sk_..."
       }
     }
@@ -91,7 +74,7 @@ response = client.beta.messages.create(
     mcp_servers=[
         {
             "type": "url",
-            "url": "https://demo.simba-mmm.com/mcp",
+            "url": "https://app.simba-mmm.com/mcp",
             "name": "simba",
             "authorization_token": "simba_sk_...",
         }
@@ -145,11 +128,169 @@ Try these with any connected AI assistant:
 **Full workflow:**
 > "I have marketing data I want to analyze. First get the schema so I know what format is needed, then upload my data, create a model, and once it's done show me the ROI by channel."
 
+## Gotchas & Tips
+
+Things that commonly trip up both AI agents and humans:
+
+### Channel names are exact-match
+
+Channel names in model results can contain spaces (e.g. `"Digital impressions"`, `"TV_impressions"`). The optimizer uses these as dictionary keys — matching is **case-sensitive and space-sensitive**.
+
+**Always** call `get_model_results` with `sections="channel_summary"` first to see exact channel names, then use those verbatim in optimizer payloads.
+
+### Models are identified by `model_hash`
+
+All model endpoints use the string `model_hash` (e.g. `"f835671a25"`) returned by `create_model` and `list_models`.
+
+### Optimizer arrays, not scalars
+
+`laydown_weights` and `period_cpm` must be **objects of arrays**, each array having exactly `num_periods` elements:
+
+```json
+// Wrong
+"period_cpm": {"TV": 10}
+
+// Correct
+"period_cpm": {"TV": [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]}
+```
+
+The same channel keys must appear in `bounds`, `laydown_weights`, and `period_cpm`. Bounds values are **percentages** (0-100) of `total_budget`, not currency amounts.
+
+### Clean NaN from scenario templates
+
+The template from `get_scenario_template` may contain `NaN`/`null` for channels without historical data. Replace them with `0` before passing to `run_scenario`:
+
+```python
+import math
+for row in scenario_data:
+    for key, val in row.items():
+        if val is None or (isinstance(val, float) and math.isnan(val)):
+            row[key] = 0
+```
+
+### Three endpoints are async
+
+These return 202 and require polling:
+
+| Action | Start | Poll |
+|--------|-------|------|
+| Fit model | `create_model` | `get_model_status` |
+| Optimize | `run_optimizer` | `get_optimizer_results` |
+| Scenario | `run_scenario` | `get_scenario_results` |
+
+Poll every 5-10 seconds. Check the `status` field for `"complete"` or `"failed"`.
+
+### Data upload requirements
+
+- **CSV only** (not Excel). Maximum 50 MB.
+- Minimum **52 rows** (104+ recommended).
+- Media columns: `{channel}_activity` and `{channel}_spend` per channel.
+- Use `0` for inactive periods, not blank or NA.
+
+## Common Errors
+
+| Error | Cause | Fix |
+|-------|-------|-----|
+| `Authentication required` | No API key or expired key | Check `SIMBA_API_KEY` env var |
+| `API key missing required scope: <scope>` | Key doesn't have the needed scope | Create a key with all scopes |
+| `Missing required fields: [...]` | Payload missing required keys | Check the tool's parameter list |
+| `Model status is '<status>'. Optimization requires a 'complete' model.` | Model still fitting or failed | Poll `get_model_status` until complete |
+| `laydown_weights['TV'] must be an array of length 12` | Scalar instead of array, or wrong length | Use arrays matching `num_periods` |
+| `period_cpm['TV'] values must all be positive` | Zero or negative CPM | All CPM values must be > 0 |
+| `Channels in bounds missing from period_cpm: [...]` | Mismatched channel names | Same keys in bounds, laydown_weights, and period_cpm |
+| `Columns not found in data: [...]` | Column name typo | Check CSV headers match exactly |
+| `File exceeds 50 MB limit` | CSV too large | Reduce file size or aggregate data |
+
+## Direct API Access
+
+The MCP server wraps the Simba REST API. For scripting, CI/CD, or environments without MCP, you can call the API directly.
+
+### When to use MCP vs direct API
+
+| | MCP (via AI assistant) | Direct API (curl / Python) |
+|---|---|---|
+| **Best for** | Exploratory analysis, conversational workflows | Automated pipelines, scheduled jobs, scripts |
+| **Async polling** | Assistant handles it automatically | You implement poll-until-complete logic |
+| **Data cleaning** | Assistant cleans NaN/null, builds payloads | You write the data prep code |
+| **Reproducibility** | Conversational | Scriptable, version-controlled |
+
+Both use the same API keys with the same scopes.
+
+### Quick start (Python)
+
+```python
+import requests, time
+
+BASE = "https://app.simba-mmm.com"
+HEADERS = {"Authorization": "Bearer simba_sk_..."}
+
+# Upload data
+with open("marketing_data.csv", "rb") as f:
+    r = requests.post(f"{BASE}/api/v1/ingest",
+                      headers={**HEADERS, "Content-Type": "text/csv"},
+                      data=f.read(), params={"name": "q1_data"})
+file_id = r.json()["id"]
+
+# Create model
+r = requests.post(f"{BASE}/api/v1/models", headers=HEADERS, json={
+    "data_source": {"uploaded_file_id": file_id},
+    "date_column": "date",
+    "kpi_column": "revenue",
+    "hierarchy_column": "brand",
+    "channels": [
+        {"name": "TV", "activity_column": "tv_grps", "spend_column": "tv_spend"},
+        {"name": "Search", "activity_column": "search_impressions", "spend_column": "search_spend"},
+    ],
+    "total_media_effect": "Retail",
+})
+model_hash = r.json()["model_hash"]
+
+# Poll until complete
+while True:
+    status = requests.get(f"{BASE}/api/v1/models/{model_hash}/status",
+                          headers=HEADERS).json()
+    if status["status"] in ("complete", "failed"):
+        break
+    print(f"Fitting... {status.get('progress', '?')}%")
+    time.sleep(10)
+
+# Get results
+results = requests.get(f"{BASE}/api/v1/models/{model_hash}/results",
+                       headers=HEADERS,
+                       params={"sections": "channel_summary,model_stats"}).json()
+for ch in results["results"]["channel_summary"]:
+    print(f"{ch['Channel']}: ROI {ch['ROI']:.1f}")
+```
+
+### Quick start (curl)
+
+```bash
+API_KEY="simba_sk_..."
+BASE="https://app.simba-mmm.com"
+
+# Upload data
+curl -X POST "$BASE/api/v1/ingest?name=q1_data" \
+  -H "Authorization: Bearer $API_KEY" \
+  -H "Content-Type: text/csv" \
+  --data-binary @marketing_data.csv
+
+# Create model (replace uploaded_file_id with id from upload)
+curl -X POST "$BASE/api/v1/models" \
+  -H "Authorization: Bearer $API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"data_source": {"uploaded_file_id": 1}, "date_column": "date", "kpi_column": "revenue", "hierarchy_column": "brand", "channels": [{"name": "TV", "activity_column": "tv_grps", "spend_column": "tv_spend"}]}'
+
+# Poll status (replace MODEL_HASH)
+curl "$BASE/api/v1/models/MODEL_HASH/status" -H "Authorization: Bearer $API_KEY"
+
+# Get results
+curl "$BASE/api/v1/models/MODEL_HASH/results?sections=channel_summary,model_stats" \
+  -H "Authorization: Bearer $API_KEY"
+```
+
 ## API Key Setup
 
-The MCP server authenticates with the same API keys used by the Simba REST API. You'll need an active Simba account — **[book a call](https://calendly.com/niall-oulton)** if you don't have one yet.
-
-Once you have access, create a key with the required scopes:
+The MCP server authenticates with the same API keys used by the Simba REST API. Create a key with the required scopes:
 
 1. Go to **Profile > API Keys** in the Simba UI
 2. Click **Create Key**
@@ -180,11 +321,9 @@ simba-mcp --transport streamable-http --port 8100
 simba-mcp --transport sse --port 8100
 
 # Or via uvicorn directly
-uvicorn "simba_mcp.server:create_app()" --host 0.0.0.0 --port 8100
+uvicorn simba_mcp.server:app --host 0.0.0.0 --port 8100
 ```
 
 ## License
 
-MIT — see [LICENSE](LICENSE) for details.
-
-Built by [SIMBA](https://getsimba.ai) on [PyMC-Marketing](https://www.pymc-marketing.io/).
+MIT
