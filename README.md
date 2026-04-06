@@ -48,7 +48,7 @@ Add to your Cursor MCP settings (`.cursor/mcp.json` in the workspace or global s
       "command": "uvx",
       "args": ["simba-mcp"],
       "env": {
-        "SIMBA_API_URL": "https://app.getsimba.ai",
+        "SIMBA_API_URL": "https://demo.simba-mmm.com",
         "SIMBA_API_KEY": "simba_sk_..."
       }
     }
@@ -67,7 +67,7 @@ Add to your Claude Code MCP config:
       "command": "uvx",
       "args": ["simba-mcp"],
       "env": {
-        "SIMBA_API_URL": "https://app.getsimba.ai",
+        "SIMBA_API_URL": "https://demo.simba-mmm.com",
         "SIMBA_API_KEY": "simba_sk_..."
       }
     }
@@ -91,7 +91,7 @@ response = client.beta.messages.create(
     mcp_servers=[
         {
             "type": "url",
-            "url": "https://app.getsimba.ai/mcp",
+            "url": "https://demo.simba-mmm.com/mcp",
             "name": "simba",
             "authorization_token": "simba_sk_...",
         }
