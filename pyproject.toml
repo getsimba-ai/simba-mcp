@@ -1,6 +1,6 @@
 [project]
 name = "simba-mcp"
-version = "0.1.0"
+version = "0.1.1"
 description = "Model Context Protocol (MCP) server for SIMBA — connect Claude, Cursor, and AI assistants to Bayesian Marketing Mix Models (MMM)"
 readme = "README.md"
 license = "MIT"
