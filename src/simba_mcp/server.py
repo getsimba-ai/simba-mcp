@@ -277,19 +277,34 @@ async def run_optimizer(
     Finds the optimal budget allocation across channels to maximize
     predicted revenue within the given constraints.
 
+    IMPORTANT: Channel names in bounds, laydown_weights, and period_cpm must
+    match the media channel names from get_model_results (channel_summary section).
+    Use get_scenario_template to discover channel names and their average CPM values.
+
+    All three dicts (bounds, laydown_weights, period_cpm) must have the same
+    set of channel keys, and array values must have length equal to num_periods.
+
     Args:
         model_hash: Hash of a completed model.
         total_budget: Total budget in currency units.
-        num_periods: Number of periods to optimize over.
+        num_periods: Number of periods to optimize over (matches your planning horizon).
         gamma: Aggressiveness parameter (0 = conservative, 1 = aggressive).
+               0.0 = maximize expected return only; 1.0 = heavily penalize uncertainty.
         currency: Currency code (e.g. "USD", "GBP").
-        bounds: Per-channel min/max as percentages. Example: {"TV": {"lower": 5, "upper": 40}}.
-        laydown_weights: Per-channel spend timing weights (arrays of length num_periods).
-                        Example: {"TV": [1, 1, 1, 1]} for uniform distribution.
-        period_cpm: Per-channel cost-per-metric for each period (arrays of length num_periods).
-                   Example: {"TV": [10, 10, 10, 10]}.
+        bounds: Per-channel min/max budget allocation as PERCENTAGES (0-100).
+                Every channel must appear. Example:
+                {"TV_Impressions": {"lower": 5, "upper": 40},
+                 "Search_Clicks": {"lower": 10, "upper": 50}}
+        laydown_weights: Per-channel spend timing weights. Each value is an array of
+                        length num_periods. Weights are relative (normalized internally).
+                        Use uniform [1, 1, ...] for even distribution across periods.
+                        Example: {"TV_Impressions": [1, 1, 1, 1]}
+        period_cpm: Per-channel cost-per-metric for each period. Each value is an array
+                   of length num_periods with positive values. Get baseline CPM from
+                   get_scenario_template (avg_cpu_by_channel field).
+                   Example: {"TV_Impressions": [10.5, 10.5, 10.5, 10.5]}
 
-    Returns immediately with status. Use get_optimizer_results to poll.
+    Returns immediately with status. Use get_optimizer_results to poll for results.
     """
     payload = {
         "total_budget": total_budget,
@@ -340,8 +355,13 @@ async def get_scenario_template(
 
     Returns future dates pre-filled with values from 1 year prior,
     the list of media and control channels, and average cost-per-unit
-    per media channel. Use this to understand what a scenario plan
-    should look like before calling run_scenario.
+    per media channel.
+
+    IMPORTANT: Always call this before run_scenario or run_optimizer to discover:
+    - Channel names (use these exact names in scenario_data, bounds, laydown_weights, period_cpm)
+    - Average CPM per channel (avg_cpu_by_channel — use for period_cpm in run_optimizer)
+    - Baseline activity values per channel (rows — use as starting point for scenarios)
+    - Media vs control channel classification
 
     Args:
         model_hash: Hash of a completed model.
@@ -360,25 +380,32 @@ async def run_scenario(
     model_hash: str,
     scenario_data: list[dict],
     spend_metadata: list[dict] | None = None,
-    rebuild_model: bool = False,
+    rebuild_model: bool = True,
     ctx: Context[ServerSession, AppContext] = None,
 ) -> dict:
     """Run a "what-if" scenario prediction on a completed model.
 
     Takes a set of future period rows with channel activity values and
     predicts the KPI outcome. Use get_scenario_template first to get
-    the expected format and channel names.
+    the expected format, channel names, and baseline values.
 
-    This is async — returns immediately. Poll get_scenario_results for output.
+    This is async — returns immediately with status "pending".
+    You MUST poll get_scenario_results afterwards to get the actual prediction output.
+
+    Workflow: get_scenario_template -> modify values -> run_scenario -> poll get_scenario_results
 
     Args:
         model_hash: Hash of a completed model.
-        scenario_data: Array of period rows, each a dict with "Date" and channel columns.
+        scenario_data: Array of period rows, each a dict with "Date" (YYYY-MM-DD format)
+                      and channel activity columns. Channel names must match exactly what
+                      get_scenario_template returns in the "channels" field.
                       Example: [{"Date": "2025-01-06", "TV_Impressions": 50000, "Search_Clicks": 1200}]
-        spend_metadata: Optional per-channel spend info for ROI calculation. Each entry:
-                       {"channel": "TV_Impressions", "metric": "impressions", "cpm": 25.0,
-                        "total_spend": 125000, "weekly_spend": [25000, 25000, ...]}
-        rebuild_model: If true, recompile the model (slower but handles edge cases).
+        spend_metadata: Optional per-channel spend info for ROI calculation in results.
+                       Each entry: {"channel": "TV_Impressions", "metric": "impressions",
+                       "cpm": 25.0, "total_spend": 125000,
+                       "weekly_spend": [25000, 25000, ...]}
+        rebuild_model: Recompile the model graph before prediction. Must be True (default)
+                      for API-initiated scenarios where the model graph is not in memory.
     """
     payload: dict = {"scenario_data": scenario_data}
     if spend_metadata:
