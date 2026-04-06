@@ -138,9 +138,9 @@ Channel names in model results can contain spaces (e.g. `"Digital impressions"`,
 
 **Always** call `get_model_results` with `sections="channel_summary"` first to see exact channel names, then use those verbatim in optimizer payloads.
 
-### Use `model_hash`, not numeric ID
+### Models are identified by `model_hash`
 
-All endpoints use the string `model_hash` (e.g. `"f835671a25"`) — not the numeric `id` from `list_models`. The only numeric ID you'll use is `uploaded_file_id` from `upload_data`.
+All model endpoints use the string `model_hash` (e.g. `"f835671a25"`) returned by `create_model` and `list_models`.
 
 ### Optimizer arrays, not scalars
 
