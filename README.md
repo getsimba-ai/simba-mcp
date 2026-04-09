@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 
-[Simba](https://simba-mmm.com) is a Bayesian Marketing Mix Modeling (MMM) platform. This Marketing Mix Modeling [MCP server](https://modelcontextprotocol.io/) lets AI assistants interact with your Marketing Mix Models directly — upload data, build models, check results, and run budget optimizations through natural language in Claude, Cursor, or Claude Code.
+[Simba](https://simba-mmm.com) is a Bayesian Marketing Mix Modeling (MMM) platform. This Marketing Mix Modeling [MCP server](https://modelcontextprotocol.io/) lets AI assistants interact with your models directly — upload data, build models, check results, and run budget optimizations through natural language in Claude, Cursor, or Claude Code.
 
 ## Installation
 
