@@ -49,5 +49,5 @@ dev = [
     "pytest>=8.0",
     "anyio>=4.0",
     "pytest-anyio>=0.0.0",
-    "ruff>=0.4",
+    "ruff>=0.15.10",
 ]
