@@ -312,12 +312,24 @@ async def run_optimizer(
     bounds: dict,
     laydown_weights: dict,
     period_cpm: dict,
+    objective: str = "revenue",
+    forward_margin: float | None = None,
+    period_multiplier: list[float] | None = None,
+    include_historical_effect: bool = True,
+    enable_warm_start: bool = True,
     ctx: Context[ServerSession, AppContext] = None,
 ) -> dict:
     """Run budget optimization on a completed model.
 
     Finds the optimal budget allocation across channels to maximize
-    predicted revenue within the given constraints.
+    predicted revenue — or predicted PROFIT with objective="profit" —
+    within the given constraints.
+
+    PROFIT OBJECTIVE: objective="profit" requires a margin source. If the model
+    was built with an operating margin, it is used automatically; otherwise you
+    MUST pass forward_margin (e.g. 0.18 for an 18% margin) or the API returns an
+    error. Result fields (Revenue, ROI, ExpectedResponse) are then on the profit
+    basis.
 
     IMPORTANT:
     - Channel names must exactly match model results (case-sensitive, space-sensitive).
@@ -353,6 +365,17 @@ async def run_optimizer(
                    of length num_periods with positive values. Get baseline CPM from
                    get_scenario_template (avg_cpu_by_channel field).
                    Example: {"TV_Impressions": [10.5, 10.5, 10.5, 10.5]}
+        objective: "revenue" (default) or "profit". See PROFIT OBJECTIVE above.
+        forward_margin: Decimal margin in (0, 1], e.g. 0.18 = 18%. Only used with
+                       objective="profit"; required when the model has no stored
+                       operating margin.
+        period_multiplier: Optional array of length num_periods converting KPI
+                          units to revenue per period over the planning horizon
+                          (mirrors the model's multiplier_column, e.g. price).
+        include_historical_effect: Include carryover from historical spend in the
+                                  predicted response (default True).
+        enable_warm_start: Warm-start the optimizer from a previous solution
+                          (default True).
     """
     payload = {
         "total_budget": total_budget,
@@ -363,6 +386,16 @@ async def run_optimizer(
         "laydown_weights": laydown_weights,
         "period_cpm": period_cpm,
     }
+    if objective != "revenue":
+        payload["objective"] = objective
+    if forward_margin is not None:
+        payload["forward_margin"] = forward_margin
+    if period_multiplier is not None:
+        payload["period_multiplier"] = period_multiplier
+    if not include_historical_effect:
+        payload["include_historical_effect"] = False
+    if not enable_warm_start:
+        payload["enable_warm_start"] = False
     return await _client(ctx).run_optimizer(model_hash, payload)
 
 
