@@ -323,10 +323,96 @@ async def get_model_status(
 # ---------------------------------------------------------------------------
 
 
+_CURVE_SECTIONS = ("response_curves", "marginal_curves")
+_BAND_SUFFIXES = ("_lower_50", "_upper_50", "_lower", "_upper")
+
+
+def _norm_channel(name: str) -> str:
+    """Normalize a channel identifier for matching: lowercase, spaces to
+    underscores, and strip the _activity/_spend suffix (results are keyed by
+    activity-column name)."""
+    k = str(name).strip().lower().replace(" ", "_")
+    for suffix in ("_activity", "_spend"):
+        if k.endswith(suffix):
+            k = k[: -len(suffix)]
+            break
+    return k
+
+
+def _column_channel(col: str) -> str:
+    """Base channel of a curve column, with any credible-band suffix removed."""
+    for suffix in _BAND_SUFFIXES:
+        if col.endswith(suffix):
+            col = col[: -len(suffix)]
+            break
+    return _norm_channel(col)
+
+
+def _downsample(records: list, max_points: int) -> list:
+    """Stride a grid-record list down to <= max_points, keeping first and last."""
+    n = len(records)
+    if max_points < 2 or n <= max_points:
+        return records
+    idx = {round(i * (n - 1) / (max_points - 1)) for i in range(max_points)}
+    return [records[i] for i in sorted(idx)]
+
+
+def _filter_results(payload: dict, channels: list | None, max_grid_points: int | None) -> dict:
+    """Client-side channel filter + curve downsampling on a results payload.
+
+    Applies only where channel identity is unambiguous. `contributions` is
+    passed through untouched: its non-channel columns (controls, Base,
+    Seasonality, ...) cannot be reliably told apart from unrequested channels.
+    """
+    target = payload.get("results") if isinstance(payload.get("results"), dict) else payload
+    wanted = {_norm_channel(c) for c in channels} if channels else None
+
+    for section in _CURVE_SECTIONS:
+        recs = target.get(section)
+        if not isinstance(recs, list):
+            continue
+        if wanted is not None:
+            recs = [
+                {k: v for k, v in r.items()
+                 if k == "Spend" or _column_channel(k) in wanted}
+                for r in recs
+            ]
+        if max_grid_points:
+            recs = _downsample(recs, max_grid_points)
+        target[section] = recs
+
+    if wanted is not None:
+        for section in ("decay_curves", "saturation"):
+            entry = target.get(section)
+            sub = entry.get("channels") if section == "saturation" and isinstance(entry, dict) else entry
+            if isinstance(sub, dict):
+                filtered = {k: v for k, v in sub.items() if _norm_channel(k) in wanted}
+                if section == "saturation":
+                    entry["channels"] = filtered
+                else:
+                    target[section] = filtered
+        for section, key in (("channel_summary", "Channel"), ("coefficients", "Channel")):
+            recs = target.get(section)
+            if isinstance(recs, list):
+                target[section] = [
+                    r for r in recs if _norm_channel(r.get(key, "")) in wanted
+                ]
+        mroi = target.get("mroi_summary")
+        if isinstance(mroi, dict) and isinstance(mroi.get("channels"), list):
+            mroi["channels"] = [
+                r for r in mroi["channels"]
+                if _norm_channel(r.get("channel", "")) in wanted
+            ]
+    return payload
+
+
 @mcp.tool()
 async def get_model_results(
     model_hash: str,
     sections: str = "",
+    format: str = "json",
+    channels: list[str] | None = None,
+    max_grid_points: int | None = None,
     ctx: Context[ServerSession, AppContext] = None,
 ) -> dict:
     """Get results from a completed model.
@@ -371,13 +457,34 @@ async def get_model_results(
     NOTE: Date values in contributions/coefficients records are millisecond
     epoch integers.
 
+    CONTEXT-SIZE TIP: a full pull is very large (curve sections alone are 100
+    grid points x channels x 5 band columns). In conversational use, request
+    only the sections you need and pass channels=[...] and max_grid_points=20.
+
     Args:
         model_hash: The model hash.
         sections: Comma-separated list of sections to include.
                   Leave empty for all sections.
                   Common: "channel_summary,model_stats" for ROI and diagnostics.
+        format: "json" (default) or "csv". CSV returns
+                {"format": "csv", "content": "..."} — concatenated
+                "# section" + CSV blocks, useful for saving to disk.
+                Filtering below applies to JSON only.
+        channels: Optional channel filter (matching is case/space-insensitive
+                  and tolerates the _activity/_spend suffix). Applied to curve
+                  sections, decay_curves, saturation, channel_summary,
+                  coefficients, and mroi_summary. `contributions` is never
+                  filtered (its control columns are indistinguishable from
+                  channels client-side).
+        max_grid_points: Optional cap on response/marginal curve grid points;
+                         records are strided evenly, keeping first and last.
     """
-    return await _client(ctx).get_model_results(model_hash, sections=sections)
+    res = await _client(ctx).get_model_results(model_hash, sections=sections, fmt=format)
+    if format != "json" or (channels is None and max_grid_points is None):
+        return res
+    if not isinstance(res, dict) or res.get("_status_code", 200) >= 400:
+        return res
+    return _filter_results(res, channels, max_grid_points)
 
 
 # ---------------------------------------------------------------------------
