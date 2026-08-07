@@ -57,6 +57,10 @@ class SimbaAPIClient:
             if response.status_code in (401, 403):
                 error_body["_help"] = AUTH_HELP
             return error_body
+        content_type = response.headers.get("content-type", "")
+        if "json" not in content_type.lower():
+            # e.g. GET .../results?format=csv returns text/csv
+            return {"format": "csv", "content": response.text}
         return response.json()
 
     async def _request(self, method: str, path: str, **kwargs) -> dict[str, Any]:
@@ -106,9 +110,13 @@ class SimbaAPIClient:
     async def get_schema(self) -> dict:
         return await self._request("GET", "/api/v1/ingest/schema")
 
-    async def upload_csv(self, csv_content: str, name: str = "") -> dict:
+    async def upload_csv(self, csv_content: str, name: str = "", filename: str = "") -> dict:
         """Upload CSV text content. For MCP, CSV arrives as a string."""
-        params = {"name": name} if name else {}
+        params = {}
+        if name:
+            params["name"] = name
+        if filename:
+            params["filename"] = filename
         return await self._request(
             "POST",
             "/api/v1/ingest",
