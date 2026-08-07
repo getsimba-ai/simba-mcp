@@ -38,6 +38,53 @@ class TestToolRegistration:
             assert tool.description, f"Tool {tool.name!r} has no description"
 
 
+class TestResultsSectionsDoc:
+    """Guard against the get_model_results section list going stale (issue #12)."""
+
+    # Every section the API's results endpoint can serve must be discoverable
+    # from the tool description — for agent-driven use the docstring IS the API.
+    API_SECTIONS = [
+        "channel_summary",
+        "contributions",
+        "coefficients",
+        "params",
+        "decay_curves",
+        "response_curves",
+        "marginal_curves",
+        "saturation",
+        "mroi_summary",
+        "model_stats",
+        "actual_vs_model",
+        "long_run_rollup",
+        "optimizer",
+        "predictions",
+    ]
+
+    def _description(self, name):
+        tool = next(t for t in mcp._tool_manager.list_tools() if t.name == name)
+        return tool.description
+
+    def test_all_sections_documented(self):
+        """Require the bullet form `- section_name:` so a name mentioned in
+        passing (e.g. 'optimizer' inside another sentence) doesn't false-pass."""
+        desc = self._description("get_model_results")
+        missing = [s for s in self.API_SECTIONS if f"- {s}:" not in desc]
+        assert not missing, (
+            f"Sections missing as `- name:` bullets from get_model_results "
+            f"docstring: {missing}"
+        )
+
+    def test_activity_column_naming_rule_documented(self):
+        """The activity-column key rule must appear in every tool that consumes
+        channel keys."""
+        for name in ("get_model_results", "run_optimizer", "run_scenario"):
+            desc = self._description(name)
+            assert "activity" in desc.lower() and "channels[].name" in desc, (
+                f"{name} docstring must state that results/template keys are the "
+                "activity-column names, not channels[].name"
+            )
+
+
 class TestLifespan:
     @pytest.mark.anyio
     async def test_lifespan_creates_client(self):
