@@ -45,8 +45,7 @@ CONTRACT = {
     },
     "GET /api/v1/models/{hash}/results": {
         "sections": "get_model_results.sections",
-        # "format" is exposed by the PR for issue #13 — add
-        # 'format': 'get_model_results.format' to this snapshot when it merges.
+        "format": "get_model_results.format",
     },
     "POST /api/v1/models/{hash}/optimize": {
         "total_budget": "run_optimizer.total_budget",
@@ -56,9 +55,11 @@ CONTRACT = {
         "bounds": "run_optimizer.bounds",
         "laydown_weights": "run_optimizer.laydown_weights",
         "period_cpm": "run_optimizer.period_cpm",
-        # objective / forward_margin / period_multiplier /
-        # include_historical_effect / enable_warm_start are exposed by the PR
-        # for issue #11 — add them to this snapshot when it merges.
+        "objective": "run_optimizer.objective",
+        "forward_margin": "run_optimizer.forward_margin",
+        "period_multiplier": "run_optimizer.period_multiplier",
+        "include_historical_effect": "run_optimizer.include_historical_effect",
+        "enable_warm_start": "run_optimizer.enable_warm_start",
     },
     "POST /api/v1/models/{hash}/scenario/template": {
         "periods_forward": "get_scenario_template.periods_forward",
