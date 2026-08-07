@@ -57,6 +57,10 @@ class SimbaAPIClient:
             if response.status_code in (401, 403):
                 error_body["_help"] = AUTH_HELP
             return error_body
+        content_type = response.headers.get("content-type", "")
+        if "json" not in content_type.lower():
+            # e.g. GET .../results?format=csv returns text/csv
+            return {"format": "csv", "content": response.text}
         return response.json()
 
     async def _request(self, method: str, path: str, **kwargs) -> dict[str, Any]:

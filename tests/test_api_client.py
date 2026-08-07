@@ -330,3 +330,47 @@ class TestAPIClientRetry:
         result = await client.get_schema()
         assert result["_status_code"] == 403
         assert call_count == 1
+
+
+class TestCsvResponses:
+    """Non-JSON success bodies are returned as {'format': 'csv', ...} (issue #13)."""
+
+    @staticmethod
+    def _make_client(transport):
+        api_client = SimbaAPIClient("http://test-simba:5005", "simba_sk_testkey123")
+        api_client._client = httpx.AsyncClient(
+            base_url="http://test-simba:5005",
+            headers={"Authorization": "Bearer simba_sk_testkey123"},
+            transport=transport,
+        )
+        return api_client
+
+    @pytest.mark.anyio
+    async def test_csv_body_wrapped_not_json_decoded(self):
+        class CsvTransport(httpx.AsyncBaseTransport):
+            async def handle_async_request(self, request):
+                await request.aread()
+                return httpx.Response(
+                    200,
+                    text="# channel_summary\nChannel,ROI\ntv_activity,2.0\n",
+                    headers={"content-type": "text/csv"},
+                )
+
+        client = self._make_client(CsvTransport())
+        result = await client.get_model_results("abc", fmt="csv")
+        assert result["format"] == "csv"
+        assert result["content"].startswith("# channel_summary")
+
+    @pytest.mark.anyio
+    async def test_fmt_param_sent_as_format_query(self):
+        seen = {}
+
+        class RecordingTransport(httpx.AsyncBaseTransport):
+            async def handle_async_request(self, request):
+                await request.aread()
+                seen["url"] = str(request.url)
+                return httpx.Response(200, json={"ok": True})
+
+        client = self._make_client(RecordingTransport())
+        await client.get_model_results("abc", fmt="csv")
+        assert "format=csv" in seen["url"]
