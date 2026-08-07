@@ -14,6 +14,7 @@ import os
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
+from pathlib import Path
 
 from mcp.server.fastmcp import Context, FastMCP
 from mcp.server.session import ServerSession
@@ -21,6 +22,50 @@ from mcp.server.session import ServerSession
 from .api_client import SimbaAPIClient
 
 logger = logging.getLogger(__name__)
+
+# The API's actual ingest cap (src/api/v1/ingest.py: MAX_INGEST_SIZE_BYTES).
+MAX_UPLOAD_BYTES = 10 * 1024 * 1024  # 10 MB
+
+# csv_path reads files from the machine the MCP server runs on. That is the
+# caller's own machine in stdio mode, but NOT in HTTP/SSE deployments — there
+# it would read the server host's filesystem, so it defaults off. Override
+# with SIMBA_MCP_ALLOW_LOCAL_FILES=1/0.
+_serving_http = False
+
+
+def set_http_mode(enabled: bool = True) -> None:
+    """Mark the server as running over a network transport (HTTP/SSE)."""
+    global _serving_http
+    _serving_http = enabled
+
+
+def _local_files_allowed() -> bool:
+    return _local_files_denial_reason() is None
+
+
+def _local_files_denial_reason() -> str | None:
+    """Return an error message if csv_path reads are disallowed, else None.
+
+    Distinguishes an explicit SIMBA_MCP_ALLOW_LOCAL_FILES=0 from the default
+    HTTP/SSE disable, so callers get accurate remediation guidance.
+    """
+    env = os.environ.get("SIMBA_MCP_ALLOW_LOCAL_FILES", "").strip().lower()
+    if env in ("1", "true", "yes"):
+        return None
+    if env in ("0", "false", "no"):
+        return (
+            "csv_path is disabled because SIMBA_MCP_ALLOW_LOCAL_FILES is set "
+            f"to {env!r}. Pass csv_content instead, or set "
+            "SIMBA_MCP_ALLOW_LOCAL_FILES=1 to allow local file reads."
+        )
+    if _serving_http:
+        return (
+            "csv_path is disabled on network transports (HTTP/SSE) because "
+            "it reads the server host's filesystem, not yours. Pass "
+            "csv_content instead, or set SIMBA_MCP_ALLOW_LOCAL_FILES=1 "
+            "on the server if this is intentional."
+        )
+    return None
 
 
 @dataclass
@@ -87,29 +132,67 @@ async def get_data_schema(ctx: Context[ServerSession, AppContext]) -> dict:
 
 @mcp.tool()
 async def upload_data(
-    csv_content: str,
+    csv_content: str = "",
+    csv_path: str = "",
     name: str = "",
     ctx: Context[ServerSession, AppContext] = None,
 ) -> dict:
     """Upload a CSV dataset to Simba for use in model building.
+
+    Provide EXACTLY ONE of csv_content (raw CSV text) or csv_path (a file path
+    on the machine running this MCP server). Prefer csv_path for anything
+    beyond trivial size — it avoids passing megabytes of CSV through the
+    conversation.
 
     The CSV should follow the canonical schema: one row per time period
     with date, KPI, multiplier, hierarchy, media activity/spend columns,
     and optional control variables.
 
     IMPORTANT:
-    - CSV only (not Excel). Maximum file size: 50 MB.
-    - Minimum 52 rows required (104+ recommended for robust estimation).
+    - CSV only (not Excel). Maximum file size: 10 MB (API-enforced).
+    - Row minimum: check get_data_schema -> x-simba-constraints.min_rows for
+      the declared minimum; enforcement may be more permissive, and the upload
+      response's `warnings` field is authoritative. More rows = tighter
+      posteriors (104+ weekly rows recommended).
     - Media columns must follow naming: {channel}_activity and {channel}_spend.
     - Use 0 for inactive periods, not blank or NA.
+    - csv_path is only available when the server runs locally (stdio). On
+      HTTP/SSE deployments it is disabled unless SIMBA_MCP_ALLOW_LOCAL_FILES=1.
 
     Args:
         csv_content: The full CSV text content (not base64, just raw CSV text).
-        name: Optional dataset name for identification.
+        csv_path: Path to a .csv file readable by the MCP server process.
+        name: Optional dataset name for identification. Defaults to the file
+              stem when csv_path is used.
 
     Returns the uploaded file ID (needed for create_model), row/column counts,
     and any validation warnings.
     """
+    if bool(csv_content) == bool(csv_path):
+        return {
+            "error": "Provide exactly one of csv_content or csv_path.",
+            "_status_code": 400,
+        }
+    if csv_path:
+        denial = _local_files_denial_reason()
+        if denial:
+            return {"error": denial, "_status_code": 403}
+        path = Path(csv_path).expanduser()
+        if not path.is_file():
+            return {"error": f"File not found: {path}", "_status_code": 400}
+        size = path.stat().st_size
+        if size > MAX_UPLOAD_BYTES:
+            return {
+                "error": (
+                    f"{path.name} is {size / 1024 / 1024:.1f} MB — over the API's "
+                    f"{MAX_UPLOAD_BYTES // (1024 * 1024)} MB ingest limit. "
+                    "Aggregate or trim the file first."
+                ),
+                "_status_code": 413,
+            }
+        csv_content = path.read_text(encoding="utf-8-sig")
+        if not name:
+            name = path.stem
     return await _client(ctx).upload_csv(csv_content, name)
 
 
@@ -539,6 +622,7 @@ async def get_scenario_results(
 
 def _create_app():
     """Create the ASGI app for uvicorn/Streamable HTTP deployment."""
+    set_http_mode(True)
     mcp.settings.streamable_http_path = "/"
     return mcp.streamable_http_app()
 
