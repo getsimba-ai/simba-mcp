@@ -147,6 +147,10 @@ Model results are keyed by the channel's **activity column** name (e.g. `"search
 
 All model endpoints use the string `model_hash` (e.g. `"f835671a25"`) returned by `create_model` and `list_models`.
 
+### API-key management is deliberately not exposed
+
+The `/api/v1/keys` endpoints (create/list/revoke API keys) are session-auth only and have no MCP tools **by design**: a server holding one key must not be able to mint or revoke keys. Manage keys in the Simba UI (Profile → API Keys).
+
 ### Optimizer arrays, not scalars
 
 `laydown_weights` and `period_cpm` must be **objects of arrays**, each array having exactly `num_periods` elements:
