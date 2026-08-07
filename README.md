@@ -182,10 +182,11 @@ Poll every 5-10 seconds. Check the `status` field for `"complete"` or `"failed"`
 
 ### Data upload requirements
 
-- **CSV only** (not Excel). Maximum 50 MB.
-- Minimum **52 rows** (104+ recommended).
+- **CSV only** (not Excel). Maximum **10 MB** (API-enforced).
+- Row minimum: check `get_data_schema` → `x-simba-constraints.min_rows`; the upload response's `warnings` field is authoritative. More rows = tighter posteriors (104+ weekly rows recommended).
 - Media columns: `{channel}_activity` and `{channel}_spend` per channel.
 - Use `0` for inactive periods, not blank or NA.
+- Large file? Pass `csv_path` (a local file path) instead of `csv_content` — the server reads it directly instead of the CSV going through the conversation. Local (stdio) servers only; disabled on HTTP/SSE deployments unless `SIMBA_MCP_ALLOW_LOCAL_FILES=1`.
 
 ## Common Errors
 
@@ -199,7 +200,7 @@ Poll every 5-10 seconds. Check the `status` field for `"complete"` or `"failed"`
 | `period_cpm['TV'] values must all be positive` | Zero or negative CPM | All CPM values must be > 0 |
 | `Channels in bounds missing from period_cpm: [...]` | Mismatched channel names | Same keys in bounds, laydown_weights, and period_cpm |
 | `Columns not found in data: [...]` | Column name typo | Check CSV headers match exactly |
-| `File exceeds 50 MB limit` | CSV too large | Reduce file size or aggregate data |
+| `File exceeds 10 MB limit` | CSV too large | Reduce file size or aggregate data |
 
 ## Direct API Access
 

@@ -4,6 +4,17 @@ All notable changes to the SIMBA MCP Server will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## Unreleased
+
+### Added
+
+- `upload_data` accepts `csv_path` (mutually exclusive with `csv_content`): the server reads the file directly, so large CSVs no longer transit the LLM conversation. Pre-flight existence/size checks; dataset name defaults to the file stem. Local (stdio) servers only — disabled on HTTP/SSE transports unless `SIMBA_MCP_ALLOW_LOCAL_FILES=1` (issue #14).
+
+### Fixed
+
+- Upload size limit corrected: the API enforces **10 MB**, not the previously documented 50 MB. Docstring and README updated; oversized `csv_path` uploads fail fast with a clear message (issue #14).
+- Row-minimum guidance no longer hardcodes "52 rows" — it defers to `get_data_schema` → `x-simba-constraints.min_rows` and notes that the upload response's `warnings` field is authoritative (issue #14).
+
 ## 0.1.2 — 2026-04-06
 
 ### Added

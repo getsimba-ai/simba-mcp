@@ -14,7 +14,7 @@ Usage:
 
 import argparse
 
-from .server import mcp
+from .server import mcp, set_http_mode
 
 
 def main():
@@ -29,6 +29,8 @@ def main():
     parser.add_argument("--port", type=int, default=8100, help="Port to bind (default: 8100)")
     args = parser.parse_args()
 
+    if args.transport != "stdio":
+        set_http_mode(True)
     mcp.settings.host = args.host
     mcp.settings.port = args.port
     mcp.run(transport=args.transport)
