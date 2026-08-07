@@ -134,9 +134,14 @@ Things that commonly trip up both AI agents and humans:
 
 ### Channel names are exact-match
 
-Channel names in model results can contain spaces (e.g. `"Digital impressions"`, `"TV_impressions"`). The optimizer uses these as dictionary keys — matching is **case-sensitive and space-sensitive**.
+Model results are keyed by the channel's **activity column** name (e.g. `"search_activity"`, `"TV_impressions"`), **not** by the `channels[].name` you passed to `create_model`. Keys can contain spaces and matching is **case-sensitive and space-sensitive** — the optimizer and scenario tools use them as dictionary keys.
 
-**Always** call `get_model_results` with `sections="channel_summary"` first to see exact channel names, then use those verbatim in optimizer payloads.
+**Always** call `get_model_results` with `sections="channel_summary"` first to see exact channel keys, then use those verbatim in optimizer/scenario payloads.
+
+### Results sections
+
+`get_model_results` serves these sections (request only what you need via `sections=`):
+`channel_summary`, `contributions` (KPI/unit space — multiplier **not** applied), `coefficients` (per-period per-channel **revenue** table), `params`, `decay_curves`, `response_curves`, `marginal_curves`, `saturation`, `mroi_summary` (marginal ROI at current spend with 94% HDI), `model_stats`, `actual_vs_model`, `long_run_rollup`, `optimizer`, `predictions`. The response's `sections_available` field is authoritative if the server is newer than these docs.
 
 ### Models are identified by `model_hash`
 
