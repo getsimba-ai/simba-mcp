@@ -89,6 +89,7 @@ async def get_data_schema(ctx: Context[ServerSession, AppContext]) -> dict:
 async def upload_data(
     csv_content: str,
     name: str = "",
+    filename: str = "",
     ctx: Context[ServerSession, AppContext] = None,
 ) -> dict:
     """Upload a CSV dataset to Simba for use in model building.
@@ -106,11 +107,12 @@ async def upload_data(
     Args:
         csv_content: The full CSV text content (not base64, just raw CSV text).
         name: Optional dataset name for identification.
+        filename: Optional original filename to record alongside the dataset.
 
     Returns the uploaded file ID (needed for create_model), row/column counts,
     and any validation warnings.
     """
-    return await _client(ctx).upload_csv(csv_content, name)
+    return await _client(ctx).upload_csv(csv_content, name, filename=filename)
 
 
 # ---------------------------------------------------------------------------
@@ -122,6 +124,7 @@ async def upload_data(
 async def list_models(
     include_unsaved: bool = False,
     limit: int = 50,
+    offset: int = 0,
     ctx: Context[ServerSession, AppContext] = None,
 ) -> dict:
     """List all Marketing Mix Models for the authenticated user.
@@ -135,8 +138,11 @@ async def list_models(
     Args:
         include_unsaved: Include draft/unsaved models (default false).
         limit: Maximum number of models to return (default 50, max 500).
+        offset: Number of models to skip, for paging past `limit` (default 0).
     """
-    return await _client(ctx).list_models(include_unsaved=include_unsaved, limit=limit)
+    return await _client(ctx).list_models(
+        include_unsaved=include_unsaved, limit=limit, offset=offset
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -379,7 +385,11 @@ async def get_scenario_template(
     - Channel names (use these exact names in scenario_data, bounds, laydown_weights, period_cpm)
     - Average CPM per channel (avg_cpu_by_channel — use for period_cpm in run_optimizer)
     - Baseline activity values per channel (rows — use as starting point for scenarios)
-    - Media vs control channel classification
+    - Media vs control channel classification (variable_classification field)
+
+    The response also includes: operating_margin (the model's stored margin, if
+    set — useful for profit math), variable_transforms (per-variable transform
+    metadata), periodicity, and start_date.
 
     WARNING: Template data may contain NaN or null values for channels without
     historical data. You MUST replace NaN/null with 0 before passing to run_scenario,
@@ -403,6 +413,9 @@ async def run_scenario(
     scenario_data: list[dict],
     spend_metadata: list[dict] | None = None,
     rebuild_model: bool = True,
+    evaluate_holdout: bool = False,
+    skip_slicing: bool = False,
+    proxy_channels: list[dict] | None = None,
     ctx: Context[ServerSession, AppContext] = None,
 ) -> dict:
     """Run a "what-if" scenario prediction on a completed model.
@@ -432,12 +445,25 @@ async def run_scenario(
                        "weekly_spend": [25000, 25000, ...]}
         rebuild_model: Recompile the model graph before prediction. Must be True (default)
                       for API-initiated scenarios where the model graph is not in memory.
+        evaluate_holdout: Evaluate the scenario against held-out actuals when the
+                         scenario period overlaps observed data (default False).
+        skip_slicing: Skip per-channel contribution slicing in the prediction
+                     output — faster when only the KPI total is needed (default False).
+        proxy_channels: Optional list of proxy-channel mappings, each mapping a
+                       scenario channel to a fitted channel whose transforms it
+                       borrows (for channels without their own history).
     """
     payload: dict = {"scenario_data": scenario_data}
     if spend_metadata:
         payload["spend_metadata"] = spend_metadata
     if rebuild_model:
         payload["rebuild_model"] = True
+    if evaluate_holdout:
+        payload["evaluate_holdout"] = True
+    if skip_slicing:
+        payload["skip_slicing"] = True
+    if proxy_channels:
+        payload["proxy_channels"] = proxy_channels
     return await _client(ctx).run_scenario(model_hash, payload)
 
 

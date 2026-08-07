@@ -4,6 +4,13 @@ All notable changes to the SIMBA MCP Server will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## Unreleased
+
+### Added
+
+- Parameter-completeness sweep vs API v1 (issue #15): `list_models` exposes `offset` (paging); `run_scenario` exposes `evaluate_holdout`, `skip_slicing`, `proxy_channels` (serialized only when non-default — existing payloads unchanged); `upload_data` exposes `filename`; `get_scenario_template` docstring documents the `operating_margin`, `variable_transforms`, and `variable_classification` response fields.
+- Contract test (`tests/test_contract.py`) pinning the v1 request-parameter surface: it fails when a snapshot parameter isn't reachable through any MCP tool, with an `EXCLUDED_BY_DESIGN` list for the deliberate exclusions (API-key management). README documents that exclusion.
+
 ## 0.1.2 — 2026-04-06
 
 ### Added
