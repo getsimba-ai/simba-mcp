@@ -40,12 +40,32 @@ def set_http_mode(enabled: bool = True) -> None:
 
 
 def _local_files_allowed() -> bool:
+    return _local_files_denial_reason() is None
+
+
+def _local_files_denial_reason() -> str | None:
+    """Return an error message if csv_path reads are disallowed, else None.
+
+    Distinguishes an explicit SIMBA_MCP_ALLOW_LOCAL_FILES=0 from the default
+    HTTP/SSE disable, so callers get accurate remediation guidance.
+    """
     env = os.environ.get("SIMBA_MCP_ALLOW_LOCAL_FILES", "").strip().lower()
     if env in ("1", "true", "yes"):
-        return True
+        return None
     if env in ("0", "false", "no"):
-        return False
-    return not _serving_http
+        return (
+            "csv_path is disabled because SIMBA_MCP_ALLOW_LOCAL_FILES is set "
+            f"to {env!r}. Pass csv_content instead, or set "
+            "SIMBA_MCP_ALLOW_LOCAL_FILES=1 to allow local file reads."
+        )
+    if _serving_http:
+        return (
+            "csv_path is disabled on network transports (HTTP/SSE) because "
+            "it reads the server host's filesystem, not yours. Pass "
+            "csv_content instead, or set SIMBA_MCP_ALLOW_LOCAL_FILES=1 "
+            "on the server if this is intentional."
+        )
+    return None
 
 
 @dataclass
@@ -154,16 +174,9 @@ async def upload_data(
             "_status_code": 400,
         }
     if csv_path:
-        if not _local_files_allowed():
-            return {
-                "error": (
-                    "csv_path is disabled on network transports (HTTP/SSE) because "
-                    "it reads the server host's filesystem, not yours. Pass "
-                    "csv_content instead, or set SIMBA_MCP_ALLOW_LOCAL_FILES=1 "
-                    "on the server if this is intentional."
-                ),
-                "_status_code": 403,
-            }
+        denial = _local_files_denial_reason()
+        if denial:
+            return {"error": denial, "_status_code": 403}
         path = Path(csv_path).expanduser()
         if not path.is_file():
             return {"error": f"File not found: {path}", "_status_code": 400}
