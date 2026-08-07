@@ -4,6 +4,12 @@ All notable changes to the SIMBA MCP Server will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## Unreleased
+
+### Added
+
+- `run_optimizer` now exposes the API's remaining optimizer options: `objective` ("revenue"/"profit"), `forward_margin`, `period_multiplier`, `include_historical_effect`, `enable_warm_start`. Profit optimization is now reachable through MCP; omitting the new params produces byte-identical payloads to 0.1.2 (issue #11).
+
 ## 0.1.2 — 2026-04-06
 
 ### Added
