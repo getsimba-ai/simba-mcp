@@ -248,23 +248,51 @@ async def get_model_results(
 ) -> dict:
     """Get results from a completed model.
 
-    Available sections: contributions, channel_summary, coefficients,
-    params, optimizer, predictions, model_stats, decay_curves,
-    response_curves, marginal_curves, actual_vs_model.
+    Available sections:
+    - channel_summary: per-channel aggregates {Channel, Sales, Spend, Revenue, ROI}.
+    - contributions: per-period decomposition (Date, one column per channel, plus
+      Base, Seasonality, Event Effect, Model, Fit Actual, Actual). Values are in
+      KPI/unit space — the multiplier is NOT applied. Use `coefficients` for
+      per-period revenue.
+    - coefficients: per-period per-channel media results table (Date, Channel,
+      Sales, Revenue, Spend, Media Units, ROI, Cost/Revenue/Sales per Media Unit).
+      This is the only per-period revenue-space decomposition.
+    - params: fitted posterior means per channel (alpha, decay, cpu, scalars).
+    - decay_curves: adstock decay per channel (mean/lower/upper, l_max,
+      adstock_type, curve points; dual-geometric models add decay_slow_* and
+      dual_weight_* parameters).
+    - response_curves: 100-point spend-vs-revenue grid per channel with credible
+      bands ({ch}, {ch}_lower, {ch}_lower_50, {ch}_upper_50, {ch}_upper).
+    - marginal_curves: same grid for marginal ROI (diminishing returns).
+    - saturation: fitted saturation family and parameters (saturation_type is
+      tanh, michaelis_menten, or negative_exponential; per-channel alpha/scale).
+    - mroi_summary: headline marginal ROI at current spend per channel with a
+      94% HDI (channel, current_spend, mroi_median, mroi_hdi_3, mroi_hdi_97).
+    - model_stats: fit diagnostics (R², MAPE, Durbin-Watson, Max R_hat, ...).
+    - actual_vs_model: actual vs predicted per period with 50%/95% HDIs.
+    - long_run_rollup: MMM short-term + VAR long-run revenue rollup per channel;
+      returns {available: false, reason: "no_linked_var_model"} when no VAR
+      model is linked to this MMM.
+    - optimizer: latest optimization results (see get_optimizer_results).
+    - predictions: latest scenario prediction rows (see get_scenario_results).
 
-    IMPORTANT: Channel names in results may contain spaces (e.g. "Digital impressions").
-    These exact names (case-sensitive, space-sensitive) must be used as dictionary keys
-    in run_optimizer bounds, laydown_weights, and period_cpm. Always check channel_summary
-    first to get the exact channel names before calling run_optimizer.
+    The response envelope includes `sections_available` — trust it over any
+    hardcoded list if the server is newer than these docs.
+
+    IMPORTANT — channel naming: results are keyed by the channel's ACTIVITY
+    COLUMN name (e.g. "search_activity"), not by the `channels[].name` passed to
+    create_model. These exact keys (case- and space-sensitive) must be used in
+    run_optimizer bounds, laydown_weights, and period_cpm. Always read
+    channel_summary first to get the exact keys.
+
+    NOTE: Date values in contributions/coefficients records are millisecond
+    epoch integers.
 
     Args:
         model_hash: The model hash.
         sections: Comma-separated list of sections to include.
                   Leave empty for all sections.
                   Common: "channel_summary,model_stats" for ROI and diagnostics.
-                  Use "response_curves" for spend-vs-revenue curves per channel.
-                  Use "marginal_curves" for diminishing returns curves.
-                  Use "actual_vs_model" for model fit quality (actual vs predicted).
     """
     return await _client(ctx).get_model_results(model_hash, sections=sections)
 
@@ -293,6 +321,8 @@ async def run_optimizer(
 
     IMPORTANT:
     - Channel names must exactly match model results (case-sensitive, space-sensitive).
+      Results are keyed by the channel's ACTIVITY COLUMN name (e.g. "search_activity"),
+      not by the `channels[].name` passed to create_model.
       Call get_model_results with sections="channel_summary" first to get exact names,
       or use get_scenario_template to discover channel names and their average CPM values.
     - bounds values are percentages of total_budget (0-100), not currency amounts.
@@ -409,7 +439,9 @@ async def run_scenario(
 
     Takes a set of future period rows with channel activity values and
     predicts the KPI outcome. Use get_scenario_template first to get
-    the expected format, channel names, and baseline values.
+    the expected format, channel names, and baseline values. Channel names are
+    the activity-column keys from the template/results (e.g. "search_activity"),
+    not the `channels[].name` passed to create_model.
 
     IMPORTANT: Before submitting, replace any NaN/null values in scenario_data with 0.
     The template from get_scenario_template may contain NaN for channels without
