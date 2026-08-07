@@ -65,9 +65,14 @@ class TestResultsSectionsDoc:
         return tool.description
 
     def test_all_sections_documented(self):
+        """Require the bullet form `- section_name:` so a name mentioned in
+        passing (e.g. 'optimizer' inside another sentence) doesn't false-pass."""
         desc = self._description("get_model_results")
-        missing = [s for s in self.API_SECTIONS if s not in desc]
-        assert not missing, f"Sections missing from get_model_results docstring: {missing}"
+        missing = [s for s in self.API_SECTIONS if f"- {s}:" not in desc]
+        assert not missing, (
+            f"Sections missing as `- name:` bullets from get_model_results "
+            f"docstring: {missing}"
+        )
 
     def test_activity_column_naming_rule_documented(self):
         """The activity-column key rule must appear in every tool that consumes
