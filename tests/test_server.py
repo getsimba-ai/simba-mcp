@@ -149,6 +149,23 @@ class TestUploadData:
         ctx, client = self._ctx_capturing()
         res = await server_mod.upload_data(csv_path=str(f), ctx=ctx)
         assert res["_status_code"] == 403
+        assert "HTTP/SSE" in res["error"]
+        client.upload_csv.assert_not_called()
+
+    @pytest.mark.anyio
+    async def test_csv_path_disabled_by_env_on_stdio(self, tmp_path, monkeypatch):
+        """Explicit SIMBA_MCP_ALLOW_LOCAL_FILES=0 must not blame HTTP/SSE."""
+        import simba_mcp.server as server_mod
+
+        monkeypatch.setenv("SIMBA_MCP_ALLOW_LOCAL_FILES", "0")
+        monkeypatch.setattr(server_mod, "_serving_http", False)
+        f = tmp_path / "d.csv"
+        f.write_text("a,b\n", encoding="utf-8")
+        ctx, client = self._ctx_capturing()
+        res = await server_mod.upload_data(csv_path=str(f), ctx=ctx)
+        assert res["_status_code"] == 403
+        assert "SIMBA_MCP_ALLOW_LOCAL_FILES" in res["error"]
+        assert "HTTP/SSE" not in res["error"]
         client.upload_csv.assert_not_called()
 
     @pytest.mark.anyio
