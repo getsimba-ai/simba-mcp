@@ -68,3 +68,77 @@ class TestLifespan:
         warnings = [r.message for r in caplog.records if "SIMBA_API_KEY" in r.message]
         assert len(warnings) == 1
         assert "calendly.com" in warnings[0]
+
+
+class TestRunOptimizerPayload:
+    """Payload construction for run_optimizer, incl. profit objective (issue #11)."""
+
+    LEGACY_ARGS = dict(
+        model_hash="abc123",
+        total_budget=1_000_000.0,
+        num_periods=4,
+        gamma=0.0,
+        currency="USD",
+        bounds={"TV": {"lower": 0, "upper": 40}},
+        laydown_weights={"TV": [1, 1, 1, 1]},
+        period_cpm={"TV": [10.0, 10.0, 10.0, 10.0]},
+    )
+
+    def _ctx_capturing(self):
+        """A fake Context whose client records the payload passed to run_optimizer."""
+        from unittest.mock import AsyncMock, MagicMock
+
+        client = MagicMock()
+        client.run_optimizer = AsyncMock(return_value={"optimizer_status": "pending"})
+        ctx = MagicMock()
+        ctx.request_context.lifespan_context.client = client
+        return ctx, client
+
+    @pytest.mark.anyio
+    async def test_legacy_args_produce_legacy_payload(self):
+        """Backward compat: without new params the payload has exactly the 7 legacy keys."""
+        from simba_mcp.server import run_optimizer
+
+        ctx, client = self._ctx_capturing()
+        await run_optimizer(**self.LEGACY_ARGS, ctx=ctx)
+        _, payload = client.run_optimizer.call_args.args
+        assert set(payload) == {
+            "total_budget", "num_periods", "gamma", "currency",
+            "bounds", "laydown_weights", "period_cpm",
+        }
+
+    @pytest.mark.anyio
+    async def test_profit_objective_passthrough(self):
+        from simba_mcp.server import run_optimizer
+
+        ctx, client = self._ctx_capturing()
+        await run_optimizer(**self.LEGACY_ARGS, objective="profit",
+                            forward_margin=0.18, ctx=ctx)
+        _, payload = client.run_optimizer.call_args.args
+        assert payload["objective"] == "profit"
+        assert payload["forward_margin"] == 0.18
+
+    @pytest.mark.anyio
+    async def test_period_multiplier_and_flags_passthrough(self):
+        from simba_mcp.server import run_optimizer
+
+        ctx, client = self._ctx_capturing()
+        await run_optimizer(**self.LEGACY_ARGS, period_multiplier=[1.5] * 4,
+                            include_historical_effect=False,
+                            enable_warm_start=False, ctx=ctx)
+        _, payload = client.run_optimizer.call_args.args
+        assert payload["period_multiplier"] == [1.5] * 4
+        assert payload["include_historical_effect"] is False
+        assert payload["enable_warm_start"] is False
+
+    @pytest.mark.anyio
+    async def test_default_flags_not_sent(self):
+        """True defaults for the booleans are omitted, not serialized as True."""
+        from simba_mcp.server import run_optimizer
+
+        ctx, client = self._ctx_capturing()
+        await run_optimizer(**self.LEGACY_ARGS, objective="revenue", ctx=ctx)
+        _, payload = client.run_optimizer.call_args.args
+        assert "objective" not in payload
+        assert "include_historical_effect" not in payload
+        assert "enable_warm_start" not in payload
