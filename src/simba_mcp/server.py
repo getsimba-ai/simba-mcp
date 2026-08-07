@@ -14,6 +14,7 @@ import os
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
+from pathlib import Path
 
 from mcp.server.fastmcp import Context, FastMCP
 from mcp.server.session import ServerSession
@@ -21,6 +22,50 @@ from mcp.server.session import ServerSession
 from .api_client import SimbaAPIClient
 
 logger = logging.getLogger(__name__)
+
+# The API's actual ingest cap (src/api/v1/ingest.py: MAX_INGEST_SIZE_BYTES).
+MAX_UPLOAD_BYTES = 10 * 1024 * 1024  # 10 MB
+
+# csv_path reads files from the machine the MCP server runs on. That is the
+# caller's own machine in stdio mode, but NOT in HTTP/SSE deployments — there
+# it would read the server host's filesystem, so it defaults off. Override
+# with SIMBA_MCP_ALLOW_LOCAL_FILES=1/0.
+_serving_http = False
+
+
+def set_http_mode(enabled: bool = True) -> None:
+    """Mark the server as running over a network transport (HTTP/SSE)."""
+    global _serving_http
+    _serving_http = enabled
+
+
+def _local_files_allowed() -> bool:
+    return _local_files_denial_reason() is None
+
+
+def _local_files_denial_reason() -> str | None:
+    """Return an error message if csv_path reads are disallowed, else None.
+
+    Distinguishes an explicit SIMBA_MCP_ALLOW_LOCAL_FILES=0 from the default
+    HTTP/SSE disable, so callers get accurate remediation guidance.
+    """
+    env = os.environ.get("SIMBA_MCP_ALLOW_LOCAL_FILES", "").strip().lower()
+    if env in ("1", "true", "yes"):
+        return None
+    if env in ("0", "false", "no"):
+        return (
+            "csv_path is disabled because SIMBA_MCP_ALLOW_LOCAL_FILES is set "
+            f"to {env!r}. Pass csv_content instead, or set "
+            "SIMBA_MCP_ALLOW_LOCAL_FILES=1 to allow local file reads."
+        )
+    if _serving_http:
+        return (
+            "csv_path is disabled on network transports (HTTP/SSE) because "
+            "it reads the server host's filesystem, not yours. Pass "
+            "csv_content instead, or set SIMBA_MCP_ALLOW_LOCAL_FILES=1 "
+            "on the server if this is intentional."
+        )
+    return None
 
 
 @dataclass
@@ -87,30 +132,72 @@ async def get_data_schema(ctx: Context[ServerSession, AppContext]) -> dict:
 
 @mcp.tool()
 async def upload_data(
-    csv_content: str,
+    csv_content: str = "",
+    csv_path: str = "",
     name: str = "",
+    filename: str = "",
     ctx: Context[ServerSession, AppContext] = None,
 ) -> dict:
     """Upload a CSV dataset to Simba for use in model building.
+
+    Provide EXACTLY ONE of csv_content (raw CSV text) or csv_path (a file path
+    on the machine running this MCP server). Prefer csv_path for anything
+    beyond trivial size — it avoids passing megabytes of CSV through the
+    conversation.
 
     The CSV should follow the canonical schema: one row per time period
     with date, KPI, multiplier, hierarchy, media activity/spend columns,
     and optional control variables.
 
     IMPORTANT:
-    - CSV only (not Excel). Maximum file size: 50 MB.
-    - Minimum 52 rows required (104+ recommended for robust estimation).
+    - CSV only (not Excel). Maximum file size: 10 MB (API-enforced).
+    - Row minimum: check get_data_schema -> x-simba-constraints.min_rows for
+      the declared minimum; enforcement may be more permissive, and the upload
+      response's `warnings` field is authoritative. More rows = tighter
+      posteriors (104+ weekly rows recommended).
     - Media columns must follow naming: {channel}_activity and {channel}_spend.
     - Use 0 for inactive periods, not blank or NA.
+    - csv_path is only available when the server runs locally (stdio). On
+      HTTP/SSE deployments it is disabled unless SIMBA_MCP_ALLOW_LOCAL_FILES=1.
 
     Args:
         csv_content: The full CSV text content (not base64, just raw CSV text).
-        name: Optional dataset name for identification.
+        csv_path: Path to a .csv file readable by the MCP server process.
+        name: Optional dataset name for identification. Defaults to the file
+              stem when csv_path is used.
+        filename: Optional original filename to record alongside the dataset.
 
     Returns the uploaded file ID (needed for create_model), row/column counts,
     and any validation warnings.
     """
-    return await _client(ctx).upload_csv(csv_content, name)
+    if bool(csv_content) == bool(csv_path):
+        return {
+            "error": "Provide exactly one of csv_content or csv_path.",
+            "_status_code": 400,
+        }
+    if csv_path:
+        denial = _local_files_denial_reason()
+        if denial:
+            return {"error": denial, "_status_code": 403}
+        path = Path(csv_path).expanduser()
+        if not path.is_file():
+            return {"error": f"File not found: {path}", "_status_code": 400}
+        size = path.stat().st_size
+        if size > MAX_UPLOAD_BYTES:
+            return {
+                "error": (
+                    f"{path.name} is {size / 1024 / 1024:.1f} MB — over the API's "
+                    f"{MAX_UPLOAD_BYTES // (1024 * 1024)} MB ingest limit. "
+                    "Aggregate or trim the file first."
+                ),
+                "_status_code": 413,
+            }
+        csv_content = path.read_text(encoding="utf-8-sig")
+        if not name:
+            name = path.stem
+        if not filename:
+            filename = path.name
+    return await _client(ctx).upload_csv(csv_content, name, filename=filename)
 
 
 # ---------------------------------------------------------------------------
@@ -122,6 +209,7 @@ async def upload_data(
 async def list_models(
     include_unsaved: bool = False,
     limit: int = 50,
+    offset: int = 0,
     ctx: Context[ServerSession, AppContext] = None,
 ) -> dict:
     """List all Marketing Mix Models for the authenticated user.
@@ -135,8 +223,11 @@ async def list_models(
     Args:
         include_unsaved: Include draft/unsaved models (default false).
         limit: Maximum number of models to return (default 50, max 500).
+        offset: Number of models to skip, for paging past `limit` (default 0).
     """
-    return await _client(ctx).list_models(include_unsaved=include_unsaved, limit=limit)
+    return await _client(ctx).list_models(
+        include_unsaved=include_unsaved, limit=limit, offset=offset
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -240,33 +331,168 @@ async def get_model_status(
 # ---------------------------------------------------------------------------
 
 
+_CURVE_SECTIONS = ("response_curves", "marginal_curves")
+_BAND_SUFFIXES = ("_lower_50", "_upper_50", "_lower", "_upper")
+
+
+def _norm_channel(name: str) -> str:
+    """Normalize a channel identifier for matching: lowercase, spaces to
+    underscores, and strip the _activity/_spend suffix (results are keyed by
+    activity-column name)."""
+    k = str(name).strip().lower().replace(" ", "_")
+    for suffix in ("_activity", "_spend"):
+        if k.endswith(suffix):
+            k = k[: -len(suffix)]
+            break
+    return k
+
+
+def _column_channel(col: str) -> str:
+    """Base channel of a curve column, with any credible-band suffix removed."""
+    for suffix in _BAND_SUFFIXES:
+        if col.endswith(suffix):
+            col = col[: -len(suffix)]
+            break
+    return _norm_channel(col)
+
+
+def _downsample(records: list, max_points: int) -> list:
+    """Stride a grid-record list down to <= max_points, keeping first and last."""
+    n = len(records)
+    if max_points < 2 or n <= max_points:
+        return records
+    idx = {round(i * (n - 1) / (max_points - 1)) for i in range(max_points)}
+    return [records[i] for i in sorted(idx)]
+
+
+def _filter_results(payload: dict, channels: list | None, max_grid_points: int | None) -> dict:
+    """Client-side channel filter + curve downsampling on a results payload.
+
+    Applies only where channel identity is unambiguous. `contributions` is
+    passed through untouched: its non-channel columns (controls, Base,
+    Seasonality, ...) cannot be reliably told apart from unrequested channels.
+    """
+    target = payload.get("results") if isinstance(payload.get("results"), dict) else payload
+    wanted = {_norm_channel(c) for c in channels} if channels else None
+
+    for section in _CURVE_SECTIONS:
+        recs = target.get(section)
+        if not isinstance(recs, list):
+            continue
+        if wanted is not None:
+            recs = [
+                {k: v for k, v in r.items()
+                 if k == "Spend" or _column_channel(k) in wanted}
+                for r in recs
+            ]
+        if max_grid_points:
+            recs = _downsample(recs, max_grid_points)
+        target[section] = recs
+
+    if wanted is not None:
+        for section in ("decay_curves", "saturation"):
+            entry = target.get(section)
+            sub = entry.get("channels") if section == "saturation" and isinstance(entry, dict) else entry
+            if isinstance(sub, dict):
+                filtered = {k: v for k, v in sub.items() if _norm_channel(k) in wanted}
+                if section == "saturation":
+                    entry["channels"] = filtered
+                else:
+                    target[section] = filtered
+        for section, key in (("channel_summary", "Channel"), ("coefficients", "Channel")):
+            recs = target.get(section)
+            if isinstance(recs, list):
+                target[section] = [
+                    r for r in recs if _norm_channel(r.get(key, "")) in wanted
+                ]
+        mroi = target.get("mroi_summary")
+        if isinstance(mroi, dict) and isinstance(mroi.get("channels"), list):
+            mroi["channels"] = [
+                r for r in mroi["channels"]
+                if _norm_channel(r.get("channel", "")) in wanted
+            ]
+    return payload
+
+
 @mcp.tool()
 async def get_model_results(
     model_hash: str,
     sections: str = "",
+    format: str = "json",
+    channels: list[str] | None = None,
+    max_grid_points: int | None = None,
     ctx: Context[ServerSession, AppContext] = None,
 ) -> dict:
     """Get results from a completed model.
 
-    Available sections: contributions, channel_summary, coefficients,
-    params, optimizer, predictions, model_stats, decay_curves,
-    response_curves, marginal_curves, actual_vs_model.
+    Available sections:
+    - channel_summary: per-channel aggregates {Channel, Sales, Spend, Revenue, ROI}.
+    - contributions: per-period decomposition (Date, one column per channel, plus
+      Base, Seasonality, Event Effect, Model, Fit Actual, Actual). Values are in
+      KPI/unit space — the multiplier is NOT applied. Use `coefficients` for
+      per-period revenue.
+    - coefficients: per-period per-channel media results table (Date, Channel,
+      Sales, Revenue, Spend, Media Units, ROI, Cost/Revenue/Sales per Media Unit).
+      This is the only per-period revenue-space decomposition.
+    - params: fitted posterior means per channel (alpha, decay, cpu, scalars).
+    - decay_curves: adstock decay per channel (mean/lower/upper, l_max,
+      adstock_type, curve points; dual-geometric models add decay_slow_* and
+      dual_weight_* parameters).
+    - response_curves: 100-point spend-vs-revenue grid per channel with credible
+      bands ({ch}, {ch}_lower, {ch}_lower_50, {ch}_upper_50, {ch}_upper).
+    - marginal_curves: same grid for marginal ROI (diminishing returns).
+    - saturation: fitted saturation family and parameters (saturation_type is
+      tanh, michaelis_menten, or negative_exponential; per-channel alpha/scale).
+    - mroi_summary: headline marginal ROI at current spend per channel with a
+      94% HDI (channel, current_spend, mroi_median, mroi_hdi_3, mroi_hdi_97).
+    - model_stats: fit diagnostics (R², MAPE, Durbin-Watson, Max R_hat, ...).
+    - actual_vs_model: actual vs predicted per period with 50%/95% HDIs.
+    - long_run_rollup: MMM short-term + VAR long-run revenue rollup per channel;
+      returns {available: false, reason: "no_linked_var_model"} when no VAR
+      model is linked to this MMM.
+    - optimizer: latest optimization results (see get_optimizer_results).
+    - predictions: latest scenario prediction rows (see get_scenario_results).
 
-    IMPORTANT: Channel names in results may contain spaces (e.g. "Digital impressions").
-    These exact names (case-sensitive, space-sensitive) must be used as dictionary keys
-    in run_optimizer bounds, laydown_weights, and period_cpm. Always check channel_summary
-    first to get the exact channel names before calling run_optimizer.
+    The response envelope includes `sections_available` — trust it over any
+    hardcoded list if the server is newer than these docs.
+
+    IMPORTANT — channel naming: results are keyed by the channel's ACTIVITY
+    COLUMN name (e.g. "search_activity"), not by the `channels[].name` passed to
+    create_model. These exact keys (case- and space-sensitive) must be used in
+    run_optimizer bounds, laydown_weights, and period_cpm. Always read
+    channel_summary first to get the exact keys.
+
+    NOTE: Date values in contributions/coefficients records are millisecond
+    epoch integers.
+
+    CONTEXT-SIZE TIP: a full pull is very large (curve sections alone are 100
+    grid points x channels x 5 band columns). In conversational use, request
+    only the sections you need and pass channels=[...] and max_grid_points=20.
 
     Args:
         model_hash: The model hash.
         sections: Comma-separated list of sections to include.
                   Leave empty for all sections.
                   Common: "channel_summary,model_stats" for ROI and diagnostics.
-                  Use "response_curves" for spend-vs-revenue curves per channel.
-                  Use "marginal_curves" for diminishing returns curves.
-                  Use "actual_vs_model" for model fit quality (actual vs predicted).
+        format: "json" (default) or "csv". CSV returns
+                {"format": "csv", "content": "..."} — concatenated
+                "# section" + CSV blocks, useful for saving to disk.
+                Filtering below applies to JSON only.
+        channels: Optional channel filter (matching is case/space-insensitive
+                  and tolerates the _activity/_spend suffix). Applied to curve
+                  sections, decay_curves, saturation, channel_summary,
+                  coefficients, and mroi_summary. `contributions` is never
+                  filtered (its control columns are indistinguishable from
+                  channels client-side).
+        max_grid_points: Optional cap on response/marginal curve grid points;
+                         records are strided evenly, keeping first and last.
     """
-    return await _client(ctx).get_model_results(model_hash, sections=sections)
+    res = await _client(ctx).get_model_results(model_hash, sections=sections, fmt=format)
+    if format != "json" or (channels is None and max_grid_points is None):
+        return res
+    if not isinstance(res, dict) or res.get("_status_code", 200) >= 400:
+        return res
+    return _filter_results(res, channels, max_grid_points)
 
 
 # ---------------------------------------------------------------------------
@@ -284,15 +510,29 @@ async def run_optimizer(
     bounds: dict,
     laydown_weights: dict,
     period_cpm: dict,
+    objective: str = "revenue",
+    forward_margin: float | None = None,
+    period_multiplier: list[float] | None = None,
+    include_historical_effect: bool = True,
+    enable_warm_start: bool = True,
     ctx: Context[ServerSession, AppContext] = None,
 ) -> dict:
     """Run budget optimization on a completed model.
 
     Finds the optimal budget allocation across channels to maximize
-    predicted revenue within the given constraints.
+    predicted revenue — or predicted PROFIT with objective="profit" —
+    within the given constraints.
+
+    PROFIT OBJECTIVE: objective="profit" requires a margin source. If the model
+    was built with an operating margin, it is used automatically; otherwise you
+    MUST pass forward_margin (e.g. 0.18 for an 18% margin) or the API returns an
+    error. Result fields (Revenue, ROI, ExpectedResponse) are then on the profit
+    basis.
 
     IMPORTANT:
     - Channel names must exactly match model results (case-sensitive, space-sensitive).
+      Results are keyed by the channel's ACTIVITY COLUMN name (e.g. "search_activity"),
+      not by the `channels[].name` passed to create_model.
       Call get_model_results with sections="channel_summary" first to get exact names,
       or use get_scenario_template to discover channel names and their average CPM values.
     - bounds values are percentages of total_budget (0-100), not currency amounts.
@@ -323,6 +563,17 @@ async def run_optimizer(
                    of length num_periods with positive values. Get baseline CPM from
                    get_scenario_template (avg_cpu_by_channel field).
                    Example: {"TV_Impressions": [10.5, 10.5, 10.5, 10.5]}
+        objective: "revenue" (default) or "profit". See PROFIT OBJECTIVE above.
+        forward_margin: Decimal margin in (0, 1], e.g. 0.18 = 18%. Only used with
+                       objective="profit"; required when the model has no stored
+                       operating margin.
+        period_multiplier: Optional array of length num_periods converting KPI
+                          units to revenue per period over the planning horizon
+                          (mirrors the model's multiplier_column, e.g. price).
+        include_historical_effect: Include carryover from historical spend in the
+                                  predicted response (default True).
+        enable_warm_start: Warm-start the optimizer from a previous solution
+                          (default True).
     """
     payload = {
         "total_budget": total_budget,
@@ -333,6 +584,16 @@ async def run_optimizer(
         "laydown_weights": laydown_weights,
         "period_cpm": period_cpm,
     }
+    if objective != "revenue":
+        payload["objective"] = objective
+    if forward_margin is not None:
+        payload["forward_margin"] = forward_margin
+    if period_multiplier is not None:
+        payload["period_multiplier"] = period_multiplier
+    if not include_historical_effect:
+        payload["include_historical_effect"] = False
+    if not enable_warm_start:
+        payload["enable_warm_start"] = False
     return await _client(ctx).run_optimizer(model_hash, payload)
 
 
@@ -379,7 +640,11 @@ async def get_scenario_template(
     - Channel names (use these exact names in scenario_data, bounds, laydown_weights, period_cpm)
     - Average CPM per channel (avg_cpu_by_channel — use for period_cpm in run_optimizer)
     - Baseline activity values per channel (rows — use as starting point for scenarios)
-    - Media vs control channel classification
+    - Media vs control channel classification (variable_classification field)
+
+    The response also includes: operating_margin (the model's stored margin, if
+    set — useful for profit math), variable_transforms (per-variable transform
+    metadata), periodicity, and start_date.
 
     WARNING: Template data may contain NaN or null values for channels without
     historical data. You MUST replace NaN/null with 0 before passing to run_scenario,
@@ -403,13 +668,18 @@ async def run_scenario(
     scenario_data: list[dict],
     spend_metadata: list[dict] | None = None,
     rebuild_model: bool = True,
+    evaluate_holdout: bool = False,
+    skip_slicing: bool = False,
+    proxy_channels: list[dict] | None = None,
     ctx: Context[ServerSession, AppContext] = None,
 ) -> dict:
     """Run a "what-if" scenario prediction on a completed model.
 
     Takes a set of future period rows with channel activity values and
     predicts the KPI outcome. Use get_scenario_template first to get
-    the expected format, channel names, and baseline values.
+    the expected format, channel names, and baseline values. Channel names are
+    the activity-column keys from the template/results (e.g. "search_activity"),
+    not the `channels[].name` passed to create_model.
 
     IMPORTANT: Before submitting, replace any NaN/null values in scenario_data with 0.
     The template from get_scenario_template may contain NaN for channels without
@@ -432,12 +702,25 @@ async def run_scenario(
                        "weekly_spend": [25000, 25000, ...]}
         rebuild_model: Recompile the model graph before prediction. Must be True (default)
                       for API-initiated scenarios where the model graph is not in memory.
+        evaluate_holdout: Evaluate the scenario against held-out actuals when the
+                         scenario period overlaps observed data (default False).
+        skip_slicing: Skip per-channel contribution slicing in the prediction
+                     output — faster when only the KPI total is needed (default False).
+        proxy_channels: Optional list of proxy-channel mappings, each mapping a
+                       scenario channel to a fitted channel whose transforms it
+                       borrows (for channels without their own history).
     """
     payload: dict = {"scenario_data": scenario_data}
     if spend_metadata:
         payload["spend_metadata"] = spend_metadata
     if rebuild_model:
         payload["rebuild_model"] = True
+    if evaluate_holdout:
+        payload["evaluate_holdout"] = True
+    if skip_slicing:
+        payload["skip_slicing"] = True
+    if proxy_channels:
+        payload["proxy_channels"] = proxy_channels
     return await _client(ctx).run_scenario(model_hash, payload)
 
 
@@ -474,6 +757,7 @@ async def get_scenario_results(
 
 def _create_app():
     """Create the ASGI app for uvicorn/Streamable HTTP deployment."""
+    set_http_mode(True)
     mcp.settings.streamable_http_path = "/"
     return mcp.streamable_http_app()
 

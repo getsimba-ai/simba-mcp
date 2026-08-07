@@ -134,13 +134,22 @@ Things that commonly trip up both AI agents and humans:
 
 ### Channel names are exact-match
 
-Channel names in model results can contain spaces (e.g. `"Digital impressions"`, `"TV_impressions"`). The optimizer uses these as dictionary keys — matching is **case-sensitive and space-sensitive**.
+Model results are keyed by the channel's **activity column** name (e.g. `"search_activity"`, `"TV_impressions"`), **not** by the `channels[].name` you passed to `create_model`. Keys can contain spaces and matching is **case-sensitive and space-sensitive** — the optimizer and scenario tools use them as dictionary keys.
 
-**Always** call `get_model_results` with `sections="channel_summary"` first to see exact channel names, then use those verbatim in optimizer payloads.
+**Always** call `get_model_results` with `sections="channel_summary"` first to see exact channel keys, then use those verbatim in optimizer/scenario payloads.
+
+### Results sections
+
+`get_model_results` serves these sections (request only what you need via `sections=`):
+`channel_summary`, `contributions` (KPI/unit space — multiplier **not** applied), `coefficients` (per-period per-channel **revenue** table), `params`, `decay_curves`, `response_curves`, `marginal_curves`, `saturation`, `mroi_summary` (marginal ROI at current spend with 94% HDI), `model_stats`, `actual_vs_model`, `long_run_rollup`, `optimizer`, `predictions`. The response's `sections_available` field is authoritative if the server is newer than these docs.
 
 ### Models are identified by `model_hash`
 
 All model endpoints use the string `model_hash` (e.g. `"f835671a25"`) returned by `create_model` and `list_models`.
+
+### API-key management is deliberately not exposed
+
+The `/api/v1/keys` endpoints (create/list/revoke API keys) are session-auth only and have no MCP tools **by design**: a server holding one key must not be able to mint or revoke keys. Manage keys in the Simba UI (Profile → API Keys).
 
 ### Optimizer arrays, not scalars
 
@@ -182,10 +191,11 @@ Poll every 5-10 seconds. Check the `status` field for `"complete"` or `"failed"`
 
 ### Data upload requirements
 
-- **CSV only** (not Excel). Maximum 50 MB.
-- Minimum **52 rows** (104+ recommended).
+- **CSV only** (not Excel). Maximum **10 MB** (API-enforced).
+- Row minimum: check `get_data_schema` → `x-simba-constraints.min_rows`; the upload response's `warnings` field is authoritative. More rows = tighter posteriors (104+ weekly rows recommended).
 - Media columns: `{channel}_activity` and `{channel}_spend` per channel.
 - Use `0` for inactive periods, not blank or NA.
+- Large file? Pass `csv_path` (a local file path) instead of `csv_content` — the server reads it directly instead of the CSV going through the conversation. Local (stdio) servers only; disabled on HTTP/SSE deployments unless `SIMBA_MCP_ALLOW_LOCAL_FILES=1`.
 
 ## Common Errors
 
@@ -199,7 +209,7 @@ Poll every 5-10 seconds. Check the `status` field for `"complete"` or `"failed"`
 | `period_cpm['TV'] values must all be positive` | Zero or negative CPM | All CPM values must be > 0 |
 | `Channels in bounds missing from period_cpm: [...]` | Mismatched channel names | Same keys in bounds, laydown_weights, and period_cpm |
 | `Columns not found in data: [...]` | Column name typo | Check CSV headers match exactly |
-| `File exceeds 50 MB limit` | CSV too large | Reduce file size or aggregate data |
+| `File exceeds 10 MB limit` | CSV too large | Reduce file size or aggregate data |
 
 ## Direct API Access
 
