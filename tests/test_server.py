@@ -1,6 +1,7 @@
 """Tests for the MCP server layer — tool registration, metadata, and lifespan."""
 
 import os
+from typing import ClassVar
 from unittest.mock import patch
 
 import pytest
@@ -43,7 +44,7 @@ class TestResultsSectionsDoc:
 
     # Every section the API's results endpoint can serve must be discoverable
     # from the tool description — for agent-driven use the docstring IS the API.
-    API_SECTIONS = [
+    API_SECTIONS: ClassVar[list[str]] = [
         "channel_summary",
         "contributions",
         "coefficients",
@@ -58,6 +59,9 @@ class TestResultsSectionsDoc:
         "long_run_rollup",
         "optimizer",
         "predictions",
+        "posterior",
+        "financials",
+        "model_config",
     ]
 
     def _description(self, name):
@@ -70,8 +74,7 @@ class TestResultsSectionsDoc:
         desc = self._description("get_model_results")
         missing = [s for s in self.API_SECTIONS if f"- {s}:" not in desc]
         assert not missing, (
-            f"Sections missing as `- name:` bullets from get_model_results "
-            f"docstring: {missing}"
+            f"Sections missing as `- name:` bullets from get_model_results docstring: {missing}"
         )
 
     def test_activity_column_naming_rule_documented(self):
@@ -120,16 +123,16 @@ class TestLifespan:
 class TestRunOptimizerPayload:
     """Payload construction for run_optimizer, incl. profit objective (issue #11)."""
 
-    LEGACY_ARGS = dict(
-        model_hash="abc123",
-        total_budget=1_000_000.0,
-        num_periods=4,
-        gamma=0.0,
-        currency="USD",
-        bounds={"TV": {"lower": 0, "upper": 40}},
-        laydown_weights={"TV": [1, 1, 1, 1]},
-        period_cpm={"TV": [10.0, 10.0, 10.0, 10.0]},
-    )
+    LEGACY_ARGS: ClassVar[dict] = {
+        "model_hash": "abc123",
+        "total_budget": 1_000_000.0,
+        "num_periods": 4,
+        "gamma": 0.0,
+        "currency": "USD",
+        "bounds": {"TV": {"lower": 0, "upper": 40}},
+        "laydown_weights": {"TV": [1, 1, 1, 1]},
+        "period_cpm": {"TV": [10.0, 10.0, 10.0, 10.0]},
+    }
 
     def _ctx_capturing(self):
         """A fake Context whose client records the payload passed to run_optimizer."""
@@ -150,8 +153,13 @@ class TestRunOptimizerPayload:
         await run_optimizer(**self.LEGACY_ARGS, ctx=ctx)
         _, payload = client.run_optimizer.call_args.args
         assert set(payload) == {
-            "total_budget", "num_periods", "gamma", "currency",
-            "bounds", "laydown_weights", "period_cpm",
+            "total_budget",
+            "num_periods",
+            "gamma",
+            "currency",
+            "bounds",
+            "laydown_weights",
+            "period_cpm",
         }
 
     @pytest.mark.anyio
@@ -159,8 +167,7 @@ class TestRunOptimizerPayload:
         from simba_mcp.server import run_optimizer
 
         ctx, client = self._ctx_capturing()
-        await run_optimizer(**self.LEGACY_ARGS, objective="profit",
-                            forward_margin=0.18, ctx=ctx)
+        await run_optimizer(**self.LEGACY_ARGS, objective="profit", forward_margin=0.18, ctx=ctx)
         _, payload = client.run_optimizer.call_args.args
         assert payload["objective"] == "profit"
         assert payload["forward_margin"] == 0.18
@@ -170,9 +177,13 @@ class TestRunOptimizerPayload:
         from simba_mcp.server import run_optimizer
 
         ctx, client = self._ctx_capturing()
-        await run_optimizer(**self.LEGACY_ARGS, period_multiplier=[1.5] * 4,
-                            include_historical_effect=False,
-                            enable_warm_start=False, ctx=ctx)
+        await run_optimizer(
+            **self.LEGACY_ARGS,
+            period_multiplier=[1.5] * 4,
+            include_historical_effect=False,
+            enable_warm_start=False,
+            ctx=ctx,
+        )
         _, payload = client.run_optimizer.call_args.args
         assert payload["period_multiplier"] == [1.5] * 4
         assert payload["include_historical_effect"] is False
@@ -189,6 +200,102 @@ class TestRunOptimizerPayload:
         assert "objective" not in payload
         assert "include_historical_effect" not in payload
         assert "enable_warm_start" not in payload
+
+
+class TestCreateModelPayload:
+    """Payload construction for create_model architecture params
+    (saturation_type / transform_order / link)."""
+
+    BASE_ARGS: ClassVar[dict] = {
+        "uploaded_file_id": 7,
+        "date_column": "date",
+        "kpi_column": "sales",
+        "hierarchy_column": "brand",
+        "channels": [{"name": "TV", "activity_column": "tv_activity", "spend_column": "tv_spend"}],
+    }
+
+    def _ctx_capturing(self):
+        from unittest.mock import AsyncMock, MagicMock
+
+        client = MagicMock()
+        client.create_model = AsyncMock(return_value={"model_hash": "h"})
+        ctx = MagicMock()
+        ctx.request_context.lifespan_context.client = client
+        return ctx, client
+
+    @pytest.mark.anyio
+    async def test_default_config_unchanged(self):
+        """Defaults keep the config byte-identical to pre-0.2 payloads."""
+        from simba_mcp.server import create_model
+
+        ctx, client = self._ctx_capturing()
+        await create_model(**self.BASE_ARGS, ctx=ctx)
+        (payload,) = client.create_model.call_args.args
+        assert payload["config"] == {
+            "trend": False,
+            "seasonality": False,
+            "likelihood": "normal",
+        }
+
+    @pytest.mark.anyio
+    async def test_architecture_params_passthrough(self):
+        from simba_mcp.server import create_model
+
+        ctx, client = self._ctx_capturing()
+        await create_model(
+            **self.BASE_ARGS,
+            saturation_type="generalized_log",
+            transform_order="saturation_first",
+            link="log",
+            ctx=ctx,
+        )
+        (payload,) = client.create_model.call_args.args
+        assert payload["config"]["saturation_type"] == "generalized_log"
+        assert payload["config"]["transform_order"] == "saturation_first"
+        assert payload["config"]["link"] == "log"
+
+    @pytest.mark.anyio
+    async def test_channel_groups_passthrough(self):
+        from simba_mcp.server import create_model
+
+        groups = [{"name": "Long", "channels": ["TV", "OOH"]}]
+        ctx, client = self._ctx_capturing()
+        await create_model(**self.BASE_ARGS, channel_groups=groups, ctx=ctx)
+        (payload,) = client.create_model.call_args.args
+        assert payload["config"]["channel_groups"] == groups
+
+    @pytest.mark.anyio
+    async def test_empty_channel_groups_omitted(self):
+        from simba_mcp.server import create_model
+
+        ctx, client = self._ctx_capturing()
+        await create_model(**self.BASE_ARGS, channel_groups=[], ctx=ctx)
+        (payload,) = client.create_model.call_args.args
+        assert "channel_groups" not in payload["config"]
+
+    def test_docstring_no_invalid_likelihood(self):
+        """The API rejects 'negbinomial'; the docstring must name the canonical
+        values instead (negativebinomial et al.)."""
+        tool = next(t for t in mcp._tool_manager.list_tools() if t.name == "create_model")
+        assert "negbinomial" not in tool.description.replace("negativebinomial", "")
+        assert "negativebinomial" in tool.description
+        assert "lognormal" in tool.description
+
+    def test_docstring_documents_new_prior_fields(self):
+        """Half-life, theta, dual-weight, and sat-shape prior overrides must be
+        discoverable from the docstring."""
+        tool = next(t for t in mcp._tool_manager.list_tools() if t.name == "create_model")
+        for field in (
+            "half_life_lower",
+            "half_life_upper",
+            "theta_mean",
+            "theta_sd",
+            "dual_weight_mean",
+            "dual_weight_sd",
+            "sat_shape_mean",
+            "sat_shape_sd",
+        ):
+            assert field in tool.description, f"{field} missing from docstring"
 
 
 class TestUploadData:
@@ -312,8 +419,7 @@ class TestUploadData:
 
     def test_docstring_no_stale_limits(self):
         """Docstring must not claim 50 MB or a hardcoded 52-row minimum."""
-        tool = next(t for t in mcp._tool_manager.list_tools()
-                    if t.name == "upload_data")
+        tool = next(t for t in mcp._tool_manager.list_tools() if t.name == "upload_data")
         assert "50 MB" not in tool.description
         assert "Minimum 52 rows" not in tool.description
         assert "min_rows" in tool.description
@@ -324,11 +430,13 @@ class TestGetModelResultsFiltering:
 
     @staticmethod
     def _payload():
-        curve_row = lambda i: {  # noqa: E731
+        curve_row = lambda i: {
             "Spend": float(i),
-            "tv_activity": i * 1.0, "tv_activity_lower": i * 0.8,
+            "tv_activity": i * 1.0,
+            "tv_activity_lower": i * 0.8,
             "tv_activity_upper_50": i * 1.1,
-            "search_activity": i * 2.0, "search_activity_lower": i * 1.6,
+            "search_activity": i * 2.0,
+            "search_activity_lower": i * 1.6,
         }
         return {
             "model_hash": "abc",
@@ -336,18 +444,22 @@ class TestGetModelResultsFiltering:
             "results": {
                 "response_curves": [curve_row(i) for i in range(100)],
                 "marginal_curves": [curve_row(i) for i in range(100)],
-                "decay_curves": {"tv_activity": {"mean": 0.5},
-                                 "search_activity": {"mean": 0.4}},
-                "saturation": {"saturation_type": "tanh",
-                               "channels": {"tv_activity": {}, "search_activity": {}}},
-                "channel_summary": [{"Channel": "tv_activity", "ROI": 2.0},
-                                    {"Channel": "search_activity", "ROI": 5.0}],
-                "coefficients": [{"Channel": "tv_activity"},
-                                 {"Channel": "search_activity"}],
-                "mroi_summary": {"channels": [{"channel": "tv_activity"},
-                                              {"channel": "search_activity"}]},
-                "contributions": [{"Date": 1, "tv_activity": 1.0,
-                                   "category_trend": 2.0, "Base": 3.0}],
+                "decay_curves": {"tv_activity": {"mean": 0.5}, "search_activity": {"mean": 0.4}},
+                "saturation": {
+                    "saturation_type": "tanh",
+                    "channels": {"tv_activity": {}, "search_activity": {}},
+                },
+                "channel_summary": [
+                    {"Channel": "tv_activity", "ROI": 2.0},
+                    {"Channel": "search_activity", "ROI": 5.0},
+                ],
+                "coefficients": [{"Channel": "tv_activity"}, {"Channel": "search_activity"}],
+                "mroi_summary": {
+                    "channels": [{"channel": "tv_activity"}, {"channel": "search_activity"}]
+                },
+                "contributions": [
+                    {"Date": 1, "tv_activity": 1.0, "category_trend": 2.0, "Base": 3.0}
+                ],
             },
         }
 
@@ -367,8 +479,7 @@ class TestGetModelResultsFiltering:
         ctx, _ = self._ctx_returning(self._payload())
         res = await get_model_results("abc", channels=["search"], ctx=ctx)
         r = res["results"]
-        assert set(r["response_curves"][0]) == {"Spend", "search_activity",
-                                                "search_activity_lower"}
+        assert set(r["response_curves"][0]) == {"Spend", "search_activity", "search_activity_lower"}
         assert list(r["decay_curves"]) == ["search_activity"]
         assert list(r["saturation"]["channels"]) == ["search_activity"]
         assert r["saturation"]["saturation_type"] == "tanh"  # non-channel keys kept
@@ -383,7 +494,10 @@ class TestGetModelResultsFiltering:
         ctx, _ = self._ctx_returning(self._payload())
         res = await get_model_results("abc", channels=["search"], ctx=ctx)
         assert set(res["results"]["contributions"][0]) == {
-            "Date", "tv_activity", "category_trend", "Base",
+            "Date",
+            "tv_activity",
+            "category_trend",
+            "Base",
         }
 
     @pytest.mark.anyio

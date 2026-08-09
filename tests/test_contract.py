@@ -11,7 +11,7 @@ API. When core adds a request parameter:
 Parameters deliberately not exposed go in EXCLUDED_BY_DESIGN with a reason.
 
 Snapshot source: simba core repo `src/api/v1/*.py` (ingest.py, results.py,
-models.py, optimizer.py, scenario.py), reviewed 2026-08-07.
+models.py, optimizer.py, scenario.py), reviewed 2026-08-09.
 """
 
 import inspect
@@ -42,6 +42,10 @@ CONTRACT = {
         "config.trend": "create_model.trend",
         "config.seasonality": "create_model.seasonality",
         "config.likelihood": "create_model.likelihood",
+        "config.saturation_type": "create_model.saturation_type",
+        "config.transform_order": "create_model.transform_order",
+        "config.link": "create_model.link",
+        "config.channel_groups": "create_model.channel_groups",
     },
     "GET /api/v1/models/{hash}/results": {
         "sections": "get_model_results.sections",
@@ -97,8 +101,7 @@ class TestContract:
                 if tool_param not in _tool_params(tool_name):
                     missing.append(f"{endpoint} param {api_param!r} -> {target}")
         assert not missing, (
-            "API v1 request parameters unreachable through MCP tools:\n  "
-            + "\n  ".join(missing)
+            "API v1 request parameters unreachable through MCP tools:\n  " + "\n  ".join(missing)
         )
 
     def test_contract_tools_exist(self):

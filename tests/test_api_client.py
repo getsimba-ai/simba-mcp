@@ -310,9 +310,8 @@ class TestAPIClientRetry:
                 raise httpx.ConnectError("connection refused")
 
         client = self._make_client(DeadTransport())
-        with patch("asyncio.sleep", new_callable=AsyncMock):
-            with pytest.raises(httpx.ConnectError):
-                await client.get_schema()
+        with patch("asyncio.sleep", new_callable=AsyncMock), pytest.raises(httpx.ConnectError):
+            await client.get_schema()
 
     @pytest.mark.anyio
     async def test_non_retriable_status_not_retried(self):
