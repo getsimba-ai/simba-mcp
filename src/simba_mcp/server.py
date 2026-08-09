@@ -428,8 +428,7 @@ def _filter_results(payload: dict, channels: list | None, max_grid_points: int |
             continue
         if wanted is not None:
             recs = [
-                {k: v for k, v in r.items()
-                 if k == "Spend" or _column_channel(k) in wanted}
+                {k: v for k, v in r.items() if k == "Spend" or _column_channel(k) in wanted}
                 for r in recs
             ]
         if max_grid_points:
@@ -439,7 +438,11 @@ def _filter_results(payload: dict, channels: list | None, max_grid_points: int |
     if wanted is not None:
         for section in ("decay_curves", "saturation"):
             entry = target.get(section)
-            sub = entry.get("channels") if section == "saturation" and isinstance(entry, dict) else entry
+            sub = (
+                entry.get("channels")
+                if section == "saturation" and isinstance(entry, dict)
+                else entry
+            )
             if isinstance(sub, dict):
                 filtered = {k: v for k, v in sub.items() if _norm_channel(k) in wanted}
                 if section == "saturation":
@@ -449,14 +452,11 @@ def _filter_results(payload: dict, channels: list | None, max_grid_points: int |
         for section, key in (("channel_summary", "Channel"), ("coefficients", "Channel")):
             recs = target.get(section)
             if isinstance(recs, list):
-                target[section] = [
-                    r for r in recs if _norm_channel(r.get(key, "")) in wanted
-                ]
+                target[section] = [r for r in recs if _norm_channel(r.get(key, "")) in wanted]
         mroi = target.get("mroi_summary")
         if isinstance(mroi, dict) and isinstance(mroi.get("channels"), list):
             mroi["channels"] = [
-                r for r in mroi["channels"]
-                if _norm_channel(r.get("channel", "")) in wanted
+                r for r in mroi["channels"] if _norm_channel(r.get("channel", "")) in wanted
             ]
     return payload
 

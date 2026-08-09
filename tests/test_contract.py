@@ -101,8 +101,7 @@ class TestContract:
                 if tool_param not in _tool_params(tool_name):
                     missing.append(f"{endpoint} param {api_param!r} -> {target}")
         assert not missing, (
-            "API v1 request parameters unreachable through MCP tools:\n  "
-            + "\n  ".join(missing)
+            "API v1 request parameters unreachable through MCP tools:\n  " + "\n  ".join(missing)
         )
 
     def test_contract_tools_exist(self):

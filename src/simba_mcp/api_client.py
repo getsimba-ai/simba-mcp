@@ -51,7 +51,8 @@ class SimbaAPIClient:
         if response.status_code >= 400:
             try:
                 error_body = response.json()
-            except Exception:
+            except ValueError:
+                # Non-JSON error body (HTML gateway pages, plain text)
                 error_body = {"error": response.text or response.reason_phrase}
             error_body["_status_code"] = response.status_code
             if response.status_code in (401, 403):
