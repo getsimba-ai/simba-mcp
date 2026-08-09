@@ -58,6 +58,9 @@ class TestResultsSectionsDoc:
         "long_run_rollup",
         "optimizer",
         "predictions",
+        "posterior",
+        "financials",
+        "model_config",
     ]
 
     def _description(self, name):
@@ -189,6 +192,92 @@ class TestRunOptimizerPayload:
         assert "objective" not in payload
         assert "include_historical_effect" not in payload
         assert "enable_warm_start" not in payload
+
+
+class TestCreateModelPayload:
+    """Payload construction for create_model architecture params
+    (saturation_type / transform_order / link)."""
+
+    BASE_ARGS = dict(
+        uploaded_file_id=7,
+        date_column="date",
+        kpi_column="sales",
+        hierarchy_column="brand",
+        channels=[{"name": "TV", "activity_column": "tv_activity",
+                   "spend_column": "tv_spend"}],
+    )
+
+    def _ctx_capturing(self):
+        from unittest.mock import AsyncMock, MagicMock
+
+        client = MagicMock()
+        client.create_model = AsyncMock(return_value={"model_hash": "h"})
+        ctx = MagicMock()
+        ctx.request_context.lifespan_context.client = client
+        return ctx, client
+
+    @pytest.mark.anyio
+    async def test_default_config_unchanged(self):
+        """Defaults keep the config byte-identical to pre-0.2 payloads."""
+        from simba_mcp.server import create_model
+
+        ctx, client = self._ctx_capturing()
+        await create_model(**self.BASE_ARGS, ctx=ctx)
+        (payload,) = client.create_model.call_args.args
+        assert payload["config"] == {
+            "trend": False, "seasonality": False, "likelihood": "normal",
+        }
+
+    @pytest.mark.anyio
+    async def test_architecture_params_passthrough(self):
+        from simba_mcp.server import create_model
+
+        ctx, client = self._ctx_capturing()
+        await create_model(**self.BASE_ARGS, saturation_type="generalized_log",
+                           transform_order="saturation_first", link="log",
+                           ctx=ctx)
+        (payload,) = client.create_model.call_args.args
+        assert payload["config"]["saturation_type"] == "generalized_log"
+        assert payload["config"]["transform_order"] == "saturation_first"
+        assert payload["config"]["link"] == "log"
+
+    @pytest.mark.anyio
+    async def test_channel_groups_passthrough(self):
+        from simba_mcp.server import create_model
+
+        groups = [{"name": "Long", "channels": ["TV", "OOH"]}]
+        ctx, client = self._ctx_capturing()
+        await create_model(**self.BASE_ARGS, channel_groups=groups, ctx=ctx)
+        (payload,) = client.create_model.call_args.args
+        assert payload["config"]["channel_groups"] == groups
+
+    @pytest.mark.anyio
+    async def test_empty_channel_groups_omitted(self):
+        from simba_mcp.server import create_model
+
+        ctx, client = self._ctx_capturing()
+        await create_model(**self.BASE_ARGS, channel_groups=[], ctx=ctx)
+        (payload,) = client.create_model.call_args.args
+        assert "channel_groups" not in payload["config"]
+
+    def test_docstring_no_invalid_likelihood(self):
+        """The API rejects 'negbinomial'; the docstring must name the canonical
+        values instead (negativebinomial et al.)."""
+        tool = next(t for t in mcp._tool_manager.list_tools()
+                    if t.name == "create_model")
+        assert "negbinomial" not in tool.description.replace("negativebinomial", "")
+        assert "negativebinomial" in tool.description
+        assert "lognormal" in tool.description
+
+    def test_docstring_documents_new_prior_fields(self):
+        """Half-life, theta, dual-weight, and sat-shape prior overrides must be
+        discoverable from the docstring."""
+        tool = next(t for t in mcp._tool_manager.list_tools()
+                    if t.name == "create_model")
+        for field in ("half_life_lower", "half_life_upper", "theta_mean",
+                      "theta_sd", "dual_weight_mean", "dual_weight_sd",
+                      "sat_shape_mean", "sat_shape_sd"):
+            assert field in tool.description, f"{field} missing from docstring"
 
 
 class TestUploadData:

@@ -11,7 +11,7 @@ API. When core adds a request parameter:
 Parameters deliberately not exposed go in EXCLUDED_BY_DESIGN with a reason.
 
 Snapshot source: simba core repo `src/api/v1/*.py` (ingest.py, results.py,
-models.py, optimizer.py, scenario.py), reviewed 2026-08-07.
+models.py, optimizer.py, scenario.py), reviewed 2026-08-09.
 """
 
 import inspect
@@ -42,6 +42,10 @@ CONTRACT = {
         "config.trend": "create_model.trend",
         "config.seasonality": "create_model.seasonality",
         "config.likelihood": "create_model.likelihood",
+        "config.saturation_type": "create_model.saturation_type",
+        "config.transform_order": "create_model.transform_order",
+        "config.link": "create_model.link",
+        "config.channel_groups": "create_model.channel_groups",
     },
     "GET /api/v1/models/{hash}/results": {
         "sections": "get_model_results.sections",

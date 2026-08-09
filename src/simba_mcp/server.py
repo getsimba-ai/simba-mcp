@@ -249,6 +249,10 @@ async def create_model(
     trend: bool = False,
     seasonality: bool = False,
     likelihood: str = "normal",
+    saturation_type: str = "tanh",
+    transform_order: str = "adstock_first",
+    link: str = "identity",
+    channel_groups: list[dict] | None = None,
     ctx: Context[ServerSession, AppContext] = None,
 ) -> dict:
     """Create and start fitting a new Bayesian Marketing Mix Model.
@@ -277,9 +281,42 @@ async def create_model(
                 a channels[].name, plus any fields to override: distribution, mean, sd, lower,
                 upper, transform, alpha_sd, decay_lower, decay_upper, adstock_type, scalars,
                 effect_period. Only specified fields are overridden; the rest use smart defaults.
+                Adstock-kernel fields: half_life_lower/half_life_upper (carryover half-life
+                bounds in periods — preferred over the legacy decay_lower/decay_upper),
+                theta_mean/theta_sd (peak-lag prior, adstock_type="delayed" only),
+                dual_weight_mean/dual_weight_sd (long-term/slow-component share prior,
+                adstock_type="dual_geometric" only). Saturation fields:
+                sat_shape_mean/sat_shape_sd (curvature prior, saturation_type=
+                "generalized_log" only; small values are near-logarithmic, 1.0 is
+                michaelis_menten).
         trend: Enable dynamic baseline trend component.
         seasonality: Enable automatic seasonality detection.
-        likelihood: Likelihood function ("normal", "studentt", "negbinomial").
+        likelihood: Likelihood function: "normal" (default), "lognormal", "logit",
+                    "studentt", "poisson", "negativebinomial", or "quantile".
+        saturation_type: Diminishing-returns curve family applied to media:
+                         "tanh" (default), "michaelis_menten", "negative_exponential",
+                         or "generalized_log" (two-parameter Box-Cox/power-log family
+                         1 - (1+x/K)^(-shape); tune per channel via the
+                         sat_shape_mean/sat_shape_sd prior fields).
+        transform_order: "adstock_first" (default: carryover accumulates, then
+                         saturates) or "saturation_first" (each period's spend
+                         saturates, then the effect spreads over time through the
+                         normalized adstock kernel).
+        link: Model Form. "identity" (default) fits an additive model — components
+              add on the outcome scale. "log" fits a multiplicative model —
+              components add on the log scale and media effects are percentage
+              lifts; contributions then include an Overlap reconciliation column
+              (see get_model_results).
+        channel_groups: Optional adstock groups: [{"name": ..., "channels":
+                        [...], "share_saturation": bool}]. Member channels tie
+                        their carryover parameters (decay/theta/dual-weight —
+                        plus saturation when share_saturation is true) to one
+                        shared value, e.g. grouping channels into shared
+                        "Long"/"Short" carryover classes. Members are
+                        channels[].name values; each group needs >= 2 members;
+                        groups must be disjoint; and tied members must have
+                        identical adstock_type/effect_period/bound overrides
+                        (the API rejects divergent groups at request time).
 
     Returns the model_hash for status polling.
     """
@@ -297,6 +334,16 @@ async def create_model(
             "likelihood": likelihood,
         },
     }
+    # Non-default architecture options only (keeps default payloads
+    # byte-identical to pre-0.2 versions).
+    if saturation_type != "tanh":
+        payload["config"]["saturation_type"] = saturation_type
+    if transform_order != "adstock_first":
+        payload["config"]["transform_order"] = transform_order
+    if link != "identity":
+        payload["config"]["link"] = link
+    if channel_groups:
+        payload["config"]["channel_groups"] = channel_groups
     if multiplier_column:
         payload["multiplier_column"] = multiplier_column
     if priors:
@@ -430,7 +477,11 @@ async def get_model_results(
     - contributions: per-period decomposition (Date, one column per channel, plus
       Base, Seasonality, Event Effect, Model, Fit Actual, Actual). Values are in
       KPI/unit space — the multiplier is NOT applied. Use `coefficients` for
-      per-period revenue.
+      per-period revenue. Multiplicative (link="log") models add an `Overlap`
+      column: a negative shared-synergy reconciliation term so that
+      Base + components + Overlap = Model. Overlap is NOT a channel — never
+      rank it, share it, or feed it to the optimizer/scenarios. Absent for
+      additive models and models fitted before the feature existed.
     - coefficients: per-period per-channel media results table (Date, Channel,
       Sales, Revenue, Spend, Media Units, ROI, Cost/Revenue/Sales per Media Unit).
       This is the only per-period revenue-space decomposition.
@@ -442,7 +493,9 @@ async def get_model_results(
       bands ({ch}, {ch}_lower, {ch}_lower_50, {ch}_upper_50, {ch}_upper).
     - marginal_curves: same grid for marginal ROI (diminishing returns).
     - saturation: fitted saturation family and parameters (saturation_type is
-      tanh, michaelis_menten, or negative_exponential; per-channel alpha/scale).
+      tanh, michaelis_menten, negative_exponential, or generalized_log;
+      per-channel alpha/scale, plus transform_order and — for generalized_log
+      only — per-channel sat_shape).
     - mroi_summary: headline marginal ROI at current spend per channel with a
       94% HDI (channel, current_spend, mroi_median, mroi_hdi_3, mroi_hdi_97).
     - model_stats: fit diagnostics (R², MAPE, Durbin-Watson, Max R_hat, ...).
@@ -452,6 +505,16 @@ async def get_model_results(
       model is linked to this MMM.
     - optimizer: latest optimization results (see get_optimizer_results).
     - predictions: latest scenario prediction rows (see get_scenario_results).
+    - posterior: full posterior summary table — one row per model variable
+      with mean, sd, hdi_3%, hdi_97%, and r_hat (quotable 94% HDIs and
+      per-variable convergence).
+    - financials: the model's operating margin ({operating_margin,
+      operating_margin_series}); omitted entirely for marginless models.
+    - model_config: the resolved model specification (inputs, not posteriors)
+      to audit or reconstruct the create_model call — includes config flags
+      such as saturation_type, transform_order, and link ("log" =
+      multiplicative). Models created before these fields existed may omit
+      them.
 
     The response envelope includes `sections_available` — trust it over any
     hardcoded list if the server is newer than these docs.
