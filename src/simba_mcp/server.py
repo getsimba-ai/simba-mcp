@@ -253,6 +253,7 @@ async def create_model(
     transform_order: str = "adstock_first",
     link: str = "identity",
     channel_groups: list[dict] | None = None,
+    control_reference: dict | None = None,
     ctx: Context[ServerSession, AppContext] = None,
 ) -> dict:
     """Create and start fitting a new Bayesian Marketing Mix Model.
@@ -317,6 +318,28 @@ async def create_model(
                         groups must be disjoint; and tied members must have
                         identical adstock_type/effect_period/bound overrides
                         (the API rejects divergent groups at request time).
+        control_reference: Control attribution reference points (#452),
+                        multiplicative models (link="log") only: maps control
+                        column names (plus optional "_default") to
+                        "auto" | "absent" | "average" | "lowest" | "highest" —
+                        which counterfactual "remove this control" means in
+                        the contributions. "absent" measures against the
+                        variable at zero (legacy behavior; honest only when
+                        zero is observed). "average"/"lowest"/"highest"
+                        reference the control at its observed mean/min/max —
+                        use for controls that never approach zero (price
+                        indices, distribution levels), where a zero
+                        counterfactual produces unbounded contributions and a
+                        negative Base. "auto" detects per control whether
+                        zero is inside the observed data range. Example:
+                        {"_default": "auto", "relative_price": "average",
+                        "promo_flag": "absent"}. Omit entirely to keep every
+                        control at "absent" (byte-identical legacy output).
+                        Unknown control names/modes are rejected at request
+                        time; any value other than "absent" requires
+                        link="log". The fit reports the resolution in
+                        model_config.control_references (see
+                        get_model_results).
 
     Returns the model_hash for status polling.
     """
@@ -344,6 +367,8 @@ async def create_model(
         payload["config"]["link"] = link
     if channel_groups:
         payload["config"]["channel_groups"] = channel_groups
+    if control_reference:
+        payload["config"]["control_reference"] = control_reference
     if multiplier_column:
         payload["multiplier_column"] = multiplier_column
     if priors:
@@ -482,6 +507,11 @@ async def get_model_results(
       Base + components + Overlap = Model. Overlap is NOT a channel — never
       rank it, share it, or feed it to the optimizer/scenarios. Absent for
       additive models and models fitted before the feature existed.
+      Control columns are measured against the reference point resolved at
+      fit time (#452, see model_config.control_references) — e.g. "vs.
+      average conditions" for a control that never reaches zero — not
+      necessarily against zero, so a referenced control's series
+      legitimately spans zero.
     - coefficients: per-period per-channel media results table (Date, Channel,
       Sales, Revenue, Spend, Media Units, ROI, Cost/Revenue/Sales per Media Unit).
       This is the only per-period revenue-space decomposition.
@@ -513,8 +543,11 @@ async def get_model_results(
     - model_config: the resolved model specification (inputs, not posteriors)
       to audit or reconstruct the create_model call — includes config flags
       such as saturation_type, transform_order, and link ("log" =
-      multiplicative). Models created before these fields existed may omit
-      them.
+      multiplicative). Multiplicative models with controls also report
+      control_references (#452): per control, the requested and resolved
+      attribution reference mode, the zero_distance diagnostic behind the
+      "auto" choice, and the posterior-mean q_ref. Models created before
+      these fields existed may omit them.
 
     The response envelope includes `sections_available` — trust it over any
     hardcoded list if the server is newer than these docs.

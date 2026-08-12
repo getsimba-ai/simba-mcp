@@ -273,6 +273,31 @@ class TestCreateModelPayload:
         (payload,) = client.create_model.call_args.args
         assert "channel_groups" not in payload["config"]
 
+    @pytest.mark.anyio
+    async def test_control_reference_passthrough(self):
+        """#452: control attribution reference points forward verbatim into
+        config.control_reference (same pattern as channel_groups)."""
+        from simba_mcp.server import create_model
+
+        reference = {"_default": "auto", "relative_price": "average"}
+        ctx, client = self._ctx_capturing()
+        await create_model(
+            **self.BASE_ARGS, link="log", control_reference=reference, ctx=ctx
+        )
+        (payload,) = client.create_model.call_args.args
+        assert payload["config"]["control_reference"] == reference
+
+    @pytest.mark.anyio
+    async def test_empty_control_reference_omitted(self):
+        """Omitted/empty keeps legacy all-'absent' semantics — the key must
+        not appear in the payload at all."""
+        from simba_mcp.server import create_model
+
+        ctx, client = self._ctx_capturing()
+        await create_model(**self.BASE_ARGS, control_reference=None, ctx=ctx)
+        (payload,) = client.create_model.call_args.args
+        assert "control_reference" not in payload["config"]
+
     def test_docstring_no_invalid_likelihood(self):
         """The API rejects 'negbinomial'; the docstring must name the canonical
         values instead (negativebinomial et al.)."""
