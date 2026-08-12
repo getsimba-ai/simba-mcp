@@ -46,6 +46,7 @@ CONTRACT = {
         "config.transform_order": "create_model.transform_order",
         "config.link": "create_model.link",
         "config.channel_groups": "create_model.channel_groups",
+        "config.control_reference": "create_model.control_reference",
     },
     "GET /api/v1/models/{hash}/results": {
         "sections": "get_model_results.sections",
