@@ -281,9 +281,7 @@ class TestCreateModelPayload:
 
         reference = {"_default": "auto", "relative_price": "average"}
         ctx, client = self._ctx_capturing()
-        await create_model(
-            **self.BASE_ARGS, link="log", control_reference=reference, ctx=ctx
-        )
+        await create_model(**self.BASE_ARGS, link="log", control_reference=reference, ctx=ctx)
         (payload,) = client.create_model.call_args.args
         assert payload["config"]["control_reference"] == reference
 
