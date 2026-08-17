@@ -201,6 +201,39 @@ class TestRunOptimizerPayload:
         assert "include_historical_effect" not in payload
         assert "enable_warm_start" not in payload
 
+    @pytest.mark.anyio
+    async def test_engine_and_penalty_passthrough(self):
+        """#502: non-default engine/penalty selections reach the payload."""
+        from simba_mcp.server import run_optimizer
+
+        ctx, client = self._ctx_capturing()
+        await run_optimizer(
+            **self.LEGACY_ARGS,
+            optimizer_engine="marginal",
+            sigma_penalty="variance",
+            ctx=ctx,
+        )
+        _, payload = client.run_optimizer.call_args.args
+        assert payload["optimizer_engine"] == "marginal"
+        assert payload["sigma_penalty"] == "variance"
+
+    @pytest.mark.anyio
+    async def test_default_engine_and_penalty_not_sent(self):
+        """#502: defaults are omitted so pre-#502 payload hashes (and the
+        server-side dedup cache) stay valid."""
+        from simba_mcp.server import run_optimizer
+
+        ctx, client = self._ctx_capturing()
+        await run_optimizer(
+            **self.LEGACY_ARGS,
+            optimizer_engine="slsqp",
+            sigma_penalty="std",
+            ctx=ctx,
+        )
+        _, payload = client.run_optimizer.call_args.args
+        assert "optimizer_engine" not in payload
+        assert "sigma_penalty" not in payload
+
 
 class TestCreateModelPayload:
     """Payload construction for create_model architecture params
