@@ -65,6 +65,8 @@ CONTRACT = {
         "period_multiplier": "run_optimizer.period_multiplier",
         "include_historical_effect": "run_optimizer.include_historical_effect",
         "enable_warm_start": "run_optimizer.enable_warm_start",
+        "optimizer_engine": "run_optimizer.optimizer_engine",
+        "sigma_penalty": "run_optimizer.sigma_penalty",
     },
     "POST /api/v1/models/{hash}/scenario/template": {
         "periods_forward": "get_scenario_template.periods_forward",

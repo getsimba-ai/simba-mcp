@@ -611,6 +611,8 @@ async def run_optimizer(
     period_multiplier: list[float] | None = None,
     include_historical_effect: bool = True,
     enable_warm_start: bool = True,
+    optimizer_engine: str = "slsqp",
+    sigma_penalty: str = "std",
     ctx: Context[ServerSession, AppContext] = None,
 ) -> dict:
     """Run budget optimization on a completed model.
@@ -670,6 +672,14 @@ async def run_optimizer(
                                   predicted response (default True).
         enable_warm_start: Warm-start the optimizer from a previous solution
                           (default True).
+        optimizer_engine: "slsqp" (hardened SLSQP, default) or "marginal"
+                         (water-fill engine: allocates until every funded
+                         channel shows the same marginal return; exact
+                         profit-hurdle semantics and the tightest optimality
+                         certificates, with automatic SLSQP fallback).
+        sigma_penalty: How gamma penalizes outcome spread: "std" (default),
+                      "variance" or "frozen" (advanced; smoother alternatives
+                      for hard-to-converge runs - leave on "std" normally).
     """
     payload = {
         "total_budget": total_budget,
@@ -690,6 +700,12 @@ async def run_optimizer(
         payload["include_historical_effect"] = False
     if not enable_warm_start:
         payload["enable_warm_start"] = False
+    # Engine + penalty (#502): additive-only so default payloads stay
+    # byte-identical (server-side content-hash dedup stays valid).
+    if optimizer_engine != "slsqp":
+        payload["optimizer_engine"] = optimizer_engine
+    if sigma_penalty != "std":
+        payload["sigma_penalty"] = sigma_penalty
     return await _client(ctx).run_optimizer(model_hash, payload)
 
 
