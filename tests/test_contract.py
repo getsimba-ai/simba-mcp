@@ -68,6 +68,9 @@ CONTRACT = {
         "optimizer_engine": "run_optimizer.optimizer_engine",
         "sigma_penalty": "run_optimizer.sigma_penalty",
     },
+    "GET /api/v1/models/{hash}/optimize/runs/{run_id}": {
+        "run_id": "get_optimizer_results.run_id",
+    },
     "POST /api/v1/models/{hash}/scenario/template": {
         "periods_forward": "get_scenario_template.periods_forward",
     },
