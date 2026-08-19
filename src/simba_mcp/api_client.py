@@ -6,7 +6,7 @@ Wraps all API v1 endpoints so MCP tools stay thin and declarative.
 
 import asyncio
 import logging
-from typing import Any
+from typing import Any, ClassVar
 
 import httpx
 
@@ -241,7 +241,7 @@ class SimbaAPIClient:
 
     # -- Saved-run curation (#576) --
 
-    _RUN_SEGMENT = {"optimizer": "optimize", "scenario": "scenario"}
+    _RUN_SEGMENT: ClassVar[dict[str, str]] = {"optimizer": "optimize", "scenario": "scenario"}
 
     def _run_path(self, artifact: str, model_hash: str, run_id: str) -> str:
         segment = self._RUN_SEGMENT.get(artifact)

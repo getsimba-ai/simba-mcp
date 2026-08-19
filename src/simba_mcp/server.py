@@ -398,10 +398,10 @@ async def create_var_model(
     exogenous_vars: list[str] | None = None,
     lags: int = 1,
     forecast_horizon: int = 12,
-    base_variable: str = None,
+    base_variable: str | None = None,
     equity_variables: list[str] | None = None,
-    lre_horizon: int = None,
-    lre_ci: float = None,
+    lre_horizon: int | None = None,
+    lre_ci: float | None = None,
     var_priors: dict | None = None,
     name: str = "",
     ctx: Context[ServerSession, AppContext] = None,
@@ -939,7 +939,7 @@ async def run_optimizer(
 @mcp.tool()
 async def get_optimizer_results(
     model_hash: str,
-    run_id: str = None,
+    run_id: str | None = None,
     ctx: Context[ServerSession, AppContext] = None,
 ) -> dict:
     """Get budget optimization status and results.
