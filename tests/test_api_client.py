@@ -138,6 +138,67 @@ class TestAPIClientEndpoints:
         assert "/api/v1/models/abc123/scenario" in requests[0]["url"]
         assert requests[0]["method"] == "GET"
 
+    @pytest.mark.anyio
+    async def test_rename_model_path(self, client_with_mock):
+        """#575: PATCH /models/{hash} with the name body."""
+        import json as _json
+
+        client, requests = client_with_mock
+        await client.rename_model("abc123", "Q3 base")
+        assert "/api/v1/models/abc123" in requests[0]["url"]
+        assert requests[0]["method"] == "PATCH"
+        assert _json.loads(requests[0]["body"]) == {"name": "Q3 base"}
+
+    @pytest.mark.anyio
+    async def test_save_model_path(self, client_with_mock):
+        """#575: POST /models/{hash}/save; project_id omitted when None."""
+        import json as _json
+
+        client, requests = client_with_mock
+        await client.save_model("abc123", "Q3 base")
+        assert "/api/v1/models/abc123/save" in requests[0]["url"]
+        assert requests[0]["method"] == "POST"
+        assert _json.loads(requests[0]["body"]) == {"name": "Q3 base"}
+
+        await client.save_model("abc123", "Q3 base", project_id=12)
+        assert _json.loads(requests[1]["body"]) == {"name": "Q3 base", "project_id": 12}
+
+    @pytest.mark.anyio
+    async def test_update_run_paths_per_artifact(self, client_with_mock):
+        """#576: artifact selects the URL segment (optimize vs scenario)."""
+        import json as _json
+
+        client, requests = client_with_mock
+        await client.update_run("optimizer", "abc123", "opt_9", name="Reference plan")
+        assert "/api/v1/models/abc123/optimize/runs/opt_9" in requests[0]["url"]
+        assert requests[0]["method"] == "PATCH"
+        assert _json.loads(requests[0]["body"]) == {"name": "Reference plan"}
+
+        await client.update_run("scenario", "abc123", "scn_9", tags=["ladder"])
+        assert "/api/v1/models/abc123/scenario/runs/scn_9" in requests[1]["url"]
+        assert _json.loads(requests[1]["body"]) == {"tags": ["ladder"]}
+
+    @pytest.mark.anyio
+    async def test_update_run_unknown_artifact_raises(self, client_with_mock):
+        client, requests = client_with_mock
+        with pytest.raises(ValueError, match="Unknown artifact"):
+            await client.update_run("portfolio", "abc123", "opt_9", name="x")
+        assert requests == []
+
+    @pytest.mark.anyio
+    async def test_set_run_pinned_body(self, client_with_mock):
+        """#576: pinned bool sent as body; None sends no body (toggle)."""
+        import json as _json
+
+        client, requests = client_with_mock
+        await client.set_run_pinned("optimizer", "abc123", "opt_9", True)
+        assert "/api/v1/models/abc123/optimize/runs/opt_9/pin" in requests[0]["url"]
+        assert requests[0]["method"] == "POST"
+        assert _json.loads(requests[0]["body"]) == {"pinned": True}
+
+        await client.set_run_pinned("optimizer", "abc123", "opt_9")
+        assert requests[1]["body"] == b""
+
 
 class TestAPIClientErrorHandling:
     @pytest.fixture

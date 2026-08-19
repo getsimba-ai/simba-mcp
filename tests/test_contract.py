@@ -11,7 +11,7 @@ API. When core adds a request parameter:
 Parameters deliberately not exposed go in EXCLUDED_BY_DESIGN with a reason.
 
 Snapshot source: simba core repo `src/api/v1/*.py` (ingest.py, results.py,
-models.py, optimizer.py, scenario.py), reviewed 2026-08-09.
+models.py, optimizer.py, scenario.py), reviewed 2026-08-19.
 """
 
 import inspect
@@ -47,6 +47,14 @@ CONTRACT = {
         "config.link": "create_model.link",
         "config.channel_groups": "create_model.channel_groups",
         "config.control_reference": "create_model.control_reference",
+        "name": "create_model.name",
+    },
+    "PATCH /api/v1/models/{hash}": {
+        "name": "rename_model.name",
+    },
+    "POST /api/v1/models/{hash}/save": {
+        "name": "save_model.name",
+        "project_id": "save_model.project_id",
     },
     "POST /api/v1/models (model_type=var)": {
         "data_source": "create_var_model.uploaded_file_id",
@@ -97,6 +105,22 @@ CONTRACT = {
     },
     "GET /api/v1/models/{hash}/optimize/runs/{run_id}": {
         "run_id": "get_optimizer_results.run_id",
+    },
+    "PATCH /api/v1/models/{hash}/optimize/runs/{run_id}": {
+        "name": "update_run.name",
+        "notes": "update_run.notes",
+        "tags": "update_run.tags",
+    },
+    "POST /api/v1/models/{hash}/optimize/runs/{run_id}/pin": {
+        "pinned": "set_run_pinned.pinned",
+    },
+    "PATCH /api/v1/models/{hash}/scenario/runs/{run_id}": {
+        "name": "update_run.name",
+        "notes": "update_run.notes",
+        "tags": "update_run.tags",
+    },
+    "POST /api/v1/models/{hash}/scenario/runs/{run_id}/pin": {
+        "pinned": "set_run_pinned.pinned",
     },
     "POST /api/v1/models/{hash}/scenario/template": {
         "periods_forward": "get_scenario_template.periods_forward",
