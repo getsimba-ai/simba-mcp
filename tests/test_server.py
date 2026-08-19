@@ -18,6 +18,8 @@ EXPECTED_TOOLS = [
     "unlink_var_model",
     "set_contribution_groups",
     "get_contribution_groups",
+    "rename_model",
+    "save_model",
     "get_model_status",
     "get_model_results",
     "run_optimizer",
@@ -25,6 +27,8 @@ EXPECTED_TOOLS = [
     "get_scenario_template",
     "run_scenario",
     "get_scenario_results",
+    "update_run",
+    "set_run_pinned",
 ]
 
 
@@ -333,6 +337,68 @@ class TestCreateModelPayload:
         await create_model(**self.BASE_ARGS, control_reference=None, ctx=ctx)
         (payload,) = client.create_model.call_args.args
         assert "control_reference" not in payload["config"]
+
+    @pytest.mark.anyio
+    async def test_name_passthrough(self):
+        """#575: a caller-supplied name lands in the payload verbatim."""
+        from simba_mcp.server import create_model
+
+        ctx, client = self._ctx_capturing()
+        await create_model(**self.BASE_ARGS, name="custom-name-A1-r11", ctx=ctx)
+        (payload,) = client.create_model.call_args.args
+        assert payload["name"] == "custom-name-A1-r11"
+
+    @pytest.mark.anyio
+    async def test_absent_name_omitted(self):
+        """Default payloads stay byte-identical — no empty name key."""
+        from simba_mcp.server import create_model
+
+        ctx, client = self._ctx_capturing()
+        await create_model(**self.BASE_ARGS, ctx=ctx)
+        (payload,) = client.create_model.call_args.args
+        assert "name" not in payload
+
+
+class TestRunCurationTools:
+    """#576: update_run / set_run_pinned forward only what was given."""
+
+    def _ctx_capturing(self):
+        from unittest.mock import AsyncMock, MagicMock
+
+        client = MagicMock()
+        client.update_run = AsyncMock(return_value={"ok": True})
+        client.set_run_pinned = AsyncMock(return_value={"ok": True})
+        ctx = MagicMock()
+        ctx.request_context.lifespan_context.client = client
+        return ctx, client
+
+    @pytest.mark.anyio
+    async def test_update_run_forwards_only_given_fields(self):
+        from simba_mcp.server import update_run
+
+        ctx, client = self._ctx_capturing()
+        await update_run("optimizer", "h1", "opt_1", name="Reference plan", ctx=ctx)
+        assert client.update_run.call_args.args == ("optimizer", "h1", "opt_1")
+        assert client.update_run.call_args.kwargs == {"name": "Reference plan"}
+
+    @pytest.mark.anyio
+    async def test_update_run_empty_notes_clears(self):
+        """notes="" is an explicit clear; omitted notes stay untouched."""
+        from simba_mcp.server import update_run
+
+        ctx, client = self._ctx_capturing()
+        await update_run("scenario", "h1", "scn_1", notes="", ctx=ctx)
+        assert client.update_run.call_args.kwargs == {"notes": ""}
+
+    @pytest.mark.anyio
+    async def test_set_run_pinned_forwards_state(self):
+        from simba_mcp.server import set_run_pinned
+
+        ctx, client = self._ctx_capturing()
+        await set_run_pinned("optimizer", "h1", "opt_1", True, ctx=ctx)
+        assert client.set_run_pinned.call_args.args == (
+            "optimizer", "h1", "opt_1", True,
+        )
 
     def test_docstring_no_invalid_likelihood(self):
         """The API rejects 'negbinomial'; the docstring must name the canonical

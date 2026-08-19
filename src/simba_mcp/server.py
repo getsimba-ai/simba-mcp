@@ -254,6 +254,7 @@ async def create_model(
     link: str = "identity",
     channel_groups: list[dict] | None = None,
     control_reference: dict | None = None,
+    name: str = "",
     ctx: Context[ServerSession, AppContext] = None,
 ) -> dict:
     """Create and start fitting a new Bayesian Marketing Mix Model.
@@ -340,6 +341,11 @@ async def create_model(
                         link="log". The fit reports the resolution in
                         model_config.control_references (see
                         get_model_results).
+        name: Display name for the created model, honoured verbatim (#575).
+              Falls back to a generated API_MMM_{brand}_{hash} string when
+              omitted. Either way the model starts unsaved — invisible to
+              list_models unless include_unsaved=true — until save_model
+              files it into a project.
 
     Returns the model_hash for status polling.
     """
@@ -373,6 +379,8 @@ async def create_model(
         payload["multiplier_column"] = multiplier_column
     if priors:
         payload["priors"] = priors
+    if name:
+        payload["name"] = name
 
     return await _client(ctx).create_model(payload)
 
@@ -425,7 +433,8 @@ async def create_var_model(
         lre_ci: Credible-interval mass for the effects table, in (0, 1).
         var_priors: Advanced prior overrides (lag_coefs / alpha / coefs /
             noise_chol); unknown keys are rejected.
-        name: Display name fragment for the created model.
+        name: Display name for the created model, honoured verbatim (#575).
+            Falls back to a generated API_VAR_* string when omitted.
 
     Returns 202-style payload with model_hash; poll get_model_status.
     """
@@ -529,6 +538,57 @@ async def get_contribution_groups(
 # ---------------------------------------------------------------------------
 # Tool 5: get_model_status
 # ---------------------------------------------------------------------------
+
+
+# ---------------------------------------------------------------------------
+# Model curation (#575): rename_model / save_model
+# ---------------------------------------------------------------------------
+
+
+@mcp.tool()
+async def rename_model(
+    model_hash: str,
+    name: str,
+    ctx: Context[ServerSession, AppContext] = None,
+) -> dict:
+    """Rename a model.
+
+    Changes only the display name; the model's saved/unsaved state is
+    untouched (use save_model to file it into a project). The name is
+    HTML-sanitized server-side and must be non-empty.
+
+    Args:
+        model_hash: Hash of the model to rename.
+        name: New display name.
+    """
+    return await _client(ctx).rename_model(model_hash, name)
+
+
+@mcp.tool()
+async def save_model(
+    model_hash: str,
+    name: str,
+    project_id: int | None = None,
+    ctx: Context[ServerSession, AppContext] = None,
+) -> dict:
+    """Save a model into a project under a display name.
+
+    API-created models start unsaved and are invisible to list_models
+    (without include_unsaved=true) — saving files them into a project so
+    they appear in the default listing and the dashboard's Saved Models.
+
+    The same saved-models cap applies as in the dashboard: at the cap the
+    API returns a 400 with error_type "saved_limit". Re-saving an
+    already-saved model renames/refiles it without consuming a new slot.
+
+    Args:
+        model_hash: Hash of the model to save.
+        name: Display name to save under (non-empty).
+        project_id: Optional target project ID; must be a project you own
+            or one shared with a team you belong to. Defaults to your
+            default project.
+    """
+    return await _client(ctx).save_model(model_hash, name, project_id=project_id)
 
 
 @mcp.tool()
@@ -1050,6 +1110,70 @@ async def get_scenario_results(
         model_hash: Hash of the model the scenario was run on.
     """
     return await _client(ctx).get_scenario_results(model_hash)
+
+
+# ---------------------------------------------------------------------------
+# Saved-run curation (#576): update_run / set_run_pinned
+# ---------------------------------------------------------------------------
+
+
+@mcp.tool()
+async def update_run(
+    artifact: str,
+    model_hash: str,
+    run_id: str,
+    name: str = "",
+    notes: str | None = None,
+    tags: list[str] | None = None,
+    ctx: Context[ServerSession, AppContext] = None,
+) -> dict:
+    """Rename / annotate a saved optimizer or scenario run.
+
+    Runs are auto-named at creation (e.g. "$1.2M · 12mo · Jan 5");
+    renaming makes run history carry the analysis ("holiday cut -10%",
+    "stretch 130%"). Renaming permanently flips the run's auto_named flag
+    to false so future auto-naming never overwrites it. Only the fields
+    you provide are changed.
+
+    Args:
+        artifact: "optimizer" (run_id "opt_...") or "scenario" ("scn_...").
+        model_hash: Hash of the model the run belongs to.
+        run_id: The run's stable id from run history.
+        name: New display name (non-empty when given; capped at 255 chars).
+        notes: Free-text annotation. Omit to leave untouched; pass "" to
+            clear.
+        tags: Replacement tag list (max 20 tags, 64 chars each).
+    """
+    kwargs: dict = {}
+    if name:
+        kwargs["name"] = name
+    if notes is not None:
+        kwargs["notes"] = notes
+    if tags is not None:
+        kwargs["tags"] = tags
+    return await _client(ctx).update_run(artifact, model_hash, run_id, **kwargs)
+
+
+@mcp.tool()
+async def set_run_pinned(
+    artifact: str,
+    model_hash: str,
+    run_id: str,
+    pinned: bool,
+    ctx: Context[ServerSession, AppContext] = None,
+) -> dict:
+    """Pin or unpin a saved optimizer or scenario run.
+
+    Declarative and idempotent: setting the current state again is a
+    no-op, so scripts can safely re-run it.
+
+    Args:
+        artifact: "optimizer" (run_id "opt_...") or "scenario" ("scn_...").
+        model_hash: Hash of the model the run belongs to.
+        run_id: The run's stable id from run history.
+        pinned: Desired pin state.
+    """
+    return await _client(ctx).set_run_pinned(artifact, model_hash, run_id, pinned)
 
 
 # ---------------------------------------------------------------------------

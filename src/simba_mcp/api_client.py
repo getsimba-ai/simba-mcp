@@ -169,6 +169,23 @@ class SimbaAPIClient:
             json={"contribution_groups": groups},
         )
 
+    async def rename_model(self, model_hash: str, name: str) -> dict:
+        """Rename a model (#575). Does not save it."""
+        return await self._request(
+            "PATCH", f"/api/v1/models/{model_hash}", json={"name": name}
+        )
+
+    async def save_model(
+        self, model_hash: str, name: str, project_id: int | None = None
+    ) -> dict:
+        """Save a model into a project under a display name (#575)."""
+        payload: dict = {"name": name}
+        if project_id is not None:
+            payload["project_id"] = project_id
+        return await self._request(
+            "POST", f"/api/v1/models/{model_hash}/save", json=payload
+        )
+
     async def get_model_status(self, model_hash: str) -> dict:
         return await self._request("GET", f"/api/v1/models/{model_hash}/status")
 
@@ -221,3 +238,52 @@ class SimbaAPIClient:
 
     async def get_scenario_results(self, model_hash: str) -> dict:
         return await self._request("GET", f"/api/v1/models/{model_hash}/scenario")
+
+    # -- Saved-run curation (#576) --
+
+    _RUN_SEGMENT = {"optimizer": "optimize", "scenario": "scenario"}
+
+    def _run_path(self, artifact: str, model_hash: str, run_id: str) -> str:
+        segment = self._RUN_SEGMENT.get(artifact)
+        if segment is None:
+            raise ValueError(
+                f"Unknown artifact '{artifact}'. Expected one of: optimizer, scenario."
+            )
+        return f"/api/v1/models/{model_hash}/{segment}/runs/{run_id}"
+
+    async def update_run(
+        self,
+        artifact: str,
+        model_hash: str,
+        run_id: str,
+        *,
+        name: str | None = None,
+        notes: str | None = None,
+        tags: list[str] | None = None,
+    ) -> dict:
+        """Rename / annotate a saved run (#576). Only provided fields change."""
+        payload: dict = {}
+        if name is not None:
+            payload["name"] = name
+        if notes is not None:
+            payload["notes"] = notes
+        if tags is not None:
+            payload["tags"] = tags
+        return await self._request(
+            "PATCH", self._run_path(artifact, model_hash, run_id), json=payload
+        )
+
+    async def set_run_pinned(
+        self,
+        artifact: str,
+        model_hash: str,
+        run_id: str,
+        pinned: bool | None = None,
+    ) -> dict:
+        """Pin/unpin a saved run (#576). ``pinned`` sets; None toggles."""
+        kwargs: dict = {}
+        if pinned is not None:
+            kwargs["json"] = {"pinned": pinned}
+        return await self._request(
+            "POST", self._run_path(artifact, model_hash, run_id) + "/pin", **kwargs
+        )
