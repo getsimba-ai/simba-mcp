@@ -93,6 +93,7 @@ CONTRACT = {
         "enable_warm_start": "run_optimizer.enable_warm_start",
         "optimizer_engine": "run_optimizer.optimizer_engine",
         "sigma_penalty": "run_optimizer.sigma_penalty",
+        "group_bounds": "run_optimizer.group_bounds",
     },
     "GET /api/v1/models/{hash}/optimize/runs/{run_id}": {
         "run_id": "get_optimizer_results.run_id",

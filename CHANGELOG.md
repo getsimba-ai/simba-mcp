@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ### Added
 
+- `run_optimizer` exposes `group_bounds` (#570): joint budget constraints over channel sets in % of total budget, disjoint and feasibility-validated server-side; presence forces the slsqp engine and results gain `GroupBounds`/`GroupBoundsReport` columns. Contract snapshot pins the key.
 - Long-term (VAR) models are now reachable through MCP (#569): `create_var_model` (endogenous/exogenous series, lags, forecast horizon, long-run-effects base/equity/horizon/ci, `var_priors`), plus `link_var_model`/`unlink_var_model` to attach a VAR to an MMM so `get_model_results` serves the `long_run_rollup` section. Contract snapshot pins all VAR request parameters.
 - `set_contribution_groups`/`get_contribution_groups` (#436): persist the dashboard contributions-view driver groupings (colors, per-driver base adjustments, the `_channel_color_overrides` pseudo-group) next to the model via the new v1 route pair — with the explicit warning that this is NOT `create_model`'s adstock `channel_groups`. Contract snapshot pins the payload.
 

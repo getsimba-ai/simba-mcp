@@ -762,6 +762,7 @@ async def run_optimizer(
     enable_warm_start: bool = True,
     optimizer_engine: str = "slsqp",
     sigma_penalty: str = "std",
+    group_bounds: list[dict] | None = None,
     ctx: Context[ServerSession, AppContext] = None,
 ) -> dict:
     """Run budget optimization on a completed model.
@@ -829,6 +830,15 @@ async def run_optimizer(
         sigma_penalty: How gamma penalizes outcome spread: "std" (default),
                       "variance" or "frozen" (advanced; smoother alternatives
                       for hard-to-converge runs - leave on "std" normally).
+        group_bounds: Joint constraints over channel SETS (#570),
+                     e.g. [{"name": "trade", "channels": ["TV", "Search"],
+                     "lower": 40, "upper": 60}] with lower/upper in % of
+                     total_budget (same convention as bounds). Groups must be
+                     disjoint and jointly feasible with the members'
+                     per-channel bounds. Presence forces the slsqp engine.
+                     Results gain GroupBounds/GroupBoundsReport columns; a
+                     BINDING group's members legitimately sit off the global
+                     marginal (they share the group's shadow price).
     """
     payload = {
         "total_budget": total_budget,
@@ -849,6 +859,9 @@ async def run_optimizer(
         payload["include_historical_effect"] = False
     if not enable_warm_start:
         payload["enable_warm_start"] = False
+    if group_bounds:
+        # #570: additive-only, same hash-preservation rule as engine/penalty.
+        payload["group_bounds"] = group_bounds
     # Engine + penalty (#502): additive-only so default payloads stay
     # byte-identical (server-side content-hash dedup stays valid).
     if optimizer_engine != "slsqp":
