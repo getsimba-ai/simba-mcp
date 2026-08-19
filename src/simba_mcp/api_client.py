@@ -174,7 +174,11 @@ class SimbaAPIClient:
             json=payload,
         )
 
-    async def get_optimizer_results(self, model_hash: str) -> dict:
+    async def get_optimizer_results(self, model_hash: str, run_id: str | None = None) -> dict:
+        if run_id:
+            return await self._request(
+                "GET", f"/api/v1/models/{model_hash}/optimize/runs/{run_id}"
+            )
         return await self._request("GET", f"/api/v1/models/{model_hash}/optimize")
 
     # -- Scenario Planner --

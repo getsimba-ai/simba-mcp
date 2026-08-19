@@ -717,18 +717,46 @@ async def run_optimizer(
 @mcp.tool()
 async def get_optimizer_results(
     model_hash: str,
+    run_id: str = None,
     ctx: Context[ServerSession, AppContext] = None,
 ) -> dict:
     """Get budget optimization status and results.
 
-    Returns optimizer_status (pending/complete/failed) and, when complete,
-    the full optimization results including per-channel budget allocation,
-    predicted revenue, and ROI.
+    Without run_id: returns the MODEL-LEVEL optimizer state. Top-level keys:
+    `optimizer_status` ("none"/"pending"/"under way"/"complete"/"failed"),
+    `progress` + `progress_text` while running, and `results` when complete.
+    This reflects the LATEST run on the model — a newer run overwrites it, so
+    a poller can lose sight of the run it submitted.
+
+    With run_id (run_optimizer's response includes it): fetches that specific
+    run, immune to later runs. Top-level keys include `run_id`, `model_hash`,
+    `status`, `created_at`, `label`, `inputs`, and `results`. Poll THIS form
+    when you need to know whether your own run completed.
+
+    Reading `results` rows — the columns come from DIFFERENT conventions and
+    must not be treated as interchangeable:
+    - `Revenue` / `ROI`: the optimizer's DECISION math — removal-lift
+      counterfactual revenue at the allocated spend. This is what the solver
+      optimized.
+    - `OptimizedEvalRevenue` / `OptimizedEvalROI` and `HistoricalRevenue` /
+      `HistoricalROI`: fitted-convention COMPARISON columns — the reconciled
+      accounting view matching the model's Contributions panel. Same spend,
+      different question; never mix them with `Revenue`/`ROI` in one summary.
+    - `ObjectiveMarginal`: the decision-math marginal return at the optimum
+      (the quantity the solver equalizes across unconstrained channels).
+    - `MroiAtOptimized` / `MroiAtOptimizedHdi3` / `MroiAtOptimizedHdi97`:
+      posterior mROI evaluated at the optimized spend (94% HDI bounds) — a
+      DIFFERENT quantity from ObjectiveMarginal (they can differ by several
+      times); quote the one matching the question asked.
+    - Convergence / KKT certificate fields report solver health. All-None
+      placeholder arrays (PeriodResponse etc.) are stripped server-side.
 
     Args:
         model_hash: Hash of the model that was optimized.
+        run_id: Optional optimization run id from run_optimizer's response.
+            Pass it to poll a specific run's status/results.
     """
-    return await _client(ctx).get_optimizer_results(model_hash)
+    return await _client(ctx).get_optimizer_results(model_hash, run_id=run_id)
 
 
 # ---------------------------------------------------------------------------
