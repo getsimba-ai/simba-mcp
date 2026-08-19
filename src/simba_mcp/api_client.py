@@ -147,6 +147,28 @@ class SimbaAPIClient:
     async def create_model(self, payload: dict) -> dict:
         return await self._request("POST", "/api/v1/models", json=payload)
 
+    async def link_var_model(self, model_hash: str, var_model_hash: str) -> dict:
+        return await self._request(
+            "POST",
+            f"/api/v1/models/{model_hash}/link_var",
+            json={"var_model_hash": var_model_hash},
+        )
+
+    async def unlink_var_model(self, model_hash: str) -> dict:
+        return await self._request("DELETE", f"/api/v1/models/{model_hash}/link_var")
+
+    async def get_contribution_groups(self, model_hash: str) -> dict:
+        return await self._request(
+            "GET", f"/api/v1/models/{model_hash}/contribution-groups"
+        )
+
+    async def put_contribution_groups(self, model_hash: str, groups: list) -> dict:
+        return await self._request(
+            "PUT",
+            f"/api/v1/models/{model_hash}/contribution-groups",
+            json={"contribution_groups": groups},
+        )
+
     async def get_model_status(self, model_hash: str) -> dict:
         return await self._request("GET", f"/api/v1/models/{model_hash}/status")
 

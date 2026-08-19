@@ -378,6 +378,155 @@ async def create_model(
 
 
 # ---------------------------------------------------------------------------
+# Tool 4b: create_var_model / link_var_model / unlink_var_model
+# ---------------------------------------------------------------------------
+
+
+@mcp.tool()
+async def create_var_model(
+    uploaded_file_id: int,
+    date_column: str,
+    endogenous_vars: list[str],
+    exogenous_vars: list[str] | None = None,
+    lags: int = 1,
+    forecast_horizon: int = 12,
+    base_variable: str = None,
+    equity_variables: list[str] | None = None,
+    lre_horizon: int = None,
+    lre_ci: float = None,
+    var_priors: dict | None = None,
+    name: str = "",
+    ctx: Context[ServerSession, AppContext] = None,
+) -> dict:
+    """Create and start fitting a long-term (VAR) model (#569).
+
+    VAR models capture the joint dynamics of several series (e.g. sales and
+    brand-equity metrics) and produce the long-run elasticity bridge behind
+    the MMM's `long_run_rollup` results section. Fit one, then link it to an
+    MMM with link_var_model.
+
+    Args:
+        uploaded_file_id: Dataset id from upload_data (must contain every
+            named column).
+        date_column: Date column name. Cannot also be a series.
+        endogenous_vars: At least two column names — the jointly-modeled
+            series.
+        exogenous_vars: Optional outside drivers; must not overlap the
+            endogenous set.
+        lags: VAR order (>= 1). The dataset needs at least lags + 10 rows
+            with no missing values across the modeled columns.
+        forecast_horizon: Periods forecast for diagnostics (default 12).
+        base_variable: The outcome series (must be endogenous) long-run
+            multipliers are measured against. Required for long-run effects.
+        equity_variables: Endogenous columns (excluding the base) whose
+            long-run IRF multipliers are estimated. Required for long-run
+            effects.
+        lre_horizon: Long-run effects horizon in periods (default 156).
+        lre_ci: Credible-interval mass for the effects table, in (0, 1).
+        var_priors: Advanced prior overrides (lag_coefs / alpha / coefs /
+            noise_chol); unknown keys are rejected.
+        name: Display name fragment for the created model.
+
+    Returns 202-style payload with model_hash; poll get_model_status.
+    """
+    config: dict = {
+        "endogenous_vars": endogenous_vars,
+        "lags": lags,
+        "forecast_horizon": forecast_horizon,
+    }
+    if exogenous_vars:
+        config["exogenous_vars"] = exogenous_vars
+    if base_variable:
+        config["base_variable"] = base_variable
+    if equity_variables:
+        config["equity_variables"] = equity_variables
+    if lre_horizon is not None:
+        config["lre_horizon"] = lre_horizon
+    if lre_ci is not None:
+        config["lre_ci"] = lre_ci
+    if var_priors:
+        config["var_priors"] = var_priors
+
+    payload = {
+        "model_type": "var",
+        "data_source": {"uploaded_file_id": uploaded_file_id},
+        "date_column": date_column,
+        "config": config,
+    }
+    if name:
+        payload["name"] = name
+    return await _client(ctx).create_model(payload)
+
+
+@mcp.tool()
+async def link_var_model(
+    model_hash: str,
+    var_model_hash: str,
+    ctx: Context[ServerSession, AppContext] = None,
+) -> dict:
+    """Link a completed VAR model to an MMM (#569).
+
+    After linking, the MMM's get_model_results `long_run_rollup` section
+    joins the VAR's long-run elasticities with the MMM's short-term revenue.
+    A VAR links to at most one MMM at a time — the error names the current
+    owner if it is already linked elsewhere.
+
+    Args:
+        model_hash: The MMM to attach the long-run view to.
+        var_model_hash: The VAR model (from create_var_model).
+    """
+    return await _client(ctx).link_var_model(model_hash, var_model_hash)
+
+
+@mcp.tool()
+async def unlink_var_model(
+    model_hash: str,
+    ctx: Context[ServerSession, AppContext] = None,
+) -> dict:
+    """Remove an MMM's VAR link (#569). Idempotent."""
+    return await _client(ctx).unlink_var_model(model_hash)
+
+
+# ---------------------------------------------------------------------------
+# Tool 4c: contribution groups (set/get)
+# ---------------------------------------------------------------------------
+
+
+@mcp.tool()
+async def set_contribution_groups(
+    model_hash: str,
+    contribution_groups: list[dict],
+    ctx: Context[ServerSession, AppContext] = None,
+) -> dict:
+    """Persist the driver groupings the dashboard contributions view renders
+    (#436) — configure grouping once and every viewer sees it.
+
+    Each group: {"name": str, "drivers": [column names], "color": "#hex"?,
+    "baseAdjustments": {driver: "min"|"max"|"none"}?}. Driver names are
+    validated against the model's media/control/halo/trademark factors
+    (400 with a did-you-mean hint on typos); each driver may belong to at
+    most one group; baseAdjustments must reference the group's own drivers.
+    The special "_channel_color_overrides" pseudo-group carries a
+    channelColors map instead of drivers.
+
+    NOTE: this is the CONTRIBUTIONS-VIEW grouping. create_model's
+    channel_groups is the unrelated adstock parameter-sharing feature —
+    do not confuse them.
+    """
+    return await _client(ctx).put_contribution_groups(model_hash, contribution_groups)
+
+
+@mcp.tool()
+async def get_contribution_groups(
+    model_hash: str,
+    ctx: Context[ServerSession, AppContext] = None,
+) -> dict:
+    """Read the stored contribution groups for a model (#436).
+    Legacy dashboard-saved configs are served verbatim."""
+    return await _client(ctx).get_contribution_groups(model_hash)
+
+
+# ---------------------------------------------------------------------------
 # Tool 5: get_model_status
 # ---------------------------------------------------------------------------
 
@@ -613,6 +762,7 @@ async def run_optimizer(
     enable_warm_start: bool = True,
     optimizer_engine: str = "slsqp",
     sigma_penalty: str = "std",
+    group_bounds: list[dict] | None = None,
     ctx: Context[ServerSession, AppContext] = None,
 ) -> dict:
     """Run budget optimization on a completed model.
@@ -680,6 +830,15 @@ async def run_optimizer(
         sigma_penalty: How gamma penalizes outcome spread: "std" (default),
                       "variance" or "frozen" (advanced; smoother alternatives
                       for hard-to-converge runs - leave on "std" normally).
+        group_bounds: Joint constraints over channel SETS (#570),
+                     e.g. [{"name": "trade", "channels": ["TV", "Search"],
+                     "lower": 40, "upper": 60}] with lower/upper in % of
+                     total_budget (same convention as bounds). Groups must be
+                     disjoint and jointly feasible with the members'
+                     per-channel bounds. Presence forces the slsqp engine.
+                     Results gain GroupBounds/GroupBoundsReport columns; a
+                     BINDING group's members legitimately sit off the global
+                     marginal (they share the group's shadow price).
     """
     payload = {
         "total_budget": total_budget,
@@ -700,6 +859,9 @@ async def run_optimizer(
         payload["include_historical_effect"] = False
     if not enable_warm_start:
         payload["enable_warm_start"] = False
+    if group_bounds:
+        # #570: additive-only, same hash-preservation rule as engine/penalty.
+        payload["group_bounds"] = group_bounds
     # Engine + penalty (#502): additive-only so default payloads stay
     # byte-identical (server-side content-hash dedup stays valid).
     if optimizer_engine != "slsqp":

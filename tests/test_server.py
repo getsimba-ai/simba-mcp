@@ -13,6 +13,11 @@ EXPECTED_TOOLS = [
     "upload_data",
     "list_models",
     "create_model",
+    "create_var_model",
+    "link_var_model",
+    "unlink_var_model",
+    "set_contribution_groups",
+    "get_contribution_groups",
     "get_model_status",
     "get_model_results",
     "run_optimizer",
@@ -25,13 +30,13 @@ EXPECTED_TOOLS = [
 
 class TestToolRegistration:
     def test_all_tools_registered(self):
-        """All 11 expected tools are registered on the mcp instance."""
+        """All expected tools are registered on the mcp instance."""
         registered = {t.name for t in mcp._tool_manager.list_tools()}
         assert registered == set(EXPECTED_TOOLS)
 
     def test_tool_count(self):
-        """Exactly 11 tools are registered."""
-        assert len(mcp._tool_manager.list_tools()) == 11
+        """Exactly len(EXPECTED_TOOLS) tools are registered."""
+        assert len(mcp._tool_manager.list_tools()) == len(EXPECTED_TOOLS)
 
     def test_every_tool_has_description(self):
         """Every registered tool has a non-empty description."""

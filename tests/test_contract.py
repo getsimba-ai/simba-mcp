@@ -48,6 +48,32 @@ CONTRACT = {
         "config.channel_groups": "create_model.channel_groups",
         "config.control_reference": "create_model.control_reference",
     },
+    "POST /api/v1/models (model_type=var)": {
+        "data_source": "create_var_model.uploaded_file_id",
+        "date_column": "create_var_model.date_column",
+        "config.endogenous_vars": "create_var_model.endogenous_vars",
+        "config.exogenous_vars": "create_var_model.exogenous_vars",
+        "config.lags": "create_var_model.lags",
+        "config.forecast_horizon": "create_var_model.forecast_horizon",
+        "config.base_variable": "create_var_model.base_variable",
+        "config.equity_variables": "create_var_model.equity_variables",
+        "config.lre_horizon": "create_var_model.lre_horizon",
+        "config.lre_ci": "create_var_model.lre_ci",
+        "config.var_priors": "create_var_model.var_priors",
+        "name": "create_var_model.name",
+    },
+    "POST /api/v1/models/{hash}/link_var": {
+        "var_model_hash": "link_var_model.var_model_hash",
+    },
+    "DELETE /api/v1/models/{hash}/link_var": {
+        "model_hash": "unlink_var_model.model_hash",
+    },
+    "PUT /api/v1/models/{hash}/contribution-groups": {
+        "contribution_groups": "set_contribution_groups.contribution_groups",
+    },
+    "GET /api/v1/models/{hash}/contribution-groups": {
+        "model_hash": "get_contribution_groups.model_hash",
+    },
     "GET /api/v1/models/{hash}/results": {
         "sections": "get_model_results.sections",
         "format": "get_model_results.format",
@@ -67,6 +93,7 @@ CONTRACT = {
         "enable_warm_start": "run_optimizer.enable_warm_start",
         "optimizer_engine": "run_optimizer.optimizer_engine",
         "sigma_penalty": "run_optimizer.sigma_penalty",
+        "group_bounds": "run_optimizer.group_bounds",
     },
     "GET /api/v1/models/{hash}/optimize/runs/{run_id}": {
         "run_id": "get_optimizer_results.run_id",
