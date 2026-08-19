@@ -158,9 +158,7 @@ class SimbaAPIClient:
         return await self._request("DELETE", f"/api/v1/models/{model_hash}/link_var")
 
     async def get_contribution_groups(self, model_hash: str) -> dict:
-        return await self._request(
-            "GET", f"/api/v1/models/{model_hash}/contribution-groups"
-        )
+        return await self._request("GET", f"/api/v1/models/{model_hash}/contribution-groups")
 
     async def put_contribution_groups(self, model_hash: str, groups: list) -> dict:
         return await self._request(
@@ -171,20 +169,14 @@ class SimbaAPIClient:
 
     async def rename_model(self, model_hash: str, name: str) -> dict:
         """Rename a model (#575). Does not save it."""
-        return await self._request(
-            "PATCH", f"/api/v1/models/{model_hash}", json={"name": name}
-        )
+        return await self._request("PATCH", f"/api/v1/models/{model_hash}", json={"name": name})
 
-    async def save_model(
-        self, model_hash: str, name: str, project_id: int | None = None
-    ) -> dict:
+    async def save_model(self, model_hash: str, name: str, project_id: int | None = None) -> dict:
         """Save a model into a project under a display name (#575)."""
         payload: dict = {"name": name}
         if project_id is not None:
             payload["project_id"] = project_id
-        return await self._request(
-            "POST", f"/api/v1/models/{model_hash}/save", json=payload
-        )
+        return await self._request("POST", f"/api/v1/models/{model_hash}/save", json=payload)
 
     async def get_model_status(self, model_hash: str) -> dict:
         return await self._request("GET", f"/api/v1/models/{model_hash}/status")
@@ -215,9 +207,7 @@ class SimbaAPIClient:
 
     async def get_optimizer_results(self, model_hash: str, run_id: str | None = None) -> dict:
         if run_id:
-            return await self._request(
-                "GET", f"/api/v1/models/{model_hash}/optimize/runs/{run_id}"
-            )
+            return await self._request("GET", f"/api/v1/models/{model_hash}/optimize/runs/{run_id}")
         return await self._request("GET", f"/api/v1/models/{model_hash}/optimize")
 
     # -- Scenario Planner --

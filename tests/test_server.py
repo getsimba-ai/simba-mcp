@@ -397,7 +397,10 @@ class TestRunCurationTools:
         ctx, client = self._ctx_capturing()
         await set_run_pinned("optimizer", "h1", "opt_1", True, ctx=ctx)
         assert client.set_run_pinned.call_args.args == (
-            "optimizer", "h1", "opt_1", True,
+            "optimizer",
+            "h1",
+            "opt_1",
+            True,
         )
 
     def test_docstring_no_invalid_likelihood(self):
