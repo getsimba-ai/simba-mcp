@@ -692,6 +692,13 @@ def _filter_results(payload: dict, channels: list | None, max_grid_points: int |
             mroi["channels"] = [
                 r for r in mroi["channels"] if _norm_channel(r.get("channel", "")) in wanted
             ]
+        # Per-period series (#591): channels x periods rows — the largest
+        # per-channel section, so the filter matters most here.
+        periods = target.get("mroi_periods")
+        if isinstance(periods, dict) and isinstance(periods.get("rows"), list):
+            periods["rows"] = [
+                r for r in periods["rows"] if _norm_channel(r.get("channel", "")) in wanted
+            ]
     return payload
 
 
@@ -737,6 +744,19 @@ async def get_model_results(
       only — per-channel sat_shape).
     - mroi_summary: headline marginal ROI at current spend per channel with a
       94% HDI (channel, current_spend, mroi_median, mroi_hdi_3, mroi_hdi_97).
+      Post-#591 posterior fits add two averaging-convention scalars per
+      channel — mroi_allperiods_unweighted_median (+_hdi_3/_hdi_97) and
+      mroi_spendweighted_active_median (+_hdi_3/_hdi_97), with *_profit_*
+      variants on margin models — plus a top-level conventions_available
+      array. Channels with no active periods omit the spendweighted fields.
+    - mroi_periods: OPT-IN ONLY (#591) — never in the default payload;
+      request it by name in `sections`. Per-period marginal ROI series:
+      {available, hdi_prob, evaluation_point: "historical_period_spend",
+      rows} with one row per (channel x modelled period): channel, date,
+      spend, mroi_median/_hdi_3/_hdi_97, and mroi_profit_* on margin models.
+      Models fitted before the artifact existed return
+      {available: false, reason: "fitted_before_mroi_periods"} — refit to
+      enable. Large (channels x periods) — pair with the channels filter.
     - model_stats: fit diagnostics (R², MAPE, Durbin-Watson, Max R_hat, ...).
     - actual_vs_model: actual vs predicted per period with 50%/95% HDIs.
     - long_run_rollup: MMM short-term + VAR long-run revenue rollup per channel;
@@ -786,9 +806,9 @@ async def get_model_results(
         channels: Optional channel filter (matching is case/space-insensitive
                   and tolerates the _activity/_spend suffix). Applied to curve
                   sections, decay_curves, saturation, channel_summary,
-                  coefficients, and mroi_summary. `contributions` is never
-                  filtered (its control columns are indistinguishable from
-                  channels client-side).
+                  coefficients, mroi_summary, and mroi_periods rows.
+                  `contributions` is never filtered (its control columns are
+                  indistinguishable from channels client-side).
         max_grid_points: Optional cap on response/marginal curve grid points;
                          records are strided evenly, keeping first and last.
     """
