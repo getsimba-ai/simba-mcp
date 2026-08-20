@@ -63,6 +63,7 @@ class TestResultsSectionsDoc:
         "marginal_curves",
         "saturation",
         "mroi_summary",
+        "mroi_periods",
         "model_stats",
         "actual_vs_model",
         "long_run_rollup",
@@ -587,6 +588,13 @@ class TestGetModelResultsFiltering:
                 "mroi_summary": {
                     "channels": [{"channel": "tv_activity"}, {"channel": "search_activity"}]
                 },
+                "mroi_periods": {
+                    "available": True,
+                    "rows": [
+                        {"channel": "tv_activity", "date": "2025-06-01"},
+                        {"channel": "search_activity", "date": "2025-06-01"},
+                    ],
+                },
                 "contributions": [
                     {"Date": 1, "tv_activity": 1.0, "category_trend": 2.0, "Base": 3.0}
                 ],
@@ -616,6 +624,7 @@ class TestGetModelResultsFiltering:
         assert [row["Channel"] for row in r["channel_summary"]] == ["search_activity"]
         assert [row["Channel"] for row in r["coefficients"]] == ["search_activity"]
         assert [row["channel"] for row in r["mroi_summary"]["channels"]] == ["search_activity"]
+        assert [row["channel"] for row in r["mroi_periods"]["rows"]] == ["search_activity"]
 
     @pytest.mark.anyio
     async def test_contributions_never_filtered(self):

@@ -141,7 +141,7 @@ Model results are keyed by the channel's **activity column** name (e.g. `"search
 ### Results sections
 
 `get_model_results` serves these sections (request only what you need via `sections=`):
-`channel_summary`, `contributions` (KPI/unit space — multiplier **not** applied), `coefficients` (per-period per-channel **revenue** table), `params`, `decay_curves`, `response_curves`, `marginal_curves`, `saturation`, `mroi_summary` (marginal ROI at current spend with 94% HDI), `model_stats`, `actual_vs_model`, `long_run_rollup`, `optimizer`, `predictions`. The response's `sections_available` field is authoritative if the server is newer than these docs.
+`channel_summary`, `contributions` (KPI/unit space — multiplier **not** applied), `coefficients` (per-period per-channel **revenue** table), `params`, `decay_curves`, `response_curves`, `marginal_curves`, `saturation`, `mroi_summary` (marginal ROI at current spend with 94% HDI; post-#591 fits add the `allperiods_unweighted` / `spendweighted_active` convention scalars), `mroi_periods` (**opt-in only** — the per-period marginal ROI series; never in the default payload, request it by name), `model_stats`, `actual_vs_model`, `long_run_rollup`, `optimizer`, `predictions`, `posterior`, `financials`, `model_config`. The response's `sections_available` field is authoritative if the server is newer than these docs.
 
 ### Models are identified by `model_hash`
 
