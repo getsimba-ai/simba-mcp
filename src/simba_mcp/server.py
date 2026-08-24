@@ -290,7 +290,23 @@ async def create_model(
                 adstock_type="dual_geometric" only). Saturation fields:
                 sat_shape_mean/sat_shape_sd (curvature prior, saturation_type=
                 "generalized_log" only; small values are near-logarithmic, 1.0 is
-                michaelis_menten).
+                michaelis_menten), half_saturation_mean/half_saturation_sd (the
+                50%-of-maximum-response point in the channel's activity units —
+                preferred over the legacy alpha_sd/scalars pair, and cannot be
+                combined with it in the same override),
+                half_marginal_mean/half_marginal_sd (generalized_log ONLY: the
+                activity level where MARGINAL returns have halved. Use this
+                rather than half_saturation_* at near-logarithmic curvature —
+                the 50% point overflows below sat_shape_mean 0.00097657 and is
+                rejected with a 400, while the half-marginal point is finite at
+                every shape. Cannot be combined with the other two anchors;
+                #632).
+                UNKNOWN KEYS ARE REJECTED with a 400 naming the field
+                (#630); they used to be dropped silently, fitting a
+                hybrid of the override and the smart defaults. Common misses:
+                "beta"/"beta_mean" -> mean, "beta_sd" -> sd, "sat_shape" ->
+                sat_shape_mean. "name" and "parameter" are rejected too — they
+                identify the smart-prior row the override merges onto.
         trend: Enable dynamic baseline trend component.
         seasonality: Enable automatic seasonality detection.
         likelihood: Likelihood function: "normal" (default), "lognormal", "logit",
