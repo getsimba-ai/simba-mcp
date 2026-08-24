@@ -749,6 +749,12 @@ async def get_model_results(
       mroi_spendweighted_active_median (+_hdi_3/_hdi_97), with *_profit_*
       variants on margin models — plus a top-level conventions_available
       array. Channels with no active periods omit the spendweighted fields.
+      Post-#629 fits also carry a *_mean beside every *_median (mroi_mean,
+      mroi_profit_mean, pv_kernel_mass_mean, and the convention variants).
+      The median is what the product displays; the mean is the statistic that
+      reconciles with the marginal-revenue curve, since derivative and mean
+      commute and median does not. Absent on anything fitted before #629 —
+      there is no backfill, so feature-detect rather than assume.
     - mroi_periods: OPT-IN ONLY (#591) — never in the default payload;
       request it by name in `sections`. Per-period marginal ROI series:
       {available, hdi_prob, evaluation_point: "historical_period_spend",
