@@ -59,7 +59,9 @@ description: End-to-end Simba MMM workflow over MCP — upload a dataset, create
   R-hat > 1.2 means not converged (attribute it with the `r_hat` section).
 - **Overlap**: appears only when `link="log"` AND
   `attribution="removal_lift"` (the API default; the dashboard default is
-  proportional_normalized, which closes exactly without it). Overlap is a
+  aumann_shapley since #509, which closes exactly without it —
+  pass `attribution="aumann_shapley"` at create time to reconcile with a
+  dashboard-built model). Overlap is a
   reconciliation term, NOT a channel — never rank/share/optimize it, and
   never read its absence as "additive model".
 - Trust the response's `sections_available` over any hardcoded list, and
