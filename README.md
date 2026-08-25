@@ -128,6 +128,23 @@ Try these with any connected AI assistant:
 **Full workflow:**
 > "I have marketing data I want to analyze. First get the schema so I know what format is needed, then upload my data, create a model, and once it's done show me the ROI by channel."
 
+## Agent Skills
+
+The [`skills/`](skills/) directory ships workflow skills in the
+[Agent Skills](https://agentskills.io) format (`SKILL.md` per skill) —
+install them into any skills-aware agent (e.g. Claude Code) alongside this
+MCP server:
+
+| Skill | Covers |
+|---|---|
+| [`simba-mmm-workflow`](skills/simba-mmm-workflow/SKILL.md) | Upload → create → poll → reading results correctly (section semantics, channel naming, attribution/Overlap rules, context-size controls) |
+| [`simba-optimizer-runs`](skills/simba-optimizer-runs/SKILL.md) | Optimizer payload conventions, revenue vs profit, polling by run_id, decision- vs comparison-column semantics, run curation |
+| [`simba-prior-conventions`](skills/simba-prior-conventions/SKILL.md) | Prior-override payloads: smart-default merging, strict rejection, the half-saturation / half-marginal / half-life anchor families |
+| [`simba-var-workflow`](skills/simba-var-workflow/SKILL.md) | Long-term (VAR) modeling: create → poll → link → long_run_rollup |
+
+The skills are documentation artifacts — they ride the repo, not the wire
+protocol.
+
 ## Gotchas & Tips
 
 Things that commonly trip up both AI agents and humans:
