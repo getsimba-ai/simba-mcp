@@ -289,8 +289,10 @@ async def create_model(
                            meaning "I believe all media drives 15% of my KPI". Default "Other".
         priors: Optional per-channel prior overrides. Each dict should have "channel" matching
                 a channels[].name, plus any fields to override: distribution, mean, sd, lower,
-                upper, transform, alpha_sd, decay_lower, decay_upper, adstock_type, scalars,
-                effect_period. Only specified fields are overridden; the rest use smart defaults.
+                upper, transform, adstock_type, effect_period, alpha_sd (legacy),
+                scalars (legacy), decay_lower/decay_upper (legacy — prefer the
+                half_saturation_*/half_life_* fields described below).
+                Only specified fields are overridden; the rest use smart defaults.
                 Adstock-kernel fields: half_life_lower/half_life_upper (carryover half-life
                 bounds in periods — preferred over the legacy decay_lower/decay_upper),
                 theta_mean/theta_sd (peak-lag prior, adstock_type="delayed" only),
@@ -335,8 +337,12 @@ async def create_model(
         link: Model Form. "identity" (default) fits an additive model — components
               add on the outcome scale. "log" fits a multiplicative model —
               components add on the log scale and media effects are percentage
-              lifts; contributions then include an Overlap reconciliation column
-              (see get_model_results).
+              lifts. Under the removal_lift attribution convention (the API
+              default), contributions then include an Overlap reconciliation
+              column; the other conventions (aumann_shapley, shapley,
+              proportional_normalized — the dashboard default) allocate the
+              interaction across components and close exactly WITHOUT an
+              Overlap column (see get_model_results).
         channel_groups: Optional adstock groups: [{"name": ..., "channels":
                         [...], "share_saturation": bool}]. Member channels tie
                         their carryover parameters (decay/theta/dual-weight —
@@ -746,11 +752,16 @@ async def get_model_results(
     - contributions: per-period decomposition (Date, one column per channel, plus
       Base, Seasonality, Event Effect, Model, Fit Actual, Actual). Values are in
       KPI/unit space — the multiplier is NOT applied. Use `coefficients` for
-      per-period revenue. Multiplicative (link="log") models add an `Overlap`
-      column: a negative shared-synergy reconciliation term so that
+      per-period revenue. Multiplicative (link="log") models fitted with the
+      removal_lift attribution convention add an `Overlap` column: a negative
+      shared-synergy reconciliation term so that
       Base + components + Overlap = Model. Overlap is NOT a channel — never
-      rank it, share it, or feed it to the optimizer/scenarios. Absent for
-      additive models and models fitted before the feature existed.
+      rank it, share it, or feed it to the optimizer/scenarios. Overlap
+      requires BOTH link="log" AND attribution="removal_lift" (the API
+      default): under aumann_shapley, shapley, or proportional_normalized
+      (the dashboard default) the interaction is allocated across components,
+      which close exactly with NO Overlap column — its absence does NOT mean
+      the model is additive or predates the feature.
       Control columns are measured against the reference point resolved at
       fit time (#452, see model_config.control_references) — e.g. "vs.
       average conditions" for a control that never reaches zero — not
@@ -801,8 +812,24 @@ async def get_model_results(
     - posterior: full posterior summary table — one row per model variable
       with mean, sd, hdi_3%, hdi_97%, and r_hat (quotable 94% HDIs and
       per-variable convergence).
+    - posterior_transforms: the importable transform-parameter posterior grid
+      (what the dashboard's prior builder imports): per-channel alpha mean/sd,
+      decay 94% HDI, dual-weight mean/sd, decay-slow HDI, sat-shape mean/sd,
+      and the adstock structure including tied-group member aliases. Rows key
+      on activity-column names — join via channel_map.
+    - r_hat: per-parameter R-hat over ALL posterior variables — including
+      transform RVs such as {channel}_decay that the posterior summary's
+      coefficient rows do not cover. Use it to attribute a bad Max R_hat
+      (model_stats) to a specific parameter block.
     - financials: the model's operating margin ({operating_margin,
       operating_margin_series}); omitted entirely for marginless models.
+      operating_margin_series is a DATE-STRING-KEYED DICT
+      ({"2024-01-01": 0.18, ...}), not a list of records.
+    - cohort_ledger: per-(channel, source-period) forward-allocation ledger —
+      each period's spend is credited with the future effects its adstock
+      carryover earns (horizon slices plus PV-discounted financials from the
+      fit-time cohort kernels). Models fitted before the artifact existed
+      return {available: false, reason: ...} — feature-detect on `available`.
     - model_config: the resolved model specification (inputs, not posteriors)
       to audit or reconstruct the create_model call — includes config flags
       such as saturation_type, transform_order, and link ("log" =
@@ -811,6 +838,10 @@ async def get_model_results(
       attribution reference mode, the zero_distance diagnostic behind the
       "auto" choice, and the posterior-mean q_ref. Models created before
       these fields existed may omit them.
+    - channel_map: canonical identifier mapping, one record per channel:
+      {channel, activity_column, spend_column} as configured at create time.
+      This is the join key between channels[].name and the sections keyed by
+      activity-column name (contributions, decay_curves, posterior_transforms).
 
     The response envelope includes `sections_available` — trust it over any
     hardcoded list if the server is newer than these docs.
@@ -910,8 +941,11 @@ async def run_optimizer(
         model_hash: Hash of a completed model.
         total_budget: Total budget in currency units.
         num_periods: Number of periods to optimize over (matches your planning horizon).
-        gamma: Aggressiveness parameter (0 = conservative, 1 = aggressive).
-               0.0 = maximize expected return only; 1.0 = heavily penalize uncertainty.
+        gamma: Uncertainty-aversion weight on the outcome spread (the
+               objective is mean - gamma * spread). 0.0 = maximize expected
+               return only (most aggressive); higher values penalize
+               uncertainty harder (more conservative). The dashboard
+               typically uses values in the 0-0.1 range.
         currency: Currency code (e.g. "USD", "GBP").
         bounds: Per-channel min/max budget allocation as PERCENTAGES (0-100).
                 Every channel must appear. Example:

@@ -4,6 +4,15 @@ All notable changes to the SIMBA MCP Server will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## Unreleased
+
+### Fixed
+
+- `run_optimizer` gamma docstring no longer inverts the semantics (issue #31): gamma is an uncertainty-aversion weight — 0 maximizes expected return (most aggressive), higher values penalize uncertainty (more conservative). The old text called 0 "conservative" and 1 "aggressive", contradicting both the objective (`mean − gamma·spread`) and its own next line. Also notes the dashboard's typical 0–0.1 range, and tags `alpha_sd`/`scalars`/`decay_lower`/`decay_upper` as legacy in `create_model`'s flat prior-field list.
+- The `Overlap` emission gate is stated correctly in both docstrings that carry it (issue #32): Overlap requires `link="log"` AND `attribution="removal_lift"` (the API default). The 0.1.2 text claimed all multiplicative models add it and that absence means additive/pre-feature — false for aumann_shapley/shapley/proportional_normalized (the dashboard default), which allocate the interaction and close exactly without an Overlap column. A docstring guard test pins the corrected gate.
+- `get_model_results` documents the four remaining undocumented sections (issue #27): `posterior_transforms` (importable transform-parameter posterior grid, keyed by activity column), `r_hat` (per-parameter R-hat over all posterior RVs, transform RVs included), `channel_map` (canonical name ↔ activity/spend column mapping — the join key), and `cohort_ledger` (per-(channel, source-period) forward-allocation ledger with PV-discounted financials; `{available: false}` on pre-artifact models). All four re-verified against the live results route. Also documents that `financials.operating_margin_series` is a date-string-keyed dict, not a list. The section-list guard test now pins all 22 sections.
+- README API host regression fixed (issue #25): all five example sites read `app.simba-mmm.com`, which does not serve the API (verified live: connection failure, while `demo.simba-mmm.com` answers). Swept back to `demo.simba-mmm.com` — the same regression 0.1.1 fixed — and a test now fails if a stale host reappears in the README.
+
 ## 0.1.2 — 2026-08-25
 
 ### Added
