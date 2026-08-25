@@ -90,15 +90,27 @@ response = client.beta.messages.create(
 |------|-------------|
 | `get_data_schema` | Get the canonical CSV schema for MMM input files |
 | `upload_data` | Upload a CSV dataset to Simba |
+| `list_uploads` | List previously uploaded datasets |
+| `get_upload` | One upload's details, including its column schema |
 | `list_models` | List all models with their status |
 | `create_model` | Configure and start fitting a new MMM model |
+| `get_model` | Model metadata + config echo — works for any status, incl. failed |
+| `delete_model` | Permanently delete a FAILED model (409 for any other status) |
+| `rename_model` | Rename a model without saving it |
+| `save_model` | File a model into a project (makes it visible to default `list_models`) |
 | `get_model_status` | Poll fitting progress for a model |
 | `get_model_results` | Get results (ROI, contributions, response curves, diagnostics, and more) |
+| `create_var_model` | Fit a long-term (VAR) model |
+| `link_var_model` / `unlink_var_model` | Attach/detach a VAR model to an MMM for the `long_run_rollup` section |
+| `set_contribution_groups` / `get_contribution_groups` | Persist/read the contributions-view driver groupings |
 | `run_optimizer` | Run budget optimization on a completed model |
-| `get_optimizer_results` | Get optimizer status and results |
+| `get_optimizer_results` | Get optimizer status and results (latest, or a specific `run_id`) |
 | `get_scenario_template` | Generate a forward-period template for scenario planning |
 | `run_scenario` | Run a "what-if" scenario prediction |
-| `get_scenario_results` | Get scenario prediction results |
+| `get_scenario_results` | Get scenario results (latest, or a specific `run_id`) |
+| `list_runs` | List a model's saved optimizer/scenario run history |
+| `update_run` | Rename/annotate a saved run (notes, tags) |
+| `set_run_pinned` | Pin/unpin a saved run |
 
 ## Example Prompts
 
@@ -127,6 +139,23 @@ Try these with any connected AI assistant:
 
 **Full workflow:**
 > "I have marketing data I want to analyze. First get the schema so I know what format is needed, then upload my data, create a model, and once it's done show me the ROI by channel."
+
+## Agent Skills
+
+The [`skills/`](skills/) directory ships workflow skills in the
+[Agent Skills](https://agentskills.io) format (`SKILL.md` per skill) —
+install them into any skills-aware agent (e.g. Claude Code) alongside this
+MCP server:
+
+| Skill | Covers |
+|---|---|
+| [`simba-mmm-workflow`](skills/simba-mmm-workflow/SKILL.md) | Upload → create → poll → reading results correctly (section semantics, channel naming, attribution/Overlap rules, context-size controls) |
+| [`simba-optimizer-runs`](skills/simba-optimizer-runs/SKILL.md) | Optimizer payload conventions, revenue vs profit, polling by run_id, decision- vs comparison-column semantics, run curation |
+| [`simba-prior-conventions`](skills/simba-prior-conventions/SKILL.md) | Prior-override payloads: smart-default merging, strict rejection, the half-saturation / half-marginal / half-life anchor families |
+| [`simba-var-workflow`](skills/simba-var-workflow/SKILL.md) | Long-term (VAR) modeling: create → poll → link → long_run_rollup |
+
+The skills are documentation artifacts — they ride the repo, not the wire
+protocol.
 
 ## Gotchas & Tips
 
