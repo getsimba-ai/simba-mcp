@@ -29,11 +29,12 @@ def main():
     parser.add_argument("--port", type=int, default=8100, help="Port to bind (default: 8100)")
     args = parser.parse_args()
 
-    if args.transport != "stdio":
+    if args.transport == "stdio":
+        mcp.run(transport="stdio")
+    else:
         set_http_mode(True)
-    mcp.settings.host = args.host
-    mcp.settings.port = args.port
-    mcp.run(transport=args.transport)
+        # v2 moved host/port off Settings onto the per-transport run kwargs.
+        mcp.run(transport=args.transport, host=args.host, port=args.port)
 
 
 if __name__ == "__main__":

@@ -16,9 +16,9 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
-from mcp.server.fastmcp import Context, FastMCP
-from mcp.server.session import ServerSession
+from mcp.server.mcpserver import Context, MCPServer
 
 from .api_client import SimbaAPIClient
 
@@ -75,7 +75,12 @@ class AppContext:
 
 
 @asynccontextmanager
-async def app_lifespan(server: FastMCP) -> AsyncIterator[AppContext]:
+async def app_lifespan(server: MCPServer) -> AsyncIterator[AppContext]:
+    # Under SDK v2's streamable HTTP the lifespan enters ONCE per process and
+    # this AppContext is shared by every session (v1 entered it per-session).
+    # Safe here: the client holds only the server-wide internal API key and a
+    # stateless httpx connection pool — no per-session state may ever be
+    # added to AppContext without revisiting this.
     base_url = os.environ.get("SIMBA_API_URL", "http://localhost:5005")
     api_key = os.environ.get("SIMBA_API_KEY", "")
     if not api_key:
@@ -91,28 +96,34 @@ async def app_lifespan(server: FastMCP) -> AsyncIterator[AppContext]:
         await client.close()
 
 
-mcp = FastMCP(
-    "Simba MMM",
+def _own_version() -> str:
+    """simba-mcp's own package version for the initialize handshake (#41).
+
+    v2 servers with no version report "" — not the SDK fallback — so losing
+    this kwarg would silently regress #41 in a new way.
+    """
+    try:
+        return importlib.metadata.version("simba-mcp")
+    except importlib.metadata.PackageNotFoundError:  # running from source without install
+        return "0.0.0"
+
+
+# Every argument keyword: the v2 constructor order is (name, title,
+# description, instructions, ...) — a positional instructions lands in title.
+mcp = MCPServer(
+    name="Simba MMM",
+    version=_own_version(),
     instructions=(
         "Simba is a Bayesian Marketing Mix Modeling (MMM) platform. "
         "Use these tools to upload marketing data, build MMM models, "
         "check fitting progress, retrieve results (channel ROI, contributions, "
         "model diagnostics), and run budget optimizations."
     ),
-    json_response=True,
-    stateless_http=True,
     lifespan=app_lifespan,
 )
 
-# FastMCP 1.x accepts no version kwarg; left unset, the initialize handshake
-# reports the mcp SDK's version instead of simba-mcp's (#41).
-try:
-    mcp._mcp_server.version = importlib.metadata.version("simba-mcp")
-except importlib.metadata.PackageNotFoundError:  # running from source without install
-    mcp._mcp_server.version = "0.0.0"
 
-
-def _client(ctx: Context[ServerSession, AppContext]) -> SimbaAPIClient:
+def _client(ctx: Context[AppContext, Any]) -> SimbaAPIClient:
     return ctx.request_context.lifespan_context.client
 
 
@@ -122,7 +133,7 @@ def _client(ctx: Context[ServerSession, AppContext]) -> SimbaAPIClient:
 
 
 @mcp.tool()
-async def get_data_schema(ctx: Context[ServerSession, AppContext]) -> dict:
+async def get_data_schema(ctx: Context[AppContext, Any]) -> dict:
     """Get the canonical CSV data schema for Simba MMM input files.
 
     Returns the JSON Schema specification describing required columns
@@ -144,7 +155,7 @@ async def upload_data(
     csv_path: str = "",
     name: str = "",
     filename: str = "",
-    ctx: Context[ServerSession, AppContext] = None,
+    ctx: Context[AppContext, Any] = None,
 ) -> dict:
     """Upload a CSV dataset to Simba for use in model building.
 
@@ -218,7 +229,7 @@ async def list_models(
     include_unsaved: bool = False,
     limit: int = 50,
     offset: int = 0,
-    ctx: Context[ServerSession, AppContext] = None,
+    ctx: Context[AppContext, Any] = None,
 ) -> dict:
     """List all Marketing Mix Models for the authenticated user.
 
@@ -263,7 +274,7 @@ async def create_model(
     channel_groups: list[dict] | None = None,
     control_reference: dict | None = None,
     name: str = "",
-    ctx: Context[ServerSession, AppContext] = None,
+    ctx: Context[AppContext, Any] = None,
 ) -> dict:
     """Create and start fitting a new Bayesian Marketing Mix Model.
 
@@ -438,7 +449,7 @@ async def create_var_model(
     lre_ci: float | None = None,
     var_priors: dict | None = None,
     name: str = "",
-    ctx: Context[ServerSession, AppContext] = None,
+    ctx: Context[AppContext, Any] = None,
 ) -> dict:
     """Create and start fitting a long-term (VAR) model (#569).
 
@@ -505,7 +516,7 @@ async def create_var_model(
 async def link_var_model(
     model_hash: str,
     var_model_hash: str,
-    ctx: Context[ServerSession, AppContext] = None,
+    ctx: Context[AppContext, Any] = None,
 ) -> dict:
     """Link a completed VAR model to an MMM (#569).
 
@@ -524,7 +535,7 @@ async def link_var_model(
 @mcp.tool()
 async def unlink_var_model(
     model_hash: str,
-    ctx: Context[ServerSession, AppContext] = None,
+    ctx: Context[AppContext, Any] = None,
 ) -> dict:
     """Remove an MMM's VAR link (#569). Idempotent."""
     return await _client(ctx).unlink_var_model(model_hash)
@@ -539,7 +550,7 @@ async def unlink_var_model(
 async def set_contribution_groups(
     model_hash: str,
     contribution_groups: list[dict],
-    ctx: Context[ServerSession, AppContext] = None,
+    ctx: Context[AppContext, Any] = None,
 ) -> dict:
     """Persist the driver groupings the dashboard contributions view renders
     (#436) — configure grouping once and every viewer sees it.
@@ -562,7 +573,7 @@ async def set_contribution_groups(
 @mcp.tool()
 async def get_contribution_groups(
     model_hash: str,
-    ctx: Context[ServerSession, AppContext] = None,
+    ctx: Context[AppContext, Any] = None,
 ) -> dict:
     """Read the stored contribution groups for a model (#436).
     Legacy dashboard-saved configs are served verbatim."""
@@ -583,7 +594,7 @@ async def get_contribution_groups(
 async def rename_model(
     model_hash: str,
     name: str,
-    ctx: Context[ServerSession, AppContext] = None,
+    ctx: Context[AppContext, Any] = None,
 ) -> dict:
     """Rename a model.
 
@@ -603,7 +614,7 @@ async def save_model(
     model_hash: str,
     name: str,
     project_id: int | None = None,
-    ctx: Context[ServerSession, AppContext] = None,
+    ctx: Context[AppContext, Any] = None,
 ) -> dict:
     """Save a model into a project under a display name.
 
@@ -628,7 +639,7 @@ async def save_model(
 @mcp.tool()
 async def get_model_status(
     model_hash: str,
-    ctx: Context[ServerSession, AppContext] = None,
+    ctx: Context[AppContext, Any] = None,
 ) -> dict:
     """Check the fitting progress of a model.
 
@@ -743,7 +754,7 @@ async def get_model_results(
     format: str = "json",
     channels: list[str] | None = None,
     max_grid_points: int | None = None,
-    ctx: Context[ServerSession, AppContext] = None,
+    ctx: Context[AppContext, Any] = None,
 ) -> dict:
     """Get results from a completed model.
 
@@ -908,7 +919,7 @@ async def run_optimizer(
     optimizer_engine: str = "slsqp",
     sigma_penalty: str = "std",
     group_bounds: list[dict] | None = None,
-    ctx: Context[ServerSession, AppContext] = None,
+    ctx: Context[AppContext, Any] = None,
 ) -> dict:
     """Run budget optimization on a completed model.
 
@@ -1028,7 +1039,7 @@ async def run_optimizer(
 async def get_optimizer_results(
     model_hash: str,
     run_id: str | None = None,
-    ctx: Context[ServerSession, AppContext] = None,
+    ctx: Context[AppContext, Any] = None,
 ) -> dict:
     """Get budget optimization status and results.
 
@@ -1078,7 +1089,7 @@ async def get_optimizer_results(
 async def get_scenario_template(
     model_hash: str,
     periods_forward: int = 12,
-    ctx: Context[ServerSession, AppContext] = None,
+    ctx: Context[AppContext, Any] = None,
 ) -> dict:
     """Generate a forward-period scenario template from a completed model.
 
@@ -1121,7 +1132,7 @@ async def run_scenario(
     evaluate_holdout: bool = False,
     skip_slicing: bool = False,
     proxy_channels: list[dict] | None = None,
-    ctx: Context[ServerSession, AppContext] = None,
+    ctx: Context[AppContext, Any] = None,
 ) -> dict:
     """Run a "what-if" scenario prediction on a completed model.
 
@@ -1182,7 +1193,7 @@ async def run_scenario(
 @mcp.tool()
 async def get_scenario_results(
     model_hash: str,
-    ctx: Context[ServerSession, AppContext] = None,
+    ctx: Context[AppContext, Any] = None,
 ) -> dict:
     """Get scenario prediction results.
 
@@ -1213,7 +1224,7 @@ async def update_run(
     name: str = "",
     notes: str | None = None,
     tags: list[str] | None = None,
-    ctx: Context[ServerSession, AppContext] = None,
+    ctx: Context[AppContext, Any] = None,
 ) -> dict:
     """Rename / annotate a saved optimizer or scenario run.
 
@@ -1248,7 +1259,7 @@ async def set_run_pinned(
     model_hash: str,
     run_id: str,
     pinned: bool,
-    ctx: Context[ServerSession, AppContext] = None,
+    ctx: Context[AppContext, Any] = None,
 ) -> dict:
     """Pin or unpin a saved optimizer or scenario run.
 
@@ -1272,8 +1283,16 @@ async def set_run_pinned(
 def _create_app():
     """Create the ASGI app for uvicorn/Streamable HTTP deployment."""
     set_http_mode(True)
-    mcp.settings.streamable_http_path = "/"
-    return mcp.streamable_http_app()
+    # host="0.0.0.0" opts out of the SDK's auto-enabled DNS-rebinding
+    # protection (it activates when host is localhost-ish): this app runs
+    # behind a reverse proxy with a public Host header, which the localhost
+    # allowlist would reject.
+    return mcp.streamable_http_app(
+        streamable_http_path="/",
+        json_response=True,
+        stateless_http=True,
+        host="0.0.0.0",
+    )
 
 
 def __getattr__(name: str):

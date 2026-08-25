@@ -4,7 +4,17 @@ All notable changes to the SIMBA MCP Server will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
-## Unreleased
+## 0.2.0 — 2026-08-25
+
+### Changed
+
+- **Ported to MCP SDK v2** (`mcp>=2.1,<3`; issue #42): `FastMCP` → `MCPServer`, v2 `Context[AppContext, Any]` annotations, transport options moved off the constructor onto the app builder/run kwargs. **No tool surface change** — all 20 tool bodies are untouched and a `tools/list` capture from a 0.1.2 install diffs empty against the ported build (names, descriptions, and input schemas identical).
+- The server now speaks the 2026-07-28 stateless protocol revision alongside earlier ones automatically: `server/discover` answers without a handshake, and sessionless clients work against any worker. The `uvicorn --workers N` session-affinity hazard (a session created on one worker 404ing on another) is retired for stateless-revision clients.
+- The #41 version workaround (`_mcp_server.version` assignment) is replaced by the v2 constructor's `version=` parameter. The handshake tests now also guard the v2 failure mode: an unversioned v2 server reports `""` rather than the SDK fallback.
+- The lifespan now enters once per process under streamable HTTP (v1 entered it per session); the shared `SimbaAPIClient` is session-safe (server-wide internal key + stateless httpx pool) and the constraint is documented at the lifespan.
+- The ASGI app opts out of the SDK's localhost-default DNS-rebinding protection (`host="0.0.0.0"`): the deployed server sits behind a reverse proxy with a public Host header, which the SDK's localhost allowlist would reject.
+- Unexpected tool exceptions now reach clients as generic "Error executing tool ..." messages (SDK 2.1 behavior); Simba API errors are unaffected — they are returned as structured payloads, not raised.
+- New transitive dependency `opentelemetry-api` (inert without an OTel SDK configured).
 
 ### Fixed
 

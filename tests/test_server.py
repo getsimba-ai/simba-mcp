@@ -6,9 +6,16 @@ from pathlib import Path
 from typing import ClassVar
 from unittest.mock import patch
 
+import anyio
 import pytest
 
 from simba_mcp.server import AppContext, app_lifespan, mcp
+
+
+def _list_tools():
+    """Snapshot the registered tools via the public (async) v2 listing."""
+    return anyio.run(mcp.list_tools)
+
 
 EXPECTED_TOOLS = [
     "get_data_schema",
@@ -37,16 +44,16 @@ EXPECTED_TOOLS = [
 class TestToolRegistration:
     def test_all_tools_registered(self):
         """All expected tools are registered on the mcp instance."""
-        registered = {t.name for t in mcp._tool_manager.list_tools()}
+        registered = {t.name for t in _list_tools()}
         assert registered == set(EXPECTED_TOOLS)
 
     def test_tool_count(self):
         """Exactly len(EXPECTED_TOOLS) tools are registered."""
-        assert len(mcp._tool_manager.list_tools()) == len(EXPECTED_TOOLS)
+        assert len(_list_tools()) == len(EXPECTED_TOOLS)
 
     def test_every_tool_has_description(self):
         """Every registered tool has a non-empty description."""
-        for tool in mcp._tool_manager.list_tools():
+        for tool in _list_tools():
             assert tool.description, f"Tool {tool.name!r} has no description"
 
 
@@ -54,13 +61,20 @@ class TestHandshakeVersion:
     """The initialize handshake reports simba-mcp's own version, not the mcp SDK's (issue #41)."""
 
     def test_server_version_matches_installed_metadata(self):
-        opts = mcp._mcp_server.create_initialization_options()
+        opts = mcp._lowlevel_server.create_initialization_options()
         assert opts.server_version == importlib.metadata.version("simba-mcp")
 
+    def test_server_version_is_not_empty(self):
+        """Regression guard for the v2 failure mode: an MCPServer constructed
+        without version= reports "" (not the SDK fallback v1 had), so losing
+        the kwarg would silently undo #41 in a new way."""
+        opts = mcp._lowlevel_server.create_initialization_options()
+        assert opts.server_version not in ("", None)
+
     def test_server_version_is_not_the_sdk_fallback(self):
-        """Regression: with version unset, create_initialization_options falls
-        back to the mcp SDK's own package version."""
-        opts = mcp._mcp_server.create_initialization_options()
+        """Regression: v1 fell back to the mcp SDK's own package version; the
+        handshake must never report that again."""
+        opts = mcp._lowlevel_server.create_initialization_options()
         assert opts.server_version != importlib.metadata.version("mcp")
 
 
@@ -95,7 +109,7 @@ class TestResultsSectionsDoc:
     ]
 
     def _description(self, name):
-        tool = next(t for t in mcp._tool_manager.list_tools() if t.name == name)
+        tool = next(t for t in _list_tools() if t.name == name)
         return tool.description
 
     def test_all_sections_documented(self):
@@ -453,7 +467,7 @@ class TestRunCurationTools:
     def test_docstring_no_invalid_likelihood(self):
         """The API rejects 'negbinomial'; the docstring must name the canonical
         values instead (negativebinomial et al.)."""
-        tool = next(t for t in mcp._tool_manager.list_tools() if t.name == "create_model")
+        tool = next(t for t in _list_tools() if t.name == "create_model")
         assert "negbinomial" not in tool.description.replace("negativebinomial", "")
         assert "negativebinomial" in tool.description
         assert "lognormal" in tool.description
@@ -461,7 +475,7 @@ class TestRunCurationTools:
     def test_docstring_documents_new_prior_fields(self):
         """Half-life, theta, dual-weight, and sat-shape prior overrides must be
         discoverable from the docstring."""
-        tool = next(t for t in mcp._tool_manager.list_tools() if t.name == "create_model")
+        tool = next(t for t in _list_tools() if t.name == "create_model")
         for field in (
             "half_life_lower",
             "half_life_upper",
@@ -596,7 +610,7 @@ class TestUploadData:
 
     def test_docstring_no_stale_limits(self):
         """Docstring must not claim 50 MB or a hardcoded 52-row minimum."""
-        tool = next(t for t in mcp._tool_manager.list_tools() if t.name == "upload_data")
+        tool = next(t for t in _list_tools() if t.name == "upload_data")
         assert "50 MB" not in tool.description
         assert "Minimum 52 rows" not in tool.description
         assert "min_rows" in tool.description
