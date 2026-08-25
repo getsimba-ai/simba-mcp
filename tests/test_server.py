@@ -158,6 +158,77 @@ class TestReadmeHost:
             )
 
 
+class TestToolSchemaSnapshot:
+    """Pin the wire-visible tool surface (issue #42's parity invariant): the
+    committed snapshot was captured from the published 0.1.2 build and must
+    stay byte-identical unless a PR deliberately changes a tool schema."""
+
+    def test_input_schemas_match_snapshot(self):
+        import json
+
+        snap = json.loads(
+            (Path(__file__).resolve().parent / "tool_schema_snapshot.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        live = {t.name: t.input_schema for t in _list_tools()}
+        assert live == snap, (
+            "Tool input schemas drifted from tests/tool_schema_snapshot.json — "
+            "if intentional, regenerate the snapshot in the same PR"
+        )
+
+
+class TestAsgiApp:
+    """The deployed entrypoint (uvicorn simba_mcp.server:app): the lazy module
+    attr must build a stateless, JSON-response app serving at "/" — previously
+    asserted by nothing but the staging deploy."""
+
+    def test_lazy_app_serves_stateless_json_at_root(self, monkeypatch):
+        from starlette.testclient import TestClient
+
+        import simba_mcp.server as srv
+
+        monkeypatch.setenv("SIMBA_API_KEY", "sk_test")
+        monkeypatch.setenv("SIMBA_API_URL", "http://test:9999")
+        # _create_app flips the module-global HTTP-mode flag; register the
+        # current value with monkeypatch so it is restored after the test.
+        monkeypatch.setattr(srv, "_serving_http", srv._serving_http)
+
+        app = srv.app  # lazy module __getattr__ — the uvicorn target
+        headers = {
+            "Accept": "application/json, text/event-stream",
+            "Content-Type": "application/json",
+        }
+        with TestClient(app) as client:
+            init = client.post(
+                "/",
+                json={
+                    "jsonrpc": "2.0",
+                    "id": 1,
+                    "method": "initialize",
+                    "params": {
+                        "protocolVersion": "2025-03-26",
+                        "capabilities": {},
+                        "clientInfo": {"name": "test", "version": "0"},
+                    },
+                },
+                headers=headers,
+            )
+            assert init.status_code == 200
+            # json_response=True: plain JSON body, not SSE framing
+            assert init.headers["content-type"].startswith("application/json")
+            info = init.json()["result"]["serverInfo"]
+            assert info["version"] == importlib.metadata.version("simba-mcp")
+            # stateless_http=True: no session header required on the next call
+            tools = client.post(
+                "/",
+                json={"jsonrpc": "2.0", "id": 2, "method": "tools/list", "params": {}},
+                headers=headers,
+            )
+            assert tools.status_code == 200
+            assert len(tools.json()["result"]["tools"]) == len(EXPECTED_TOOLS)
+
+
 class TestMainTransportKwargs:
     """v2 moved transport config off Settings onto run() kwargs — the CLI HTTP
     path must pass stateless_http/json_response itself (Bugbot on PR #47) or

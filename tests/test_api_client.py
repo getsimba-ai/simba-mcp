@@ -362,8 +362,10 @@ class TestAPIClientRetry:
         assert call_count == 2
 
     @pytest.mark.anyio
-    async def test_raises_after_max_transport_errors(self):
-        """Persistent transport errors are raised after exhausting retries."""
+    async def test_structured_error_after_max_transport_errors(self):
+        """Persistent transport errors return a structured payload, never raise:
+        SDK v2 masks raised exceptions to an info-free "Error executing tool"
+        at the client, so the cause must travel in the tool result instead."""
 
         class DeadTransport(httpx.AsyncBaseTransport):
             async def handle_async_request(self, request):
@@ -371,8 +373,11 @@ class TestAPIClientRetry:
                 raise httpx.ConnectError("connection refused")
 
         client = self._make_client(DeadTransport())
-        with patch("asyncio.sleep", new_callable=AsyncMock), pytest.raises(httpx.ConnectError):
-            await client.get_schema()
+        with patch("asyncio.sleep", new_callable=AsyncMock):
+            result = await client.get_schema()
+        assert result["_status_code"] == 503
+        assert "unreachable" in result["error"]
+        assert "connection refused" in result["error"]
 
     @pytest.mark.anyio
     async def test_non_retriable_status_not_retried(self):

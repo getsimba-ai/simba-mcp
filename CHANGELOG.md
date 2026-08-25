@@ -13,8 +13,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - The #41 version workaround (`_mcp_server.version` assignment) is replaced by the v2 constructor's `version=` parameter. The handshake tests now also guard the v2 failure mode: an unversioned v2 server reports `""` rather than the SDK fallback.
 - The lifespan now enters once per process under streamable HTTP (v1 entered it per session); the shared `SimbaAPIClient` is session-safe (server-wide internal key + stateless httpx pool) and the constraint is documented at the lifespan.
 - The ASGI app opts out of the SDK's localhost-default DNS-rebinding protection (`host="0.0.0.0"`): the deployed server sits behind a reverse proxy with a public Host header, which the SDK's localhost allowlist would reject.
-- Unexpected tool exceptions now reach clients as generic "Error executing tool ..." messages (SDK 2.1 behavior); Simba API errors are unaffected — they are returned as structured payloads, not raised.
-- New transitive dependency `opentelemetry-api` (inert without an OTel SDK configured).
+- Unexpected tool exceptions now reach clients as generic "Error executing tool ..." messages (SDK 2.1 behavior — the cause stays server-side). Simba API **status** errors were always structured payloads and are unaffected. Transport-level failures (backend unreachable/timeout after retries) previously *raised* — v1 forwarded the cause text to clients, v2 would mask it — so the client now returns them as a structured `{"error": ..., "_status_code": 503}` payload naming the cause, consistent with every other failure mode.
+- **Downstream pin note:** mcp 2.1.x raises dependency floors — notably `pydantic>=2.12.0` (also `anyio>=4.9`, `sse-starlette>=3.0`, new `opentelemetry-api`, inert without an OTel SDK). A deployment that pins pydantic below 2.12 in the same environment (e.g. a shared backend image) must bump it in the same change as the simba-mcp pin or the image build fails with ResolutionImpossible.
 
 ### Fixed
 
