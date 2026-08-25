@@ -31,7 +31,7 @@ Add to your Cursor MCP settings (`.cursor/mcp.json` in the workspace or global s
       "command": "uvx",
       "args": ["simba-mcp"],
       "env": {
-        "SIMBA_API_URL": "https://app.simba-mmm.com",
+        "SIMBA_API_URL": "https://demo.simba-mmm.com",
         "SIMBA_API_KEY": "simba_sk_..."
       }
     }
@@ -50,7 +50,7 @@ Add to your Claude Code MCP config:
       "command": "uvx",
       "args": ["simba-mcp"],
       "env": {
-        "SIMBA_API_URL": "https://app.simba-mmm.com",
+        "SIMBA_API_URL": "https://demo.simba-mmm.com",
         "SIMBA_API_KEY": "simba_sk_..."
       }
     }
@@ -74,7 +74,7 @@ response = client.beta.messages.create(
     mcp_servers=[
         {
             "type": "url",
-            "url": "https://app.simba-mmm.com/mcp",
+            "url": "https://demo.simba-mmm.com/mcp",
             "name": "simba",
             "authorization_token": "simba_sk_...",
         }
@@ -231,7 +231,7 @@ Both use the same API keys with the same scopes.
 ```python
 import requests, time
 
-BASE = "https://app.simba-mmm.com"
+BASE = "https://demo.simba-mmm.com"
 HEADERS = {"Authorization": "Bearer simba_sk_..."}
 
 # Upload data
@@ -276,7 +276,7 @@ for ch in results["results"]["channel_summary"]:
 
 ```bash
 API_KEY="simba_sk_..."
-BASE="https://app.simba-mmm.com"
+BASE="https://demo.simba-mmm.com"
 
 # Upload data
 curl -X POST "$BASE/api/v1/ingest?name=q1_data" \

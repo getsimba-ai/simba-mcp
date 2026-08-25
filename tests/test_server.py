@@ -2,6 +2,7 @@
 
 import importlib.metadata
 import os
+from pathlib import Path
 from typing import ClassVar
 from unittest.mock import patch
 
@@ -85,8 +86,12 @@ class TestResultsSectionsDoc:
         "optimizer",
         "predictions",
         "posterior",
+        "posterior_transforms",
+        "r_hat",
         "financials",
+        "cohort_ledger",
         "model_config",
+        "channel_map",
     ]
 
     def _description(self, name):
@@ -110,6 +115,32 @@ class TestResultsSectionsDoc:
             assert "activity" in desc.lower() and "channels[].name" in desc, (
                 f"{name} docstring must state that results/template keys are the "
                 "activity-column names, not channels[].name"
+            )
+
+    def test_overlap_gate_states_attribution_convention(self):
+        """Issue #32: Overlap is emitted only when link="log" AND
+        attribution="removal_lift". Every docstring that mentions Overlap must
+        carry the convention gate, or agents read its absence as 'additive
+        model' on the dashboard-default conventions."""
+        for name in ("create_model", "get_model_results"):
+            desc = self._description(name)
+            assert "Overlap" in desc, name
+            assert "removal_lift" in desc, (
+                f"{name} docstring mentions Overlap without the removal_lift "
+                "attribution gate (issue #32)"
+            )
+
+
+class TestReadmeHost:
+    """Issue #25: the canonical API host is demo.simba-mmm.com — verified live
+    (app.simba-mmm.com does not answer). README examples regressed twice."""
+
+    def test_no_stale_api_hosts_in_readme(self):
+        readme = (Path(__file__).resolve().parent.parent / "README.md").read_text(encoding="utf-8")
+        for stale in ("app.simba-mmm.com", "app.getsimba.ai"):
+            assert stale not in readme, (
+                f"Stale API host {stale!r} found in README.md — the canonical "
+                "host is demo.simba-mmm.com (issue #25)"
             )
 
 
