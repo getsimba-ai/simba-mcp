@@ -243,7 +243,11 @@ class TestMainTransportKwargs:
         import sys
 
         import simba_mcp.__main__ as entry
+        import simba_mcp.server as srv
 
+        # main() flips the module-global HTTP-mode flag for http/sse — since
+        # #51 that flag gates auth behavior, so register it for restore.
+        monkeypatch.setattr(srv, "_serving_http", srv._serving_http)
         calls = {}
         monkeypatch.setattr(entry.mcp, "run", lambda **kw: calls.update(kw))
         monkeypatch.setattr(sys, "argv", ["simba-mcp", *argv])
@@ -994,3 +998,126 @@ class TestGetModelResultsFiltering:
         assert _norm_channel("Digital impressions") == "digital_impressions"
         assert _column_channel("search_activity_lower_50") == "search"
         assert _column_channel("search_activity_upper") == "search"
+
+
+class TestBringYourOwnKey:
+    """#51: hosted callers authenticate with their own bearer token; no
+    fallback to the env key in HTTP mode."""
+
+    def _ctx_with_headers(self, headers):
+        from unittest.mock import MagicMock
+
+        ctx = MagicMock()
+        ctx.headers = headers
+        return ctx
+
+    def test_bearer_token_extraction(self):
+        from simba_mcp.server import _bearer_token
+
+        cases = [
+            ({"Authorization": "Bearer simba_sk_x"}, "simba_sk_x"),
+            ({"authorization": "bearer simba_sk_y"}, "simba_sk_y"),  # HTTP/2 lowercase
+            ({"Authorization": "Basic dXNlcg=="}, ""),  # wrong scheme
+            ({"Authorization": "Bearer   "}, ""),  # empty token
+            ({"Authorization": "simba_sk_bare"}, ""),  # no scheme
+            ({}, ""),
+            (None, ""),
+        ]
+        for headers, expected in cases:
+            assert _bearer_token(self._ctx_with_headers(headers)) == expected, headers
+
+    def test_client_sets_caller_key_only_in_http_mode(self, monkeypatch):
+        import simba_mcp.server as srv
+        from simba_mcp.api_client import CALLER_API_KEY
+        from simba_mcp.server import _client
+
+        ctx = self._ctx_with_headers({"Authorization": "Bearer simba_sk_h"})
+
+        monkeypatch.setattr(srv, "_serving_http", True)
+        token = CALLER_API_KEY.set(None)  # register restore point
+        try:
+            _client(ctx)
+            assert CALLER_API_KEY.get() == "simba_sk_h"
+            # unconditional re-set: a keyless request must not inherit a key
+            _client(self._ctx_with_headers({}))
+            assert CALLER_API_KEY.get() == ""
+        finally:
+            CALLER_API_KEY.reset(token)
+
+        monkeypatch.setattr(srv, "_serving_http", False)
+        token = CALLER_API_KEY.set(None)
+        try:
+            _client(ctx)
+            assert CALLER_API_KEY.get() is None  # stdio: env key applies
+        finally:
+            CALLER_API_KEY.reset(token)
+
+    def test_asgi_end_to_end_key_gate_and_passthrough(self, monkeypatch):
+        """Through the real wire path: a keyless tools/call gets the 401
+        guidance payload without any backend request; a caller's bearer
+        token reaches the backend verbatim."""
+        import httpx
+        from starlette.testclient import TestClient
+
+        import simba_mcp.server as srv
+        from simba_mcp.api_client import SimbaAPIClient
+
+        recorded = []
+
+        class RecordingTransport(httpx.AsyncBaseTransport):
+            async def handle_async_request(self, request):
+                await request.aread()
+                recorded.append(dict(request.headers))
+                return httpx.Response(200, json={"ok": True})
+
+        async def fake_get_client(self):
+            if self._client is None or self._client.is_closed:
+                self._client = httpx.AsyncClient(
+                    base_url="http://test:1", transport=RecordingTransport()
+                )
+            return self._client
+
+        monkeypatch.setenv("SIMBA_API_KEY", "simba_sk_env_should_never_appear")
+        monkeypatch.setenv("SIMBA_API_URL", "http://test:1")
+        monkeypatch.setattr(SimbaAPIClient, "_get_client", fake_get_client)
+        monkeypatch.setattr(srv, "_serving_http", srv._serving_http)
+
+        # A fresh app, not the module-cached `srv.app`: each app's session
+        # manager is single-use, and TestAsgiApp already consumed the cache.
+        app = srv._create_app()
+        base_headers = {
+            "Accept": "application/json, text/event-stream",
+            "Content-Type": "application/json",
+        }
+        call = {
+            "jsonrpc": "2.0",
+            "id": 2,
+            "method": "tools/call",
+            "params": {"name": "get_data_schema", "arguments": {}},
+        }
+        init = {
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "initialize",
+            "params": {
+                "protocolVersion": "2025-03-26",
+                "capabilities": {},
+                "clientInfo": {"name": "t", "version": "0"},
+            },
+        }
+        with TestClient(app) as client:
+            client.post("/", json=init, headers=base_headers)
+            # keyless: guidance payload, zero backend requests
+            r = client.post("/", json=call, headers=base_headers)
+            text = r.json()["result"]["content"][0]["text"]
+            assert "No API key on this request" in text
+            assert recorded == []
+            # with a caller token: it reaches the backend, env key never does
+            r2 = client.post(
+                "/",
+                json={**call, "id": 3},
+                headers={**base_headers, "Authorization": "Bearer simba_sk_caller99"},
+            )
+            assert '"ok": true' in r2.json()["result"]["content"][0]["text"].lower()
+            assert recorded[0]["authorization"] == "Bearer simba_sk_caller99"
+            assert "should_never_appear" not in str(recorded)
