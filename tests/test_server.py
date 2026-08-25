@@ -1,5 +1,6 @@
 """Tests for the MCP server layer — tool registration, metadata, and lifespan."""
 
+import importlib.metadata
 import os
 from typing import ClassVar
 from unittest.mock import patch
@@ -46,6 +47,20 @@ class TestToolRegistration:
         """Every registered tool has a non-empty description."""
         for tool in mcp._tool_manager.list_tools():
             assert tool.description, f"Tool {tool.name!r} has no description"
+
+
+class TestHandshakeVersion:
+    """The initialize handshake reports simba-mcp's own version, not the mcp SDK's (issue #41)."""
+
+    def test_server_version_matches_installed_metadata(self):
+        opts = mcp._mcp_server.create_initialization_options()
+        assert opts.server_version == importlib.metadata.version("simba-mcp")
+
+    def test_server_version_is_not_the_sdk_fallback(self):
+        """Regression: with version unset, create_initialization_options falls
+        back to the mcp SDK's own package version."""
+        opts = mcp._mcp_server.create_initialization_options()
+        assert opts.server_version != importlib.metadata.version("mcp")
 
 
 class TestResultsSectionsDoc:
