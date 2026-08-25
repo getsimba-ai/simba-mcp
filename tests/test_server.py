@@ -255,6 +255,8 @@ class TestMainTransportKwargs:
         return calls
 
     def test_streamable_http_is_stateless_json(self, monkeypatch):
+        import simba_mcp.server as srv
+
         calls = self._run_main(
             monkeypatch, ["--transport", "streamable-http", "--host", "1.2.3.4", "--port", "9001"]
         )
@@ -265,14 +267,24 @@ class TestMainTransportKwargs:
             "json_response": True,
             "stateless_http": True,
         }
+        # The flag gates BYOK auth AND csv_path denial (#51 review): losing
+        # set_http_mode(True) here would silently revert network callers to
+        # the shared env identity with zero other test signal.
+        assert srv._serving_http is True
 
     def test_stdio_passes_no_transport_kwargs(self, monkeypatch):
+        import simba_mcp.server as srv
+
         calls = self._run_main(monkeypatch, [])
         assert calls == {"transport": "stdio"}
+        assert srv._serving_http is False
 
     def test_sse_passes_host_and_port(self, monkeypatch):
+        import simba_mcp.server as srv
+
         calls = self._run_main(monkeypatch, ["--transport", "sse", "--port", "9002"])
         assert calls == {"transport": "sse", "host": "0.0.0.0", "port": 9002}
+        assert srv._serving_http is True
 
 
 class TestLifespan:
@@ -1121,3 +1133,21 @@ class TestBringYourOwnKey:
             assert '"ok": true' in r2.json()["result"]["content"][0]["text"].lower()
             assert recorded[0]["authorization"] == "Bearer simba_sk_caller99"
             assert "should_never_appear" not in str(recorded)
+
+    @pytest.mark.anyio
+    async def test_http_lifespan_builds_client_without_env_key(self, monkeypatch):
+        """Fail closed at the boundary (#51 review): in HTTP mode the shared
+        client carries NO default credential, so even a code path that
+        bypasses _client(ctx) — leaving the ContextVar at None — gets a 401
+        instead of silently authenticating as the env identity."""
+        import simba_mcp.server as srv
+
+        monkeypatch.setattr(srv, "_serving_http", True)
+        env = {"SIMBA_API_URL": "http://test:9999", "SIMBA_API_KEY": "simba_sk_env_leak"}
+        with patch.dict(os.environ, env):
+            async with app_lifespan(mcp) as app_ctx:
+                assert app_ctx.client._api_key == ""
+                # Direct client use, no _client(ctx): must refuse pre-flight.
+                result = await app_ctx.client.get_schema()
+        assert result["_status_code"] == 401
+        assert "simba_sk_env_leak" not in str(result)

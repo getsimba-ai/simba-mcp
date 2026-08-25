@@ -90,6 +90,11 @@ async def app_lifespan(server: MCPServer) -> AsyncIterator[AppContext]:
             "HTTP mode: per-caller Authorization bearer tokens authenticate "
             "every request (bring-your-own-key); SIMBA_API_KEY is not used."
         )
+        # Fail closed at the boundary, not just at _client(): the shared
+        # client gets NO default credential in HTTP mode, so any code path
+        # that ever bypasses _client(ctx) hits the empty-key 401 instead of
+        # silently authenticating as a shared env identity (#51 review).
+        api_key = ""
     elif not api_key:
         logger.warning(
             "SIMBA_API_KEY is not set — all API calls will return an authentication error. "
@@ -1535,6 +1540,10 @@ def _create_app():
         json_response=True,
         stateless_http=True,
         host="0.0.0.0",
+        # The SDK default (4 MiB) is below the API's 10 MB CSV ingest limit;
+        # 12 MiB leaves headroom for the JSON-RPC envelope. Front proxies
+        # must allow at least the same (nginx client_max_body_size).
+        max_request_body_size=12 * 1024 * 1024,
     )
 
 
