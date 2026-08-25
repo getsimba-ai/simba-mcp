@@ -9,6 +9,7 @@ Run locally:  simba-mcp
 Run remote:   uvicorn simba_mcp.server:app --host 0.0.0.0 --port 8100
 """
 
+import importlib.metadata
 import logging
 import os
 from collections.abc import AsyncIterator
@@ -102,6 +103,13 @@ mcp = FastMCP(
     stateless_http=True,
     lifespan=app_lifespan,
 )
+
+# FastMCP 1.x accepts no version kwarg; left unset, the initialize handshake
+# reports the mcp SDK's version instead of simba-mcp's (#41).
+try:
+    mcp._mcp_server.version = importlib.metadata.version("simba-mcp")
+except importlib.metadata.PackageNotFoundError:  # running from source without install
+    mcp._mcp_server.version = "0.0.0"
 
 
 def _client(ctx: Context[ServerSession, AppContext]) -> SimbaAPIClient:
