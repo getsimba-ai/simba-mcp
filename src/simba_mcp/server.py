@@ -27,6 +27,13 @@ logger = logging.getLogger(__name__)
 # The API's actual ingest cap (src/api/v1/ingest.py: MAX_INGEST_SIZE_BYTES).
 MAX_UPLOAD_BYTES = 10 * 1024 * 1024  # 10 MB
 
+# Streamable-HTTP request-body ceiling. The SDK's 4 MiB default sits BELOW
+# MAX_UPLOAD_BYTES, so a legal csv_content upload would be rejected by the
+# transport before reaching the API; 12 MiB leaves JSON-RPC envelope
+# headroom. Both HTTP entry points (the ASGI app and the CLI) must pass it —
+# the SDK inherits nothing from the constructor (see __main__.py).
+MAX_REQUEST_BODY_BYTES = 12 * 1024 * 1024  # 12 MiB
+
 # csv_path reads files from the machine the MCP server runs on. That is the
 # caller's own machine in stdio mode, but NOT in HTTP/SSE deployments — there
 # it would read the server host's filesystem, so it defaults off. Override
@@ -1540,10 +1547,9 @@ def _create_app():
         json_response=True,
         stateless_http=True,
         host="0.0.0.0",
-        # The SDK default (4 MiB) is below the API's 10 MB CSV ingest limit;
-        # 12 MiB leaves headroom for the JSON-RPC envelope. Front proxies
-        # must allow at least the same (nginx client_max_body_size).
-        max_request_body_size=12 * 1024 * 1024,
+        # Front proxies must allow at least the same (nginx
+        # client_max_body_size), or they reject the upload first.
+        max_request_body_size=MAX_REQUEST_BODY_BYTES,
     )
 
 

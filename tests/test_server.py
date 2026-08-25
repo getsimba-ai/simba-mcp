@@ -266,11 +266,19 @@ class TestMainTransportKwargs:
             "port": 9001,
             "json_response": True,
             "stateless_http": True,
+            "max_request_body_size": srv.MAX_REQUEST_BODY_BYTES,
         }
         # The flag gates BYOK auth AND csv_path denial (#51 review): losing
         # set_http_mode(True) here would silently revert network callers to
         # the shared env identity with zero other test signal.
         assert srv._serving_http is True
+
+    def test_body_limit_covers_the_api_upload_cap(self):
+        """Every HTTP entry point must allow a legal csv_content upload: the
+        SDK's 4 MiB default sits below the API's 10 MB ingest cap."""
+        import simba_mcp.server as srv
+
+        assert srv.MAX_REQUEST_BODY_BYTES > srv.MAX_UPLOAD_BYTES
 
     def test_stdio_passes_no_transport_kwargs(self, monkeypatch):
         import simba_mcp.server as srv
@@ -283,7 +291,12 @@ class TestMainTransportKwargs:
         import simba_mcp.server as srv
 
         calls = self._run_main(monkeypatch, ["--transport", "sse", "--port", "9002"])
-        assert calls == {"transport": "sse", "host": "0.0.0.0", "port": 9002}
+        assert calls == {
+            "transport": "sse",
+            "host": "0.0.0.0",
+            "port": 9002,
+            "max_request_body_size": srv.MAX_REQUEST_BODY_BYTES,
+        }
         assert srv._serving_http is True
 
 
