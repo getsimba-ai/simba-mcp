@@ -20,8 +20,13 @@ def _list_tools():
 EXPECTED_TOOLS = [
     "get_data_schema",
     "upload_data",
+    "list_uploads",
+    "get_upload",
     "list_models",
     "create_model",
+    "get_model",
+    "delete_model",
+    "list_runs",
     "create_var_model",
     "link_var_model",
     "unlink_var_model",
@@ -526,6 +531,137 @@ class TestCreateModelPayload:
         await create_model(**self.BASE_ARGS, ctx=ctx)
         (payload,) = client.create_model.call_args.args
         assert "name" not in payload
+
+    @pytest.mark.anyio
+    async def test_margin_keys_are_top_level_not_config(self):
+        """#26: the API reads operating_margin/operating_margin_column from
+        the REQUEST ROOT and silently drops them inside config — placement
+        is the whole bug class this guards."""
+        from simba_mcp.server import create_model
+
+        ctx, client = self._ctx_capturing()
+        await create_model(**self.BASE_ARGS, operating_margin=0.18, ctx=ctx)
+        (payload,) = client.create_model.call_args.args
+        assert payload["operating_margin"] == 0.18
+        assert "operating_margin" not in payload["config"]
+
+        ctx, client = self._ctx_capturing()
+        await create_model(**self.BASE_ARGS, operating_margin_column="margin", ctx=ctx)
+        (payload,) = client.create_model.call_args.args
+        assert payload["operating_margin_column"] == "margin"
+        assert "operating_margin_column" not in payload["config"]
+
+    @pytest.mark.anyio
+    async def test_config_extras_passthrough(self):
+        """#26: attribution / annual_discount_rate / sampler / reporting_kernel
+        land under config."""
+        from simba_mcp.server import create_model
+
+        ctx, client = self._ctx_capturing()
+        await create_model(
+            **self.BASE_ARGS,
+            link="log",
+            attribution="aumann_shapley",
+            annual_discount_rate=0.08,
+            sampler={"cores": 2, "n_samples": 2000},
+            reporting_kernel={"mode": "complete"},
+            ctx=ctx,
+        )
+        (payload,) = client.create_model.call_args.args
+        assert payload["config"]["attribution"] == "aumann_shapley"
+        assert payload["config"]["annual_discount_rate"] == 0.08
+        assert payload["config"]["sampler"] == {"cores": 2, "n_samples": 2000}
+        assert payload["config"]["reporting_kernel"] == {"mode": "complete"}
+
+    @pytest.mark.anyio
+    async def test_absent_margin_and_extras_omitted(self):
+        """Defaults keep payloads byte-identical: none of the #26 keys appear
+        when unset (annual_discount_rate=0 IS sent — 0 is a valid rate)."""
+        from simba_mcp.server import create_model
+
+        ctx, client = self._ctx_capturing()
+        await create_model(**self.BASE_ARGS, ctx=ctx)
+        (payload,) = client.create_model.call_args.args
+        assert "operating_margin" not in payload
+        assert "operating_margin_column" not in payload
+        for key in ("attribution", "annual_discount_rate", "sampler", "reporting_kernel"):
+            assert key not in payload["config"], key
+
+
+class TestNewResourceTools:
+    """#45/#21: get_model / delete_model / list_runs / list_uploads /
+    get_upload wire the right client calls, and get_scenario_results routes
+    on run_id."""
+
+    def _ctx_capturing(self, method_name):
+        from unittest.mock import AsyncMock, MagicMock
+
+        client = MagicMock()
+        setattr(client, method_name, AsyncMock(return_value={"ok": True}))
+        ctx = MagicMock()
+        ctx.request_context.lifespan_context.client = client
+        return ctx, client
+
+    @pytest.mark.anyio
+    async def test_get_model_forwards_hash(self):
+        from simba_mcp.server import get_model
+
+        ctx, client = self._ctx_capturing("get_model")
+        await get_model("abc123", ctx=ctx)
+        client.get_model.assert_awaited_once_with("abc123")
+
+    @pytest.mark.anyio
+    async def test_delete_model_forwards_hash(self):
+        from simba_mcp.server import delete_model
+
+        ctx, client = self._ctx_capturing("delete_model")
+        await delete_model("abc123", ctx=ctx)
+        client.delete_model.assert_awaited_once_with("abc123")
+
+    def test_delete_model_docstring_states_destructive_and_failed_only(self):
+        """The docstring is the only guard an agent sees before a destructive
+        call — it must say permanent AND failed-only."""
+        tool = next(t for t in _list_tools() if t.name == "delete_model")
+        desc = tool.description
+        assert "PERMANENTLY" in desc or "permanent" in desc.lower()
+        assert "failed" in desc.lower()
+        assert "409" in desc
+
+    @pytest.mark.anyio
+    async def test_list_runs_forwards_paging(self):
+        from simba_mcp.server import list_runs
+
+        ctx, client = self._ctx_capturing("list_runs")
+        await list_runs("scenario", "abc123", limit=10, offset=20, ctx=ctx)
+        client.list_runs.assert_awaited_once_with("scenario", "abc123", limit=10, offset=20)
+
+    @pytest.mark.anyio
+    async def test_scenario_results_routes_on_run_id(self):
+        from simba_mcp.server import get_scenario_results
+
+        ctx, client = self._ctx_capturing("get_scenario_results")
+        await get_scenario_results("abc123", ctx=ctx)
+        client.get_scenario_results.assert_awaited_once_with("abc123", run_id=None)
+
+        ctx, client = self._ctx_capturing("get_scenario_results")
+        await get_scenario_results("abc123", run_id="scn_42", ctx=ctx)
+        client.get_scenario_results.assert_awaited_once_with("abc123", run_id="scn_42")
+
+    @pytest.mark.anyio
+    async def test_list_uploads_forwards_filter(self):
+        from simba_mcp.server import list_uploads
+
+        ctx, client = self._ctx_capturing("list_uploads")
+        await list_uploads(limit=5, name="q3", ctx=ctx)
+        client.list_uploads.assert_awaited_once_with(limit=5, offset=0, name="q3")
+
+    @pytest.mark.anyio
+    async def test_get_upload_forwards_id(self):
+        from simba_mcp.server import get_upload
+
+        ctx, client = self._ctx_capturing("get_upload")
+        await get_upload(17, ctx=ctx)
+        client.get_upload.assert_awaited_once_with(17)
 
 
 class TestRunCurationTools:

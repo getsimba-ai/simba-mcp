@@ -4,6 +4,16 @@ All notable changes to the SIMBA MCP Server will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.2.1 — 2026-08-25
+
+### Added
+
+- `get_model` and `delete_model` (issue #45), mirroring #658's model resource routes: `get_model` returns metadata + the create-time config echo for a model in ANY status — including failed models, with their error message — where `get_model_results` requires 'complete'. `delete_model` permanently deletes a FAILED model (any other status is a 409; the docstring says so plainly) and unlinks dependent VAR pointers. Scopes: `read:models` / `create:models`.
+- Run history is reachable (issue #21): `list_runs(artifact="optimizer"|"scenario", ...)` lists a model's saved runs (pinned-first, newest-first) with paging — documenting two API sharp edges: `count` is the page length (not the total), and the optimizer `objective` is absent from summaries (fetch the run's `inputs` via `get_optimizer_results(run_id=...)`; profit runs carry the key, revenue runs omit it). `get_scenario_results` gains `run_id` — the scenario half of the by-run getter that #33 shipped for the optimizer — so back-to-back scenario runs can finally be disambiguated.
+- Upload listing (issue #21): `list_uploads` (paging + case-insensitive filename filter; `count` here IS the true total) and `get_upload` (per-file detail including the `columns` [{name, dtype}] schema — enough to build `create_model` arguments without re-reading the CSV).
+- `create_model` exposes the financial layer and the remaining accepted config options (issue #26): top-level `operating_margin` / `operating_margin_column` (mutually exclusive; unlocks the `financials` section and automatic profit-optimizer margins — with an explicit warning that the API reads margin keys from the request ROOT and silently ignores them inside `config`), plus `config.attribution` (non-default values require `link="log"`; determines whether the Overlap column exists), `config.annual_discount_rate` (display-time PV discounting), `config.sampler` (strictly validated; cores 1–8), and `config.reporting_kernel` (validated against channel names). Defaults omit every new key — existing payloads are byte-identical.
+- Contract snapshot pins all new request parameters and endpoints; the tool schema snapshot is regenerated for the five new tools (25 total).
+
 ## 0.2.0 — 2026-08-25
 
 ### Changed

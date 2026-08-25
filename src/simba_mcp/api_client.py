@@ -189,6 +189,14 @@ class SimbaAPIClient:
             payload["project_id"] = project_id
         return await self._request("POST", f"/api/v1/models/{model_hash}/save", json=payload)
 
+    async def get_model(self, model_hash: str) -> dict:
+        """Model metadata + config echo (#45); works for every status incl. failed."""
+        return await self._request("GET", f"/api/v1/models/{model_hash}")
+
+    async def delete_model(self, model_hash: str) -> dict:
+        """Delete a FAILED model (#45); the API 409s for any other status."""
+        return await self._request("DELETE", f"/api/v1/models/{model_hash}")
+
     async def get_model_status(self, model_hash: str) -> dict:
         return await self._request("GET", f"/api/v1/models/{model_hash}/status")
 
@@ -237,7 +245,9 @@ class SimbaAPIClient:
             json=payload,
         )
 
-    async def get_scenario_results(self, model_hash: str) -> dict:
+    async def get_scenario_results(self, model_hash: str, run_id: str | None = None) -> dict:
+        if run_id:
+            return await self._request("GET", f"/api/v1/models/{model_hash}/scenario/runs/{run_id}")
         return await self._request("GET", f"/api/v1/models/{model_hash}/scenario")
 
     # -- Saved-run curation (#576) --
@@ -288,3 +298,33 @@ class SimbaAPIClient:
         return await self._request(
             "POST", self._run_path(artifact, model_hash, run_id) + "/pin", **kwargs
         )
+
+    async def list_runs(
+        self,
+        artifact: str,
+        model_hash: str,
+        limit: int = 50,
+        offset: int = 0,
+    ) -> dict:
+        """Run history for a model (#21): GET .../optimize/runs or .../scenario/runs."""
+        segment = self._RUN_SEGMENT.get(artifact)
+        if segment is None:
+            raise ValueError(
+                f"Unknown artifact '{artifact}'. Expected one of: optimizer, scenario."
+            )
+        return await self._request(
+            "GET",
+            f"/api/v1/models/{model_hash}/{segment}/runs",
+            params={"limit": limit, "offset": offset},
+        )
+
+    # -- Upload listing (#21) --
+
+    async def list_uploads(self, limit: int = 50, offset: int = 0, name: str = "") -> dict:
+        params: dict = {"limit": limit, "offset": offset}
+        if name:
+            params["name"] = name
+        return await self._request("GET", "/api/v1/ingest", params=params)
+
+    async def get_upload(self, file_id: int) -> dict:
+        return await self._request("GET", f"/api/v1/ingest/{file_id}")

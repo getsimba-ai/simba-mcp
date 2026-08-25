@@ -11,7 +11,7 @@ API. When core adds a request parameter:
 Parameters deliberately not exposed go in EXCLUDED_BY_DESIGN with a reason.
 
 Snapshot source: simba core repo `src/api/v1/*.py` (ingest.py, results.py,
-models.py, optimizer.py, scenario.py), reviewed 2026-08-19.
+models.py, optimizer.py, scenario.py), reviewed 2026-08-25 (post-#640-645 refactor).
 """
 
 import inspect
@@ -23,6 +23,14 @@ CONTRACT = {
     "POST /api/v1/ingest": {
         "name": "upload_data.name",
         "filename": "upload_data.filename",
+    },
+    "GET /api/v1/ingest": {
+        "limit": "list_uploads.limit",
+        "offset": "list_uploads.offset",
+        "name": "list_uploads.name",
+    },
+    "GET /api/v1/ingest/{id}": {
+        "file_id": "get_upload.file_id",
     },
     "GET /api/v1/models": {
         "include_unsaved": "list_models.include_unsaved",
@@ -47,7 +55,19 @@ CONTRACT = {
         "config.link": "create_model.link",
         "config.channel_groups": "create_model.channel_groups",
         "config.control_reference": "create_model.control_reference",
+        "config.attribution": "create_model.attribution",
+        "config.annual_discount_rate": "create_model.annual_discount_rate",
+        "config.sampler": "create_model.sampler",
+        "config.reporting_kernel": "create_model.reporting_kernel",
+        "operating_margin": "create_model.operating_margin",
+        "operating_margin_column": "create_model.operating_margin_column",
         "name": "create_model.name",
+    },
+    "GET /api/v1/models/{hash}": {
+        "model_hash": "get_model.model_hash",
+    },
+    "DELETE /api/v1/models/{hash}": {
+        "model_hash": "delete_model.model_hash",
     },
     "PATCH /api/v1/models/{hash}": {
         "name": "rename_model.name",
@@ -103,8 +123,19 @@ CONTRACT = {
         "sigma_penalty": "run_optimizer.sigma_penalty",
         "group_bounds": "run_optimizer.group_bounds",
     },
+    "GET /api/v1/models/{hash}/optimize/runs": {
+        "limit": "list_runs.limit",
+        "offset": "list_runs.offset",
+    },
+    "GET /api/v1/models/{hash}/scenario/runs": {
+        "limit": "list_runs.limit",
+        "offset": "list_runs.offset",
+    },
     "GET /api/v1/models/{hash}/optimize/runs/{run_id}": {
         "run_id": "get_optimizer_results.run_id",
+    },
+    "GET /api/v1/models/{hash}/scenario/runs/{run_id}": {
+        "run_id": "get_scenario_results.run_id",
     },
     "PATCH /api/v1/models/{hash}/optimize/runs/{run_id}": {
         "name": "update_run.name",
