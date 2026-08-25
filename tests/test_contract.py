@@ -172,6 +172,20 @@ EXCLUDED_BY_DESIGN = {
     "holding one key must not mint or revoke keys.",
     "GET /api/v1/keys": "See POST /api/v1/keys.",
     "DELETE /api/v1/keys/{id}": "See POST /api/v1/keys.",
+    # Deferred (tracked in issue #49) — accepted by the API but not yet
+    # exposed; each needs its semantics documented before agents get it:
+    "POST /api/v1/models config.sample_prior": "Deferred: prior-predictive "
+    "mode (#395) returns a different artifact class than a fitted model; "
+    "needs its own workflow docs before exposure (issue #49).",
+    "POST /api/v1/models config.base_share_prior": "Deferred: elicited "
+    "base-share prior (#442) is a strictly-validated nested object with "
+    "elicitation semantics to document first (issue #49).",
+    "POST /api/v1/models/{hash}/scenario scenario_space": "Deferred: raw- "
+    "vs model-space flag (#573) silently changes how scenario rows are "
+    "transformed — semantics-changing, document before exposing (issue #49).",
+    "POST /api/v1/models/{hash}/scenario periodicity": "Deferred: scenario "
+    "periodicity override; document interaction with the model's own "
+    "periodicity first (issue #49).",
 }
 
 

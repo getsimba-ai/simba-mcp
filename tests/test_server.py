@@ -558,20 +558,21 @@ class TestCreateModelPayload:
         from simba_mcp.server import create_model
 
         ctx, client = self._ctx_capturing()
+        kernel = {"classes": {"short": {"horizon": 8}}, "channel_classes": {"TV": "short"}}
         await create_model(
             **self.BASE_ARGS,
             link="log",
             attribution="aumann_shapley",
             annual_discount_rate=0.08,
             sampler={"cores": 2, "n_samples": 2000},
-            reporting_kernel={"mode": "complete"},
+            reporting_kernel=kernel,
             ctx=ctx,
         )
         (payload,) = client.create_model.call_args.args
         assert payload["config"]["attribution"] == "aumann_shapley"
         assert payload["config"]["annual_discount_rate"] == 0.08
         assert payload["config"]["sampler"] == {"cores": 2, "n_samples": 2000}
-        assert payload["config"]["reporting_kernel"] == {"mode": "complete"}
+        assert payload["config"]["reporting_kernel"] == kernel
 
     @pytest.mark.anyio
     async def test_absent_margin_and_extras_omitted(self):

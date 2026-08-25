@@ -254,13 +254,15 @@ class SimbaAPIClient:
 
     _RUN_SEGMENT: ClassVar[dict[str, str]] = {"optimizer": "optimize", "scenario": "scenario"}
 
-    def _run_path(self, artifact: str, model_hash: str, run_id: str) -> str:
-        segment = self._RUN_SEGMENT.get(artifact)
-        if segment is None:
-            raise ValueError(
-                f"Unknown artifact '{artifact}'. Expected one of: optimizer, scenario."
-            )
-        return f"/api/v1/models/{model_hash}/{segment}/runs/{run_id}"
+    @staticmethod
+    def _unknown_artifact(artifact: str) -> dict:
+        # Structured payload, never a raise: SDK v2 masks raised exceptions
+        # to an info-free "Error executing tool ..." at the client, so the
+        # recovery guidance must travel in the tool result.
+        return {
+            "error": f"Unknown artifact '{artifact}'. Expected one of: optimizer, scenario.",
+            "_status_code": 400,
+        }
 
     async def update_run(
         self,
@@ -273,6 +275,9 @@ class SimbaAPIClient:
         tags: list[str] | None = None,
     ) -> dict:
         """Rename / annotate a saved run (#576). Only provided fields change."""
+        segment = self._RUN_SEGMENT.get(artifact)
+        if segment is None:
+            return self._unknown_artifact(artifact)
         payload: dict = {}
         if name is not None:
             payload["name"] = name
@@ -281,7 +286,7 @@ class SimbaAPIClient:
         if tags is not None:
             payload["tags"] = tags
         return await self._request(
-            "PATCH", self._run_path(artifact, model_hash, run_id), json=payload
+            "PATCH", f"/api/v1/models/{model_hash}/{segment}/runs/{run_id}", json=payload
         )
 
     async def set_run_pinned(
@@ -292,11 +297,14 @@ class SimbaAPIClient:
         pinned: bool | None = None,
     ) -> dict:
         """Pin/unpin a saved run (#576). ``pinned`` sets; None toggles."""
+        segment = self._RUN_SEGMENT.get(artifact)
+        if segment is None:
+            return self._unknown_artifact(artifact)
         kwargs: dict = {}
         if pinned is not None:
             kwargs["json"] = {"pinned": pinned}
         return await self._request(
-            "POST", self._run_path(artifact, model_hash, run_id) + "/pin", **kwargs
+            "POST", f"/api/v1/models/{model_hash}/{segment}/runs/{run_id}/pin", **kwargs
         )
 
     async def list_runs(
@@ -309,9 +317,7 @@ class SimbaAPIClient:
         """Run history for a model (#21): GET .../optimize/runs or .../scenario/runs."""
         segment = self._RUN_SEGMENT.get(artifact)
         if segment is None:
-            raise ValueError(
-                f"Unknown artifact '{artifact}'. Expected one of: optimizer, scenario."
-            )
+            return self._unknown_artifact(artifact)
         return await self._request(
             "GET",
             f"/api/v1/models/{model_hash}/{segment}/runs",

@@ -226,7 +226,9 @@ async def list_uploads(
     name: str = "",
     ctx: Context[AppContext, Any] = None,
 ) -> dict:
-    """List datasets previously uploaded via the API (newest first).
+    """List the datasets in your workspace (newest first) — every source,
+    not just API uploads: dashboard/manual uploads and pipeline-ingested
+    datasets appear too (see source_type per file).
 
     Returns {files, count, limit, offset} where each file has: id (the
     uploaded_file_id create_model needs), filename, original_filename,
@@ -399,10 +401,11 @@ async def create_model(
               components add on the log scale and media effects are percentage
               lifts. Under the removal_lift attribution convention (the API
               default), contributions then include an Overlap reconciliation
-              column; the other conventions (aumann_shapley, shapley,
-              proportional_normalized — the dashboard default) allocate the
-              interaction across components and close exactly WITHOUT an
-              Overlap column (see get_model_results).
+              column; the other conventions (aumann_shapley — the dashboard
+              default for multiplicative models since #509 —
+              shapley, and proportional_normalized) allocate the interaction
+              across components and close exactly WITHOUT an Overlap column
+              (see get_model_results).
         channel_groups: Optional adstock groups: [{"name": ..., "channels":
                         [...], "share_saturation": bool}]. Member channels tie
                         their carryover parameters (decay/theta/dual-weight —
@@ -447,20 +450,25 @@ async def create_model(
               lets run_optimizer(objective="profit") use it automatically
               instead of requiring forward_margin on every call.
         operating_margin_column: Name of a column in the uploaded CSV holding
-              a per-date margin series (each value a fraction in (0, 1]).
-              Same unlocks as operating_margin; the column must exist in the
-              uploaded file. CAUTION: the API reads the margin keys from the
-              REQUEST ROOT — a margin placed inside a config dict is silently
-              ignored (no error), and the model fits marginless.
+              a per-date margin series. The column may be uniformly in
+              fractions (0, 1] OR uniformly in percentages (1, 100] — the
+              API detects the unit and normalizes percentages; mixed units
+              are rejected. Same unlocks as operating_margin; the column
+              must exist in the uploaded file. CAUTION: the API reads the
+              margin keys from the REQUEST ROOT — a margin placed inside a
+              config dict is silently ignored (no error), and the model fits
+              marginless.
         attribution: Attribution convention for the contribution decomposition,
-              resolved at fit time: "removal_lift" (default; one-at-a-time
-              removal — multiplicative models then emit the Overlap column),
-              "proportional_normalized" (the dashboard default),
-              "aumann_shapley", or "shapley". Any value other than
-              "removal_lift" requires link="log" (the API rejects it on
-              additive models). The non-removal conventions allocate the
-              interaction across components and close exactly WITHOUT an
-              Overlap column.
+              resolved at fit time: "removal_lift" (the API default;
+              one-at-a-time removal — multiplicative models then emit the
+              Overlap column), "aumann_shapley" (the dashboard default for
+              multiplicative models since #509), "shapley", or
+              "proportional_normalized". Any value other than "removal_lift"
+              requires link="log" (the API rejects it on additive models).
+              The non-removal conventions allocate the interaction across
+              components and close exactly WITHOUT an Overlap column. To
+              reconcile with a dashboard-built multiplicative model, use
+              "aumann_shapley".
         annual_discount_rate: Annual discount rate (decimal >= 0, e.g. 0.08)
               used by the display-time financial bridge and cohort ledger PV
               discounting. Display-time only — does not change the fit.
@@ -469,10 +477,17 @@ async def create_model(
               STRICTLY validated: unknown keys inside sampler are rejected
               with a 400 naming the field; cores must be 1-8. Only the keys
               you send are overridden.
-        reporting_kernel: Cohort-horizon reporting override (#449/#450), e.g.
-              {"mode": "complete"} or a per-channel spec. Channel names are
-              validated against channels[].name / activity_column at request
-              time. Affects reported decompositions, not the fit itself.
+        reporting_kernel: Reporting-kernel class override (#450) for
+              the cohort_ledger section's forward allocation. Shape:
+              {"classes": {...}, "channel_classes": {...}} — ONLY those two
+              top-level keys are accepted (anything else, e.g. "mode", 400s
+              with the unknown key named). channel_classes names channels by
+              channels[].name or activity_column, validated at request time.
+              Affects only how the cohort_ledger allocates effects over the
+              horizon — not the fit, and not the contributions /
+              channel_summary decompositions. (The related "complete" /
+              "in_window" choice is a separate cohort_horizon QUERY parameter
+              on the results endpoint, not part of this config.)
 
     Returns the model_hash for status polling.
     """
@@ -914,10 +929,11 @@ async def get_model_results(
       Base + components + Overlap = Model. Overlap is NOT a channel — never
       rank it, share it, or feed it to the optimizer/scenarios. Overlap
       requires BOTH link="log" AND attribution="removal_lift" (the API
-      default): under aumann_shapley, shapley, or proportional_normalized
-      (the dashboard default) the interaction is allocated across components,
-      which close exactly with NO Overlap column — its absence does NOT mean
-      the model is additive or predates the feature.
+      default): under aumann_shapley (the dashboard default for
+      multiplicative models since #509), shapley, or
+      proportional_normalized, the interaction is allocated across
+      components, which close exactly with NO Overlap column — its absence
+      does NOT mean the model is additive or predates the feature.
       Control columns are measured against the reference point resolved at
       fit time (#452, see model_config.control_references) — e.g. "vs.
       average conditions" for a control that never reaches zero — not
