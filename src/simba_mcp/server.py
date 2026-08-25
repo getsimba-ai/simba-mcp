@@ -308,7 +308,11 @@ async def create_model(
                 sat_shape_mean. "name" and "parameter" are rejected too — they
                 identify the smart-prior row the override merges onto.
         trend: Enable dynamic baseline trend component.
-        seasonality: Enable automatic seasonality detection.
+        seasonality: Enable automatic seasonality detection. The prior sigma on
+                     the Fourier coefficients is chosen for the link (#534):
+                     0.5 under link="log", 10 under "identity". The coefficients
+                     live on the link's scale, so the additive default would
+                     admit e^10x seasonal amplitude on a multiplicative model.
         likelihood: Likelihood function: "normal" (default), "lognormal", "logit",
                     "studentt", "poisson", "negativebinomial", or "quantile".
         saturation_type: Diminishing-returns curve family applied to media:
