@@ -1,0 +1,820 @@
+{
+ "create_model": {
+  "properties": {
+   "channel_groups": {
+    "anyOf": [
+     {
+      "items": {
+       "additionalProperties": true,
+       "type": "object"
+      },
+      "type": "array"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null,
+    "title": "Channel Groups"
+   },
+   "channels": {
+    "items": {
+     "additionalProperties": true,
+     "type": "object"
+    },
+    "title": "Channels",
+    "type": "array"
+   },
+   "control_columns": {
+    "anyOf": [
+     {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null,
+    "title": "Control Columns"
+   },
+   "control_reference": {
+    "anyOf": [
+     {
+      "additionalProperties": true,
+      "type": "object"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null,
+    "title": "Control Reference"
+   },
+   "date_column": {
+    "title": "Date Column",
+    "type": "string"
+   },
+   "hierarchy_column": {
+    "title": "Hierarchy Column",
+    "type": "string"
+   },
+   "kpi_column": {
+    "title": "Kpi Column",
+    "type": "string"
+   },
+   "likelihood": {
+    "default": "normal",
+    "title": "Likelihood",
+    "type": "string"
+   },
+   "link": {
+    "default": "identity",
+    "title": "Link",
+    "type": "string"
+   },
+   "multiplier_column": {
+    "default": "",
+    "title": "Multiplier Column",
+    "type": "string"
+   },
+   "name": {
+    "default": "",
+    "title": "Name",
+    "type": "string"
+   },
+   "priors": {
+    "anyOf": [
+     {
+      "items": {
+       "additionalProperties": true,
+       "type": "object"
+      },
+      "type": "array"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null,
+    "title": "Priors"
+   },
+   "saturation_type": {
+    "default": "tanh",
+    "title": "Saturation Type",
+    "type": "string"
+   },
+   "seasonality": {
+    "default": false,
+    "title": "Seasonality",
+    "type": "boolean"
+   },
+   "total_media_effect": {
+    "default": "Other",
+    "title": "Total Media Effect",
+    "type": "string"
+   },
+   "transform_order": {
+    "default": "adstock_first",
+    "title": "Transform Order",
+    "type": "string"
+   },
+   "trend": {
+    "default": false,
+    "title": "Trend",
+    "type": "boolean"
+   },
+   "uploaded_file_id": {
+    "title": "Uploaded File Id",
+    "type": "integer"
+   }
+  },
+  "required": [
+   "uploaded_file_id",
+   "date_column",
+   "kpi_column",
+   "hierarchy_column",
+   "channels"
+  ],
+  "title": "create_modelArguments",
+  "type": "object"
+ },
+ "create_var_model": {
+  "properties": {
+   "base_variable": {
+    "anyOf": [
+     {
+      "type": "string"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null,
+    "title": "Base Variable"
+   },
+   "date_column": {
+    "title": "Date Column",
+    "type": "string"
+   },
+   "endogenous_vars": {
+    "items": {
+     "type": "string"
+    },
+    "title": "Endogenous Vars",
+    "type": "array"
+   },
+   "equity_variables": {
+    "anyOf": [
+     {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null,
+    "title": "Equity Variables"
+   },
+   "exogenous_vars": {
+    "anyOf": [
+     {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null,
+    "title": "Exogenous Vars"
+   },
+   "forecast_horizon": {
+    "default": 12,
+    "title": "Forecast Horizon",
+    "type": "integer"
+   },
+   "lags": {
+    "default": 1,
+    "title": "Lags",
+    "type": "integer"
+   },
+   "lre_ci": {
+    "anyOf": [
+     {
+      "type": "number"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null,
+    "title": "Lre Ci"
+   },
+   "lre_horizon": {
+    "anyOf": [
+     {
+      "type": "integer"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null,
+    "title": "Lre Horizon"
+   },
+   "name": {
+    "default": "",
+    "title": "Name",
+    "type": "string"
+   },
+   "uploaded_file_id": {
+    "title": "Uploaded File Id",
+    "type": "integer"
+   },
+   "var_priors": {
+    "anyOf": [
+     {
+      "additionalProperties": true,
+      "type": "object"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null,
+    "title": "Var Priors"
+   }
+  },
+  "required": [
+   "uploaded_file_id",
+   "date_column",
+   "endogenous_vars"
+  ],
+  "title": "create_var_modelArguments",
+  "type": "object"
+ },
+ "get_contribution_groups": {
+  "properties": {
+   "model_hash": {
+    "title": "Model Hash",
+    "type": "string"
+   }
+  },
+  "required": [
+   "model_hash"
+  ],
+  "title": "get_contribution_groupsArguments",
+  "type": "object"
+ },
+ "get_data_schema": {
+  "properties": {},
+  "title": "get_data_schemaArguments",
+  "type": "object"
+ },
+ "get_model_results": {
+  "properties": {
+   "channels": {
+    "anyOf": [
+     {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null,
+    "title": "Channels"
+   },
+   "format": {
+    "default": "json",
+    "title": "Format",
+    "type": "string"
+   },
+   "max_grid_points": {
+    "anyOf": [
+     {
+      "type": "integer"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null,
+    "title": "Max Grid Points"
+   },
+   "model_hash": {
+    "title": "Model Hash",
+    "type": "string"
+   },
+   "sections": {
+    "default": "",
+    "title": "Sections",
+    "type": "string"
+   }
+  },
+  "required": [
+   "model_hash"
+  ],
+  "title": "get_model_resultsArguments",
+  "type": "object"
+ },
+ "get_model_status": {
+  "properties": {
+   "model_hash": {
+    "title": "Model Hash",
+    "type": "string"
+   }
+  },
+  "required": [
+   "model_hash"
+  ],
+  "title": "get_model_statusArguments",
+  "type": "object"
+ },
+ "get_optimizer_results": {
+  "properties": {
+   "model_hash": {
+    "title": "Model Hash",
+    "type": "string"
+   },
+   "run_id": {
+    "anyOf": [
+     {
+      "type": "string"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null,
+    "title": "Run Id"
+   }
+  },
+  "required": [
+   "model_hash"
+  ],
+  "title": "get_optimizer_resultsArguments",
+  "type": "object"
+ },
+ "get_scenario_results": {
+  "properties": {
+   "model_hash": {
+    "title": "Model Hash",
+    "type": "string"
+   }
+  },
+  "required": [
+   "model_hash"
+  ],
+  "title": "get_scenario_resultsArguments",
+  "type": "object"
+ },
+ "get_scenario_template": {
+  "properties": {
+   "model_hash": {
+    "title": "Model Hash",
+    "type": "string"
+   },
+   "periods_forward": {
+    "default": 12,
+    "title": "Periods Forward",
+    "type": "integer"
+   }
+  },
+  "required": [
+   "model_hash"
+  ],
+  "title": "get_scenario_templateArguments",
+  "type": "object"
+ },
+ "link_var_model": {
+  "properties": {
+   "model_hash": {
+    "title": "Model Hash",
+    "type": "string"
+   },
+   "var_model_hash": {
+    "title": "Var Model Hash",
+    "type": "string"
+   }
+  },
+  "required": [
+   "model_hash",
+   "var_model_hash"
+  ],
+  "title": "link_var_modelArguments",
+  "type": "object"
+ },
+ "list_models": {
+  "properties": {
+   "include_unsaved": {
+    "default": false,
+    "title": "Include Unsaved",
+    "type": "boolean"
+   },
+   "limit": {
+    "default": 50,
+    "title": "Limit",
+    "type": "integer"
+   },
+   "offset": {
+    "default": 0,
+    "title": "Offset",
+    "type": "integer"
+   }
+  },
+  "title": "list_modelsArguments",
+  "type": "object"
+ },
+ "rename_model": {
+  "properties": {
+   "model_hash": {
+    "title": "Model Hash",
+    "type": "string"
+   },
+   "name": {
+    "title": "Name",
+    "type": "string"
+   }
+  },
+  "required": [
+   "model_hash",
+   "name"
+  ],
+  "title": "rename_modelArguments",
+  "type": "object"
+ },
+ "run_optimizer": {
+  "properties": {
+   "bounds": {
+    "additionalProperties": true,
+    "title": "Bounds",
+    "type": "object"
+   },
+   "currency": {
+    "title": "Currency",
+    "type": "string"
+   },
+   "enable_warm_start": {
+    "default": true,
+    "title": "Enable Warm Start",
+    "type": "boolean"
+   },
+   "forward_margin": {
+    "anyOf": [
+     {
+      "type": "number"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null,
+    "title": "Forward Margin"
+   },
+   "gamma": {
+    "title": "Gamma",
+    "type": "number"
+   },
+   "group_bounds": {
+    "anyOf": [
+     {
+      "items": {
+       "additionalProperties": true,
+       "type": "object"
+      },
+      "type": "array"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null,
+    "title": "Group Bounds"
+   },
+   "include_historical_effect": {
+    "default": true,
+    "title": "Include Historical Effect",
+    "type": "boolean"
+   },
+   "laydown_weights": {
+    "additionalProperties": true,
+    "title": "Laydown Weights",
+    "type": "object"
+   },
+   "model_hash": {
+    "title": "Model Hash",
+    "type": "string"
+   },
+   "num_periods": {
+    "title": "Num Periods",
+    "type": "integer"
+   },
+   "objective": {
+    "default": "revenue",
+    "title": "Objective",
+    "type": "string"
+   },
+   "optimizer_engine": {
+    "default": "slsqp",
+    "title": "Optimizer Engine",
+    "type": "string"
+   },
+   "period_cpm": {
+    "additionalProperties": true,
+    "title": "Period Cpm",
+    "type": "object"
+   },
+   "period_multiplier": {
+    "anyOf": [
+     {
+      "items": {
+       "type": "number"
+      },
+      "type": "array"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null,
+    "title": "Period Multiplier"
+   },
+   "sigma_penalty": {
+    "default": "std",
+    "title": "Sigma Penalty",
+    "type": "string"
+   },
+   "total_budget": {
+    "title": "Total Budget",
+    "type": "number"
+   }
+  },
+  "required": [
+   "model_hash",
+   "total_budget",
+   "num_periods",
+   "gamma",
+   "currency",
+   "bounds",
+   "laydown_weights",
+   "period_cpm"
+  ],
+  "title": "run_optimizerArguments",
+  "type": "object"
+ },
+ "run_scenario": {
+  "properties": {
+   "evaluate_holdout": {
+    "default": false,
+    "title": "Evaluate Holdout",
+    "type": "boolean"
+   },
+   "model_hash": {
+    "title": "Model Hash",
+    "type": "string"
+   },
+   "proxy_channels": {
+    "anyOf": [
+     {
+      "items": {
+       "additionalProperties": true,
+       "type": "object"
+      },
+      "type": "array"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null,
+    "title": "Proxy Channels"
+   },
+   "rebuild_model": {
+    "default": true,
+    "title": "Rebuild Model",
+    "type": "boolean"
+   },
+   "scenario_data": {
+    "items": {
+     "additionalProperties": true,
+     "type": "object"
+    },
+    "title": "Scenario Data",
+    "type": "array"
+   },
+   "skip_slicing": {
+    "default": false,
+    "title": "Skip Slicing",
+    "type": "boolean"
+   },
+   "spend_metadata": {
+    "anyOf": [
+     {
+      "items": {
+       "additionalProperties": true,
+       "type": "object"
+      },
+      "type": "array"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null,
+    "title": "Spend Metadata"
+   }
+  },
+  "required": [
+   "model_hash",
+   "scenario_data"
+  ],
+  "title": "run_scenarioArguments",
+  "type": "object"
+ },
+ "save_model": {
+  "properties": {
+   "model_hash": {
+    "title": "Model Hash",
+    "type": "string"
+   },
+   "name": {
+    "title": "Name",
+    "type": "string"
+   },
+   "project_id": {
+    "anyOf": [
+     {
+      "type": "integer"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null,
+    "title": "Project Id"
+   }
+  },
+  "required": [
+   "model_hash",
+   "name"
+  ],
+  "title": "save_modelArguments",
+  "type": "object"
+ },
+ "set_contribution_groups": {
+  "properties": {
+   "contribution_groups": {
+    "items": {
+     "additionalProperties": true,
+     "type": "object"
+    },
+    "title": "Contribution Groups",
+    "type": "array"
+   },
+   "model_hash": {
+    "title": "Model Hash",
+    "type": "string"
+   }
+  },
+  "required": [
+   "model_hash",
+   "contribution_groups"
+  ],
+  "title": "set_contribution_groupsArguments",
+  "type": "object"
+ },
+ "set_run_pinned": {
+  "properties": {
+   "artifact": {
+    "title": "Artifact",
+    "type": "string"
+   },
+   "model_hash": {
+    "title": "Model Hash",
+    "type": "string"
+   },
+   "pinned": {
+    "title": "Pinned",
+    "type": "boolean"
+   },
+   "run_id": {
+    "title": "Run Id",
+    "type": "string"
+   }
+  },
+  "required": [
+   "artifact",
+   "model_hash",
+   "run_id",
+   "pinned"
+  ],
+  "title": "set_run_pinnedArguments",
+  "type": "object"
+ },
+ "unlink_var_model": {
+  "properties": {
+   "model_hash": {
+    "title": "Model Hash",
+    "type": "string"
+   }
+  },
+  "required": [
+   "model_hash"
+  ],
+  "title": "unlink_var_modelArguments",
+  "type": "object"
+ },
+ "update_run": {
+  "properties": {
+   "artifact": {
+    "title": "Artifact",
+    "type": "string"
+   },
+   "model_hash": {
+    "title": "Model Hash",
+    "type": "string"
+   },
+   "name": {
+    "default": "",
+    "title": "Name",
+    "type": "string"
+   },
+   "notes": {
+    "anyOf": [
+     {
+      "type": "string"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null,
+    "title": "Notes"
+   },
+   "run_id": {
+    "title": "Run Id",
+    "type": "string"
+   },
+   "tags": {
+    "anyOf": [
+     {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null,
+    "title": "Tags"
+   }
+  },
+  "required": [
+   "artifact",
+   "model_hash",
+   "run_id"
+  ],
+  "title": "update_runArguments",
+  "type": "object"
+ },
+ "upload_data": {
+  "properties": {
+   "csv_content": {
+    "default": "",
+    "title": "Csv Content",
+    "type": "string"
+   },
+   "csv_path": {
+    "default": "",
+    "title": "Csv Path",
+    "type": "string"
+   },
+   "filename": {
+    "default": "",
+    "title": "Filename",
+    "type": "string"
+   },
+   "name": {
+    "default": "",
+    "title": "Name",
+    "type": "string"
+   }
+  },
+  "title": "upload_dataArguments",
+  "type": "object"
+ }
+}

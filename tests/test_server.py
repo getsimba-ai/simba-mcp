@@ -6,9 +6,16 @@ from pathlib import Path
 from typing import ClassVar
 from unittest.mock import patch
 
+import anyio
 import pytest
 
 from simba_mcp.server import AppContext, app_lifespan, mcp
+
+
+def _list_tools():
+    """Snapshot the registered tools via the public (async) v2 listing."""
+    return anyio.run(mcp.list_tools)
+
 
 EXPECTED_TOOLS = [
     "get_data_schema",
@@ -37,16 +44,16 @@ EXPECTED_TOOLS = [
 class TestToolRegistration:
     def test_all_tools_registered(self):
         """All expected tools are registered on the mcp instance."""
-        registered = {t.name for t in mcp._tool_manager.list_tools()}
+        registered = {t.name for t in _list_tools()}
         assert registered == set(EXPECTED_TOOLS)
 
     def test_tool_count(self):
         """Exactly len(EXPECTED_TOOLS) tools are registered."""
-        assert len(mcp._tool_manager.list_tools()) == len(EXPECTED_TOOLS)
+        assert len(_list_tools()) == len(EXPECTED_TOOLS)
 
     def test_every_tool_has_description(self):
         """Every registered tool has a non-empty description."""
-        for tool in mcp._tool_manager.list_tools():
+        for tool in _list_tools():
             assert tool.description, f"Tool {tool.name!r} has no description"
 
 
@@ -54,13 +61,20 @@ class TestHandshakeVersion:
     """The initialize handshake reports simba-mcp's own version, not the mcp SDK's (issue #41)."""
 
     def test_server_version_matches_installed_metadata(self):
-        opts = mcp._mcp_server.create_initialization_options()
+        opts = mcp._lowlevel_server.create_initialization_options()
         assert opts.server_version == importlib.metadata.version("simba-mcp")
 
+    def test_server_version_is_not_empty(self):
+        """Regression guard for the v2 failure mode: an MCPServer constructed
+        without version= reports "" (not the SDK fallback v1 had), so losing
+        the kwarg would silently undo #41 in a new way."""
+        opts = mcp._lowlevel_server.create_initialization_options()
+        assert opts.server_version not in ("", None)
+
     def test_server_version_is_not_the_sdk_fallback(self):
-        """Regression: with version unset, create_initialization_options falls
-        back to the mcp SDK's own package version."""
-        opts = mcp._mcp_server.create_initialization_options()
+        """Regression: v1 fell back to the mcp SDK's own package version; the
+        handshake must never report that again."""
+        opts = mcp._lowlevel_server.create_initialization_options()
         assert opts.server_version != importlib.metadata.version("mcp")
 
 
@@ -95,7 +109,7 @@ class TestResultsSectionsDoc:
     ]
 
     def _description(self, name):
-        tool = next(t for t in mcp._tool_manager.list_tools() if t.name == name)
+        tool = next(t for t in _list_tools() if t.name == name)
         return tool.description
 
     def test_all_sections_documented(self):
@@ -142,6 +156,114 @@ class TestReadmeHost:
                 f"Stale API host {stale!r} found in README.md — the canonical "
                 "host is demo.simba-mmm.com (issue #25)"
             )
+
+
+class TestToolSchemaSnapshot:
+    """Pin the wire-visible tool surface (issue #42's parity invariant): the
+    committed snapshot was captured from the published 0.1.2 build and must
+    stay byte-identical unless a PR deliberately changes a tool schema."""
+
+    def test_input_schemas_match_snapshot(self):
+        import json
+
+        snap = json.loads(
+            (Path(__file__).resolve().parent / "tool_schema_snapshot.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        live = {t.name: t.input_schema for t in _list_tools()}
+        assert live == snap, (
+            "Tool input schemas drifted from tests/tool_schema_snapshot.json — "
+            "if intentional, regenerate the snapshot in the same PR"
+        )
+
+
+class TestAsgiApp:
+    """The deployed entrypoint (uvicorn simba_mcp.server:app): the lazy module
+    attr must build a stateless, JSON-response app serving at "/" — previously
+    asserted by nothing but the staging deploy."""
+
+    def test_lazy_app_serves_stateless_json_at_root(self, monkeypatch):
+        from starlette.testclient import TestClient
+
+        import simba_mcp.server as srv
+
+        monkeypatch.setenv("SIMBA_API_KEY", "sk_test")
+        monkeypatch.setenv("SIMBA_API_URL", "http://test:9999")
+        # _create_app flips the module-global HTTP-mode flag; register the
+        # current value with monkeypatch so it is restored after the test.
+        monkeypatch.setattr(srv, "_serving_http", srv._serving_http)
+
+        app = srv.app  # lazy module __getattr__ — the uvicorn target
+        headers = {
+            "Accept": "application/json, text/event-stream",
+            "Content-Type": "application/json",
+        }
+        with TestClient(app) as client:
+            init = client.post(
+                "/",
+                json={
+                    "jsonrpc": "2.0",
+                    "id": 1,
+                    "method": "initialize",
+                    "params": {
+                        "protocolVersion": "2025-03-26",
+                        "capabilities": {},
+                        "clientInfo": {"name": "test", "version": "0"},
+                    },
+                },
+                headers=headers,
+            )
+            assert init.status_code == 200
+            # json_response=True: plain JSON body, not SSE framing
+            assert init.headers["content-type"].startswith("application/json")
+            info = init.json()["result"]["serverInfo"]
+            assert info["version"] == importlib.metadata.version("simba-mcp")
+            # stateless_http=True: no session header required on the next call
+            tools = client.post(
+                "/",
+                json={"jsonrpc": "2.0", "id": 2, "method": "tools/list", "params": {}},
+                headers=headers,
+            )
+            assert tools.status_code == 200
+            assert len(tools.json()["result"]["tools"]) == len(EXPECTED_TOOLS)
+
+
+class TestMainTransportKwargs:
+    """v2 moved transport config off Settings onto run() kwargs — the CLI HTTP
+    path must pass stateless_http/json_response itself (Bugbot on PR #47) or
+    it silently reverts to stateful sessions, unlike the deployed ASGI app."""
+
+    def _run_main(self, monkeypatch, argv):
+        import sys
+
+        import simba_mcp.__main__ as entry
+
+        calls = {}
+        monkeypatch.setattr(entry.mcp, "run", lambda **kw: calls.update(kw))
+        monkeypatch.setattr(sys, "argv", ["simba-mcp", *argv])
+        entry.main()
+        return calls
+
+    def test_streamable_http_is_stateless_json(self, monkeypatch):
+        calls = self._run_main(
+            monkeypatch, ["--transport", "streamable-http", "--host", "1.2.3.4", "--port", "9001"]
+        )
+        assert calls == {
+            "transport": "streamable-http",
+            "host": "1.2.3.4",
+            "port": 9001,
+            "json_response": True,
+            "stateless_http": True,
+        }
+
+    def test_stdio_passes_no_transport_kwargs(self, monkeypatch):
+        calls = self._run_main(monkeypatch, [])
+        assert calls == {"transport": "stdio"}
+
+    def test_sse_passes_host_and_port(self, monkeypatch):
+        calls = self._run_main(monkeypatch, ["--transport", "sse", "--port", "9002"])
+        assert calls == {"transport": "sse", "host": "0.0.0.0", "port": 9002}
 
 
 class TestLifespan:
@@ -453,7 +575,7 @@ class TestRunCurationTools:
     def test_docstring_no_invalid_likelihood(self):
         """The API rejects 'negbinomial'; the docstring must name the canonical
         values instead (negativebinomial et al.)."""
-        tool = next(t for t in mcp._tool_manager.list_tools() if t.name == "create_model")
+        tool = next(t for t in _list_tools() if t.name == "create_model")
         assert "negbinomial" not in tool.description.replace("negativebinomial", "")
         assert "negativebinomial" in tool.description
         assert "lognormal" in tool.description
@@ -461,7 +583,7 @@ class TestRunCurationTools:
     def test_docstring_documents_new_prior_fields(self):
         """Half-life, theta, dual-weight, and sat-shape prior overrides must be
         discoverable from the docstring."""
-        tool = next(t for t in mcp._tool_manager.list_tools() if t.name == "create_model")
+        tool = next(t for t in _list_tools() if t.name == "create_model")
         for field in (
             "half_life_lower",
             "half_life_upper",
@@ -596,7 +718,7 @@ class TestUploadData:
 
     def test_docstring_no_stale_limits(self):
         """Docstring must not claim 50 MB or a hardcoded 52-row minimum."""
-        tool = next(t for t in mcp._tool_manager.list_tools() if t.name == "upload_data")
+        tool = next(t for t in _list_tools() if t.name == "upload_data")
         assert "50 MB" not in tool.description
         assert "Minimum 52 rows" not in tool.description
         assert "min_rows" in tool.description

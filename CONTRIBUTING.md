@@ -19,6 +19,19 @@ source .venv/bin/activate  # or .venv\Scripts\activate on Windows
 pip install -e ".[dev]"
 ```
 
+### MCP SDK notes
+
+This server targets MCP Python SDK v2 (`mcp>=2.1,<3` — `MCPServer`, not the
+removed `mcp.server.fastmcp`). When changing anything SDK-facing (transports,
+`Context` signatures, the constructor, the ASGI app), prefer the official
+[`mcp-server-dev` Claude Code plugin](https://github.com/modelcontextprotocol)
+skills and the [v2 migration guide](https://py.sdk.modelcontextprotocol.io/v2/migration/)
+over folklore in old diffs. Two v2 traps worth knowing: the constructor's
+positional order is `(name, title, description, instructions, ...)` — keep
+every argument keyword — and `streamable_http_app()` auto-enables DNS-rebinding
+protection when its `host` is localhost-ish, which a proxied deployment must
+opt out of (see `_create_app`).
+
 ## Running Tests
 
 ```bash

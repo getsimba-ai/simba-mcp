@@ -29,11 +29,24 @@ def main():
     parser.add_argument("--port", type=int, default=8100, help="Port to bind (default: 8100)")
     args = parser.parse_args()
 
-    if args.transport != "stdio":
+    if args.transport == "stdio":
+        mcp.run(transport="stdio")
+    elif args.transport == "streamable-http":
         set_http_mode(True)
-    mcp.settings.host = args.host
-    mcp.settings.port = args.port
-    mcp.run(transport=args.transport)
+        # v2 moved transport config off the shared Settings onto per-transport
+        # run kwargs, so stateless_http/json_response no longer inherit from
+        # the constructor: pass them here too or the CLI HTTP path silently
+        # reverts to stateful sessions, unlike the deployed ASGI app.
+        mcp.run(
+            transport="streamable-http",
+            host=args.host,
+            port=args.port,
+            json_response=True,
+            stateless_http=True,
+        )
+    else:  # sse (no stateless/json knobs on this transport)
+        set_http_mode(True)
+        mcp.run(transport="sse", host=args.host, port=args.port)
 
 
 if __name__ == "__main__":

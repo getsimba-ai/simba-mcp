@@ -104,7 +104,18 @@ class SimbaAPIClient:
                         exc,
                     )
                     await asyncio.sleep(delay)
-        raise last_exc  # type: ignore[misc]
+        # Return a structured payload like every other failure mode instead of
+        # raising: SDK v2 masks unexpected exceptions to an info-free
+        # "Error executing tool ..." at the client, which would hide the most
+        # plausible production failure (backend unreachable during a deploy).
+        return {
+            "error": (
+                f"Simba API unreachable after {MAX_RETRIES} attempts "
+                f"({type(last_exc).__name__}: {last_exc}). The backend may be "
+                "restarting or the SIMBA_API_URL may be wrong — retry shortly."
+            ),
+            "_status_code": 503,
+        }
 
     # -- Ingest --
 
