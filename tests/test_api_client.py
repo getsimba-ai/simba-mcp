@@ -179,10 +179,20 @@ class TestAPIClientEndpoints:
         assert _json.loads(requests[1]["body"]) == {"tags": ["ladder"]}
 
     @pytest.mark.anyio
-    async def test_update_run_unknown_artifact_raises(self, client_with_mock):
+    async def test_unknown_artifact_returns_structured_error(self, client_with_mock):
+        """Never a raise: SDK v2 masks raised exceptions to an info-free
+        'Error executing tool ...' at the client — the guidance must travel
+        in the tool result. Covers all three artifact-taking methods."""
         client, requests = client_with_mock
-        with pytest.raises(ValueError, match="Unknown artifact"):
-            await client.update_run("portfolio", "abc123", "opt_9", name="x")
+        for coro in (
+            client.update_run("portfolio", "abc123", "opt_9", name="x"),
+            client.set_run_pinned("portfolio", "abc123", "opt_9", True),
+            client.list_runs("portfolio", "abc123"),
+        ):
+            result = await coro
+            assert result["_status_code"] == 400
+            assert "Unknown artifact 'portfolio'" in result["error"]
+            assert "optimizer, scenario" in result["error"]
         assert requests == []
 
     @pytest.mark.anyio
@@ -198,6 +208,62 @@ class TestAPIClientEndpoints:
 
         await client.set_run_pinned("optimizer", "abc123", "opt_9")
         assert requests[1]["body"] == b""
+
+    @pytest.mark.anyio
+    async def test_get_model_and_delete_model_paths(self, client_with_mock):
+        """#45: GET/DELETE /api/v1/models/{hash}."""
+        client, requests = client_with_mock
+        await client.get_model("abc123")
+        assert requests[0]["url"].endswith("/api/v1/models/abc123")
+        assert requests[0]["method"] == "GET"
+
+        await client.delete_model("abc123")
+        assert requests[1]["url"].endswith("/api/v1/models/abc123")
+        assert requests[1]["method"] == "DELETE"
+
+    @pytest.mark.anyio
+    async def test_list_runs_paths_per_artifact(self, client_with_mock):
+        """#21: artifact selects the segment; limit/offset ride the query."""
+        client, requests = client_with_mock
+        await client.list_runs("optimizer", "abc123", limit=10, offset=20)
+        assert "/api/v1/models/abc123/optimize/runs" in requests[0]["url"]
+        assert requests[0]["method"] == "GET"
+        assert "limit=10" in requests[0]["url"] and "offset=20" in requests[0]["url"]
+
+        await client.list_runs("scenario", "abc123")
+        assert "/api/v1/models/abc123/scenario/runs" in requests[1]["url"]
+
+    @pytest.mark.anyio
+    async def test_get_scenario_results_run_id_path(self, client_with_mock):
+        """#21: run_id switches to the by-run route; without it, model-level."""
+        client, requests = client_with_mock
+        await client.get_scenario_results("abc123", run_id="scn_9")
+        assert "/api/v1/models/abc123/scenario/runs/scn_9" in requests[0]["url"]
+        assert requests[0]["method"] == "GET"
+
+        await client.get_scenario_results("abc123")
+        assert requests[1]["url"].endswith("/api/v1/models/abc123/scenario")
+
+    @pytest.mark.anyio
+    async def test_list_uploads_params(self, client_with_mock):
+        """#21: GET /api/v1/ingest; name only sent when non-empty."""
+        client, requests = client_with_mock
+        await client.list_uploads(limit=5, offset=10, name="q3")
+        assert "/api/v1/ingest" in requests[0]["url"]
+        assert requests[0]["method"] == "GET"
+        assert "limit=5" in requests[0]["url"] and "offset=10" in requests[0]["url"]
+        assert "name=q3" in requests[0]["url"]
+
+        await client.list_uploads()
+        assert "name=" not in requests[1]["url"]
+
+    @pytest.mark.anyio
+    async def test_get_upload_path(self, client_with_mock):
+        """#21: GET /api/v1/ingest/{id}."""
+        client, requests = client_with_mock
+        await client.get_upload(17)
+        assert requests[0]["url"].endswith("/api/v1/ingest/17")
+        assert requests[0]["method"] == "GET"
 
 
 class TestAPIClientErrorHandling:

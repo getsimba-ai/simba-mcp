@@ -1,6 +1,23 @@
 {
  "create_model": {
   "properties": {
+   "annual_discount_rate": {
+    "anyOf": [
+     {
+      "type": "number"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null,
+    "title": "Annual Discount Rate"
+   },
+   "attribution": {
+    "default": "",
+    "title": "Attribution",
+    "type": "string"
+   },
    "channel_groups": {
     "anyOf": [
      {
@@ -85,6 +102,23 @@
     "title": "Name",
     "type": "string"
    },
+   "operating_margin": {
+    "anyOf": [
+     {
+      "type": "number"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null,
+    "title": "Operating Margin"
+   },
+   "operating_margin_column": {
+    "default": "",
+    "title": "Operating Margin Column",
+    "type": "string"
+   },
    "priors": {
     "anyOf": [
      {
@@ -100,6 +134,32 @@
     ],
     "default": null,
     "title": "Priors"
+   },
+   "reporting_kernel": {
+    "anyOf": [
+     {
+      "additionalProperties": true,
+      "type": "object"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null,
+    "title": "Reporting Kernel"
+   },
+   "sampler": {
+    "anyOf": [
+     {
+      "additionalProperties": true,
+      "type": "object"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null,
+    "title": "Sampler"
    },
    "saturation_type": {
     "default": "tanh",
@@ -261,6 +321,19 @@
   "title": "create_var_modelArguments",
   "type": "object"
  },
+ "delete_model": {
+  "properties": {
+   "model_hash": {
+    "title": "Model Hash",
+    "type": "string"
+   }
+  },
+  "required": [
+   "model_hash"
+  ],
+  "title": "delete_modelArguments",
+  "type": "object"
+ },
  "get_contribution_groups": {
   "properties": {
    "model_hash": {
@@ -277,6 +350,19 @@
  "get_data_schema": {
   "properties": {},
   "title": "get_data_schemaArguments",
+  "type": "object"
+ },
+ "get_model": {
+  "properties": {
+   "model_hash": {
+    "title": "Model Hash",
+    "type": "string"
+   }
+  },
+  "required": [
+   "model_hash"
+  ],
+  "title": "get_modelArguments",
   "type": "object"
  },
  "get_model_results": {
@@ -372,6 +458,18 @@
    "model_hash": {
     "title": "Model Hash",
     "type": "string"
+   },
+   "run_id": {
+    "anyOf": [
+     {
+      "type": "string"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null,
+    "title": "Run Id"
    }
   },
   "required": [
@@ -396,6 +494,19 @@
    "model_hash"
   ],
   "title": "get_scenario_templateArguments",
+  "type": "object"
+ },
+ "get_upload": {
+  "properties": {
+   "file_id": {
+    "title": "File Id",
+    "type": "integer"
+   }
+  },
+  "required": [
+   "file_id"
+  ],
+  "title": "get_uploadArguments",
   "type": "object"
  },
  "link_var_model": {
@@ -435,6 +546,55 @@
    }
   },
   "title": "list_modelsArguments",
+  "type": "object"
+ },
+ "list_runs": {
+  "properties": {
+   "artifact": {
+    "title": "Artifact",
+    "type": "string"
+   },
+   "limit": {
+    "default": 50,
+    "title": "Limit",
+    "type": "integer"
+   },
+   "model_hash": {
+    "title": "Model Hash",
+    "type": "string"
+   },
+   "offset": {
+    "default": 0,
+    "title": "Offset",
+    "type": "integer"
+   }
+  },
+  "required": [
+   "artifact",
+   "model_hash"
+  ],
+  "title": "list_runsArguments",
+  "type": "object"
+ },
+ "list_uploads": {
+  "properties": {
+   "limit": {
+    "default": 50,
+    "title": "Limit",
+    "type": "integer"
+   },
+   "name": {
+    "default": "",
+    "title": "Name",
+    "type": "string"
+   },
+   "offset": {
+    "default": 0,
+    "title": "Offset",
+    "type": "integer"
+   }
+  },
+  "title": "list_uploadsArguments",
   "type": "object"
  },
  "rename_model": {

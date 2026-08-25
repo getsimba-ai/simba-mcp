@@ -219,6 +219,51 @@ async def upload_data(
     return await _client(ctx).upload_csv(csv_content, name, filename=filename)
 
 
+@mcp.tool()
+async def list_uploads(
+    limit: int = 50,
+    offset: int = 0,
+    name: str = "",
+    ctx: Context[AppContext, Any] = None,
+) -> dict:
+    """List the datasets in your workspace (newest first) — every source,
+    not just API uploads: dashboard/manual uploads and pipeline-ingested
+    datasets appear too (see source_type per file).
+
+    Returns {files, count, limit, offset} where each file has: id (the
+    uploaded_file_id create_model needs), filename, original_filename,
+    source_type, row_count, column_count, created_at. Here `count` IS the
+    true total matching the filter (unlike list_runs, where it is the page
+    length). Column names/dtypes are not in the listing — fetch one upload
+    with get_upload for those.
+
+    Args:
+        limit: Page size (API clamps to 1-500; default 50).
+        offset: Rows to skip (paging).
+        name: Optional case-insensitive substring filter on the original
+              filename.
+    """
+    return await _client(ctx).list_uploads(limit=limit, offset=offset, name=name)
+
+
+@mcp.tool()
+async def get_upload(
+    file_id: int,
+    ctx: Context[AppContext, Any] = None,
+) -> dict:
+    """Get one uploaded dataset's details, including its column schema.
+
+    Returns id, filename, original_filename, source_type, mime_type,
+    file_size, row_count, column_count, columns ([{name, dtype}, ...] — use
+    these to build create_model's channel/control column arguments without
+    re-reading the CSV), and created_at.
+
+    Args:
+        file_id: The upload's id, from upload_data's response or list_uploads.
+    """
+    return await _client(ctx).get_upload(file_id)
+
+
 # ---------------------------------------------------------------------------
 # Tool 3: list_models
 # ---------------------------------------------------------------------------
@@ -274,6 +319,12 @@ async def create_model(
     channel_groups: list[dict] | None = None,
     control_reference: dict | None = None,
     name: str = "",
+    operating_margin: float | None = None,
+    operating_margin_column: str = "",
+    attribution: str = "",
+    annual_discount_rate: float | None = None,
+    sampler: dict | None = None,
+    reporting_kernel: dict | None = None,
     ctx: Context[AppContext, Any] = None,
 ) -> dict:
     """Create and start fitting a new Bayesian Marketing Mix Model.
@@ -350,10 +401,11 @@ async def create_model(
               components add on the log scale and media effects are percentage
               lifts. Under the removal_lift attribution convention (the API
               default), contributions then include an Overlap reconciliation
-              column; the other conventions (aumann_shapley, shapley,
-              proportional_normalized — the dashboard default) allocate the
-              interaction across components and close exactly WITHOUT an
-              Overlap column (see get_model_results).
+              column; the other conventions (aumann_shapley — the dashboard
+              default for multiplicative models since #509 —
+              shapley, and proportional_normalized) allocate the interaction
+              across components and close exactly WITHOUT an Overlap column
+              (see get_model_results).
         channel_groups: Optional adstock groups: [{"name": ..., "channels":
                         [...], "share_saturation": bool}]. Member channels tie
                         their carryover parameters (decay/theta/dual-weight —
@@ -391,6 +443,51 @@ async def create_model(
               omitted. Either way the model starts unsaved — invisible to
               list_models unless include_unsaved=true — until save_model
               files it into a project.
+        operating_margin: Scalar operating margin as a decimal fraction in
+              (0, 1], e.g. 0.18 = 18%. Mutually exclusive with
+              operating_margin_column (the API 400s when both are given).
+              Storing a margin unlocks the `financials` results section and
+              lets run_optimizer(objective="profit") use it automatically
+              instead of requiring forward_margin on every call.
+        operating_margin_column: Name of a column in the uploaded CSV holding
+              a per-date margin series. The column may be uniformly in
+              fractions (0, 1] OR uniformly in percentages (1, 100] — the
+              API detects the unit and normalizes percentages; mixed units
+              are rejected. Same unlocks as operating_margin; the column
+              must exist in the uploaded file. CAUTION: the API reads the
+              margin keys from the REQUEST ROOT — a margin placed inside a
+              config dict is silently ignored (no error), and the model fits
+              marginless.
+        attribution: Attribution convention for the contribution decomposition,
+              resolved at fit time: "removal_lift" (the API default;
+              one-at-a-time removal — multiplicative models then emit the
+              Overlap column), "aumann_shapley" (the dashboard default for
+              multiplicative models since #509), "shapley", or
+              "proportional_normalized". Any value other than "removal_lift"
+              requires link="log" (the API rejects it on additive models).
+              The non-removal conventions allocate the interaction across
+              components and close exactly WITHOUT an Overlap column. To
+              reconcile with a dashboard-built multiplicative model, use
+              "aumann_shapley".
+        annual_discount_rate: Annual discount rate (decimal >= 0, e.g. 0.08)
+              used by the display-time financial bridge and cohort ledger PV
+              discounting. Display-time only — does not change the fit.
+        sampler: MCMC sampler overrides, e.g. {"n_samples": 2000,
+              "tune": 1500, "chains": 4, "cores": 2, "target_accept": 0.95}.
+              STRICTLY validated: unknown keys inside sampler are rejected
+              with a 400 naming the field; cores must be 1-8. Only the keys
+              you send are overridden.
+        reporting_kernel: Reporting-kernel class override (#450) for
+              the cohort_ledger section's forward allocation. Shape:
+              {"classes": {...}, "channel_classes": {...}} — ONLY those two
+              top-level keys are accepted (anything else, e.g. "mode", 400s
+              with the unknown key named). channel_classes names channels by
+              channels[].name or activity_column, validated at request time.
+              Affects only how the cohort_ledger allocates effects over the
+              horizon — not the fit, and not the contributions /
+              channel_summary decompositions. (The related "complete" /
+              "in_window" choice is a separate cohort_horizon QUERY parameter
+              on the results endpoint, not part of this config.)
 
     Returns the model_hash for status polling.
     """
@@ -420,12 +517,26 @@ async def create_model(
         payload["config"]["channel_groups"] = channel_groups
     if control_reference:
         payload["config"]["control_reference"] = control_reference
+    if attribution:
+        payload["config"]["attribution"] = attribution
+    if annual_discount_rate is not None:
+        payload["config"]["annual_discount_rate"] = annual_discount_rate
+    if sampler:
+        payload["config"]["sampler"] = sampler
+    if reporting_kernel:
+        payload["config"]["reporting_kernel"] = reporting_kernel
     if multiplier_column:
         payload["multiplier_column"] = multiplier_column
     if priors:
         payload["priors"] = priors
     if name:
         payload["name"] = name
+    # Margin keys are TOP-LEVEL request fields, not config: the API reads them
+    # from the request root and silently ignores them inside config (#26).
+    if operating_margin is not None:
+        payload["operating_margin"] = operating_margin
+    if operating_margin_column:
+        payload["operating_margin_column"] = operating_margin_column
 
     return await _client(ctx).create_model(payload)
 
@@ -637,6 +748,55 @@ async def save_model(
 
 
 @mcp.tool()
+async def get_model(
+    model_hash: str,
+    ctx: Context[AppContext, Any] = None,
+) -> dict:
+    """Get a model's metadata and configuration echo — works for EVERY status,
+    including failed models (unlike get_model_results, which needs 'complete').
+
+    Use this to inspect what a model was configured with, why it failed, or
+    where it lives. Returns: id, model_hash, name, status, model_type
+    ("mmm"/"var"), hierarchy_value, periodicity, is_saved, project_id/name,
+    linked_var_model_hash, created_at/completed_at, error (the failure
+    message — non-null only when status is "failed"), and model_config (the
+    create-time configuration echo: data_source, columns, channels, priors
+    as resolved, and the config flags).
+
+    NOTE: the echo omits a few accepted create_model inputs
+    (operating_margin, annual_discount_rate, reporting_kernel) — absence
+    there does not mean they weren't applied; check the financials results
+    section for the stored margin.
+
+    Args:
+        model_hash: The model hash (any status).
+    """
+    return await _client(ctx).get_model(model_hash)
+
+
+@mcp.tool()
+async def delete_model(
+    model_hash: str,
+    ctx: Context[AppContext, Any] = None,
+) -> dict:
+    """PERMANENTLY DELETE a FAILED model. Destructive and irreversible.
+
+    Only models with status "failed" can be deleted over the API — any other
+    status returns a 409 with the model's current status (delete is for
+    cleaning up failed fits, not curating good ones). Deleting also unlinks
+    any MMMs that pointed at it as their VAR model and removes stored
+    artifacts. On success returns {"deleted_model_hash": ..., "status":
+    "deleted"}.
+
+    Check first with get_model or get_model_status if unsure of the status.
+
+    Args:
+        model_hash: Hash of the FAILED model to delete permanently.
+    """
+    return await _client(ctx).delete_model(model_hash)
+
+
+@mcp.tool()
 async def get_model_status(
     model_hash: str,
     ctx: Context[AppContext, Any] = None,
@@ -769,10 +929,11 @@ async def get_model_results(
       Base + components + Overlap = Model. Overlap is NOT a channel — never
       rank it, share it, or feed it to the optimizer/scenarios. Overlap
       requires BOTH link="log" AND attribution="removal_lift" (the API
-      default): under aumann_shapley, shapley, or proportional_normalized
-      (the dashboard default) the interaction is allocated across components,
-      which close exactly with NO Overlap column — its absence does NOT mean
-      the model is additive or predates the feature.
+      default): under aumann_shapley (the dashboard default for
+      multiplicative models since #509), shapley, or
+      proportional_normalized, the interaction is allocated across
+      components, which close exactly with NO Overlap column — its absence
+      does NOT mean the model is additive or predates the feature.
       Control columns are measured against the reference point resolved at
       fit time (#452, see model_config.control_references) — e.g. "vs.
       average conditions" for a control that never reaches zero — not
@@ -1193,22 +1354,34 @@ async def run_scenario(
 @mcp.tool()
 async def get_scenario_results(
     model_hash: str,
+    run_id: str | None = None,
     ctx: Context[AppContext, Any] = None,
 ) -> dict:
     """Get scenario prediction results.
 
-    Returns status (pending/complete/failed) and, when complete,
-    the full prediction data including predicted KPI per period,
-    channel contributions, confidence intervals, and base components
-    (intercept, seasonality, trend).
+    Without run_id: returns the MODEL-LEVEL scenario state — status
+    (pending/complete/failed) and, when complete, the full prediction data
+    including predicted KPI per period, channel contributions, confidence
+    intervals, and base components (intercept, seasonality, trend). This
+    reflects the LATEST scenario on the model — a newer run overwrites it,
+    so a poller can lose sight of the run it submitted.
+
+    With run_id (run_scenario's response includes it): fetches that specific
+    saved run, immune to later runs — keys include `run_id`, `model_hash`,
+    `name`, `status`, `pinned`, `notes`, `tags`, `key_metrics`, timestamps,
+    `inputs` (the submitted payload), and `results`. Poll THIS form when you
+    need to know whether your own run completed, or to disambiguate
+    back-to-back scenarios.
 
     NOTE: Failed scenarios return status "failed" with an error message in the
     JSON body (not an HTTP error). Always check the status field.
 
     Args:
         model_hash: Hash of the model the scenario was run on.
+        run_id: Optional scenario run id ("scn_..."), from run_scenario's
+            response or list_runs(artifact="scenario").
     """
-    return await _client(ctx).get_scenario_results(model_hash)
+    return await _client(ctx).get_scenario_results(model_hash, run_id=run_id)
 
 
 # ---------------------------------------------------------------------------
@@ -1273,6 +1446,45 @@ async def set_run_pinned(
         pinned: Desired pin state.
     """
     return await _client(ctx).set_run_pinned(artifact, model_hash, run_id, pinned)
+
+
+@mcp.tool()
+async def list_runs(
+    artifact: str,
+    model_hash: str,
+    limit: int = 50,
+    offset: int = 0,
+    ctx: Context[AppContext, Any] = None,
+) -> dict:
+    """List a model's saved optimizer or scenario run history.
+
+    Returns {model_hash, runs, count, limit, offset}. Each run summary has:
+    run_id, name, auto_named, pinned, notes, tags, status, error_details,
+    progress fields while running, key_metrics (optimizer: total_budget,
+    num_periods, gamma, predicted_revenue/roi, ...; scenario: num_periods,
+    total_planned_spend, predicted_outcome, ...; null metrics are omitted —
+    treat every key as optional), and created/started/completed timestamps.
+    Ordering is pinned-first, then newest-first.
+
+    CAVEATS:
+    - `count` is the LENGTH OF THIS PAGE, not the total run count — page
+      until a short page.
+    - The optimizer objective ("revenue"/"profit") is NOT in the summary;
+      fetch the specific run (get_optimizer_results with run_id) and read
+      its `inputs` — profit runs carry `objective: "profit"` there, revenue
+      runs omit the key.
+
+    Use get_optimizer_results / get_scenario_results with a run_id to fetch
+    a listed run's full inputs and results; update_run / set_run_pinned to
+    curate it.
+
+    Args:
+        artifact: "optimizer" (run ids "opt_...") or "scenario" ("scn_...").
+        model_hash: Hash of the model whose run history to list.
+        limit: Page size (API clamps to 1-200; default 50).
+        offset: Rows to skip (paging).
+    """
+    return await _client(ctx).list_runs(artifact, model_hash, limit=limit, offset=offset)
 
 
 # ---------------------------------------------------------------------------
