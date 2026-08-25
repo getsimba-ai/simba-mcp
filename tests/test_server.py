@@ -158,6 +158,43 @@ class TestReadmeHost:
             )
 
 
+class TestMainTransportKwargs:
+    """v2 moved transport config off Settings onto run() kwargs — the CLI HTTP
+    path must pass stateless_http/json_response itself (Bugbot on PR #47) or
+    it silently reverts to stateful sessions, unlike the deployed ASGI app."""
+
+    def _run_main(self, monkeypatch, argv):
+        import sys
+
+        import simba_mcp.__main__ as entry
+
+        calls = {}
+        monkeypatch.setattr(entry.mcp, "run", lambda **kw: calls.update(kw))
+        monkeypatch.setattr(sys, "argv", ["simba-mcp", *argv])
+        entry.main()
+        return calls
+
+    def test_streamable_http_is_stateless_json(self, monkeypatch):
+        calls = self._run_main(
+            monkeypatch, ["--transport", "streamable-http", "--host", "1.2.3.4", "--port", "9001"]
+        )
+        assert calls == {
+            "transport": "streamable-http",
+            "host": "1.2.3.4",
+            "port": 9001,
+            "json_response": True,
+            "stateless_http": True,
+        }
+
+    def test_stdio_passes_no_transport_kwargs(self, monkeypatch):
+        calls = self._run_main(monkeypatch, [])
+        assert calls == {"transport": "stdio"}
+
+    def test_sse_passes_host_and_port(self, monkeypatch):
+        calls = self._run_main(monkeypatch, ["--transport", "sse", "--port", "9002"])
+        assert calls == {"transport": "sse", "host": "0.0.0.0", "port": 9002}
+
+
 class TestLifespan:
     @pytest.mark.anyio
     async def test_lifespan_creates_client(self):
