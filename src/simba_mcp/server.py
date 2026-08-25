@@ -20,12 +20,19 @@ from typing import Any
 
 from mcp.server.mcpserver import Context, MCPServer
 
-from .api_client import SimbaAPIClient
+from .api_client import CALLER_API_KEY, SimbaAPIClient
 
 logger = logging.getLogger(__name__)
 
 # The API's actual ingest cap (src/api/v1/ingest.py: MAX_INGEST_SIZE_BYTES).
 MAX_UPLOAD_BYTES = 10 * 1024 * 1024  # 10 MB
+
+# Streamable-HTTP request-body ceiling. The SDK's 4 MiB default sits BELOW
+# MAX_UPLOAD_BYTES, so a legal csv_content upload would be rejected by the
+# transport before reaching the API; 12 MiB leaves JSON-RPC envelope
+# headroom. Both HTTP entry points (the ASGI app and the CLI) must pass it —
+# the SDK inherits nothing from the constructor (see __main__.py).
+MAX_REQUEST_BODY_BYTES = 12 * 1024 * 1024  # 12 MiB
 
 # csv_path reads files from the machine the MCP server runs on. That is the
 # caller's own machine in stdio mode, but NOT in HTTP/SSE deployments — there
@@ -78,12 +85,24 @@ class AppContext:
 async def app_lifespan(server: MCPServer) -> AsyncIterator[AppContext]:
     # Under SDK v2's streamable HTTP the lifespan enters ONCE per process and
     # this AppContext is shared by every session (v1 entered it per-session).
-    # Safe here: the client holds only the server-wide internal API key and a
-    # stateless httpx connection pool — no per-session state may ever be
+    # Safe here: the client holds a stateless httpx connection pool, and in
+    # HTTP mode each request's credential rides a task-local ContextVar
+    # (#51), never the shared client — no per-session state may ever be
     # added to AppContext without revisiting this.
     base_url = os.environ.get("SIMBA_API_URL", "http://localhost:5005")
     api_key = os.environ.get("SIMBA_API_KEY", "")
-    if not api_key:
+    if _serving_http:
+        # BYOK (#51): callers bring their own key; the env key is unused.
+        logger.info(
+            "HTTP mode: per-caller Authorization bearer tokens authenticate "
+            "every request (bring-your-own-key); SIMBA_API_KEY is not used."
+        )
+        # Fail closed at the boundary, not just at _client(): the shared
+        # client gets NO default credential in HTTP mode, so any code path
+        # that ever bypasses _client(ctx) hits the empty-key 401 instead of
+        # silently authenticating as a shared env identity (#51 review).
+        api_key = ""
+    elif not api_key:
         logger.warning(
             "SIMBA_API_KEY is not set — all API calls will return an authentication error. "
             "This MCP server requires a Simba account. "
@@ -123,7 +142,31 @@ mcp = MCPServer(
 )
 
 
+def _bearer_token(ctx: Context[AppContext, Any]) -> str:
+    """The caller's bearer token from this request's Authorization header.
+
+    Returns "" when the header is absent or malformed — never a fallback
+    credential. Header lookup is case-insensitive (HTTP/2 lowercases).
+    """
+    headers = getattr(ctx, "headers", None) or {}
+    for name, value in headers.items():
+        if name.lower() == "authorization":
+            scheme, _, token = value.partition(" ")
+            if scheme.lower() == "bearer" and token.strip():
+                return token.strip()
+            return ""
+    return ""
+
+
 def _client(ctx: Context[AppContext, Any]) -> SimbaAPIClient:
+    if _serving_http:
+        # Bring-your-own-key (#51): every hosted caller authenticates with
+        # their OWN key from this request's Authorization header. Set
+        # unconditionally — "" makes every backend call fail with guidance —
+        # and deliberately WITHOUT a fallback to the env key: a shared
+        # fallback identity is exactly the hole this closes. The ContextVar
+        # is task-local, so concurrent callers cannot mix keys.
+        CALLER_API_KEY.set(_bearer_token(ctx))
     return ctx.request_context.lifespan_context.client
 
 
@@ -1504,6 +1547,9 @@ def _create_app():
         json_response=True,
         stateless_http=True,
         host="0.0.0.0",
+        # Front proxies must allow at least the same (nginx
+        # client_max_body_size), or they reject the upload first.
+        max_request_body_size=MAX_REQUEST_BODY_BYTES,
     )
 
 

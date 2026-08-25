@@ -5,6 +5,7 @@ Wraps all API v1 endpoints so MCP tools stay thin and declarative.
 """
 
 import asyncio
+import contextvars
 import logging
 from typing import Any, ClassVar
 
@@ -22,6 +23,23 @@ AUTH_HELP = (
     "If you're already a customer, create an API key at Profile > API Keys in the Simba UI. "
     "Not a customer yet? Book a call to get started: "
     "https://calendly.com/niall-oulton"
+)
+
+HTTP_AUTH_HELP = (
+    "On hosted (HTTP) deployments every caller authenticates with their OWN "
+    "Simba API key: send it as the HTTP Authorization header "
+    '("Authorization: Bearer simba_sk_..."). Create a key at '
+    "Profile > API Keys in the Simba UI. " + AUTH_HELP
+)
+
+# Per-caller credential override (bring-your-own-key, issue #51). The server
+# layer sets this from the incoming request's Authorization header before
+# using the shared client. None = no override (stdio: the env key applies);
+# "" = an HTTP caller sent no usable token (every call must fail with
+# guidance, never fall back to a shared key). A ContextVar is task-local, so
+# concurrent callers can never observe each other's keys by construction.
+CALLER_API_KEY: contextvars.ContextVar[str | None] = contextvars.ContextVar(
+    "simba_caller_api_key", default=None
 )
 
 
@@ -65,11 +83,27 @@ class SimbaAPIClient:
         return response.json()
 
     async def _request(self, method: str, path: str, **kwargs) -> dict[str, Any]:
-        if not self._api_key:
+        caller_key = CALLER_API_KEY.get()
+        if caller_key is None:
+            # stdio / no override: the env-configured key is the user's own.
+            if not self._api_key:
+                return {
+                    "error": "SIMBA_API_KEY is not set. " + AUTH_HELP,
+                    "_status_code": 401,
+                    "_help": AUTH_HELP,
+                }
+        elif not caller_key:
             return {
-                "error": "SIMBA_API_KEY is not set. " + AUTH_HELP,
+                "error": "No API key on this request. " + HTTP_AUTH_HELP,
                 "_status_code": 401,
-                "_help": AUTH_HELP,
+                "_help": HTTP_AUTH_HELP,
+            }
+        else:
+            # Per-request header beats the client-default Authorization in
+            # httpx, so the shared connection pool is safe to reuse.
+            kwargs["headers"] = {
+                **kwargs.get("headers", {}),
+                "Authorization": f"Bearer {caller_key}",
             }
         client = await self._get_client()
         last_exc: Exception | None = None

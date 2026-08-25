@@ -14,7 +14,7 @@ Usage:
 
 import argparse
 
-from .server import mcp, set_http_mode
+from .server import MAX_REQUEST_BODY_BYTES, mcp, set_http_mode
 
 
 def main():
@@ -34,19 +34,25 @@ def main():
     elif args.transport == "streamable-http":
         set_http_mode(True)
         # v2 moved transport config off the shared Settings onto per-transport
-        # run kwargs, so stateless_http/json_response no longer inherit from
-        # the constructor: pass them here too or the CLI HTTP path silently
-        # reverts to stateful sessions, unlike the deployed ASGI app.
+        # run kwargs, so nothing inherits from the constructor: every option
+        # the deployed ASGI app sets must be repeated here, or the CLI HTTP
+        # path silently diverges (stateful sessions, 4 MiB body cap).
         mcp.run(
             transport="streamable-http",
             host=args.host,
             port=args.port,
             json_response=True,
             stateless_http=True,
+            max_request_body_size=MAX_REQUEST_BODY_BYTES,
         )
     else:  # sse (no stateless/json knobs on this transport)
         set_http_mode(True)
-        mcp.run(transport="sse", host=args.host, port=args.port)
+        mcp.run(
+            transport="sse",
+            host=args.host,
+            port=args.port,
+            max_request_body_size=MAX_REQUEST_BODY_BYTES,
+        )
 
 
 if __name__ == "__main__":

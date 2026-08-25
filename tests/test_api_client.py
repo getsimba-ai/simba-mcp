@@ -505,3 +505,81 @@ class TestCsvResponses:
         client = self._make_client(RecordingTransport())
         await client.get_model_results("abc", fmt="csv")
         assert "format=csv" in seen["url"]
+
+
+class TestCallerKeyOverride:
+    """Bring-your-own-key (#51): the CALLER_API_KEY ContextVar overrides the
+    env key per request; "" hard-fails with guidance; None keeps env-key
+    behavior; concurrent tasks can never see each other's keys."""
+
+    @pytest.mark.anyio
+    async def test_caller_key_overrides_env_key(self, client_with_mock):
+        from simba_mcp.api_client import CALLER_API_KEY
+
+        client, requests = client_with_mock
+        token = CALLER_API_KEY.set("simba_sk_callerAAA")
+        try:
+            await client.get_schema()
+        finally:
+            CALLER_API_KEY.reset(token)
+        auth = requests[0]["headers"].get("authorization", "")
+        assert auth == "Bearer simba_sk_callerAAA"
+        assert "testkey123" not in auth
+
+    @pytest.mark.anyio
+    async def test_empty_caller_key_fails_with_guidance_before_any_request(self, client_with_mock):
+        from simba_mcp.api_client import CALLER_API_KEY, HTTP_AUTH_HELP
+
+        client, requests = client_with_mock
+        token = CALLER_API_KEY.set("")
+        try:
+            result = await client.get_schema()
+        finally:
+            CALLER_API_KEY.reset(token)
+        assert result["_status_code"] == 401
+        assert HTTP_AUTH_HELP in result["error"]
+        assert requests == []
+
+    @pytest.mark.anyio
+    async def test_no_override_keeps_env_key(self, client_with_mock):
+        """None (stdio) = pre-#51 behavior, the env-configured key."""
+        client, requests = client_with_mock
+        await client.get_schema()
+        assert requests[0]["headers"].get("authorization") == "Bearer simba_sk_testkey123"
+
+    @pytest.mark.anyio
+    async def test_override_merges_with_existing_request_headers(self, client_with_mock):
+        """upload_csv passes Content-Type per-request; the auth override must
+        merge with it, not clobber it."""
+        from simba_mcp.api_client import CALLER_API_KEY
+
+        client, requests = client_with_mock
+        token = CALLER_API_KEY.set("simba_sk_callerBBB")
+        try:
+            await client.upload_csv("a,b\n1,2", name="d")
+        finally:
+            CALLER_API_KEY.reset(token)
+        headers = requests[0]["headers"]
+        assert headers.get("authorization") == "Bearer simba_sk_callerBBB"
+        assert headers.get("content-type") == "text/csv"
+
+    @pytest.mark.anyio
+    async def test_concurrent_tasks_keep_their_own_keys(self, client_with_mock):
+        """Two tasks, two keys, one shared client: each request must carry
+        exactly its own task's key — the leak this design must preclude."""
+        import anyio
+
+        from simba_mcp.api_client import CALLER_API_KEY
+
+        client, requests = client_with_mock
+
+        async def call_as(key):
+            CALLER_API_KEY.set(key)  # task-local: dies with the task
+            await client.get_schema()
+
+        async with anyio.create_task_group() as tg:
+            tg.start_soon(call_as, "simba_sk_userONE")
+            tg.start_soon(call_as, "simba_sk_userTWO")
+
+        seen = sorted(r["headers"]["authorization"] for r in requests)
+        assert seen == ["Bearer simba_sk_userONE", "Bearer simba_sk_userTWO"]

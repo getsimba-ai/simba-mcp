@@ -161,6 +161,14 @@ protocol.
 
 Things that commonly trip up both AI agents and humans:
 
+### Hosted server: your bearer token IS your login
+
+On HTTP deployments each request is authenticated with the caller's own
+`Authorization: Bearer simba_sk_...` token — there is no server-side shared
+key. If tool calls return `"No API key on this request"`, your MCP client
+isn't sending the token (check the `authorization_token` / headers setting
+in its config).
+
 ### Channel names are exact-match
 
 Model results are keyed by the channel's **activity column** name (e.g. `"search_activity"`, `"TV_impressions"`), **not** by the `channels[].name` you passed to `create_model`. Keys can contain spaces and matching is **case-sensitive and space-sensitive** — the optimizer and scenario tools use them as dictionary keys.
@@ -336,14 +344,23 @@ The MCP server authenticates with the same API keys used by the Simba REST API. 
 3. Set scopes: `ingest`, `read:models`, `read:results`, `create:models`, `optimize`, `scenario`
 4. Copy the key (shown only once)
 
-Set the key as the `SIMBA_API_KEY` environment variable in your MCP config.
+How the key is supplied depends on where the server runs:
+
+- **Local (stdio — Cursor, Claude Code):** set it as the `SIMBA_API_KEY`
+  environment variable in your MCP config (the examples above).
+- **Hosted (`https://demo.simba-mmm.com/mcp`):** send it as the HTTP
+  `Authorization: Bearer` header — the `authorization_token` field in the
+  Claude MCP connector config. **Every caller uses their own key** (v0.2.2+):
+  the server never shares an identity between callers, a request without a
+  key gets a structured 401 with guidance, and you only ever see your own
+  account's models.
 
 ## Configuration
 
 | Environment Variable | Description | Default |
 |---------------------|-------------|---------|
 | `SIMBA_API_URL` | Simba API base URL | `http://localhost:5005` |
-| `SIMBA_API_KEY` | Your Simba API key | (required) |
+| `SIMBA_API_KEY` | Your Simba API key (stdio mode only — HTTP callers send their own key as the bearer token) | (required for stdio) |
 
 ## Transport Modes
 
