@@ -11,7 +11,8 @@ API. When core adds a request parameter:
 Parameters deliberately not exposed go in EXCLUDED_BY_DESIGN with a reason.
 
 Snapshot source: simba core repo `src/api/v1/*.py` (ingest.py, results.py,
-models.py, optimizer.py, scenario.py), reviewed 2026-08-25 (post-#640-645 refactor).
+models.py, optimizer.py, scenario.py, projects.py), reviewed 2026-08-26
+(post-#640-645 refactor; projects #645 + unsave #673 added for 0.3.0).
 """
 
 import inspect
@@ -75,6 +76,22 @@ CONTRACT = {
     "POST /api/v1/models/{hash}/save": {
         "name": "save_model.name",
         "project_id": "save_model.project_id",
+    },
+    "POST /api/v1/models/{hash}/unsave": {
+        "model_hash": "unsave_model.model_hash",
+    },
+    "GET /api/v1/projects": {
+        # The endpoint takes no request parameters — pin reachability of the
+        # tool itself via its context param.
+        "(none)": "list_projects.ctx",
+    },
+    "POST /api/v1/projects": {
+        "name": "create_project.name",
+        "team_id": "create_project.team_id",
+    },
+    "PATCH /api/v1/projects/{id}": {
+        "project_id": "rename_project.project_id",
+        "name": "rename_project.name",
     },
     "POST /api/v1/models (model_type=var)": {
         "data_source": "create_var_model.uploaded_file_id",

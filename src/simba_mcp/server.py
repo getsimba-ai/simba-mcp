@@ -394,28 +394,51 @@ async def create_model(
                            meaning "I believe all media drives 15% of my KPI". Default "Other".
         priors: Optional per-channel prior overrides. Each dict should have "channel" matching
                 a channels[].name, plus any fields to override: distribution, mean, sd, lower,
-                upper, transform, adstock_type, effect_period, alpha_sd (legacy),
-                scalars (legacy), decay_lower/decay_upper (legacy — prefer the
-                half_saturation_*/half_life_* fields described below).
+                upper, transform, adstock_type, effect_period.
                 Only specified fields are overridden; the rest use smart defaults.
                 Adstock-kernel fields: half_life_lower/half_life_upper (carryover half-life
                 bounds in periods — preferred over the legacy decay_lower/decay_upper),
                 theta_mean/theta_sd (peak-lag prior, adstock_type="delayed" only),
                 dual_weight_mean/dual_weight_sd (long-term/slow-component share prior,
-                adstock_type="dual_geometric" only). Saturation fields:
-                sat_shape_mean/sat_shape_sd (curvature prior, saturation_type=
-                "generalized_log" only; small values are near-logarithmic, 1.0 is
-                michaelis_menten), half_saturation_mean/half_saturation_sd (the
-                50%-of-maximum-response point in the channel's activity units —
-                preferred over the legacy alpha_sd/scalars pair, and cannot be
-                combined with it in the same override),
-                half_marginal_mean/half_marginal_sd (generalized_log ONLY: the
-                activity level where MARGINAL returns have halved. Use this
-                rather than half_saturation_* at near-logarithmic curvature —
-                the 50% point overflows below sat_shape_mean 0.00097657 and is
-                rejected with a 400, while the half-marginal point is finite at
-                every shape. Cannot be combined with the other two anchors;
-                #632).
+                adstock_type="dual_geometric" only).
+                SATURATION ANCHOR — state it ONCE, in exactly one of three
+                mutually exclusive forms (two in one override -> 400 "state
+                the saturation prior once"):
+                (1) half_marginal_mean/half_marginal_sd — CANONICAL for
+                saturation_type="generalized_log" (rejected on other
+                families): the activity level where MARGINAL returns have
+                halved, finite at every curvature (#632).
+                sat_shape_mean MUST accompany the pair in the same override
+                (#672) — the fold pairs your coefficient with the
+                stated curvature, so omitting it is a 400, never a silent
+                default.
+                (2) half_saturation_mean/half_saturation_sd — the
+                50%-of-maximum point in activity units, for the
+                single-parameter families (tanh/michaelis_menten/
+                negative_exponential). Do NOT use it for generalized_log
+                near-log work: it overflows below sat_shape_mean 0.00097657
+                and is rejected with a 400 — precisely the regime that
+                family exists for.
+                (3) alpha_sd + scalars — legacy internal coordinates,
+                accepted for backward compat.
+                Curvature (generalized_log only): sat_shape_mean/sat_shape_sd
+                — small values are near-logarithmic, 1.0 is michaelis_menten.
+                COEFFICIENT in a human coordinate (generalized_log only,
+                #671): effect_at_avg_mean/effect_at_avg_sd — the
+                effect share at the channel's AVERAGE activity, as FRACTIONS
+                (mean in (0, 0.95], sd > 0; 0.2 means 20%). Folded
+                server-side into mean/sd at the row's operating point with
+                the same arithmetic as the dashboard. Requires sat_shape_mean
+                in the same override; cannot be combined with mean/sd
+                ("state the coefficient prior once") or with
+                half_saturation_*. Stating half_marginal_* + effect_at_avg_*
+                + sat_shape_mean together is the full (x*, E, k) triple —
+                the recommended generalized_log elicitation, since only
+                beta*k is identified and raw beta spans orders of magnitude.
+                VERIFY what was applied via get_model's
+                model_config.priors_resolved: rows carry the FOLDED
+                mean/sd/scalars/alpha_sd, and overridden_fields lists the
+                field names you sent.
                 UNKNOWN KEYS ARE REJECTED with a 400 naming the field
                 (#630); they used to be dropped silently, fitting a
                 hybrid of the override and the smart defaults. Common misses:
@@ -784,10 +807,99 @@ async def save_model(
         model_hash: Hash of the model to save.
         name: Display name to save under (non-empty).
         project_id: Optional target project ID; must be a project you own
-            or one shared with a team you belong to. Defaults to your
-            default project.
+            or one shared with a team you belong to. Discover ids with
+            list_projects; create a folder with create_project. Defaults
+            to your default project.
     """
     return await _client(ctx).save_model(model_hash, name, project_id=project_id)
+
+
+@mcp.tool()
+async def unsave_model(
+    model_hash: str,
+    ctx: Context[AppContext, Any] = None,
+) -> dict:
+    """Release a model's saved slot without deleting anything — the inverse
+    of save_model (#673).
+
+    Use this for cap management: at the 20-saved-models cap, unsave a model
+    that no longer earns its shelf spot instead of deleting it. The model
+    reverts to the state API-created models start in (unsaved, no project;
+    the name is kept) — it leaves the default listing and the dashboard's
+    Saved Models but stays fully addressable by hash: fetchable, renameable,
+    exportable, re-saveable, and visible via list_models with
+    include_unsaved=true. Idempotent — unsaving an unsaved model is a
+    success with freed_project_id null. delete_model remains failed-only.
+
+    Two caveats: the UNSAVED pool is auto-pruned by dashboard model creation
+    (at 10+ unsaved models the oldest is hard-deleted, artifacts included),
+    so re-save anything worth keeping rather than parking it unsaved
+    long-term; and unsaving a shared model hides it from every recipient
+    until it is saved again.
+
+    Args:
+        model_hash: Hash of the model whose slot to release.
+
+    Returns: {model_hash, is_saved: false, freed_project_id}.
+    """
+    return await _client(ctx).unsave_model(model_hash)
+
+
+@mcp.tool()
+async def list_projects(
+    ctx: Context[AppContext, Any] = None,
+) -> dict:
+    """List the projects (the app's model folders) you can file models into.
+
+    Returns owned and team-shared projects: per project {id, name,
+    is_default, shared_with_team_id, model_count} — team-shared folders
+    carry "shared": true, and model_count counts SAVED models (the set the
+    app's model list shows). Use the ids with save_model(project_id=...)
+    and rename_project. There is deliberately no delete over the API — use
+    the app to delete a project.
+    """
+    return await _client(ctx).list_projects()
+
+
+@mcp.tool()
+async def create_project(
+    name: str,
+    team_id: int | None = None,
+    ctx: Context[AppContext, Any] = None,
+) -> dict:
+    """Create a named project (model folder) to file models into.
+
+    Names are sanitized the same way model names are (non-empty after
+    HTML sanitization).
+
+    Args:
+        name: Display name for the new project.
+        team_id: Optional team to share the project with; must be a team
+            you belong to (403 otherwise, 404 for an unknown team).
+
+    Returns the created project (201) including its id — pass that to
+    save_model(project_id=...).
+    """
+    return await _client(ctx).create_project(name, team_id=team_id)
+
+
+@mcp.tool()
+async def rename_project(
+    project_id: int,
+    name: str,
+    ctx: Context[AppContext, Any] = None,
+) -> dict:
+    """Rename a project you OWN.
+
+    Team members can file models into a shared folder but not rename it
+    (owner-only; 404 for a project you don't own). Renaming your default
+    folder is safe: it keeps receiving unqualified saves under its new name.
+
+    Args:
+        project_id: Id of the project to rename (see list_projects).
+        name: New display name.
+    """
+    return await _client(ctx).rename_project(project_id, name)
 
 
 @mcp.tool()
@@ -1053,6 +1165,17 @@ async def get_model_results(
       attribution reference mode, the zero_distance diagnostic behind the
       "auto" choice, and the posterior-mean q_ref. Models created before
       these fields existed may omit them.
+      priors_resolved reports what the fit actually consumed (#643): per row,
+      overridden_fields lists only the fields that took effect, and
+      accepted_not_used — present only when non-empty — names any that were
+      accepted but inert for this model's configuration, each with a reason.
+      A prior field can be spelled correctly and still do nothing: theta_*
+      needs adstock_type "delayed", dual_weight_* needs "dual_geometric",
+      sat_shape_* needs saturation_type "generalized_log", and the decay /
+      half-life bounds are ignored FOR "dual_geometric". If a prior you set
+      appears to have had no influence, read accepted_not_used first. The
+      folded coordinates (half_marginal_*, effect_at_avg_*) are never called
+      inert — they land in the row's scalars/alpha_sd/mean/sd.
     - channel_map: canonical identifier mapping, one record per channel:
       {channel, activity_column, spend_column} as configured at create time.
       This is the join key between channels[].name and the sections keyed by
