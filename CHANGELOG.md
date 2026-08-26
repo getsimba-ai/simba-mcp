@@ -4,6 +4,16 @@ All notable changes to the SIMBA MCP Server will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.3.1 — 2026-08-26
+
+### Added
+
+- **`link_var_model` gains `channel_map` (#682)** — a declared `{var_exogenous_series: [mmm_channel, ...]}` mapping so a group-level VAR (the right specification for short monthly datasets) can bridge onto a tactic-level MMM that the exact-name join misses entirely. Each group's elasticity is allocated across its member channels pro-rata by KPI short-term contribution — slices sum exactly to the group elasticity, so the group's long-run effect is counted once, never once per member. Validation is strict and link-time (unknown names 400 with a did-you-mean; the MMM must be complete when a map is supplied; no channel in two groups). The map belongs to the link: every link replaces it (omitting `channel_map` clears a stored map), unlink clears it. Contract snapshot pins the key; tool schema snapshot regenerated.
+
+### Changed
+
+- `get_model_results` docstring: `long_run_rollup` now documents the map-aware join — per-row `var_group` + allocated elasticity, group truth in `metadata.groups`, and the new `reason: "no_channel_overlap"` carried on an `available: true` rollup where nothing joined (the coverage block says why; the bridge constants stay published).
+
 ## 0.3.0 — 2026-08-26
 
 ### Added

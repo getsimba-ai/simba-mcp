@@ -543,6 +543,24 @@
    "var_model_hash": {
     "title": "Var Model Hash",
     "type": "string"
+   },
+   "channel_map": {
+    "anyOf": [
+     {
+      "additionalProperties": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "type": "object"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null,
+    "title": "Channel Map"
    }
   },
   "required": [

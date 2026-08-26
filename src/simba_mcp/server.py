@@ -693,6 +693,7 @@ async def create_var_model(
 async def link_var_model(
     model_hash: str,
     var_model_hash: str,
+    channel_map: dict[str, list[str]] | None = None,
     ctx: Context[AppContext, Any] = None,
 ) -> dict:
     """Link a completed VAR model to an MMM (#569).
@@ -702,11 +703,24 @@ async def link_var_model(
     A VAR links to at most one MMM at a time — the error names the current
     owner if it is already linked elsewhere.
 
+    The join is by exact name unless channel_map declares which MMM channels
+    each VAR exogenous series stands for (#682) — required whenever
+    the VAR is fitted on group spends (e.g. four spend groups) while the MMM
+    is tactic-level. Each group's elasticity is allocated across its member
+    channels pro-rata by KPI short-term contribution, so the group's long-run
+    effect is counted exactly once. Validation is strict: keys must be VAR
+    exogenous series, values must be channel names of the (completed) MMM,
+    and no channel may belong to two groups. The map belongs to the link:
+    every link replaces it (omitting channel_map clears any stored map) and
+    unlink clears it.
+
     Args:
         model_hash: The MMM to attach the long-run view to.
         var_model_hash: The VAR model (from create_var_model).
+        channel_map: Optional {var_exogenous_series: [mmm_channel, ...]}
+            mapping for group-level VARs.
     """
-    return await _client(ctx).link_var_model(model_hash, var_model_hash)
+    return await _client(ctx).link_var_model(model_hash, var_model_hash, channel_map)
 
 
 @mcp.tool()
@@ -1133,7 +1147,12 @@ async def get_model_results(
     - actual_vs_model: actual vs predicted per period with 50%/95% HDIs.
     - long_run_rollup: MMM short-term + VAR long-run revenue rollup per channel;
       returns {available: false, reason: "no_linked_var_model"} when no VAR
-      model is linked to this MMM.
+      model is linked to this MMM. Joins by exact name unless the link declared
+      a channel_map (see link_var_model) — mapped rows carry var_group and an
+      allocated elasticity slice, with group-level truth in metadata.groups. A
+      computed rollup where nothing joined stays available: true but carries
+      reason: "no_channel_overlap" — check metadata.coverage, then declare a
+      channel_map on the link.
     - optimizer: latest optimization results (see get_optimizer_results).
     - predictions: latest scenario prediction rows (see get_scenario_results).
     - posterior: full posterior summary table — one row per model variable
