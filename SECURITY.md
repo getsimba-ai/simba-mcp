@@ -14,4 +14,4 @@ For the broader SIMBA platform security policy, see [getsimba-ai/simba-mmm SECUR
 
 | Version | Supported |
 |---------|-----------|
-| 0.1.x   | Yes       |
+| 0.3.x   | Yes       |

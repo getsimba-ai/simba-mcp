@@ -24,7 +24,7 @@ from .api_client import CALLER_API_KEY, SimbaAPIClient
 
 logger = logging.getLogger(__name__)
 
-# The API's actual ingest cap (src/api/v1/ingest.py: MAX_INGEST_SIZE_BYTES).
+# The API's actual ingest cap, enforced server-side by the ingest endpoint.
 MAX_UPLOAD_BYTES = 10 * 1024 * 1024  # 10 MB
 
 # Streamable-HTTP request-body ceiling. The SDK's 4 MiB default sits BELOW

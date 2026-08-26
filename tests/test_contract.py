@@ -10,9 +10,8 @@ API. When core adds a request parameter:
 
 Parameters deliberately not exposed go in EXCLUDED_BY_DESIGN with a reason.
 
-Snapshot source: simba core repo `src/api/v1/*.py` (ingest.py, results.py,
-models.py, optimizer.py, scenario.py, projects.py), reviewed 2026-08-26
-(post-#640-645 refactor; projects #645 + unsave #673 added for 0.3.0).
+Snapshot source: the Simba public API v1 surface (ingest, results, models,
+optimizer, scenario and project routes), reviewed 2026-08-26.
 """
 
 import inspect
