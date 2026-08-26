@@ -109,6 +109,7 @@ CONTRACT = {
     },
     "POST /api/v1/models/{hash}/link_var": {
         "var_model_hash": "link_var_model.var_model_hash",
+        "channel_map": "link_var_model.channel_map",
     },
     "DELETE /api/v1/models/{hash}/link_var": {
         "model_hash": "unlink_var_model.model_hash",

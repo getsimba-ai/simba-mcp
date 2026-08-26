@@ -192,11 +192,19 @@ class SimbaAPIClient:
     async def create_model(self, payload: dict) -> dict:
         return await self._request("POST", "/api/v1/models", json=payload)
 
-    async def link_var_model(self, model_hash: str, var_model_hash: str) -> dict:
+    async def link_var_model(
+        self,
+        model_hash: str,
+        var_model_hash: str,
+        channel_map: dict[str, list[str]] | None = None,
+    ) -> dict:
+        body: dict = {"var_model_hash": var_model_hash}
+        if channel_map is not None:
+            body["channel_map"] = channel_map
         return await self._request(
             "POST",
             f"/api/v1/models/{model_hash}/link_var",
-            json={"var_model_hash": var_model_hash},
+            json=body,
         )
 
     async def unlink_var_model(self, model_hash: str) -> dict:
