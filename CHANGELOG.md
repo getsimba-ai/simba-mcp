@@ -4,6 +4,15 @@ All notable changes to the SIMBA MCP Server will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.3.2 — 2026-08-26
+
+### Changed
+
+- `LICENSE` now names the owning legal entity, 1749 Ltd, rather than the Simba brand. No change to the terms — the project remains MIT.
+- `Homepage` metadata points at <https://getsimba.ai>, matching the repository's own homepage.
+- `SECURITY.md`'s supported-versions table tracks the 0.3.x line instead of the long-superseded 0.1.x.
+- Internal implementation paths removed from a source comment, a test docstring and a changelog line; each now describes the behaviour by its public API surface instead.
+
 ## 0.3.1 — 2026-08-26
 
 ### Added
