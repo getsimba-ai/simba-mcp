@@ -201,6 +201,31 @@
   "title": "create_modelArguments",
   "type": "object"
  },
+ "create_project": {
+  "properties": {
+   "name": {
+    "title": "Name",
+    "type": "string"
+   },
+   "team_id": {
+    "anyOf": [
+     {
+      "type": "integer"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null,
+    "title": "Team Id"
+   }
+  },
+  "required": [
+   "name"
+  ],
+  "title": "create_projectArguments",
+  "type": "object"
+ },
  "create_var_model": {
   "properties": {
    "base_variable": {
@@ -548,6 +573,11 @@
   "title": "list_modelsArguments",
   "type": "object"
  },
+ "list_projects": {
+  "properties": {},
+  "title": "list_projectsArguments",
+  "type": "object"
+ },
  "list_runs": {
   "properties": {
    "artifact": {
@@ -613,6 +643,24 @@
    "name"
   ],
   "title": "rename_modelArguments",
+  "type": "object"
+ },
+ "rename_project": {
+  "properties": {
+   "name": {
+    "title": "Name",
+    "type": "string"
+   },
+   "project_id": {
+    "title": "Project Id",
+    "type": "integer"
+   }
+  },
+  "required": [
+   "project_id",
+   "name"
+  ],
+  "title": "rename_projectArguments",
   "type": "object"
  },
  "run_optimizer": {
@@ -894,6 +942,19 @@
    "model_hash"
   ],
   "title": "unlink_var_modelArguments",
+  "type": "object"
+ },
+ "unsave_model": {
+  "properties": {
+   "model_hash": {
+    "title": "Model Hash",
+    "type": "string"
+   }
+  },
+  "required": [
+   "model_hash"
+  ],
+  "title": "unsave_modelArguments",
   "type": "object"
  },
  "update_run": {

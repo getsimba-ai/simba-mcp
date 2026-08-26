@@ -223,6 +223,26 @@ class SimbaAPIClient:
             payload["project_id"] = project_id
         return await self._request("POST", f"/api/v1/models/{model_hash}/save", json=payload)
 
+    async def unsave_model(self, model_hash: str) -> dict:
+        """Release a model's saved slot (#673) — the non-destructive
+        inverse of save_model; the model stays addressable by hash."""
+        return await self._request("POST", f"/api/v1/models/{model_hash}/unsave")
+
+    async def list_projects(self) -> dict:
+        """Projects the caller can file models into (#645): owned + team-shared."""
+        return await self._request("GET", "/api/v1/projects")
+
+    async def create_project(self, name: str, team_id: int | None = None) -> dict:
+        """Create a named project (#645); 201 with the new project's id."""
+        payload: dict = {"name": name}
+        if team_id is not None:
+            payload["team_id"] = team_id
+        return await self._request("POST", "/api/v1/projects", json=payload)
+
+    async def rename_project(self, project_id: int, name: str) -> dict:
+        """Rename a project you OWN (#645); team members cannot rename shared folders."""
+        return await self._request("PATCH", f"/api/v1/projects/{project_id}", json={"name": name})
+
     async def get_model(self, model_hash: str) -> dict:
         """Model metadata + config echo (#45); works for every status incl. failed."""
         return await self._request("GET", f"/api/v1/models/{model_hash}")

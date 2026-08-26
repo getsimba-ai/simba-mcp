@@ -4,6 +4,19 @@ All notable changes to the SIMBA MCP Server will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.3.0 — 2026-08-26
+
+### Added
+
+- **Project tools (issue #54)** — thin wrappers over #645's routes, closing the asymmetry where `save_model` took a `project_id` that could not be discovered or created over the MCP: `list_projects()` (owned + team-shared folders, `shared: true` on team ones, `model_count` counts SAVED models), `create_project(name, team_id?)` (201; names sanitized like model names), and `rename_project(project_id, name)` (owner-only). No delete — the API deliberately has none. `save_model`'s docstring now points at `list_projects` for discovering the id it accepts.
+- **`unsave_model` (#673)** — the non-destructive inverse of `save_model`, for cap management at the 20-saved-models limit: releases the slot while the model stays addressable by hash (fetchable, renameable, re-saveable, visible via `list_models(include_unsaved=true)`). Idempotent. The docstring carries the two sharp edges: the unsaved pool is auto-pruned by *dashboard* model creation (10+ unsaved → oldest hard-deleted), and unsaving a shared model hides it from recipients until re-saved.
+
+### Changed
+
+- **`create_model` docstring: saturation priors rewritten (issue #53).** The priors section now states the three mutually exclusive saturation-anchor forms explicitly, stops steering generalized_log users toward `half_saturation_*` (which overflows below `sat_shape_mean` 0.00097657 — exactly the near-log regime the family exists for), documents that `sat_shape_mean` MUST accompany `half_marginal_*` in the same override (#672), documents the new `effect_at_avg_mean/sd` coefficient coordinate (#671 — fractions, generalized_log-only, folded server-side; with `half_marginal_*` + `sat_shape_mean` it forms the full (x*, E, k) triple, the recommended generalized_log elicitation), and points at `model_config.priors_resolved` as the verification surface. Note: the issue's original premise was partially stale — `half_marginal_*`/`sat_shape_mean` were already documented by PR #39; this release syncs the doc with the new core semantics and fixes the residual steering.
+- `get_model_results` docstring documents `priors_resolved`'s `overridden_fields` / `accepted_not_used` semantics (#643): a correctly spelled prior field can still be inert for the model's configuration, and the folded coordinates are never called inert.
+- Contract test pins the four new endpoints; tool schema snapshot regenerated (29 tools).
+
 ## 0.2.2 — 2026-08-25
 
 ### Security

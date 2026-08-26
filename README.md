@@ -98,6 +98,10 @@ response = client.beta.messages.create(
 | `delete_model` | Permanently delete a FAILED model (409 for any other status) |
 | `rename_model` | Rename a model without saving it |
 | `save_model` | File a model into a project (makes it visible to default `list_models`) |
+| `unsave_model` | Release a saved model's slot (non-destructive inverse of `save_model`) |
+| `list_projects` | List the projects (model folders) you can file models into |
+| `create_project` | Create a named project, optionally team-shared |
+| `rename_project` | Rename a project you own |
 | `get_model_status` | Poll fitting progress for a model |
 | `get_model_results` | Get results (ROI, contributions, response curves, diagnostics, and more) |
 | `create_var_model` | Fit a long-term (VAR) model |
