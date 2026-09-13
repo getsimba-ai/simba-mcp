@@ -973,7 +973,14 @@ async def get_model_status(
     """Check the fitting progress of a model.
 
     Returns status (pending/under way/complete/failed), progress percentage,
-    estimated time remaining, and timestamps.
+    estimated time remaining, and timestamps. When supported by the backend,
+    fit_liveness reports heartbeat age and the configured stall threshold in
+    seconds, with last_heartbeat_at as Unix seconds. seconds_until_stall_threshold
+    is time to the stale-heartbeat threshold, not fit ETA or an exact kill time.
+    stall_threshold_exceeded does not change the model status. If fit_liveness
+    is absent or available is false, liveness is unknown: do not infer a healthy
+    or stalled fit. Reasons include heartbeat_unavailable and not_fitting.
+    Continue polling with backoff; do not automatically restart a fit.
 
     Args:
         model_hash: The model hash returned by create_model or list_models.
