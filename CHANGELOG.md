@@ -4,6 +4,25 @@ All notable changes to the SIMBA MCP Server will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.4.1 — 2026-09-19
+
+### Added
+
+- Connected-backend capability discovery, standard tool titles/effect annotations, and permissive wire schemas that preserve additive backend fields.
+- Optional recipe input-hash preconditions and result-payload byte bounds.
+
+### Changed
+
+- Split server composition, runtime, authentication and domain tools into cohesive modules while preserving public entry points and existing tool imports.
+- Send all writes once; reconcile uncertain mutations before repeating them. Study launch retries reuse identical submission keys and inputs.
+- Add actionable error codes and next actions; omit raw transport exception details and sensitive request paths from MCP retry logs.
+- Document study prerequisites, budgets, revision recovery and evidence limitations.
+
+### Compatibility
+
+- Existing tool names, required inputs and default payloads remain. Missing backend capability advertisements mean unknown.
+- Result-byte bounds apply after download; study histories remain backend-unpaginated. Installing this release does not upgrade backend services.
+
 ## 0.4.0 — 2026-09-19
 
 ### Added
