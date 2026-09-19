@@ -39,6 +39,43 @@ RecipeSpecification = Annotated[
         }
     ),
 ]
+DraftSnapshot = Annotated[
+    dict,
+    Field(
+        json_schema_extra={
+            "description": "Lossless editor authoring state. Backend is authoritative; preserve unknown nested fields. Source bytes are copied into encrypted draft storage (10 MB source limit); metadata limit is 5 MB. No local filesystem paths or executable code.",
+            "properties": {
+                "schema_version": {"type": "integer", "enum": [1]},
+                "family": {"type": "string", "enum": ["mmm", "var"]},
+                "configuration": {"type": "object"},
+                "model_setup": {"type": "object"},
+                "model_details": {"type": "object"},
+                "transformations": {"type": "object"},
+                "source": {
+                    "anyOf": [
+                        {"type": "null"},
+                        {
+                            "type": "object",
+                            "properties": {
+                                "name": {"type": "string"},
+                                "content_base64": {"type": "string"},
+                            },
+                            "required": ["name", "content_base64"],
+                        },
+                    ]
+                },
+            },
+            "required": [
+                "schema_version",
+                "family",
+                "configuration",
+                "model_setup",
+                "model_details",
+                "transformations",
+            ],
+        }
+    ),
+]
 QualityCheck = Annotated[
     dict,
     Field(

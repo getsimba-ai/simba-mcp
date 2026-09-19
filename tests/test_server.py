@@ -20,6 +20,10 @@ def _list_tools():
 
 
 EXPECTED_TOOLS = [
+    "create_recipe_draft",
+    "get_recipe_draft",
+    "list_recipe_drafts",
+    "update_recipe_draft",
     "get_backend_capabilities",
     "compare_study_runs",
     "list_studies",

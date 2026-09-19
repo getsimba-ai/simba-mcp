@@ -4,6 +4,8 @@ from mcp.types import ToolAnnotations
 
 READ_ONLY = frozenset(
     [
+        "get_recipe_draft",
+        "list_recipe_drafts",
         "get_data_schema",
         "list_uploads",
         "get_upload",
@@ -34,6 +36,7 @@ READ_ONLY = frozenset(
 # Any operation that can replace/remove existing state is conservative/destructive.
 DESTRUCTIVE = frozenset(
     [
+        "update_recipe_draft",
         "delete_model",
         "unsave_model",
         "save_model",
@@ -50,6 +53,8 @@ DESTRUCTIVE = frozenset(
 )
 IDEMPOTENT_WRITES = frozenset(
     [
+        "create_recipe_draft",
+        "update_recipe_draft",
         "launch_study_run",
         "delete_model",
         "rename_model",
@@ -61,6 +66,7 @@ IDEMPOTENT_WRITES = frozenset(
 )
 ADDITIVE_WRITES = frozenset(
     [
+        "create_recipe_draft",
         "upload_data",
         "create_model",
         "create_var_model",

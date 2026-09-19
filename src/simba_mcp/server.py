@@ -19,6 +19,12 @@ from .tools.data import (
     list_uploads,
     upload_data,
 )
+from .tools.drafts import (
+    create_recipe_draft,
+    get_recipe_draft,
+    list_recipe_drafts,
+    update_recipe_draft,
+)
 from .tools.models import (
     create_model,
     create_var_model,
@@ -102,6 +108,10 @@ mcp = MCPServer(
 )
 
 TOOLS = (
+    create_recipe_draft,
+    get_recipe_draft,
+    list_recipe_drafts,
+    update_recipe_draft,
     get_backend_capabilities,
     get_data_schema,
     upload_data,

@@ -1708,5 +1708,205 @@
     ],
     "title": "compare_study_runsArguments",
     "type": "object"
+  },
+  "create_recipe_draft": {
+    "properties": {
+      "draft_id": {
+        "title": "Draft Id",
+        "type": "string"
+      },
+      "name": {
+        "title": "Name",
+        "type": "string"
+      },
+      "snapshot": {
+        "additionalProperties": true,
+        "description": "Lossless editor authoring state. Backend is authoritative; preserve unknown nested fields. Source bytes are copied into encrypted draft storage (10 MB source limit); metadata limit is 5 MB. No local filesystem paths or executable code.",
+        "properties": {
+          "configuration": {
+            "type": "object"
+          },
+          "family": {
+            "enum": [
+              "mmm",
+              "var"
+            ],
+            "type": "string"
+          },
+          "model_details": {
+            "type": "object"
+          },
+          "model_setup": {
+            "type": "object"
+          },
+          "schema_version": {
+            "enum": [
+              1
+            ],
+            "type": "integer"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "null"
+              },
+              {
+                "properties": {
+                  "content_base64": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name",
+                  "content_base64"
+                ],
+                "type": "object"
+              }
+            ]
+          },
+          "transformations": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "schema_version",
+          "family",
+          "configuration",
+          "model_setup",
+          "model_details",
+          "transformations"
+        ],
+        "title": "Snapshot",
+        "type": "object"
+      },
+      "study_id": {
+        "title": "Study Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "study_id",
+      "draft_id",
+      "name",
+      "snapshot"
+    ],
+    "title": "create_recipe_draftArguments",
+    "type": "object"
+  },
+  "get_recipe_draft": {
+    "properties": {
+      "draft_id": {
+        "title": "Draft Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "draft_id"
+    ],
+    "title": "get_recipe_draftArguments",
+    "type": "object"
+  },
+  "list_recipe_drafts": {
+    "properties": {
+      "study_id": {
+        "title": "Study Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "study_id"
+    ],
+    "title": "list_recipe_draftsArguments",
+    "type": "object"
+  },
+  "update_recipe_draft": {
+    "properties": {
+      "draft_id": {
+        "title": "Draft Id",
+        "type": "string"
+      },
+      "expected_version": {
+        "title": "Expected Version",
+        "type": "integer"
+      },
+      "name": {
+        "title": "Name",
+        "type": "string"
+      },
+      "snapshot": {
+        "additionalProperties": true,
+        "description": "Lossless editor authoring state. Backend is authoritative; preserve unknown nested fields. Source bytes are copied into encrypted draft storage (10 MB source limit); metadata limit is 5 MB. No local filesystem paths or executable code.",
+        "properties": {
+          "configuration": {
+            "type": "object"
+          },
+          "family": {
+            "enum": [
+              "mmm",
+              "var"
+            ],
+            "type": "string"
+          },
+          "model_details": {
+            "type": "object"
+          },
+          "model_setup": {
+            "type": "object"
+          },
+          "schema_version": {
+            "enum": [
+              1
+            ],
+            "type": "integer"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "null"
+              },
+              {
+                "properties": {
+                  "content_base64": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name",
+                  "content_base64"
+                ],
+                "type": "object"
+              }
+            ]
+          },
+          "transformations": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "schema_version",
+          "family",
+          "configuration",
+          "model_setup",
+          "model_details",
+          "transformations"
+        ],
+        "title": "Snapshot",
+        "type": "object"
+      }
+    },
+    "required": [
+      "draft_id",
+      "expected_version",
+      "name",
+      "snapshot"
+    ],
+    "title": "update_recipe_draftArguments",
+    "type": "object"
   }
 }
