@@ -16,6 +16,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ### Changed
 
+- Document backend-gated VAR draft publication alongside fixed-prior MMM. VAR quality remains unavailable under MMM policies; automatic-prior MMM publication remains unsupported.
+
 - Clarify optional backend study-budget status, blocked-capacity recovery and quality-policy requirements. Existing tool arguments and additive response forwarding remain compatible with older backends; absent budget is unknown rather than an eligibility claim.
 
 ## 0.4.1 — 2026-09-19
