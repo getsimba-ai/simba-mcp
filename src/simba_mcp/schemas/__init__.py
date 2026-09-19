@@ -59,6 +59,16 @@ DraftSnapshot = Annotated[
                             "properties": {
                                 "name": {"type": "string"},
                                 "content_base64": {"type": "string"},
+                                "origin": {
+                                    "type": "object",
+                                    "description": "Optional uploaded dataset lineage. Backend verifies ownership and exact bytes, then supplies sha256. Retain the returned origin when reopening; it never replaces frozen source bytes.",
+                                    "properties": {
+                                        "kind": {"type": "string", "enum": ["uploaded_file"]},
+                                        "id": {"type": "integer", "minimum": 1},
+                                        "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+                                    },
+                                    "required": ["kind", "id"],
+                                },
                             },
                             "required": ["name", "content_base64"],
                         },

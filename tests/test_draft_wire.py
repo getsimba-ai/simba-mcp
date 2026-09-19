@@ -26,7 +26,11 @@ def test_authoring_snapshot_crosses_wire_without_losing_fields(monkeypatch, oper
         "model_setup": {"var_lags": 9},
         "model_details": {"costMode": "high"},
         "transformations": {},
-        "source": {"name": "synthetic.csv", "content_base64": "YSxiCg=="},
+        "source": {
+            "name": "synthetic.csv",
+            "content_base64": "YSxiCg==",
+            "origin": {"kind": "uploaded_file", "id": 7, "sha256": "a" * 64},
+        },
     }
     draft = {"id": "d1", "study_id": "s1", "version": 2, "snapshot": snapshot}
     cases = {
@@ -48,7 +52,7 @@ def test_authoring_snapshot_crosses_wire_without_losing_fields(monkeypatch, oper
             "get_recipe_draft_template",
             "GET",
             "/recipe-draft-template",
-            {"family": "var"},
+            {"family": "var", "uploaded_file_id": 7},
         ),
     }
     tool, method, path, arguments = cases[operation]
@@ -61,6 +65,7 @@ def test_authoring_snapshot_crosses_wire_without_losing_fields(monkeypatch, oper
         assert request.url.path.endswith(path)
         if operation == "template":
             assert request.url.params["family"] == "var"
+            assert request.url.params["uploaded_file_id"] == "7"
         if method in ("POST", "PATCH"):
             body = json.loads(request.content)
             assert body["snapshot"] == snapshot

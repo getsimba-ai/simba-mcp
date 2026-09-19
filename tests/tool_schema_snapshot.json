@@ -1757,6 +1757,30 @@
                   },
                   "name": {
                     "type": "string"
+                  },
+                  "origin": {
+                    "description": "Optional uploaded dataset lineage. Backend verifies ownership and exact bytes, then supplies sha256. Retain the returned origin when reopening; it never replaces frozen source bytes.",
+                    "properties": {
+                      "kind": {
+                        "enum": [
+                          "uploaded_file"
+                        ],
+                        "type": "string"
+                      },
+                      "id": {
+                        "minimum": 1,
+                        "type": "integer"
+                      },
+                      "sha256": {
+                        "pattern": "^[a-f0-9]{64}$",
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "id"
+                    ],
+                    "type": "object"
                   }
                 },
                 "required": [
@@ -1874,6 +1898,30 @@
                   },
                   "name": {
                     "type": "string"
+                  },
+                  "origin": {
+                    "description": "Optional uploaded dataset lineage. Backend verifies ownership and exact bytes, then supplies sha256. Retain the returned origin when reopening; it never replaces frozen source bytes.",
+                    "properties": {
+                      "kind": {
+                        "enum": [
+                          "uploaded_file"
+                        ],
+                        "type": "string"
+                      },
+                      "id": {
+                        "minimum": 1,
+                        "type": "integer"
+                      },
+                      "sha256": {
+                        "pattern": "^[a-f0-9]{64}$",
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "id"
+                    ],
+                    "type": "object"
                   }
                 },
                 "required": [
@@ -1919,6 +1967,18 @@
         ],
         "title": "Family",
         "type": "string"
+      },
+      "uploaded_file_id": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Uploaded File Id"
       }
     },
     "title": "get_recipe_draft_templateArguments",

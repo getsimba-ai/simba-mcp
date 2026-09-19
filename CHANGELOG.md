@@ -1,5 +1,7 @@
 # Changelog
 
+- Extend draft-template discovery with optional owned uploaded-file inputs and source-lineage schema; forward frozen bytes and backend manifests unchanged.
+
 - Add read-only `get_recipe_draft_template` for backend-generated shared wizard defaults and authoring envelope discovery.
 
 All notable changes to the SIMBA MCP Server will be documented in this file.

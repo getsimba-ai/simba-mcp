@@ -10,10 +10,15 @@ from ..schemas import APIResult, DraftSnapshot
 
 
 async def get_recipe_draft_template(
-    family: Literal["mmm", "var"] = "mmm", ctx: Context[AppContext, Any] = None
+    family: Literal["mmm", "var"] = "mmm",
+    uploaded_file_id: int | None = None,
+    ctx: Context[AppContext, Any] = None,
 ) -> APIResult:
-    """Get a complete blank authoring snapshot generated from the shared wizard defaults, its hash and envelope schema. Copy snapshot into create_recipe_draft and preserve unedited fields. Defaults are not a validated model; the backend remains authoritative. Does not create, publish or run anything."""
-    return await _client(ctx).workflow_request("GET", f"/recipe-draft-template?family={family}")
+    """Get complete shared wizard defaults, hash and envelope schema. Optionally copy an owned uploaded_file_id into frozen source bytes with verified lineage and an editable data preview. Copy snapshot into create_recipe_draft and preserve unedited fields. Defaults are not a validated model. Does not create, publish or run anything."""
+    path = f"/recipe-draft-template?family={family}"
+    if uploaded_file_id is not None:
+        path += f"&uploaded_file_id={uploaded_file_id}"
+    return await _client(ctx).workflow_request("GET", path)
 
 
 async def list_recipe_drafts(study_id: str, ctx: Context[AppContext, Any] = None) -> APIResult:
