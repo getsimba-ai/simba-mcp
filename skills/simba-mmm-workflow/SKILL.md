@@ -58,6 +58,15 @@ the backend confirms the final state.
 - Models start unsaved (invisible to default `list_models`) — `save_model`
   files them into a project; `rename_model` names without saving.
 
+
+If the backend returns `fit_liveness`, use its heartbeat age and configured
+threshold to describe liveness separately from fit progress. The threshold
+countdown is not completion ETA or an exact termination time. An absent field
+or `available: false` means unknown liveness, not a healthy or stalled fit.
+An exceeded threshold does not itself change model status. Poll with backoff;
+do not automatically restart or duplicate a fit based on this metadata.
+
+
 ## 4. Read results correctly
 
 - **Channel naming**: results are keyed by ACTIVITY-COLUMN name, not

@@ -17,9 +17,17 @@ include the KPI and equity/brand metrics), optional `exogenous_vars`,
 
 `get_model_status` as with MMMs, but expect VAR fits to run LONG — the
 first fit on a worker includes heavy JIT compilation and can take well
-over an hour; a retry after an apparent stall is normal platform behavior,
-not failure. Only `failed` status is failure; use `get_model` for the
-error message.
+over an hour. Elapsed time alone does not establish whether a fit is stuck.
+Use the reported status; on `failed`, use `get_model` for the error message.
+
+
+If the backend returns `fit_liveness`, use its heartbeat age and configured
+threshold to describe liveness separately from fit progress. The threshold
+countdown is not completion ETA or an exact termination time. An absent field
+or `available: false` means unknown liveness, not a healthy or stalled fit.
+An exceeded threshold does not itself change model status. Poll with backoff;
+do not automatically restart or duplicate a fit based on this metadata.
+
 
 ## 3. Link
 
