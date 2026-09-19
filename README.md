@@ -422,3 +422,29 @@ option. Direct REST clients must perform the same capability check and put
 `control_priors` at the request root. Check `get_model`'s resolved priors and
 `overridden_fields` after creation. Prediction uses existing fit-time constants;
 this feature does not change preprocessing split order or fit a model for you.
+
+### Study workflows
+
+The study tools require a Simba backend with the workflow API deployed. Studies
+belong to projects and provide a shared record for analysts and agents:
+
+- Create/read/update studies with declared questions, attempt limits and concurrency limits.
+- Validate, save and inspect immutable recipe revisions; list recipes captured by the wizard.
+- Launch a revision with a declared quality policy and caller-generated submission key.
+- Inspect progress, request cancellation, evaluate saved evidence and compare candidates.
+- Preview/import existing models and record recommendations with a rationale.
+
+Reuse the same submission key when retrying an uncertain launch; changing the
+recipe or policy requires a new key. Workflow writes are sent once, without
+automatic HTTP retries. A study does not autonomously launch its budget of fits.
+Its runs use the existing models, workers and progress records.
+
+Project sharing permits reading studies; mutations require ownership. The MCP
+can recommend but cannot record analyst acceptance. Imported historical recipes
+are review-only where original provenance is incomplete. Wizard-captured recipes
+can be inspected and launched; changing a captured wizard configuration requires
+another wizard capture or a separately validated API recipe.
+
+Quality reports distinguish failed checks, missing evidence and required analyst
+review. Current saved-window error metrics and R-hat are not held-out validation
+or proof of business validity. No tool automatically promotes a winning model.

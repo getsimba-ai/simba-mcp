@@ -83,6 +83,7 @@ class SimbaAPIClient:
         return response.json()
 
     async def _request(self, method: str, path: str, **kwargs) -> dict[str, Any]:
+        attempts = MAX_RETRIES if kwargs.pop("retry_safe", True) else 1
         caller_key = CALLER_API_KEY.get()
         if caller_key is None:
             # stdio / no override: the env-configured key is the user's own.
@@ -107,10 +108,10 @@ class SimbaAPIClient:
             }
         client = await self._get_client()
         last_exc: Exception | None = None
-        for attempt in range(MAX_RETRIES):
+        for attempt in range(attempts):
             try:
                 response = await client.request(method, path, **kwargs)
-                if response.status_code in RETRIABLE_STATUS_CODES and attempt < MAX_RETRIES - 1:
+                if response.status_code in RETRIABLE_STATUS_CODES and attempt < attempts - 1:
                     delay = BACKOFF_BASE * (2**attempt)
                     logger.warning(
                         "Retryable %d from %s %s (attempt %d/%d, retrying in %.1fs)",
@@ -118,7 +119,7 @@ class SimbaAPIClient:
                         method,
                         path,
                         attempt + 1,
-                        MAX_RETRIES,
+                        attempts,
                         delay,
                     )
                     await asyncio.sleep(delay)
@@ -126,14 +127,14 @@ class SimbaAPIClient:
                 return await self._parse_response(response)
             except httpx.TransportError as exc:
                 last_exc = exc
-                if attempt < MAX_RETRIES - 1:
+                if attempt < attempts - 1:
                     delay = BACKOFF_BASE * (2**attempt)
                     logger.warning(
                         "Transport error on %s %s (attempt %d/%d, retrying in %.1fs): %s",
                         method,
                         path,
                         attempt + 1,
-                        MAX_RETRIES,
+                        attempts,
                         delay,
                         exc,
                     )
@@ -144,7 +145,7 @@ class SimbaAPIClient:
         # plausible production failure (backend unreachable during a deploy).
         return {
             "error": (
-                f"Simba API unreachable after {MAX_RETRIES} attempts "
+                f"Simba API unreachable after {attempts} attempts "
                 f"({type(last_exc).__name__}: {last_exc}). The backend may be "
                 "restarting or the SIMBA_API_URL may be wrong — retry shortly."
             ),
@@ -396,3 +397,8 @@ class SimbaAPIClient:
 
     async def get_upload(self, file_id: int) -> dict:
         return await self._request("GET", f"/api/v1/ingest/{file_id}")
+
+    async def workflow_request(self, method: str, path: str, payload: dict | None = None) -> dict:
+        """Internal adapter for fixed workflow routes; writes are never auto-retried."""
+        kwargs = {} if payload is None else {"json": payload}
+        return await self._request(method, "/api/v1" + path, retry_safe=method == "GET", **kwargs)
