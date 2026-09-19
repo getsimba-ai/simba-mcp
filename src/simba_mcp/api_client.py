@@ -11,6 +11,8 @@ from typing import Any, ClassVar
 
 import httpx
 
+from .errors import with_error_guidance
+
 logger = logging.getLogger(__name__)
 
 DEFAULT_TIMEOUT = 60.0
@@ -71,7 +73,9 @@ class SimbaAPIClient:
                 error_body = response.json()
             except ValueError:
                 # Non-JSON error body (HTML gateway pages, plain text)
-                error_body = {"error": response.text or response.reason_phrase}
+                error_body = {"error": "Simba returned a non-JSON error response."}
+            if not isinstance(error_body, dict):
+                error_body = {"error": "Simba returned an invalid error response."}
             error_body["_status_code"] = response.status_code
             if response.status_code in (401, 403):
                 error_body["_help"] = AUTH_HELP
@@ -79,26 +83,41 @@ class SimbaAPIClient:
         content_type = response.headers.get("content-type", "")
         if "json" not in content_type.lower():
             # e.g. GET .../results?format=csv returns text/csv
-            return {"format": "csv", "content": response.text}
-        return response.json()
+            if "csv" in content_type.lower():
+                return {"format": "csv", "content": response.text}
+            return {"error": "Simba returned an unexpected content type.", "_status_code": 502}
+        try:
+            payload = response.json()
+        except ValueError:
+            return {"error": "Simba returned invalid JSON.", "_status_code": 502}
+        if not isinstance(payload, dict):
+            return {"error": "Simba returned an unexpected response shape.", "_status_code": 502}
+        return payload
 
     async def _request(self, method: str, path: str, **kwargs) -> dict[str, Any]:
-        attempts = MAX_RETRIES if kwargs.pop("retry_safe", True) else 1
+        retry_safe = kwargs.pop("retry_safe", method.upper() == "GET")
+        attempts = MAX_RETRIES if retry_safe else 1
         caller_key = CALLER_API_KEY.get()
         if caller_key is None:
             # stdio / no override: the env-configured key is the user's own.
             if not self._api_key:
-                return {
-                    "error": "SIMBA_API_KEY is not set. " + AUTH_HELP,
-                    "_status_code": 401,
-                    "_help": AUTH_HELP,
-                }
+                return with_error_guidance(
+                    {
+                        "error": "SIMBA_API_KEY is not set. " + AUTH_HELP,
+                        "_status_code": 401,
+                        "_help": AUTH_HELP,
+                    },
+                    retry_safe=retry_safe,
+                )
         elif not caller_key:
-            return {
-                "error": "No API key on this request. " + HTTP_AUTH_HELP,
-                "_status_code": 401,
-                "_help": HTTP_AUTH_HELP,
-            }
+            return with_error_guidance(
+                {
+                    "error": "No API key on this request. " + HTTP_AUTH_HELP,
+                    "_status_code": 401,
+                    "_help": HTTP_AUTH_HELP,
+                },
+                retry_safe=retry_safe,
+            )
         else:
             # Per-request header beats the client-default Authorization in
             # httpx, so the shared connection pool is safe to reuse.
@@ -114,43 +133,45 @@ class SimbaAPIClient:
                 if response.status_code in RETRIABLE_STATUS_CODES and attempt < attempts - 1:
                     delay = BACKOFF_BASE * (2**attempt)
                     logger.warning(
-                        "Retryable %d from %s %s (attempt %d/%d, retrying in %.1fs)",
+                        "Retryable %d from %s (attempt %d/%d, retrying in %.1fs)",
                         response.status_code,
                         method,
-                        path,
                         attempt + 1,
                         attempts,
                         delay,
                     )
                     await asyncio.sleep(delay)
                     continue
-                return await self._parse_response(response)
+                return with_error_guidance(
+                    await self._parse_response(response), retry_safe=retry_safe
+                )
             except httpx.TransportError as exc:
                 last_exc = exc
                 if attempt < attempts - 1:
                     delay = BACKOFF_BASE * (2**attempt)
                     logger.warning(
-                        "Transport error on %s %s (attempt %d/%d, retrying in %.1fs): %s",
+                        "Transport error on %s (attempt %d/%d, retrying in %.1fs): %s",
                         method,
-                        path,
                         attempt + 1,
                         attempts,
                         delay,
-                        exc,
+                        type(exc).__name__,
                     )
                     await asyncio.sleep(delay)
         # Return a structured payload like every other failure mode instead of
         # raising: SDK v2 masks unexpected exceptions to an info-free
         # "Error executing tool ..." at the client, which would hide the most
         # plausible production failure (backend unreachable during a deploy).
-        return {
-            "error": (
-                f"Simba API unreachable after {attempts} attempts "
-                f"({type(last_exc).__name__}: {last_exc}). The backend may be "
-                "restarting or the SIMBA_API_URL may be wrong — retry shortly."
-            ),
-            "_status_code": 503,
-        }
+        return with_error_guidance(
+            {
+                "error": (
+                    f"Simba API unreachable after {attempts} attempts "
+                    f"({type(last_exc).__name__}). Check backend availability."
+                ),
+                "_status_code": 503,
+            },
+            retry_safe=retry_safe,
+        )
 
     # -- Ingest --
 

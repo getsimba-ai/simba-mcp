@@ -448,3 +448,20 @@ another wizard capture or a separately validated API recipe.
 Quality reports distinguish failed checks, missing evidence and required analyst
 review. Current saved-window error metrics and R-hat are not held-out validation
 or proof of business validity. No tool automatically promotes a winning model.
+# Agent workflow contracts
+
+Start with `get_capabilities` to read what your connected backend advertises about
+model families, transformations, priors and Studies. Missing declarations remain
+unknown on older deployments. Tool availability alone does not establish backend
+support, permission or subscription allowance.
+
+For a study: read its current settings, validate the recipe, save a revision, choose
+a quality policy, and launch within the attempt budget. Preserve the exact submission
+key and inputs after an uncertain launch. Poll the existing run/model, evaluate its
+evidence and recommend a decision; analyst acceptance remains in the Simba UI.
+
+Workflow list tools optionally accept `limit` (1–200) and `offset`; omitted values
+preserve existing output. Paging currently slices the backend response in the MCP,
+and `_mcp_page` reports this explicitly. Use result sections and curve limits for
+large model results. Writes are not automatically retried; structured errors explain
+the recovery action. See [architecture and compatibility](docs/architecture.md).
