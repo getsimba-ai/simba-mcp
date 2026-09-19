@@ -90,7 +90,7 @@ async def list_study_runs(
     study_id: str,
     ctx: Context[AppContext, Any] = None,
 ) -> APIResult:
-    """List preserved attempts including pending and failed runs."""
+    """List preserved attempts including pending and failed runs. Supporting backends also return budget with attempts remaining, available slots and blocking reasons. Missing budget means unknown support, not permission to launch. Capacity is rechecked on reservation; recover an uncertain launch with its original submission key."""
     return await _client(ctx).workflow_request("GET", f"/studies/{study_id}/runs")
 
 

@@ -4,6 +4,12 @@ All notable changes to the SIMBA MCP Server will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## Unreleased
+
+### Changed
+
+- Clarify optional backend study-budget status, blocked-capacity recovery and quality-policy requirements. Existing tool arguments and additive response forwarding remain compatible with older backends; absent budget is unknown rather than an eligibility claim.
+
 ## 0.4.1 — 2026-09-19
 
 ### Added
