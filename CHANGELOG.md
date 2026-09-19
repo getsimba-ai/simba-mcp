@@ -4,6 +4,23 @@ All notable changes to the SIMBA MCP Server will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.4.0 — 2026-09-19
+
+### Added
+
+- Project-owned study tools for questions, budgets, immutable recipe revisions, quality policies, run launches, progress, cancellation, evaluations, comparisons, model adoption and recommendations.
+- Explicit control transformations and coefficient priors in `create_model`, with a backend capability preflight before submitting overrides.
+
+### Changed
+
+- Workflow writes are sent once rather than automatically retried. Reuse the same submission key after an uncertain launch; a run pins its recipe revision and quality policy.
+- Agents can inspect analyst-created recipes and recommend candidates. Analyst acceptance remains a frontend operation; missing scientific evidence is explicit rather than passed.
+
+### Compatibility
+
+- Study tools require the workflow API on the configured Simba backend. Control-prior overrides require the corresponding backend capability. Updating this package does not deploy those backend features.
+- Existing model and optimisation tools remain available. No automatic fitting or model promotion is introduced.
+
 ## 0.3.2 — 2026-08-26
 
 ### Changed
