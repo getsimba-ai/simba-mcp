@@ -43,6 +43,6 @@ async def test_status_payload_survives_http_client_and_tool(liveness):
         base_url="https://example.test", transport=httpx.MockTransport(respond)
     ) as transport_client:
         client._client = transport_client
-        with patch("simba_mcp.server._client", return_value=client):
+        with patch("simba_mcp.tools.models._client", return_value=client):
             result = await get_model_status("example")
     assert result == payload

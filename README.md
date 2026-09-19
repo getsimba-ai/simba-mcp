@@ -404,3 +404,93 @@ With `available: false`, `reason` is `heartbeat_unavailable` (including unavaila
 heartbeat storage) or `not_fitting`. Missing or unavailable metadata is unknown,
 not evidence that a fit is healthy or stalled. Continue polling with backoff and
 use the reported model status; do not automatically restart or duplicate a fit.
+### Explicit control priors and transforms
+
+Use `control_columns` to include controls and optional `control_priors` to
+configure them. Overrides select an exact column via `control`; media `priors`
+continue to select a channel via `channel`.
+
+```json
+{"control_columns": ["price", "discount_depth"], "control_priors": [
+  {"control": "price", "transform": "LOG", "distribution": "normal", "mean": -1, "sd": 0.5},
+  {"control": "discount_depth", "transform": "N", "distribution": "normal", "mean": 1, "sd": 0.5}
+]}
+```
+
+These are illustrative coefficients, not fitted estimates or recommended priors.
+Native transforms: N = x; DM = x/mean(x); STA = x/sample_sd(x) without centering;
+DDM = x/mean(KPI); LOG = log(x/mean(x)), requiring positive x.
+Under a log link, a LOG coefficient is an elasticity; N is a semi-elasticity.
+Changing a transform does not convert prior units: explicitly choose suitable
+coefficient priors. Normal and inversegamma use mean/sd (positive mean for
+inversegamma); truncatednormal also requires ordered lower/upper bounds;
+halfnormal uses only sd. Unused fields, unknown keys, null field values and
+nonselected/duplicate controls are rejected. Omitted fields preserve applicable
+smart defaults; changing family clears inapplicable bounds/mean.
+
+Nonempty overrides preflight `get_data_schema` for
+`x-simba-model-capabilities.control_priors` version 1 and all five transforms.
+Unsupported, malformed or unavailable capability checks stop before creation;
+never retry by removing requested settings. Omitted/None/empty overrides keep
+legacy calls unchanged. Backend support must be deployed before using this
+option. Direct REST clients must perform the same capability check and put
+`control_priors` at the request root. Check `get_model`'s resolved priors and
+`overridden_fields` after creation. Prediction uses existing fit-time constants;
+this feature does not change preprocessing split order or fit a model for you.
+
+### Study workflows
+
+The study tools require a Simba backend with the workflow API deployed. Studies
+belong to projects and provide a shared record for analysts and agents:
+
+- Create/read/update studies with declared questions, attempt limits and concurrency limits.
+- Validate, save and inspect immutable recipe revisions; list recipes captured by the wizard.
+- Launch a revision with a declared quality policy and caller-generated submission key.
+- Inspect progress, request cancellation, evaluate saved evidence and compare candidates.
+- Preview/import existing models and record recommendations with a rationale.
+
+Reuse the same submission key when retrying an uncertain launch; changing the
+recipe or policy requires a new key. Workflow writes are sent once, without
+automatic HTTP retries. A study does not autonomously launch its budget of fits.
+Its runs use the existing models, workers and progress records.
+
+Project sharing permits reading studies; mutations require ownership. The MCP
+can recommend but cannot record analyst acceptance. Imported historical recipes
+are review-only where original provenance is incomplete. Wizard-captured recipes
+can be inspected and launched; changing a captured wizard configuration requires
+another wizard capture or a separately validated API recipe.
+
+Quality reports distinguish failed checks, missing evidence and required analyst
+review. Current saved-window error metrics and R-hat are not held-out validation
+or proof of business validity. No tool automatically promotes a winning model.
+
+
+## Discovery and reliable Studies workflows
+
+Start with `get_backend_capabilities` to read the connected backend's model,
+transform/prior and workflow advertisements. Missing fields mean **unknown**;
+installing this package does not upgrade the backend. All tool annotations are
+informational hints, never permission checks.
+
+For Studies: inspect the project/study budget, validate a recipe, freeze a revision,
+declare a quality policy, then launch with an explicit submission key. Preserve
+that key and the exact inputs after an uncertain response. Poll the shared run;
+requested cancellation is not confirmed completion. Reload and reconcile on 412;
+revalidate on an input-hash conflict. Optional `expected_content_hash` on recipe
+create/revise binds the validated effective inputs. Evaluate existing evidence and
+recommend with limitations; analyst acceptance remains in the frontend. Missing
+evidence never passes, and fitted-window metrics are not holdout validation.
+
+Writes are sent once, without automatic retries. Reconcile uncertain mutations
+before repeating them. Reads retain bounded transient retries. Existing error
+objects retain `error` / `_status_code`, with additive `_error_code` and
+`_next_action` guidance. Backend additive fields remain intact in structured output.
+
+For bounded results, request `sections="channel_summary,model_stats"` first and use
+`channels` / `max_grid_points` where appropriate. Optional `max_response_bytes`
+returns an actionable 413 instead of partial evidence when the filtered JSON
+payload is too large. It bounds payload serialization, not backend download or MCP
+envelope overhead. Existing defaults remain unchanged.
+
+See [architecture and compatibility](docs/architecture.md) for ownership,
+transport/authentication boundaries, known limits and validation.

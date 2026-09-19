@@ -1,1059 +1,1712 @@
 {
- "create_model": {
-  "properties": {
-   "annual_discount_rate": {
-    "anyOf": [
-     {
-      "type": "number"
-     },
-     {
-      "type": "null"
-     }
-    ],
-    "default": null,
-    "title": "Annual Discount Rate"
-   },
-   "attribution": {
-    "default": "",
-    "title": "Attribution",
-    "type": "string"
-   },
-   "channel_groups": {
-    "anyOf": [
-     {
-      "items": {
-       "additionalProperties": true,
-       "type": "object"
-      },
-      "type": "array"
-     },
-     {
-      "type": "null"
-     }
-    ],
-    "default": null,
-    "title": "Channel Groups"
-   },
-   "channels": {
-    "items": {
-     "additionalProperties": true,
-     "type": "object"
-    },
-    "title": "Channels",
-    "type": "array"
-   },
-   "control_columns": {
-    "anyOf": [
-     {
-      "items": {
-       "type": "string"
-      },
-      "type": "array"
-     },
-     {
-      "type": "null"
-     }
-    ],
-    "default": null,
-    "title": "Control Columns"
-   },
-   "control_reference": {
-    "anyOf": [
-     {
-      "additionalProperties": true,
-      "type": "object"
-     },
-     {
-      "type": "null"
-     }
-    ],
-    "default": null,
-    "title": "Control Reference"
-   },
-   "date_column": {
-    "title": "Date Column",
-    "type": "string"
-   },
-   "hierarchy_column": {
-    "title": "Hierarchy Column",
-    "type": "string"
-   },
-   "kpi_column": {
-    "title": "Kpi Column",
-    "type": "string"
-   },
-   "likelihood": {
-    "default": "normal",
-    "title": "Likelihood",
-    "type": "string"
-   },
-   "link": {
-    "default": "identity",
-    "title": "Link",
-    "type": "string"
-   },
-   "multiplier_column": {
-    "default": "",
-    "title": "Multiplier Column",
-    "type": "string"
-   },
-   "name": {
-    "default": "",
-    "title": "Name",
-    "type": "string"
-   },
-   "operating_margin": {
-    "anyOf": [
-     {
-      "type": "number"
-     },
-     {
-      "type": "null"
-     }
-    ],
-    "default": null,
-    "title": "Operating Margin"
-   },
-   "operating_margin_column": {
-    "default": "",
-    "title": "Operating Margin Column",
-    "type": "string"
-   },
-   "priors": {
-    "anyOf": [
-     {
-      "items": {
-       "additionalProperties": true,
-       "type": "object"
-      },
-      "type": "array"
-     },
-     {
-      "type": "null"
-     }
-    ],
-    "default": null,
-    "title": "Priors"
-   },
-   "reporting_kernel": {
-    "anyOf": [
-     {
-      "additionalProperties": true,
-      "type": "object"
-     },
-     {
-      "type": "null"
-     }
-    ],
-    "default": null,
-    "title": "Reporting Kernel"
-   },
-   "sampler": {
-    "anyOf": [
-     {
-      "additionalProperties": true,
-      "type": "object"
-     },
-     {
-      "type": "null"
-     }
-    ],
-    "default": null,
-    "title": "Sampler"
-   },
-   "saturation_type": {
-    "default": "tanh",
-    "title": "Saturation Type",
-    "type": "string"
-   },
-   "seasonality": {
-    "default": false,
-    "title": "Seasonality",
-    "type": "boolean"
-   },
-   "total_media_effect": {
-    "default": "Other",
-    "title": "Total Media Effect",
-    "type": "string"
-   },
-   "transform_order": {
-    "default": "adstock_first",
-    "title": "Transform Order",
-    "type": "string"
-   },
-   "trend": {
-    "default": false,
-    "title": "Trend",
-    "type": "boolean"
-   },
-   "uploaded_file_id": {
-    "title": "Uploaded File Id",
-    "type": "integer"
-   }
+  "get_backend_capabilities": {
+    "properties": {},
+    "title": "get_backend_capabilitiesArguments",
+    "type": "object"
   },
-  "required": [
-   "uploaded_file_id",
-   "date_column",
-   "kpi_column",
-   "hierarchy_column",
-   "channels"
-  ],
-  "title": "create_modelArguments",
-  "type": "object"
- },
- "create_project": {
-  "properties": {
-   "name": {
-    "title": "Name",
-    "type": "string"
-   },
-   "team_id": {
-    "anyOf": [
-     {
-      "type": "integer"
-     },
-     {
-      "type": "null"
-     }
-    ],
-    "default": null,
-    "title": "Team Id"
-   }
+  "get_data_schema": {
+    "properties": {},
+    "title": "get_data_schemaArguments",
+    "type": "object"
   },
-  "required": [
-   "name"
-  ],
-  "title": "create_projectArguments",
-  "type": "object"
- },
- "create_var_model": {
-  "properties": {
-   "base_variable": {
-    "anyOf": [
-     {
-      "type": "string"
-     },
-     {
-      "type": "null"
-     }
-    ],
-    "default": null,
-    "title": "Base Variable"
-   },
-   "date_column": {
-    "title": "Date Column",
-    "type": "string"
-   },
-   "endogenous_vars": {
-    "items": {
-     "type": "string"
-    },
-    "title": "Endogenous Vars",
-    "type": "array"
-   },
-   "equity_variables": {
-    "anyOf": [
-     {
-      "items": {
-       "type": "string"
-      },
-      "type": "array"
-     },
-     {
-      "type": "null"
-     }
-    ],
-    "default": null,
-    "title": "Equity Variables"
-   },
-   "exogenous_vars": {
-    "anyOf": [
-     {
-      "items": {
-       "type": "string"
-      },
-      "type": "array"
-     },
-     {
-      "type": "null"
-     }
-    ],
-    "default": null,
-    "title": "Exogenous Vars"
-   },
-   "forecast_horizon": {
-    "default": 12,
-    "title": "Forecast Horizon",
-    "type": "integer"
-   },
-   "lags": {
-    "default": 1,
-    "title": "Lags",
-    "type": "integer"
-   },
-   "lre_ci": {
-    "anyOf": [
-     {
-      "type": "number"
-     },
-     {
-      "type": "null"
-     }
-    ],
-    "default": null,
-    "title": "Lre Ci"
-   },
-   "lre_horizon": {
-    "anyOf": [
-     {
-      "type": "integer"
-     },
-     {
-      "type": "null"
-     }
-    ],
-    "default": null,
-    "title": "Lre Horizon"
-   },
-   "name": {
-    "default": "",
-    "title": "Name",
-    "type": "string"
-   },
-   "uploaded_file_id": {
-    "title": "Uploaded File Id",
-    "type": "integer"
-   },
-   "var_priors": {
-    "anyOf": [
-     {
-      "additionalProperties": true,
-      "type": "object"
-     },
-     {
-      "type": "null"
-     }
-    ],
-    "default": null,
-    "title": "Var Priors"
-   }
-  },
-  "required": [
-   "uploaded_file_id",
-   "date_column",
-   "endogenous_vars"
-  ],
-  "title": "create_var_modelArguments",
-  "type": "object"
- },
- "delete_model": {
-  "properties": {
-   "model_hash": {
-    "title": "Model Hash",
-    "type": "string"
-   }
-  },
-  "required": [
-   "model_hash"
-  ],
-  "title": "delete_modelArguments",
-  "type": "object"
- },
- "get_contribution_groups": {
-  "properties": {
-   "model_hash": {
-    "title": "Model Hash",
-    "type": "string"
-   }
-  },
-  "required": [
-   "model_hash"
-  ],
-  "title": "get_contribution_groupsArguments",
-  "type": "object"
- },
- "get_data_schema": {
-  "properties": {},
-  "title": "get_data_schemaArguments",
-  "type": "object"
- },
- "get_model": {
-  "properties": {
-   "model_hash": {
-    "title": "Model Hash",
-    "type": "string"
-   }
-  },
-  "required": [
-   "model_hash"
-  ],
-  "title": "get_modelArguments",
-  "type": "object"
- },
- "get_model_results": {
-  "properties": {
-   "channels": {
-    "anyOf": [
-     {
-      "items": {
-       "type": "string"
-      },
-      "type": "array"
-     },
-     {
-      "type": "null"
-     }
-    ],
-    "default": null,
-    "title": "Channels"
-   },
-   "format": {
-    "default": "json",
-    "title": "Format",
-    "type": "string"
-   },
-   "max_grid_points": {
-    "anyOf": [
-     {
-      "type": "integer"
-     },
-     {
-      "type": "null"
-     }
-    ],
-    "default": null,
-    "title": "Max Grid Points"
-   },
-   "model_hash": {
-    "title": "Model Hash",
-    "type": "string"
-   },
-   "sections": {
-    "default": "",
-    "title": "Sections",
-    "type": "string"
-   }
-  },
-  "required": [
-   "model_hash"
-  ],
-  "title": "get_model_resultsArguments",
-  "type": "object"
- },
- "get_model_status": {
-  "properties": {
-   "model_hash": {
-    "title": "Model Hash",
-    "type": "string"
-   }
-  },
-  "required": [
-   "model_hash"
-  ],
-  "title": "get_model_statusArguments",
-  "type": "object"
- },
- "get_optimizer_results": {
-  "properties": {
-   "model_hash": {
-    "title": "Model Hash",
-    "type": "string"
-   },
-   "run_id": {
-    "anyOf": [
-     {
-      "type": "string"
-     },
-     {
-      "type": "null"
-     }
-    ],
-    "default": null,
-    "title": "Run Id"
-   }
-  },
-  "required": [
-   "model_hash"
-  ],
-  "title": "get_optimizer_resultsArguments",
-  "type": "object"
- },
- "get_scenario_results": {
-  "properties": {
-   "model_hash": {
-    "title": "Model Hash",
-    "type": "string"
-   },
-   "run_id": {
-    "anyOf": [
-     {
-      "type": "string"
-     },
-     {
-      "type": "null"
-     }
-    ],
-    "default": null,
-    "title": "Run Id"
-   }
-  },
-  "required": [
-   "model_hash"
-  ],
-  "title": "get_scenario_resultsArguments",
-  "type": "object"
- },
- "get_scenario_template": {
-  "properties": {
-   "model_hash": {
-    "title": "Model Hash",
-    "type": "string"
-   },
-   "periods_forward": {
-    "default": 12,
-    "title": "Periods Forward",
-    "type": "integer"
-   }
-  },
-  "required": [
-   "model_hash"
-  ],
-  "title": "get_scenario_templateArguments",
-  "type": "object"
- },
- "get_upload": {
-  "properties": {
-   "file_id": {
-    "title": "File Id",
-    "type": "integer"
-   }
-  },
-  "required": [
-   "file_id"
-  ],
-  "title": "get_uploadArguments",
-  "type": "object"
- },
- "link_var_model": {
-  "properties": {
-   "model_hash": {
-    "title": "Model Hash",
-    "type": "string"
-   },
-   "var_model_hash": {
-    "title": "Var Model Hash",
-    "type": "string"
-   },
-   "channel_map": {
-    "anyOf": [
-     {
-      "additionalProperties": {
-       "items": {
+  "upload_data": {
+    "properties": {
+      "csv_content": {
+        "default": "",
+        "title": "Csv Content",
         "type": "string"
-       },
-       "type": "array"
       },
-      "type": "object"
-     },
-     {
-      "type": "null"
-     }
-    ],
-    "default": null,
-    "title": "Channel Map"
-   }
-  },
-  "required": [
-   "model_hash",
-   "var_model_hash"
-  ],
-  "title": "link_var_modelArguments",
-  "type": "object"
- },
- "list_models": {
-  "properties": {
-   "include_unsaved": {
-    "default": false,
-    "title": "Include Unsaved",
-    "type": "boolean"
-   },
-   "limit": {
-    "default": 50,
-    "title": "Limit",
-    "type": "integer"
-   },
-   "offset": {
-    "default": 0,
-    "title": "Offset",
-    "type": "integer"
-   }
-  },
-  "title": "list_modelsArguments",
-  "type": "object"
- },
- "list_projects": {
-  "properties": {},
-  "title": "list_projectsArguments",
-  "type": "object"
- },
- "list_runs": {
-  "properties": {
-   "artifact": {
-    "title": "Artifact",
-    "type": "string"
-   },
-   "limit": {
-    "default": 50,
-    "title": "Limit",
-    "type": "integer"
-   },
-   "model_hash": {
-    "title": "Model Hash",
-    "type": "string"
-   },
-   "offset": {
-    "default": 0,
-    "title": "Offset",
-    "type": "integer"
-   }
-  },
-  "required": [
-   "artifact",
-   "model_hash"
-  ],
-  "title": "list_runsArguments",
-  "type": "object"
- },
- "list_uploads": {
-  "properties": {
-   "limit": {
-    "default": 50,
-    "title": "Limit",
-    "type": "integer"
-   },
-   "name": {
-    "default": "",
-    "title": "Name",
-    "type": "string"
-   },
-   "offset": {
-    "default": 0,
-    "title": "Offset",
-    "type": "integer"
-   }
-  },
-  "title": "list_uploadsArguments",
-  "type": "object"
- },
- "rename_model": {
-  "properties": {
-   "model_hash": {
-    "title": "Model Hash",
-    "type": "string"
-   },
-   "name": {
-    "title": "Name",
-    "type": "string"
-   }
-  },
-  "required": [
-   "model_hash",
-   "name"
-  ],
-  "title": "rename_modelArguments",
-  "type": "object"
- },
- "rename_project": {
-  "properties": {
-   "name": {
-    "title": "Name",
-    "type": "string"
-   },
-   "project_id": {
-    "title": "Project Id",
-    "type": "integer"
-   }
-  },
-  "required": [
-   "project_id",
-   "name"
-  ],
-  "title": "rename_projectArguments",
-  "type": "object"
- },
- "run_optimizer": {
-  "properties": {
-   "bounds": {
-    "additionalProperties": true,
-    "title": "Bounds",
-    "type": "object"
-   },
-   "currency": {
-    "title": "Currency",
-    "type": "string"
-   },
-   "enable_warm_start": {
-    "default": true,
-    "title": "Enable Warm Start",
-    "type": "boolean"
-   },
-   "forward_margin": {
-    "anyOf": [
-     {
-      "type": "number"
-     },
-     {
-      "type": "null"
-     }
-    ],
-    "default": null,
-    "title": "Forward Margin"
-   },
-   "gamma": {
-    "title": "Gamma",
-    "type": "number"
-   },
-   "group_bounds": {
-    "anyOf": [
-     {
-      "items": {
-       "additionalProperties": true,
-       "type": "object"
+      "csv_path": {
+        "default": "",
+        "title": "Csv Path",
+        "type": "string"
       },
-      "type": "array"
-     },
-     {
-      "type": "null"
-     }
-    ],
-    "default": null,
-    "title": "Group Bounds"
-   },
-   "include_historical_effect": {
-    "default": true,
-    "title": "Include Historical Effect",
-    "type": "boolean"
-   },
-   "laydown_weights": {
-    "additionalProperties": true,
-    "title": "Laydown Weights",
-    "type": "object"
-   },
-   "model_hash": {
-    "title": "Model Hash",
-    "type": "string"
-   },
-   "num_periods": {
-    "title": "Num Periods",
-    "type": "integer"
-   },
-   "objective": {
-    "default": "revenue",
-    "title": "Objective",
-    "type": "string"
-   },
-   "optimizer_engine": {
-    "default": "slsqp",
-    "title": "Optimizer Engine",
-    "type": "string"
-   },
-   "period_cpm": {
-    "additionalProperties": true,
-    "title": "Period Cpm",
-    "type": "object"
-   },
-   "period_multiplier": {
-    "anyOf": [
-     {
-      "items": {
-       "type": "number"
+      "name": {
+        "default": "",
+        "title": "Name",
+        "type": "string"
       },
-      "type": "array"
-     },
-     {
-      "type": "null"
-     }
-    ],
-    "default": null,
-    "title": "Period Multiplier"
-   },
-   "sigma_penalty": {
-    "default": "std",
-    "title": "Sigma Penalty",
-    "type": "string"
-   },
-   "total_budget": {
-    "title": "Total Budget",
-    "type": "number"
-   }
-  },
-  "required": [
-   "model_hash",
-   "total_budget",
-   "num_periods",
-   "gamma",
-   "currency",
-   "bounds",
-   "laydown_weights",
-   "period_cpm"
-  ],
-  "title": "run_optimizerArguments",
-  "type": "object"
- },
- "run_scenario": {
-  "properties": {
-   "evaluate_holdout": {
-    "default": false,
-    "title": "Evaluate Holdout",
-    "type": "boolean"
-   },
-   "model_hash": {
-    "title": "Model Hash",
-    "type": "string"
-   },
-   "proxy_channels": {
-    "anyOf": [
-     {
-      "items": {
-       "additionalProperties": true,
-       "type": "object"
-      },
-      "type": "array"
-     },
-     {
-      "type": "null"
-     }
-    ],
-    "default": null,
-    "title": "Proxy Channels"
-   },
-   "rebuild_model": {
-    "default": true,
-    "title": "Rebuild Model",
-    "type": "boolean"
-   },
-   "scenario_data": {
-    "items": {
-     "additionalProperties": true,
-     "type": "object"
+      "filename": {
+        "default": "",
+        "title": "Filename",
+        "type": "string"
+      }
     },
-    "title": "Scenario Data",
-    "type": "array"
-   },
-   "skip_slicing": {
-    "default": false,
-    "title": "Skip Slicing",
-    "type": "boolean"
-   },
-   "spend_metadata": {
-    "anyOf": [
-     {
-      "items": {
-       "additionalProperties": true,
-       "type": "object"
+    "title": "upload_dataArguments",
+    "type": "object"
+  },
+  "list_uploads": {
+    "properties": {
+      "limit": {
+        "default": 50,
+        "title": "Limit",
+        "type": "integer"
       },
-      "type": "array"
-     },
-     {
-      "type": "null"
-     }
-    ],
-    "default": null,
-    "title": "Spend Metadata"
-   }
-  },
-  "required": [
-   "model_hash",
-   "scenario_data"
-  ],
-  "title": "run_scenarioArguments",
-  "type": "object"
- },
- "save_model": {
-  "properties": {
-   "model_hash": {
-    "title": "Model Hash",
-    "type": "string"
-   },
-   "name": {
-    "title": "Name",
-    "type": "string"
-   },
-   "project_id": {
-    "anyOf": [
-     {
-      "type": "integer"
-     },
-     {
-      "type": "null"
-     }
-    ],
-    "default": null,
-    "title": "Project Id"
-   }
-  },
-  "required": [
-   "model_hash",
-   "name"
-  ],
-  "title": "save_modelArguments",
-  "type": "object"
- },
- "set_contribution_groups": {
-  "properties": {
-   "contribution_groups": {
-    "items": {
-     "additionalProperties": true,
-     "type": "object"
+      "offset": {
+        "default": 0,
+        "title": "Offset",
+        "type": "integer"
+      },
+      "name": {
+        "default": "",
+        "title": "Name",
+        "type": "string"
+      }
     },
-    "title": "Contribution Groups",
-    "type": "array"
-   },
-   "model_hash": {
-    "title": "Model Hash",
-    "type": "string"
-   }
+    "title": "list_uploadsArguments",
+    "type": "object"
   },
-  "required": [
-   "model_hash",
-   "contribution_groups"
-  ],
-  "title": "set_contribution_groupsArguments",
-  "type": "object"
- },
- "set_run_pinned": {
-  "properties": {
-   "artifact": {
-    "title": "Artifact",
-    "type": "string"
-   },
-   "model_hash": {
-    "title": "Model Hash",
-    "type": "string"
-   },
-   "pinned": {
-    "title": "Pinned",
-    "type": "boolean"
-   },
-   "run_id": {
-    "title": "Run Id",
-    "type": "string"
-   }
-  },
-  "required": [
-   "artifact",
-   "model_hash",
-   "run_id",
-   "pinned"
-  ],
-  "title": "set_run_pinnedArguments",
-  "type": "object"
- },
- "unlink_var_model": {
-  "properties": {
-   "model_hash": {
-    "title": "Model Hash",
-    "type": "string"
-   }
-  },
-  "required": [
-   "model_hash"
-  ],
-  "title": "unlink_var_modelArguments",
-  "type": "object"
- },
- "unsave_model": {
-  "properties": {
-   "model_hash": {
-    "title": "Model Hash",
-    "type": "string"
-   }
-  },
-  "required": [
-   "model_hash"
-  ],
-  "title": "unsave_modelArguments",
-  "type": "object"
- },
- "update_run": {
-  "properties": {
-   "artifact": {
-    "title": "Artifact",
-    "type": "string"
-   },
-   "model_hash": {
-    "title": "Model Hash",
-    "type": "string"
-   },
-   "name": {
-    "default": "",
-    "title": "Name",
-    "type": "string"
-   },
-   "notes": {
-    "anyOf": [
-     {
-      "type": "string"
-     },
-     {
-      "type": "null"
-     }
+  "get_upload": {
+    "properties": {
+      "file_id": {
+        "title": "File Id",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "file_id"
     ],
-    "default": null,
-    "title": "Notes"
-   },
-   "run_id": {
-    "title": "Run Id",
-    "type": "string"
-   },
-   "tags": {
-    "anyOf": [
-     {
-      "items": {
-       "type": "string"
+    "title": "get_uploadArguments",
+    "type": "object"
+  },
+  "list_models": {
+    "properties": {
+      "include_unsaved": {
+        "default": false,
+        "title": "Include Unsaved",
+        "type": "boolean"
       },
-      "type": "array"
-     },
-     {
-      "type": "null"
-     }
+      "limit": {
+        "default": 50,
+        "title": "Limit",
+        "type": "integer"
+      },
+      "offset": {
+        "default": 0,
+        "title": "Offset",
+        "type": "integer"
+      }
+    },
+    "title": "list_modelsArguments",
+    "type": "object"
+  },
+  "create_model": {
+    "properties": {
+      "uploaded_file_id": {
+        "title": "Uploaded File Id",
+        "type": "integer"
+      },
+      "date_column": {
+        "title": "Date Column",
+        "type": "string"
+      },
+      "kpi_column": {
+        "title": "Kpi Column",
+        "type": "string"
+      },
+      "hierarchy_column": {
+        "title": "Hierarchy Column",
+        "type": "string"
+      },
+      "channels": {
+        "items": {
+          "additionalProperties": true,
+          "description": "Media channel binding. Exact activity-column keys identify channels in result/optimizer calls.",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "activity_column": {
+              "type": "string"
+            },
+            "spend_column": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "name",
+            "activity_column",
+            "spend_column"
+          ],
+          "type": "object"
+        },
+        "title": "Channels",
+        "type": "array"
+      },
+      "multiplier_column": {
+        "default": "",
+        "title": "Multiplier Column",
+        "type": "string"
+      },
+      "control_columns": {
+        "anyOf": [
+          {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Control Columns"
+      },
+      "total_media_effect": {
+        "default": "Other",
+        "title": "Total Media Effect",
+        "type": "string"
+      },
+      "priors": {
+        "anyOf": [
+          {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Priors"
+      },
+      "trend": {
+        "default": false,
+        "title": "Trend",
+        "type": "boolean"
+      },
+      "seasonality": {
+        "default": false,
+        "title": "Seasonality",
+        "type": "boolean"
+      },
+      "likelihood": {
+        "default": "normal",
+        "title": "Likelihood",
+        "type": "string"
+      },
+      "saturation_type": {
+        "default": "tanh",
+        "title": "Saturation Type",
+        "type": "string"
+      },
+      "transform_order": {
+        "default": "adstock_first",
+        "title": "Transform Order",
+        "type": "string"
+      },
+      "link": {
+        "default": "identity",
+        "title": "Link",
+        "type": "string"
+      },
+      "channel_groups": {
+        "anyOf": [
+          {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Channel Groups"
+      },
+      "control_reference": {
+        "anyOf": [
+          {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Control Reference"
+      },
+      "name": {
+        "default": "",
+        "title": "Name",
+        "type": "string"
+      },
+      "operating_margin": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Operating Margin"
+      },
+      "operating_margin_column": {
+        "default": "",
+        "title": "Operating Margin Column",
+        "type": "string"
+      },
+      "attribution": {
+        "default": "",
+        "title": "Attribution",
+        "type": "string"
+      },
+      "annual_discount_rate": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Annual Discount Rate"
+      },
+      "sampler": {
+        "anyOf": [
+          {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Sampler"
+      },
+      "reporting_kernel": {
+        "anyOf": [
+          {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Reporting Kernel"
+      },
+      "control_priors": {
+        "anyOf": [
+          {
+            "items": {
+              "additionalProperties": true,
+              "description": "Optional override for a selected control column. Values and priors use transformed units; discover backend support first.",
+              "properties": {
+                "control": {
+                  "type": "string"
+                },
+                "transform": {
+                  "description": "N unchanged; DM divide by variable mean; STA scale by sample SD without centering; DDM divide by variable mean within hierarchy; LOG log(x/mean(x)). Backend validates applicability.",
+                  "examples": [
+                    "N",
+                    "DM",
+                    "STA",
+                    "DDM",
+                    "LOG"
+                  ],
+                  "type": "string"
+                },
+                "distribution": {
+                  "examples": [
+                    "normal",
+                    "inversegamma",
+                    "truncatednormal",
+                    "halfnormal"
+                  ],
+                  "type": "string"
+                },
+                "mean": {
+                  "type": "number"
+                },
+                "sd": {
+                  "type": "number"
+                },
+                "lower": {
+                  "type": "number"
+                },
+                "upper": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "control"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Control Priors"
+      }
+    },
+    "required": [
+      "uploaded_file_id",
+      "date_column",
+      "kpi_column",
+      "hierarchy_column",
+      "channels"
     ],
-    "default": null,
-    "title": "Tags"
-   }
+    "title": "create_modelArguments",
+    "type": "object"
   },
-  "required": [
-   "artifact",
-   "model_hash",
-   "run_id"
-  ],
-  "title": "update_runArguments",
-  "type": "object"
- },
- "upload_data": {
-  "properties": {
-   "csv_content": {
-    "default": "",
-    "title": "Csv Content",
-    "type": "string"
-   },
-   "csv_path": {
-    "default": "",
-    "title": "Csv Path",
-    "type": "string"
-   },
-   "filename": {
-    "default": "",
-    "title": "Filename",
-    "type": "string"
-   },
-   "name": {
-    "default": "",
-    "title": "Name",
-    "type": "string"
-   }
+  "create_var_model": {
+    "properties": {
+      "uploaded_file_id": {
+        "title": "Uploaded File Id",
+        "type": "integer"
+      },
+      "date_column": {
+        "title": "Date Column",
+        "type": "string"
+      },
+      "endogenous_vars": {
+        "items": {
+          "type": "string"
+        },
+        "title": "Endogenous Vars",
+        "type": "array"
+      },
+      "exogenous_vars": {
+        "anyOf": [
+          {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Exogenous Vars"
+      },
+      "lags": {
+        "default": 1,
+        "title": "Lags",
+        "type": "integer"
+      },
+      "forecast_horizon": {
+        "default": 12,
+        "title": "Forecast Horizon",
+        "type": "integer"
+      },
+      "base_variable": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Base Variable"
+      },
+      "equity_variables": {
+        "anyOf": [
+          {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Equity Variables"
+      },
+      "lre_horizon": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Lre Horizon"
+      },
+      "lre_ci": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Lre Ci"
+      },
+      "var_priors": {
+        "anyOf": [
+          {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Var Priors"
+      },
+      "name": {
+        "default": "",
+        "title": "Name",
+        "type": "string"
+      }
+    },
+    "required": [
+      "uploaded_file_id",
+      "date_column",
+      "endogenous_vars"
+    ],
+    "title": "create_var_modelArguments",
+    "type": "object"
   },
-  "title": "upload_dataArguments",
-  "type": "object"
- }
+  "link_var_model": {
+    "properties": {
+      "model_hash": {
+        "title": "Model Hash",
+        "type": "string"
+      },
+      "var_model_hash": {
+        "title": "Var Model Hash",
+        "type": "string"
+      },
+      "channel_map": {
+        "anyOf": [
+          {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Channel Map"
+      }
+    },
+    "required": [
+      "model_hash",
+      "var_model_hash"
+    ],
+    "title": "link_var_modelArguments",
+    "type": "object"
+  },
+  "unlink_var_model": {
+    "properties": {
+      "model_hash": {
+        "title": "Model Hash",
+        "type": "string"
+      }
+    },
+    "required": [
+      "model_hash"
+    ],
+    "title": "unlink_var_modelArguments",
+    "type": "object"
+  },
+  "set_contribution_groups": {
+    "properties": {
+      "model_hash": {
+        "title": "Model Hash",
+        "type": "string"
+      },
+      "contribution_groups": {
+        "items": {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        "title": "Contribution Groups",
+        "type": "array"
+      }
+    },
+    "required": [
+      "model_hash",
+      "contribution_groups"
+    ],
+    "title": "set_contribution_groupsArguments",
+    "type": "object"
+  },
+  "get_contribution_groups": {
+    "properties": {
+      "model_hash": {
+        "title": "Model Hash",
+        "type": "string"
+      }
+    },
+    "required": [
+      "model_hash"
+    ],
+    "title": "get_contribution_groupsArguments",
+    "type": "object"
+  },
+  "rename_model": {
+    "properties": {
+      "model_hash": {
+        "title": "Model Hash",
+        "type": "string"
+      },
+      "name": {
+        "title": "Name",
+        "type": "string"
+      }
+    },
+    "required": [
+      "model_hash",
+      "name"
+    ],
+    "title": "rename_modelArguments",
+    "type": "object"
+  },
+  "save_model": {
+    "properties": {
+      "model_hash": {
+        "title": "Model Hash",
+        "type": "string"
+      },
+      "name": {
+        "title": "Name",
+        "type": "string"
+      },
+      "project_id": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Project Id"
+      }
+    },
+    "required": [
+      "model_hash",
+      "name"
+    ],
+    "title": "save_modelArguments",
+    "type": "object"
+  },
+  "unsave_model": {
+    "properties": {
+      "model_hash": {
+        "title": "Model Hash",
+        "type": "string"
+      }
+    },
+    "required": [
+      "model_hash"
+    ],
+    "title": "unsave_modelArguments",
+    "type": "object"
+  },
+  "list_projects": {
+    "properties": {},
+    "title": "list_projectsArguments",
+    "type": "object"
+  },
+  "create_project": {
+    "properties": {
+      "name": {
+        "title": "Name",
+        "type": "string"
+      },
+      "team_id": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Team Id"
+      }
+    },
+    "required": [
+      "name"
+    ],
+    "title": "create_projectArguments",
+    "type": "object"
+  },
+  "rename_project": {
+    "properties": {
+      "project_id": {
+        "title": "Project Id",
+        "type": "integer"
+      },
+      "name": {
+        "title": "Name",
+        "type": "string"
+      }
+    },
+    "required": [
+      "project_id",
+      "name"
+    ],
+    "title": "rename_projectArguments",
+    "type": "object"
+  },
+  "get_model": {
+    "properties": {
+      "model_hash": {
+        "title": "Model Hash",
+        "type": "string"
+      }
+    },
+    "required": [
+      "model_hash"
+    ],
+    "title": "get_modelArguments",
+    "type": "object"
+  },
+  "delete_model": {
+    "properties": {
+      "model_hash": {
+        "title": "Model Hash",
+        "type": "string"
+      }
+    },
+    "required": [
+      "model_hash"
+    ],
+    "title": "delete_modelArguments",
+    "type": "object"
+  },
+  "get_model_status": {
+    "properties": {
+      "model_hash": {
+        "title": "Model Hash",
+        "type": "string"
+      }
+    },
+    "required": [
+      "model_hash"
+    ],
+    "title": "get_model_statusArguments",
+    "type": "object"
+  },
+  "get_model_results": {
+    "properties": {
+      "model_hash": {
+        "title": "Model Hash",
+        "type": "string"
+      },
+      "sections": {
+        "default": "",
+        "title": "Sections",
+        "type": "string"
+      },
+      "format": {
+        "default": "json",
+        "title": "Format",
+        "type": "string"
+      },
+      "channels": {
+        "anyOf": [
+          {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Channels"
+      },
+      "max_grid_points": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Max Grid Points"
+      },
+      "max_response_bytes": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Max Response Bytes"
+      }
+    },
+    "required": [
+      "model_hash"
+    ],
+    "title": "get_model_resultsArguments",
+    "type": "object"
+  },
+  "run_optimizer": {
+    "properties": {
+      "model_hash": {
+        "title": "Model Hash",
+        "type": "string"
+      },
+      "total_budget": {
+        "title": "Total Budget",
+        "type": "number"
+      },
+      "num_periods": {
+        "title": "Num Periods",
+        "type": "integer"
+      },
+      "gamma": {
+        "title": "Gamma",
+        "type": "number"
+      },
+      "currency": {
+        "title": "Currency",
+        "type": "string"
+      },
+      "bounds": {
+        "additionalProperties": true,
+        "title": "Bounds",
+        "type": "object"
+      },
+      "laydown_weights": {
+        "additionalProperties": true,
+        "title": "Laydown Weights",
+        "type": "object"
+      },
+      "period_cpm": {
+        "additionalProperties": true,
+        "title": "Period Cpm",
+        "type": "object"
+      },
+      "objective": {
+        "default": "revenue",
+        "title": "Objective",
+        "type": "string"
+      },
+      "forward_margin": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Forward Margin"
+      },
+      "period_multiplier": {
+        "anyOf": [
+          {
+            "items": {
+              "type": "number"
+            },
+            "type": "array"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Period Multiplier"
+      },
+      "include_historical_effect": {
+        "default": true,
+        "title": "Include Historical Effect",
+        "type": "boolean"
+      },
+      "enable_warm_start": {
+        "default": true,
+        "title": "Enable Warm Start",
+        "type": "boolean"
+      },
+      "optimizer_engine": {
+        "default": "slsqp",
+        "title": "Optimizer Engine",
+        "type": "string"
+      },
+      "sigma_penalty": {
+        "default": "std",
+        "title": "Sigma Penalty",
+        "type": "string"
+      },
+      "group_bounds": {
+        "anyOf": [
+          {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Group Bounds"
+      }
+    },
+    "required": [
+      "model_hash",
+      "total_budget",
+      "num_periods",
+      "gamma",
+      "currency",
+      "bounds",
+      "laydown_weights",
+      "period_cpm"
+    ],
+    "title": "run_optimizerArguments",
+    "type": "object"
+  },
+  "get_optimizer_results": {
+    "properties": {
+      "model_hash": {
+        "title": "Model Hash",
+        "type": "string"
+      },
+      "run_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Run Id"
+      }
+    },
+    "required": [
+      "model_hash"
+    ],
+    "title": "get_optimizer_resultsArguments",
+    "type": "object"
+  },
+  "get_scenario_template": {
+    "properties": {
+      "model_hash": {
+        "title": "Model Hash",
+        "type": "string"
+      },
+      "periods_forward": {
+        "default": 12,
+        "title": "Periods Forward",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "model_hash"
+    ],
+    "title": "get_scenario_templateArguments",
+    "type": "object"
+  },
+  "run_scenario": {
+    "properties": {
+      "model_hash": {
+        "title": "Model Hash",
+        "type": "string"
+      },
+      "scenario_data": {
+        "items": {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        "title": "Scenario Data",
+        "type": "array"
+      },
+      "spend_metadata": {
+        "anyOf": [
+          {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Spend Metadata"
+      },
+      "rebuild_model": {
+        "default": true,
+        "title": "Rebuild Model",
+        "type": "boolean"
+      },
+      "evaluate_holdout": {
+        "default": false,
+        "title": "Evaluate Holdout",
+        "type": "boolean"
+      },
+      "skip_slicing": {
+        "default": false,
+        "title": "Skip Slicing",
+        "type": "boolean"
+      },
+      "proxy_channels": {
+        "anyOf": [
+          {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Proxy Channels"
+      }
+    },
+    "required": [
+      "model_hash",
+      "scenario_data"
+    ],
+    "title": "run_scenarioArguments",
+    "type": "object"
+  },
+  "get_scenario_results": {
+    "properties": {
+      "model_hash": {
+        "title": "Model Hash",
+        "type": "string"
+      },
+      "run_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Run Id"
+      }
+    },
+    "required": [
+      "model_hash"
+    ],
+    "title": "get_scenario_resultsArguments",
+    "type": "object"
+  },
+  "update_run": {
+    "properties": {
+      "artifact": {
+        "title": "Artifact",
+        "type": "string"
+      },
+      "model_hash": {
+        "title": "Model Hash",
+        "type": "string"
+      },
+      "run_id": {
+        "title": "Run Id",
+        "type": "string"
+      },
+      "name": {
+        "default": "",
+        "title": "Name",
+        "type": "string"
+      },
+      "notes": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Notes"
+      },
+      "tags": {
+        "anyOf": [
+          {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Tags"
+      }
+    },
+    "required": [
+      "artifact",
+      "model_hash",
+      "run_id"
+    ],
+    "title": "update_runArguments",
+    "type": "object"
+  },
+  "set_run_pinned": {
+    "properties": {
+      "artifact": {
+        "title": "Artifact",
+        "type": "string"
+      },
+      "model_hash": {
+        "title": "Model Hash",
+        "type": "string"
+      },
+      "run_id": {
+        "title": "Run Id",
+        "type": "string"
+      },
+      "pinned": {
+        "title": "Pinned",
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "artifact",
+      "model_hash",
+      "run_id",
+      "pinned"
+    ],
+    "title": "set_run_pinnedArguments",
+    "type": "object"
+  },
+  "list_runs": {
+    "properties": {
+      "artifact": {
+        "title": "Artifact",
+        "type": "string"
+      },
+      "model_hash": {
+        "title": "Model Hash",
+        "type": "string"
+      },
+      "limit": {
+        "default": 50,
+        "title": "Limit",
+        "type": "integer"
+      },
+      "offset": {
+        "default": 0,
+        "title": "Offset",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "artifact",
+      "model_hash"
+    ],
+    "title": "list_runsArguments",
+    "type": "object"
+  },
+  "list_studies": {
+    "properties": {
+      "project_id": {
+        "title": "Project Id",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "project_id"
+    ],
+    "title": "list_studiesArguments",
+    "type": "object"
+  },
+  "create_study": {
+    "properties": {
+      "project_id": {
+        "title": "Project Id",
+        "type": "integer"
+      },
+      "name": {
+        "title": "Name",
+        "type": "string"
+      },
+      "question": {
+        "title": "Question",
+        "type": "string"
+      },
+      "max_attempts": {
+        "default": 5,
+        "title": "Max Attempts",
+        "type": "integer"
+      },
+      "max_concurrent": {
+        "default": 1,
+        "title": "Max Concurrent",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "project_id",
+      "name",
+      "question"
+    ],
+    "title": "create_studyArguments",
+    "type": "object"
+  },
+  "get_study": {
+    "properties": {
+      "study_id": {
+        "title": "Study Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "study_id"
+    ],
+    "title": "get_studyArguments",
+    "type": "object"
+  },
+  "update_study": {
+    "properties": {
+      "study_id": {
+        "title": "Study Id",
+        "type": "string"
+      },
+      "version": {
+        "title": "Version",
+        "type": "integer"
+      },
+      "name": {
+        "title": "Name",
+        "type": "string"
+      },
+      "question": {
+        "title": "Question",
+        "type": "string"
+      },
+      "max_attempts": {
+        "title": "Max Attempts",
+        "type": "integer"
+      },
+      "max_concurrent": {
+        "title": "Max Concurrent",
+        "type": "integer"
+      },
+      "state": {
+        "default": "active",
+        "description": "Backend state: active, paused or archived.",
+        "examples": [
+          "active",
+          "paused",
+          "archived"
+        ],
+        "title": "State",
+        "type": "string"
+      }
+    },
+    "required": [
+      "study_id",
+      "version",
+      "name",
+      "question",
+      "max_attempts",
+      "max_concurrent"
+    ],
+    "title": "update_studyArguments",
+    "type": "object"
+  },
+  "list_study_recipes": {
+    "properties": {
+      "study_id": {
+        "title": "Study Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "study_id"
+    ],
+    "title": "list_study_recipesArguments",
+    "type": "object"
+  },
+  "create_study_recipe": {
+    "properties": {
+      "study_id": {
+        "title": "Study Id",
+        "type": "string"
+      },
+      "name": {
+        "title": "Name",
+        "type": "string"
+      },
+      "reason": {
+        "title": "Reason",
+        "type": "string"
+      },
+      "specification": {
+        "additionalProperties": true,
+        "description": "Backend recipe envelope. api_mmm requires request; model_snapshot requires model_hash and is review-only. Unknown fields are forwarded for backend validation.",
+        "properties": {
+          "kind": {
+            "examples": [
+              "api_mmm",
+              "model_snapshot"
+            ],
+            "type": "string"
+          },
+          "request": {
+            "description": "Model API request with data_source, column bindings, channels, config and optional priors.",
+            "type": "object"
+          },
+          "model_hash": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind"
+        ],
+        "title": "Specification",
+        "type": "object"
+      },
+      "expected_content_hash": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Expected Content Hash"
+      }
+    },
+    "required": [
+      "study_id",
+      "name",
+      "reason",
+      "specification"
+    ],
+    "title": "create_study_recipeArguments",
+    "type": "object"
+  },
+  "revise_study_recipe": {
+    "properties": {
+      "recipe_id": {
+        "title": "Recipe Id",
+        "type": "string"
+      },
+      "expected_version": {
+        "title": "Expected Version",
+        "type": "integer"
+      },
+      "name": {
+        "title": "Name",
+        "type": "string"
+      },
+      "reason": {
+        "title": "Reason",
+        "type": "string"
+      },
+      "specification": {
+        "additionalProperties": true,
+        "description": "Backend recipe envelope. api_mmm requires request; model_snapshot requires model_hash and is review-only. Unknown fields are forwarded for backend validation.",
+        "properties": {
+          "kind": {
+            "examples": [
+              "api_mmm",
+              "model_snapshot"
+            ],
+            "type": "string"
+          },
+          "request": {
+            "description": "Model API request with data_source, column bindings, channels, config and optional priors.",
+            "type": "object"
+          },
+          "model_hash": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind"
+        ],
+        "title": "Specification",
+        "type": "object"
+      },
+      "expected_content_hash": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Expected Content Hash"
+      }
+    },
+    "required": [
+      "recipe_id",
+      "expected_version",
+      "name",
+      "reason",
+      "specification"
+    ],
+    "title": "revise_study_recipeArguments",
+    "type": "object"
+  },
+  "get_recipe_revision": {
+    "properties": {
+      "recipe_id": {
+        "title": "Recipe Id",
+        "type": "string"
+      },
+      "number": {
+        "title": "Number",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "recipe_id",
+      "number"
+    ],
+    "title": "get_recipe_revisionArguments",
+    "type": "object"
+  },
+  "validate_study_recipe": {
+    "properties": {
+      "specification": {
+        "additionalProperties": true,
+        "description": "Backend recipe envelope. api_mmm requires request; model_snapshot requires model_hash and is review-only. Unknown fields are forwarded for backend validation.",
+        "properties": {
+          "kind": {
+            "examples": [
+              "api_mmm",
+              "model_snapshot"
+            ],
+            "type": "string"
+          },
+          "request": {
+            "description": "Model API request with data_source, column bindings, channels, config and optional priors.",
+            "type": "object"
+          },
+          "model_hash": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind"
+        ],
+        "title": "Specification",
+        "type": "object"
+      }
+    },
+    "required": [
+      "specification"
+    ],
+    "title": "validate_study_recipeArguments",
+    "type": "object"
+  },
+  "launch_study_run": {
+    "properties": {
+      "study_id": {
+        "title": "Study Id",
+        "type": "string"
+      },
+      "revision_id": {
+        "title": "Revision Id",
+        "type": "string"
+      },
+      "policy_id": {
+        "title": "Policy Id",
+        "type": "string"
+      },
+      "submission_key": {
+        "description": "Caller-generated 8-128 character identity for one intentional attempt. Reuse identical key and inputs after a lost response; a new key may consume another attempt.",
+        "title": "Submission Key",
+        "type": "string"
+      }
+    },
+    "required": [
+      "study_id",
+      "revision_id",
+      "policy_id",
+      "submission_key"
+    ],
+    "title": "launch_study_runArguments",
+    "type": "object"
+  },
+  "list_study_runs": {
+    "properties": {
+      "study_id": {
+        "title": "Study Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "study_id"
+    ],
+    "title": "list_study_runsArguments",
+    "type": "object"
+  },
+  "get_study_run": {
+    "properties": {
+      "run_id": {
+        "title": "Run Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "run_id"
+    ],
+    "title": "get_study_runArguments",
+    "type": "object"
+  },
+  "cancel_study_run": {
+    "properties": {
+      "run_id": {
+        "title": "Run Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "run_id"
+    ],
+    "title": "cancel_study_runArguments",
+    "type": "object"
+  },
+  "list_quality_policies": {
+    "properties": {
+      "study_id": {
+        "title": "Study Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "study_id"
+    ],
+    "title": "list_quality_policiesArguments",
+    "type": "object"
+  },
+  "create_quality_policy": {
+    "properties": {
+      "study_id": {
+        "title": "Study Id",
+        "type": "string"
+      },
+      "name": {
+        "title": "Name",
+        "type": "string"
+      },
+      "rationale": {
+        "title": "Rationale",
+        "type": "string"
+      },
+      "checks": {
+        "items": {
+          "additionalProperties": true,
+          "properties": {
+            "metric": {
+              "examples": [
+                "r_hat_max",
+                "mae",
+                "rmse",
+                "wape"
+              ],
+              "type": "string"
+            },
+            "maximum": {
+              "description": "Declared upper threshold: WAPE as a fraction, MAE/RMSE in outcome units, R-hat dimensionless.",
+              "type": "number"
+            },
+            "required": {
+              "default": true,
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "metric",
+            "maximum"
+          ],
+          "type": "object"
+        },
+        "title": "Checks",
+        "type": "array"
+      }
+    },
+    "required": [
+      "study_id",
+      "name",
+      "rationale",
+      "checks"
+    ],
+    "title": "create_quality_policyArguments",
+    "type": "object"
+  },
+  "evaluate_study_run": {
+    "properties": {
+      "run_id": {
+        "title": "Run Id",
+        "type": "string"
+      },
+      "policy_id": {
+        "title": "Policy Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "run_id",
+      "policy_id"
+    ],
+    "title": "evaluate_study_runArguments",
+    "type": "object"
+  },
+  "list_study_evaluations": {
+    "properties": {
+      "run_id": {
+        "title": "Run Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "run_id"
+    ],
+    "title": "list_study_evaluationsArguments",
+    "type": "object"
+  },
+  "list_study_decisions": {
+    "properties": {
+      "study_id": {
+        "title": "Study Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "study_id"
+    ],
+    "title": "list_study_decisionsArguments",
+    "type": "object"
+  },
+  "recommend_study_run": {
+    "properties": {
+      "study_id": {
+        "title": "Study Id",
+        "type": "string"
+      },
+      "run_id": {
+        "title": "Run Id",
+        "type": "string"
+      },
+      "evaluation_id": {
+        "title": "Evaluation Id",
+        "type": "string"
+      },
+      "reason": {
+        "title": "Reason",
+        "type": "string"
+      }
+    },
+    "required": [
+      "study_id",
+      "run_id",
+      "evaluation_id",
+      "reason"
+    ],
+    "title": "recommend_study_runArguments",
+    "type": "object"
+  },
+  "adopt_model_into_study": {
+    "properties": {
+      "study_id": {
+        "title": "Study Id",
+        "type": "string"
+      },
+      "model_hash": {
+        "title": "Model Hash",
+        "type": "string"
+      },
+      "reason": {
+        "title": "Reason",
+        "type": "string"
+      },
+      "confirm": {
+        "default": false,
+        "title": "Confirm",
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "study_id",
+      "model_hash",
+      "reason"
+    ],
+    "title": "adopt_model_into_studyArguments",
+    "type": "object"
+  },
+  "compare_study_runs": {
+    "properties": {
+      "study_id": {
+        "title": "Study Id",
+        "type": "string"
+      },
+      "run_ids": {
+        "items": {
+          "type": "string"
+        },
+        "title": "Run Ids",
+        "type": "array"
+      },
+      "policy_id": {
+        "title": "Policy Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "study_id",
+      "run_ids",
+      "policy_id"
+    ],
+    "title": "compare_study_runsArguments",
+    "type": "object"
+  }
 }

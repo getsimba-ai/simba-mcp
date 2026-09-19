@@ -29,3 +29,7 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Local delivery notes and resolver state are not published artifacts.
+.codex/
+uv.lock

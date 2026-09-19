@@ -54,3 +54,18 @@ ruff check src/ tests/
 ## Code Style
 
 This project uses [Ruff](https://docs.astral.sh/ruff/) for linting, configured in `pyproject.toml` (Python 3.11+, 100-char line length). CI enforces this on every PR.
+
+
+### Module ownership and contract changes
+
+Add plain async functions to a domain module in `src/simba_mcp/tools/`, export and
+register them in `server.py`, and explicitly classify their effects in
+`metadata.py`. Registration fails for an unclassified tool. Keep business rules
+and durable workflow state in the backend. Use permissive schema descriptions to
+preserve newer backend fields; do not copy backend validators into MCP.
+
+Update the input-schema snapshot only for intentional, documented contract
+changes. Test the actual MCP wire result as well as direct Python forwarding.
+Run `pytest`, `ruff check src/ tests/`, `ruff format --check src/ tests/`, and
+`uv build`. Verify the supported SDK floor separately when changing SDK-facing
+contracts. See [architecture](docs/architecture.md) for compatibility boundaries.
