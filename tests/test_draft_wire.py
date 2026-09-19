@@ -14,7 +14,8 @@ from simba_mcp.api_client import SimbaAPIClient
     "operation",
     ["create", "update", "get", "list", "template", "pipeline_template", "publish", "authoring"],
 )
-def test_authoring_snapshot_crosses_wire_without_losing_fields(monkeypatch, operation):
+@pytest.mark.parametrize("edited", [False, True])
+def test_authoring_snapshot_crosses_wire_without_losing_fields(monkeypatch, operation, edited):
     snapshot = {
         "schema_version": 1,
         "family": "var",
@@ -43,6 +44,17 @@ def test_authoring_snapshot_crosses_wire_without_losing_fields(monkeypatch, oper
             "version": 3,
             "sha256": "a" * 64,
         }
+    if edited:
+        snapshot["source"].pop("origin", None)
+        snapshot["source"]["history"] = [
+            {
+                "kind": "remove_column",
+                "column": "unused",
+                "input_sha256": "a" * 64,
+                "output_sha256": "b" * 64,
+                "row_count": 2,
+            }
+        ]
     draft = {"id": "d1", "study_id": "s1", "version": 2, "snapshot": snapshot}
     cases = {
         "create": (

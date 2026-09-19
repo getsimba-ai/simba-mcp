@@ -61,13 +61,52 @@ DraftSnapshot = Annotated[
                                 "content_base64": {"type": "string"},
                                 "origin": {
                                     "type": "object",
-                                    "description": "Optional uploaded dataset lineage. Backend verifies ownership and exact bytes, then supplies sha256. Retain the returned origin when reopening; it never replaces frozen source bytes.",
+                                    "description": "Optional uploaded dataset or saved pipeline-version lineage. Backend verifies ownership and exact bytes, then supplies sha256. Retain the returned origin when reopening; it never replaces frozen source bytes.",
                                     "properties": {
-                                        "kind": {"type": "string", "enum": ["uploaded_file"]},
+                                        "kind": {
+                                            "type": "string",
+                                            "enum": ["uploaded_file", "pipeline_version"],
+                                        },
                                         "id": {"type": "integer", "minimum": 1},
                                         "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+                                        "pipeline_id": {"type": "integer", "minimum": 1},
+                                        "version": {"type": "integer", "minimum": 1},
                                     },
                                     "required": ["kind", "id"],
+                                },
+                                "history": {
+                                    "type": "array",
+                                    "maxItems": 100,
+                                    "description": "Client-reported authoring edits. Backend validates the hash chain and final bytes, not operation semantics. Preserve when reopening. Edited sources must omit unchanged origin.",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "kind": {
+                                                "type": "string",
+                                                "enum": ["transform_column", "remove_column"],
+                                            },
+                                            "column": {"type": "string"},
+                                            "output_column": {"type": "string"},
+                                            "transformation": {"type": "string"},
+                                            "parameter": {"type": ["number", "null"]},
+                                            "input_sha256": {
+                                                "type": "string",
+                                                "pattern": "^[a-f0-9]{64}$",
+                                            },
+                                            "output_sha256": {
+                                                "type": "string",
+                                                "pattern": "^[a-f0-9]{64}$",
+                                            },
+                                            "row_count": {"type": "integer", "minimum": 0},
+                                        },
+                                        "required": [
+                                            "kind",
+                                            "column",
+                                            "input_sha256",
+                                            "output_sha256",
+                                            "row_count",
+                                        ],
+                                    },
                                 },
                             },
                             "required": ["name", "content_base64"],

@@ -506,3 +506,5 @@ Draft publication: `publish_recipe_draft` freezes a saved MMM or VAR draft as an
 Calibration: check the backend `calibration` capability. MMM draft publication validates active likelihood observations and returns their count, units, channels and hash in recipe provenance. Enabled invalid or unapplied observations fail explicitly; VAR calibration is unsupported. Preserve disabled authoring rows when editing. Imported wizard JSON is retained as editable rows; multipart wizard CSV capture retains its original bytes. No new MCP route is needed.
 
 Pipeline sources retain the exact version ID, pipeline ID, version number and verified content hash. No pipeline is executed. Existing exported uploads are not assigned inferred pipeline lineage.
+
+Draft `source.history` preserves up to 100 recorded column transformations/removals with parameters and before/after data hashes. The backend checks chain continuity and the terminal data hash. These are client-reported authoring records, not independently replayed operations or quality evidence. Edited data must omit an unchanged source origin. Unknown nested fields remain preserved.
