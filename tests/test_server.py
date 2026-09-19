@@ -9,6 +9,7 @@ from unittest.mock import patch
 import anyio
 import pytest
 
+from simba_mcp import auth
 from simba_mcp.server import AppContext, app_lifespan, mcp
 
 
@@ -222,7 +223,7 @@ class TestAsgiApp:
         monkeypatch.setenv("SIMBA_API_URL", "http://test:9999")
         # _create_app flips the module-global HTTP-mode flag; register the
         # current value with monkeypatch so it is restored after the test.
-        monkeypatch.setattr(srv, "_serving_http", srv._serving_http)
+        monkeypatch.setattr(auth, "_serving_http", auth._serving_http)
 
         app = srv.app  # lazy module __getattr__ — the uvicorn target
         headers = {
@@ -268,11 +269,10 @@ class TestMainTransportKwargs:
         import sys
 
         import simba_mcp.__main__ as entry
-        import simba_mcp.server as srv
 
         # main() flips the module-global HTTP-mode flag for http/sse — since
         # #51 that flag gates auth behavior, so register it for restore.
-        monkeypatch.setattr(srv, "_serving_http", srv._serving_http)
+        monkeypatch.setattr(auth, "_serving_http", auth._serving_http)
         calls = {}
         monkeypatch.setattr(entry.mcp, "run", lambda **kw: calls.update(kw))
         monkeypatch.setattr(sys, "argv", ["simba-mcp", *argv])
@@ -296,7 +296,7 @@ class TestMainTransportKwargs:
         # The flag gates BYOK auth AND csv_path denial (#51 review): losing
         # set_http_mode(True) here would silently revert network callers to
         # the shared env identity with zero other test signal.
-        assert srv._serving_http is True
+        assert auth._serving_http is True
 
     def test_body_limit_covers_the_api_upload_cap(self):
         """Every HTTP entry point must allow a legal csv_content upload: the
@@ -306,11 +306,10 @@ class TestMainTransportKwargs:
         assert srv.MAX_REQUEST_BODY_BYTES > srv.MAX_UPLOAD_BYTES
 
     def test_stdio_passes_no_transport_kwargs(self, monkeypatch):
-        import simba_mcp.server as srv
 
         calls = self._run_main(monkeypatch, [])
         assert calls == {"transport": "stdio"}
-        assert srv._serving_http is False
+        assert auth._serving_http is False
 
     def test_sse_passes_host_and_port(self, monkeypatch):
         import simba_mcp.server as srv
@@ -322,7 +321,7 @@ class TestMainTransportKwargs:
             "port": 9002,
             "max_request_body_size": srv.MAX_REQUEST_BODY_BYTES,
         }
-        assert srv._serving_http is True
+        assert auth._serving_http is True
 
 
 class TestLifespan:
@@ -847,8 +846,9 @@ class TestUploadData:
     @pytest.mark.anyio
     async def test_oversized_file_rejected_preflight(self, tmp_path, monkeypatch):
         import simba_mcp.server as server_mod
+        from simba_mcp.tools import data
 
-        monkeypatch.setattr(server_mod, "MAX_UPLOAD_BYTES", 10)
+        monkeypatch.setattr(data, "MAX_UPLOAD_BYTES", 10)
         f = tmp_path / "big.csv"
         f.write_text("x" * 100, encoding="utf-8")
         ctx, client = self._ctx_capturing()
@@ -861,7 +861,9 @@ class TestUploadData:
         import simba_mcp.server as server_mod
 
         monkeypatch.delenv("SIMBA_MCP_ALLOW_LOCAL_FILES", raising=False)
-        monkeypatch.setattr(server_mod, "_serving_http", True)
+        from simba_mcp import auth
+
+        monkeypatch.setattr(auth, "_serving_http", True)
         f = tmp_path / "d.csv"
         f.write_text("a,b\n", encoding="utf-8")
         ctx, client = self._ctx_capturing()
@@ -876,7 +878,9 @@ class TestUploadData:
         import simba_mcp.server as server_mod
 
         monkeypatch.setenv("SIMBA_MCP_ALLOW_LOCAL_FILES", "0")
-        monkeypatch.setattr(server_mod, "_serving_http", False)
+        from simba_mcp import auth
+
+        monkeypatch.setattr(auth, "_serving_http", False)
         f = tmp_path / "d.csv"
         f.write_text("a,b\n", encoding="utf-8")
         ctx, client = self._ctx_capturing()
@@ -891,7 +895,9 @@ class TestUploadData:
         import simba_mcp.server as server_mod
 
         monkeypatch.setenv("SIMBA_MCP_ALLOW_LOCAL_FILES", "1")
-        monkeypatch.setattr(server_mod, "_serving_http", True)
+        from simba_mcp import auth
+
+        monkeypatch.setattr(auth, "_serving_http", True)
         f = tmp_path / "d.csv"
         f.write_text("a,b\n", encoding="utf-8")
         ctx, client = self._ctx_capturing()
@@ -1077,13 +1083,12 @@ class TestBringYourOwnKey:
             assert _bearer_token(self._ctx_with_headers(headers)) == expected, headers
 
     def test_client_sets_caller_key_only_in_http_mode(self, monkeypatch):
-        import simba_mcp.server as srv
         from simba_mcp.api_client import CALLER_API_KEY
         from simba_mcp.server import _client
 
         ctx = self._ctx_with_headers({"Authorization": "Bearer simba_sk_h"})
 
-        monkeypatch.setattr(srv, "_serving_http", True)
+        monkeypatch.setattr(auth, "_serving_http", True)
         token = CALLER_API_KEY.set(None)  # register restore point
         try:
             _client(ctx)
@@ -1094,7 +1099,7 @@ class TestBringYourOwnKey:
         finally:
             CALLER_API_KEY.reset(token)
 
-        monkeypatch.setattr(srv, "_serving_http", False)
+        monkeypatch.setattr(auth, "_serving_http", False)
         token = CALLER_API_KEY.set(None)
         try:
             _client(ctx)
@@ -1130,7 +1135,7 @@ class TestBringYourOwnKey:
         monkeypatch.setenv("SIMBA_API_KEY", "simba_sk_env_should_never_appear")
         monkeypatch.setenv("SIMBA_API_URL", "http://test:1")
         monkeypatch.setattr(SimbaAPIClient, "_get_client", fake_get_client)
-        monkeypatch.setattr(srv, "_serving_http", srv._serving_http)
+        monkeypatch.setattr(auth, "_serving_http", auth._serving_http)
 
         # A fresh app, not the module-cached `srv.app`: each app's session
         # manager is single-use, and TestAsgiApp already consumed the cache.
@@ -1178,9 +1183,8 @@ class TestBringYourOwnKey:
         client carries NO default credential, so even a code path that
         bypasses _client(ctx) — leaving the ContextVar at None — gets a 401
         instead of silently authenticating as the env identity."""
-        import simba_mcp.server as srv
 
-        monkeypatch.setattr(srv, "_serving_http", True)
+        monkeypatch.setattr(auth, "_serving_http", True)
         env = {"SIMBA_API_URL": "http://test:9999", "SIMBA_API_KEY": "simba_sk_env_leak"}
         with patch.dict(os.environ, env):
             async with app_lifespan(mcp) as app_ctx:
