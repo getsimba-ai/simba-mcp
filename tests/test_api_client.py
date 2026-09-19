@@ -1,4 +1,4 @@
-"""Unit tests for the MCP API client — verifies correct HTTP calls without a real server."""
+"""Unit tests for the MCP API client â€” verifies correct HTTP calls without a real server."""
 
 from unittest.mock import AsyncMock, patch
 
@@ -181,7 +181,7 @@ class TestAPIClientEndpoints:
     @pytest.mark.anyio
     async def test_unknown_artifact_returns_structured_error(self, client_with_mock):
         """Never a raise: SDK v2 masks raised exceptions to an info-free
-        'Error executing tool ...' at the client — the guidance must travel
+        'Error executing tool ...' at the client â€” the guidance must travel
         in the tool result. Covers all three artifact-taking methods."""
         client, requests = client_with_mock
         for coro in (
@@ -475,11 +475,12 @@ class TestAPIClientRetry:
             result = await client.get_schema()
         assert result["_status_code"] == 503
         assert "unreachable" in result["error"]
-        assert "connection refused" in result["error"]
+        assert "ConnectError" in result["error"]
+        assert "connection refused" not in result["error"]
 
     @pytest.mark.anyio
     async def test_non_retriable_status_not_retried(self):
-        """A 403 is not retried — it's returned immediately."""
+        """A 403 is not retried â€” it's returned immediately."""
         call_count = 0
 
         class ForbiddenTransport(httpx.AsyncBaseTransport):
@@ -598,7 +599,7 @@ class TestCallerKeyOverride:
     @pytest.mark.anyio
     async def test_concurrent_tasks_keep_their_own_keys(self, client_with_mock):
         """Two tasks, two keys, one shared client: each request must carry
-        exactly its own task's key — the leak this design must preclude."""
+        exactly its own task's key â€” the leak this design must preclude."""
         import anyio
 
         from simba_mcp.api_client import CALLER_API_KEY

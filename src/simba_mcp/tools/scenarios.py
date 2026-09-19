@@ -1,8 +1,10 @@
 """Scenarios tools backed by the Simba API."""
 
-from typing import Any
+from typing import Annotated, Any
 
 from mcp.server.mcpserver import Context, MCPServer
+from mcp.types import ToolAnnotations
+from pydantic import Field
 
 from ..auth import _client
 from ..runtime import AppContext
@@ -26,11 +28,11 @@ async def run_optimizer(
     sigma_penalty: str = "std",
     group_bounds: list[dict] | None = None,
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> dict[str, Any]:
     """Run budget optimization on a completed model.
 
     Finds the optimal budget allocation across channels to maximize
-    predicted revenue — or predicted PROFIT with objective="profit" —
+    predicted revenue â€” or predicted PROFIT with objective="profit" â€”
     within the given constraints.
 
     PROFIT OBJECTIVE: objective="profit" requires a margin source. If the model
@@ -140,13 +142,13 @@ async def get_optimizer_results(
     model_hash: str,
     run_id: str | None = None,
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> dict[str, Any]:
     """Get budget optimization status and results.
 
     Without run_id: returns the MODEL-LEVEL optimizer state. Top-level keys:
     `optimizer_status` ("none"/"pending"/"under way"/"complete"/"failed"),
     `progress` + `progress_text` while running, and `results` when complete.
-    This reflects the LATEST run on the model — a newer run overwrites it, so
+    This reflects the LATEST run on the model â€” a newer run overwrites it, so
     a poller can lose sight of the run it submitted.
 
     With run_id (run_optimizer's response includes it): fetches that specific
@@ -154,19 +156,19 @@ async def get_optimizer_results(
     `status`, `created_at`, `label`, `inputs`, and `results`. Poll THIS form
     when you need to know whether your own run completed.
 
-    Reading `results` rows — the columns come from DIFFERENT conventions and
+    Reading `results` rows â€” the columns come from DIFFERENT conventions and
     must not be treated as interchangeable:
-    - `Revenue` / `ROI`: the optimizer's DECISION math — removal-lift
+    - `Revenue` / `ROI`: the optimizer's DECISION math â€” removal-lift
       counterfactual revenue at the allocated spend. This is what the solver
       optimized.
     - `OptimizedEvalRevenue` / `OptimizedEvalROI` and `HistoricalRevenue` /
-      `HistoricalROI`: fitted-convention COMPARISON columns — the reconciled
+      `HistoricalROI`: fitted-convention COMPARISON columns â€” the reconciled
       accounting view matching the model's Contributions panel. Same spend,
       different question; never mix them with `Revenue`/`ROI` in one summary.
     - `ObjectiveMarginal`: the decision-math marginal return at the optimum
       (the quantity the solver equalizes across unconstrained channels).
     - `MroiAtOptimized` / `MroiAtOptimizedHdi3` / `MroiAtOptimizedHdi97`:
-      posterior mROI evaluated at the optimized spend (94% HDI bounds) — a
+      posterior mROI evaluated at the optimized spend (94% HDI bounds) â€” a
       DIFFERENT quantity from ObjectiveMarginal (they can differ by several
       times); quote the one matching the question asked.
     - Convergence / KKT certificate fields report solver health. All-None
@@ -184,7 +186,7 @@ async def get_scenario_template(
     model_hash: str,
     periods_forward: int = 12,
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> dict[str, Any]:
     """Generate a forward-period scenario template from a completed model.
 
     Returns future dates pre-filled with values from 1 year prior,
@@ -193,12 +195,12 @@ async def get_scenario_template(
 
     IMPORTANT: Always call this before run_scenario or run_optimizer to discover:
     - Channel names (use these exact names in scenario_data, bounds, laydown_weights, period_cpm)
-    - Average CPM per channel (avg_cpu_by_channel — use for period_cpm in run_optimizer)
-    - Baseline activity values per channel (rows — use as starting point for scenarios)
+    - Average CPM per channel (avg_cpu_by_channel â€” use for period_cpm in run_optimizer)
+    - Baseline activity values per channel (rows â€” use as starting point for scenarios)
     - Media vs control channel classification (variable_classification field)
 
     The response also includes: operating_margin (the model's stored margin, if
-    set — useful for profit math), variable_transforms (per-variable transform
+    set â€” useful for profit math), variable_transforms (per-variable transform
     metadata), periodicity, and start_date.
 
     WARNING: Template data may contain NaN or null values for channels without
@@ -221,7 +223,7 @@ async def run_scenario(
     skip_slicing: bool = False,
     proxy_channels: list[dict] | None = None,
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> dict[str, Any]:
     """Run a "what-if" scenario prediction on a completed model.
 
     Takes a set of future period rows with channel activity values and
@@ -254,7 +256,7 @@ async def run_scenario(
         evaluate_holdout: Evaluate the scenario against held-out actuals when the
                          scenario period overlaps observed data (default False).
         skip_slicing: Skip per-channel contribution slicing in the prediction
-                     output — faster when only the KPI total is needed (default False).
+                     output â€” faster when only the KPI total is needed (default False).
         proxy_channels: Optional list of proxy-channel mappings, each mapping a
                        scenario channel to a fitted channel whose transforms it
                        borrows (for channels without their own history).
@@ -277,18 +279,18 @@ async def get_scenario_results(
     model_hash: str,
     run_id: str | None = None,
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> dict[str, Any]:
     """Get scenario prediction results.
 
-    Without run_id: returns the MODEL-LEVEL scenario state — status
+    Without run_id: returns the MODEL-LEVEL scenario state â€” status
     (pending/complete/failed) and, when complete, the full prediction data
     including predicted KPI per period, channel contributions, confidence
     intervals, and base components (intercept, seasonality, trend). This
-    reflects the LATEST scenario on the model — a newer run overwrites it,
+    reflects the LATEST scenario on the model â€” a newer run overwrites it,
     so a poller can lose sight of the run it submitted.
 
     With run_id (run_scenario's response includes it): fetches that specific
-    saved run, immune to later runs — keys include `run_id`, `model_hash`,
+    saved run, immune to later runs â€” keys include `run_id`, `model_hash`,
     `name`, `status`, `pinned`, `notes`, `tags`, `key_metrics`, timestamps,
     `inputs` (the submitted payload), and `results`. Poll THIS form when you
     need to know whether your own run completed, or to disambiguate
@@ -313,10 +315,10 @@ async def update_run(
     notes: str | None = None,
     tags: list[str] | None = None,
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> dict[str, Any]:
     """Rename / annotate a saved optimizer or scenario run.
 
-    Runs are auto-named at creation (e.g. "$1.2M · 12mo · Jan 5");
+    Runs are auto-named at creation (e.g. "$1.2M Â· 12mo Â· Jan 5");
     renaming makes run history carry the analysis ("holiday cut -10%",
     "stretch 130%"). Renaming permanently flips the run's auto_named flag
     to false so future auto-naming never overwrites it. Only the fields
@@ -347,7 +349,7 @@ async def set_run_pinned(
     run_id: str,
     pinned: bool,
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> dict[str, Any]:
     """Pin or unpin a saved optimizer or scenario run.
 
     Declarative and idempotent: setting the current state again is a
@@ -365,26 +367,36 @@ async def set_run_pinned(
 async def list_runs(
     artifact: str,
     model_hash: str,
-    limit: int = 50,
-    offset: int = 0,
+    limit: Annotated[
+        int,
+        Field(
+            description="Maximum records to return. Existing endpoint defaults apply; workflow lists allow 1-200, or null to preserve the full legacy response."
+        ),
+    ] = 50,
+    offset: Annotated[
+        int,
+        Field(
+            description="Zero-based record offset. Concurrent changes can shift page boundaries."
+        ),
+    ] = 0,
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> dict[str, Any]:
     """List a model's saved optimizer or scenario run history.
 
     Returns {model_hash, runs, count, limit, offset}. Each run summary has:
     run_id, name, auto_named, pinned, notes, tags, status, error_details,
     progress fields while running, key_metrics (optimizer: total_budget,
     num_periods, gamma, predicted_revenue/roi, ...; scenario: num_periods,
-    total_planned_spend, predicted_outcome, ...; null metrics are omitted —
+    total_planned_spend, predicted_outcome, ...; null metrics are omitted â€”
     treat every key as optional), and created/started/completed timestamps.
     Ordering is pinned-first, then newest-first.
 
     CAVEATS:
-    - `count` is the LENGTH OF THIS PAGE, not the total run count — page
+    - `count` is the LENGTH OF THIS PAGE, not the total run count â€” page
       until a short page.
     - The optimizer objective ("revenue"/"profit") is NOT in the summary;
       fetch the specific run (get_optimizer_results with run_id) and read
-      its `inputs` — profit runs carry `objective: "profit"` there, revenue
+      its `inputs` â€” profit runs carry `objective: "profit"` there, revenue
       runs omit the key.
 
     Use get_optimizer_results / get_scenario_results with a run_id to fetch
@@ -401,11 +413,57 @@ async def list_runs(
 
 
 def register(mcp: MCPServer) -> None:
-    mcp.tool()(run_optimizer)
-    mcp.tool()(get_optimizer_results)
-    mcp.tool()(get_scenario_template)
-    mcp.tool()(run_scenario)
-    mcp.tool()(get_scenario_results)
-    mcp.tool()(update_run)
-    mcp.tool()(set_run_pinned)
-    mcp.tool()(list_runs)
+    mcp.tool(
+        title="Run optimizer",
+        annotations=ToolAnnotations(
+            read_only_hint=False,
+            destructive_hint=False,
+            idempotent_hint=False,
+            open_world_hint=True,
+        ),
+    )(run_optimizer)
+    mcp.tool(
+        title="Get optimizer results",
+        annotations=ToolAnnotations(
+            read_only_hint=True, destructive_hint=False, idempotent_hint=True, open_world_hint=True
+        ),
+    )(get_optimizer_results)
+    mcp.tool(
+        title="Get scenario template",
+        annotations=ToolAnnotations(
+            read_only_hint=True, destructive_hint=False, idempotent_hint=True, open_world_hint=True
+        ),
+    )(get_scenario_template)
+    mcp.tool(
+        title="Run scenario",
+        annotations=ToolAnnotations(
+            read_only_hint=False,
+            destructive_hint=False,
+            idempotent_hint=False,
+            open_world_hint=True,
+        ),
+    )(run_scenario)
+    mcp.tool(
+        title="Get scenario results",
+        annotations=ToolAnnotations(
+            read_only_hint=True, destructive_hint=False, idempotent_hint=True, open_world_hint=True
+        ),
+    )(get_scenario_results)
+    mcp.tool(
+        title="Update run",
+        annotations=ToolAnnotations(
+            read_only_hint=False, destructive_hint=True, idempotent_hint=False, open_world_hint=True
+        ),
+    )(update_run)
+    mcp.tool(
+        title="Set run pinned",
+        annotations=ToolAnnotations(
+            read_only_hint=False, destructive_hint=True, idempotent_hint=False, open_world_hint=True
+        ),
+    )(set_run_pinned)
+    mcp.tool(
+        title="List runs",
+        annotations=ToolAnnotations(
+            read_only_hint=True, destructive_hint=False, idempotent_hint=True, open_world_hint=True
+        ),
+    )(list_runs)

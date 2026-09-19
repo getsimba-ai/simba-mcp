@@ -1,9 +1,11 @@
 """Models tools backed by the Simba API."""
 
-from typing import Any
+from typing import Annotated, Any
 
 from mcp.server.mcpserver import Context, MCPServer
 from mcp.server.mcpserver.exceptions import ToolError
+from mcp.types import ToolAnnotations
+from pydantic import Field
 
 from ..auth import _client
 from ..runtime import AppContext
@@ -11,10 +13,20 @@ from ..runtime import AppContext
 
 async def list_models(
     include_unsaved: bool = False,
-    limit: int = 50,
-    offset: int = 0,
+    limit: Annotated[
+        int,
+        Field(
+            description="Maximum records to return. Existing endpoint defaults apply; workflow lists allow 1-200, or null to preserve the full legacy response."
+        ),
+    ] = 50,
+    offset: Annotated[
+        int,
+        Field(
+            description="Zero-based record offset. Concurrent changes can shift page boundaries."
+        ),
+    ] = 0,
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> dict[str, Any]:
     """List all Marketing Mix Models for the authenticated user.
 
     Returns model name, hash, status (pending/under way/complete/failed),
@@ -58,9 +70,14 @@ async def create_model(
     annual_discount_rate: float | None = None,
     sampler: dict | None = None,
     reporting_kernel: dict | None = None,
-    control_priors: list[dict] | None = None,
+    control_priors: Annotated[
+        list[dict] | None,
+        Field(
+            description="Optional per-control prior/transform overrides. Query get_capabilities first; backend validates names, values and support."
+        ),
+    ] = None,
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> dict[str, Any]:
     """Create and start fitting a new Bayesian Marketing Mix Model.
 
     This queues an async model fit and returns immediately with a model_hash.
@@ -88,34 +105,34 @@ async def create_model(
                 upper, transform, adstock_type, effect_period.
                 Only specified fields are overridden; the rest use smart defaults.
                 Adstock-kernel fields: half_life_lower/half_life_upper (carryover half-life
-                bounds in periods — preferred over the legacy decay_lower/decay_upper),
+                bounds in periods â€” preferred over the legacy decay_lower/decay_upper),
                 theta_mean/theta_sd (peak-lag prior, adstock_type="delayed" only),
                 dual_weight_mean/dual_weight_sd (long-term/slow-component share prior,
                 adstock_type="dual_geometric" only).
-                SATURATION ANCHOR — state it ONCE, in exactly one of three
+                SATURATION ANCHOR â€” state it ONCE, in exactly one of three
                 mutually exclusive forms (two in one override -> 400 "state
                 the saturation prior once"):
-                (1) half_marginal_mean/half_marginal_sd — CANONICAL for
+                (1) half_marginal_mean/half_marginal_sd â€” CANONICAL for
                 saturation_type="generalized_log" (rejected on other
                 families): the activity level where MARGINAL returns have
                 halved, finite at every curvature (#632).
                 sat_shape_mean MUST accompany the pair in the same override
-                (#672) — the fold pairs your coefficient with the
+                (#672) â€” the fold pairs your coefficient with the
                 stated curvature, so omitting it is a 400, never a silent
                 default.
-                (2) half_saturation_mean/half_saturation_sd — the
+                (2) half_saturation_mean/half_saturation_sd â€” the
                 50%-of-maximum point in activity units, for the
                 single-parameter families (tanh/michaelis_menten/
                 negative_exponential). Do NOT use it for generalized_log
                 near-log work: it overflows below sat_shape_mean 0.00097657
-                and is rejected with a 400 — precisely the regime that
+                and is rejected with a 400 â€” precisely the regime that
                 family exists for.
-                (3) alpha_sd + scalars — legacy internal coordinates,
+                (3) alpha_sd + scalars â€” legacy internal coordinates,
                 accepted for backward compat.
                 Curvature (generalized_log only): sat_shape_mean/sat_shape_sd
-                — small values are near-logarithmic, 1.0 is michaelis_menten.
+                â€” small values are near-logarithmic, 1.0 is michaelis_menten.
                 COEFFICIENT in a human coordinate (generalized_log only,
-                #671): effect_at_avg_mean/effect_at_avg_sd — the
+                #671): effect_at_avg_mean/effect_at_avg_sd â€” the
                 effect share at the channel's AVERAGE activity, as FRACTIONS
                 (mean in (0, 0.95], sd > 0; 0.2 means 20%). Folded
                 server-side into mean/sd at the row's operating point with
@@ -123,7 +140,7 @@ async def create_model(
                 in the same override; cannot be combined with mean/sd
                 ("state the coefficient prior once") or with
                 half_saturation_*. Stating half_marginal_* + effect_at_avg_*
-                + sat_shape_mean together is the full (x*, E, k) triple —
+                + sat_shape_mean together is the full (x*, E, k) triple â€”
                 the recommended generalized_log elicitation, since only
                 beta*k is identified and raw beta spans orders of magnitude.
                 VERIFY what was applied via get_model's
@@ -134,7 +151,7 @@ async def create_model(
                 (#630); they used to be dropped silently, fitting a
                 hybrid of the override and the smart defaults. Common misses:
                 "beta"/"beta_mean" -> mean, "beta_sd" -> sd, "sat_shape" ->
-                sat_shape_mean. "name" and "parameter" are rejected too — they
+                sat_shape_mean. "name" and "parameter" are rejected too â€” they
                 identify the smart-prior row the override merges onto.
         trend: Enable dynamic baseline trend component.
         seasonality: Enable automatic seasonality detection. The prior sigma on
@@ -153,19 +170,19 @@ async def create_model(
                          saturates) or "saturation_first" (each period's spend
                          saturates, then the effect spreads over time through the
                          normalized adstock kernel).
-        link: Model Form. "identity" (default) fits an additive model — components
-              add on the outcome scale. "log" fits a multiplicative model —
+        link: Model Form. "identity" (default) fits an additive model â€” components
+              add on the outcome scale. "log" fits a multiplicative model â€”
               components add on the log scale and media effects are percentage
               lifts. Under the removal_lift attribution convention (the API
               default), contributions then include an Overlap reconciliation
-              column; the other conventions (aumann_shapley — the dashboard
-              default for multiplicative models since #509 —
+              column; the other conventions (aumann_shapley â€” the dashboard
+              default for multiplicative models since #509 â€”
               shapley, and proportional_normalized) allocate the interaction
               across components and close exactly WITHOUT an Overlap column
               (see get_model_results).
         channel_groups: Optional adstock groups: [{"name": ..., "channels":
                         [...], "share_saturation": bool}]. Member channels tie
-                        their carryover parameters (decay/theta/dual-weight —
+                        their carryover parameters (decay/theta/dual-weight â€”
                         plus saturation when share_saturation is true) to one
                         shared value, e.g. grouping channels into shared
                         "Long"/"Short" carryover classes. Members are
@@ -176,12 +193,12 @@ async def create_model(
         control_reference: Control attribution reference points (#452),
                         multiplicative models (link="log") only: maps control
                         column names (plus optional "_default") to
-                        "auto" | "absent" | "average" | "lowest" | "highest" —
+                        "auto" | "absent" | "average" | "lowest" | "highest" â€”
                         which counterfactual "remove this control" means in
                         the contributions. "absent" measures against the
                         variable at zero (legacy behavior; honest only when
                         zero is observed). "average"/"lowest"/"highest"
-                        reference the control at its observed mean/min/max —
+                        reference the control at its observed mean/min/max â€”
                         use for controls that never approach zero (price
                         indices, distribution levels), where a zero
                         counterfactual produces unbounded contributions and a
@@ -197,8 +214,8 @@ async def create_model(
                         get_model_results).
         name: Display name for the created model, honoured verbatim (#575).
               Falls back to a generated API_MMM_{brand}_{hash} string when
-              omitted. Either way the model starts unsaved — invisible to
-              list_models unless include_unsaved=true — until save_model
+              omitted. Either way the model starts unsaved â€” invisible to
+              list_models unless include_unsaved=true â€” until save_model
               files it into a project.
         operating_margin: Scalar operating margin as a decimal fraction in
               (0, 1], e.g. 0.18 = 18%. Mutually exclusive with
@@ -208,16 +225,16 @@ async def create_model(
               instead of requiring forward_margin on every call.
         operating_margin_column: Name of a column in the uploaded CSV holding
               a per-date margin series. The column may be uniformly in
-              fractions (0, 1] OR uniformly in percentages (1, 100] — the
+              fractions (0, 1] OR uniformly in percentages (1, 100] â€” the
               API detects the unit and normalizes percentages; mixed units
               are rejected. Same unlocks as operating_margin; the column
               must exist in the uploaded file. CAUTION: the API reads the
-              margin keys from the REQUEST ROOT — a margin placed inside a
+              margin keys from the REQUEST ROOT â€” a margin placed inside a
               config dict is silently ignored (no error), and the model fits
               marginless.
         attribution: Attribution convention for the contribution decomposition,
               resolved at fit time: "removal_lift" (the API default;
-              one-at-a-time removal — multiplicative models then emit the
+              one-at-a-time removal â€” multiplicative models then emit the
               Overlap column), "aumann_shapley" (the dashboard default for
               multiplicative models since #509), "shapley", or
               "proportional_normalized". Any value other than "removal_lift"
@@ -228,7 +245,7 @@ async def create_model(
               "aumann_shapley".
         annual_discount_rate: Annual discount rate (decimal >= 0, e.g. 0.08)
               used by the display-time financial bridge and cohort ledger PV
-              discounting. Display-time only — does not change the fit.
+              discounting. Display-time only â€” does not change the fit.
         sampler: MCMC sampler overrides, e.g. {"n_samples": 2000,
               "tune": 1500, "chains": 4, "cores": 2, "target_accept": 0.95}.
               STRICTLY validated: unknown keys inside sampler are rejected
@@ -236,12 +253,12 @@ async def create_model(
               you send are overridden.
         reporting_kernel: Reporting-kernel class override (#450) for
               the cohort_ledger section's forward allocation. Shape:
-              {"classes": {...}, "channel_classes": {...}} — ONLY those two
+              {"classes": {...}, "channel_classes": {...}} â€” ONLY those two
               top-level keys are accepted (anything else, e.g. "mode", 400s
               with the unknown key named). channel_classes names channels by
               channels[].name or activity_column, validated at request time.
               Affects only how the cohort_ledger allocates effects over the
-              horizon — not the fit, and not the contributions /
+              horizon â€” not the fit, and not the contributions /
               channel_summary decompositions. (The related "complete" /
               "in_window" choice is a separate cohort_horizon QUERY parameter
               on the results endpoint, not part of this config.)
@@ -340,7 +357,7 @@ async def create_var_model(
     var_priors: dict | None = None,
     name: str = "",
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> dict[str, Any]:
     """Create and start fitting a long-term (VAR) model (#569).
 
     VAR models capture the joint dynamics of several series (e.g. sales and
@@ -352,7 +369,7 @@ async def create_var_model(
         uploaded_file_id: Dataset id from upload_data (must contain every
             named column).
         date_column: Date column name. Cannot also be a series.
-        endogenous_vars: At least two column names — the jointly-modeled
+        endogenous_vars: At least two column names â€” the jointly-modeled
             series.
         exogenous_vars: Optional outside drivers; must not overlap the
             endogenous set.
@@ -407,16 +424,16 @@ async def link_var_model(
     var_model_hash: str,
     channel_map: dict[str, list[str]] | None = None,
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> dict[str, Any]:
     """Link a completed VAR model to an MMM (#569).
 
     After linking, the MMM's get_model_results `long_run_rollup` section
     joins the VAR's long-run elasticities with the MMM's short-term revenue.
-    A VAR links to at most one MMM at a time — the error names the current
+    A VAR links to at most one MMM at a time â€” the error names the current
     owner if it is already linked elsewhere.
 
     The join is by exact name unless channel_map declares which MMM channels
-    each VAR exogenous series stands for (#682) — required whenever
+    each VAR exogenous series stands for (#682) â€” required whenever
     the VAR is fitted on group spends (e.g. four spend groups) while the MMM
     is tactic-level. Each group's elasticity is allocated across its member
     channels pro-rata by KPI short-term contribution, so the group's long-run
@@ -438,7 +455,7 @@ async def link_var_model(
 async def unlink_var_model(
     model_hash: str,
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> dict[str, Any]:
     """Remove an MMM's VAR link (#569). Idempotent."""
     return await _client(ctx).unlink_var_model(model_hash)
 
@@ -447,9 +464,9 @@ async def set_contribution_groups(
     model_hash: str,
     contribution_groups: list[dict],
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> dict[str, Any]:
     """Persist the driver groupings the dashboard contributions view renders
-    (#436) — configure grouping once and every viewer sees it.
+    (#436) â€” configure grouping once and every viewer sees it.
 
     Each group: {"name": str, "drivers": [column names], "color": "#hex"?,
     "baseAdjustments": {driver: "min"|"max"|"none"}?}. Driver names are
@@ -460,7 +477,7 @@ async def set_contribution_groups(
     channelColors map instead of drivers.
 
     NOTE: this is the CONTRIBUTIONS-VIEW grouping. create_model's
-    channel_groups is the unrelated adstock parameter-sharing feature —
+    channel_groups is the unrelated adstock parameter-sharing feature â€”
     do not confuse them.
     """
     return await _client(ctx).put_contribution_groups(model_hash, contribution_groups)
@@ -469,7 +486,7 @@ async def set_contribution_groups(
 async def get_contribution_groups(
     model_hash: str,
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> dict[str, Any]:
     """Read the stored contribution groups for a model (#436).
     Legacy dashboard-saved configs are served verbatim."""
     return await _client(ctx).get_contribution_groups(model_hash)
@@ -479,7 +496,7 @@ async def rename_model(
     model_hash: str,
     name: str,
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> dict[str, Any]:
     """Rename a model.
 
     Changes only the display name; the model's saved/unsaved state is
@@ -498,11 +515,11 @@ async def save_model(
     name: str,
     project_id: int | None = None,
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> dict[str, Any]:
     """Save a model into a project under a display name.
 
     API-created models start unsaved and are invisible to list_models
-    (without include_unsaved=true) — saving files them into a project so
+    (without include_unsaved=true) â€” saving files them into a project so
     they appear in the default listing and the dashboard's Saved Models.
 
     The same saved-models cap applies as in the dashboard: at the cap the
@@ -523,17 +540,17 @@ async def save_model(
 async def unsave_model(
     model_hash: str,
     ctx: Context[AppContext, Any] = None,
-) -> dict:
-    """Release a model's saved slot without deleting anything — the inverse
+) -> dict[str, Any]:
+    """Release a model's saved slot without deleting anything â€” the inverse
     of save_model (#673).
 
     Use this for cap management: at the 20-saved-models cap, unsave a model
     that no longer earns its shelf spot instead of deleting it. The model
     reverts to the state API-created models start in (unsaved, no project;
-    the name is kept) — it leaves the default listing and the dashboard's
+    the name is kept) â€” it leaves the default listing and the dashboard's
     Saved Models but stays fully addressable by hash: fetchable, renameable,
     exportable, re-saveable, and visible via list_models with
-    include_unsaved=true. Idempotent — unsaving an unsaved model is a
+    include_unsaved=true. Idempotent â€” unsaving an unsaved model is a
     success with freed_project_id null. delete_model remains failed-only.
 
     Two caveats: the UNSAVED pool is auto-pruned by dashboard model creation
@@ -553,20 +570,20 @@ async def unsave_model(
 async def get_model(
     model_hash: str,
     ctx: Context[AppContext, Any] = None,
-) -> dict:
-    """Get a model's metadata and configuration echo — works for EVERY status,
+) -> dict[str, Any]:
+    """Get a model's metadata and configuration echo â€” works for EVERY status,
     including failed models (unlike get_model_results, which needs 'complete').
 
     Use this to inspect what a model was configured with, why it failed, or
     where it lives. Returns: id, model_hash, name, status, model_type
     ("mmm"/"var"), hierarchy_value, periodicity, is_saved, project_id/name,
     linked_var_model_hash, created_at/completed_at, error (the failure
-    message — non-null only when status is "failed"), and model_config (the
+    message â€” non-null only when status is "failed"), and model_config (the
     create-time configuration echo: data_source, columns, channels, priors
     as resolved, and the config flags).
 
     NOTE: the echo omits a few accepted create_model inputs
-    (operating_margin, annual_discount_rate, reporting_kernel) — absence
+    (operating_margin, annual_discount_rate, reporting_kernel) â€” absence
     there does not mean they weren't applied; check the financials results
     section for the stored margin.
 
@@ -579,10 +596,10 @@ async def get_model(
 async def delete_model(
     model_hash: str,
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> dict[str, Any]:
     """PERMANENTLY DELETE a FAILED model. Destructive and irreversible.
 
-    Only models with status "failed" can be deleted over the API — any other
+    Only models with status "failed" can be deleted over the API â€” any other
     status returns a 409 with the model's current status (delete is for
     cleaning up failed fits, not curating good ones). Deleting also unlinks
     any MMMs that pointed at it as their VAR model and removes stored
@@ -600,7 +617,7 @@ async def delete_model(
 async def get_model_status(
     model_hash: str,
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> dict[str, Any]:
     """Check the fitting progress of a model.
 
     Returns status (pending/under way/complete/failed), progress percentage,
@@ -613,16 +630,90 @@ async def get_model_status(
 
 
 def register(mcp: MCPServer) -> None:
-    mcp.tool()(list_models)
-    mcp.tool()(create_model)
-    mcp.tool()(create_var_model)
-    mcp.tool()(link_var_model)
-    mcp.tool()(unlink_var_model)
-    mcp.tool()(set_contribution_groups)
-    mcp.tool()(get_contribution_groups)
-    mcp.tool()(rename_model)
-    mcp.tool()(save_model)
-    mcp.tool()(unsave_model)
-    mcp.tool()(get_model)
-    mcp.tool()(delete_model)
-    mcp.tool()(get_model_status)
+    mcp.tool(
+        title="List models",
+        annotations=ToolAnnotations(
+            read_only_hint=True, destructive_hint=False, idempotent_hint=True, open_world_hint=True
+        ),
+    )(list_models)
+    mcp.tool(
+        title="Create model",
+        annotations=ToolAnnotations(
+            read_only_hint=False,
+            destructive_hint=False,
+            idempotent_hint=False,
+            open_world_hint=True,
+        ),
+    )(create_model)
+    mcp.tool(
+        title="Create var model",
+        annotations=ToolAnnotations(
+            read_only_hint=False,
+            destructive_hint=False,
+            idempotent_hint=False,
+            open_world_hint=True,
+        ),
+    )(create_var_model)
+    mcp.tool(
+        title="Link var model",
+        annotations=ToolAnnotations(
+            read_only_hint=False,
+            destructive_hint=False,
+            idempotent_hint=False,
+            open_world_hint=True,
+        ),
+    )(link_var_model)
+    mcp.tool(
+        title="Unlink var model",
+        annotations=ToolAnnotations(
+            read_only_hint=False, destructive_hint=True, idempotent_hint=True, open_world_hint=True
+        ),
+    )(unlink_var_model)
+    mcp.tool(
+        title="Set contribution groups",
+        annotations=ToolAnnotations(
+            read_only_hint=False, destructive_hint=True, idempotent_hint=True, open_world_hint=True
+        ),
+    )(set_contribution_groups)
+    mcp.tool(
+        title="Get contribution groups",
+        annotations=ToolAnnotations(
+            read_only_hint=True, destructive_hint=False, idempotent_hint=True, open_world_hint=True
+        ),
+    )(get_contribution_groups)
+    mcp.tool(
+        title="Rename model",
+        annotations=ToolAnnotations(
+            read_only_hint=False, destructive_hint=True, idempotent_hint=True, open_world_hint=True
+        ),
+    )(rename_model)
+    mcp.tool(
+        title="Save model",
+        annotations=ToolAnnotations(
+            read_only_hint=False, destructive_hint=True, idempotent_hint=False, open_world_hint=True
+        ),
+    )(save_model)
+    mcp.tool(
+        title="Unsave model",
+        annotations=ToolAnnotations(
+            read_only_hint=False, destructive_hint=True, idempotent_hint=False, open_world_hint=True
+        ),
+    )(unsave_model)
+    mcp.tool(
+        title="Get model",
+        annotations=ToolAnnotations(
+            read_only_hint=True, destructive_hint=False, idempotent_hint=True, open_world_hint=True
+        ),
+    )(get_model)
+    mcp.tool(
+        title="Delete model",
+        annotations=ToolAnnotations(
+            read_only_hint=False, destructive_hint=True, idempotent_hint=False, open_world_hint=True
+        ),
+    )(delete_model)
+    mcp.tool(
+        title="Get model status",
+        annotations=ToolAnnotations(
+            read_only_hint=True, destructive_hint=False, idempotent_hint=True, open_world_hint=True
+        ),
+    )(get_model_status)

@@ -10,7 +10,17 @@ from .auth import (
     set_http_mode,
 )
 from .runtime import MAX_REQUEST_BODY_BYTES, AppContext, _own_version, app_lifespan, create_app
-from .tools import data, models, projects, quality, recipes, results, scenarios, studies
+from .tools import (
+    capabilities,
+    data,
+    models,
+    projects,
+    quality,
+    recipes,
+    results,
+    scenarios,
+    studies,
+)
 from .tools.data import MAX_UPLOAD_BYTES, get_data_schema, get_upload, list_uploads, upload_data
 from .tools.models import (
     create_model,
@@ -74,7 +84,7 @@ from .tools.studies import (
 )
 
 # Every argument keyword: the v2 constructor order is (name, title,
-# description, instructions, ...) — a positional instructions lands in title.
+# description, instructions, ...) â€” a positional instructions lands in title.
 mcp = MCPServer(
     name="Simba MMM",
     version=_own_version(),
@@ -82,11 +92,12 @@ mcp = MCPServer(
         "Simba is a Bayesian Marketing Mix Modeling (MMM) platform. "
         "Use these tools to upload marketing data, build MMM models, "
         "check fitting progress, retrieve results (channel ROI, contributions, "
-        "model diagnostics), and run budget optimizations."
+        "model diagnostics), and run budget optimizations. Discover backend support with get_capabilities. For analyst-agent handover: read the study, validate a recipe, save an immutable revision, select a quality policy, then launch within the study budget. Poll the existing run/model status; evaluate completed evidence and recommend a decision. Analyst acceptance remains in Simba. Reuse the exact submission key and inputs after an uncertain study launch. Start results retrieval with specific sections and bounded curves."
     ),
     lifespan=app_lifespan,
 )
 
+capabilities.register(mcp)
 data.register(mcp)
 projects.register(mcp)
 models.register(mcp)

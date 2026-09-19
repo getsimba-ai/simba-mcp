@@ -1,163 +1,86 @@
 {
-  "get_capabilities": {
-    "properties": {},
-    "title": "get_capabilitiesArguments",
-    "type": "object"
-  },
   "get_data_schema": {
     "properties": {},
-    "title": "get_data_schemaArguments",
     "type": "object"
   },
   "upload_data": {
     "properties": {
       "csv_content": {
         "default": "",
-        "title": "Csv Content",
         "type": "string"
       },
       "csv_path": {
         "default": "",
-        "title": "Csv Path",
         "type": "string"
       },
       "name": {
         "default": "",
-        "title": "Name",
         "type": "string"
       },
       "filename": {
         "default": "",
-        "title": "Filename",
         "type": "string"
       }
     },
-    "title": "upload_dataArguments",
     "type": "object"
   },
   "list_uploads": {
     "properties": {
       "limit": {
         "default": 50,
-        "description": "Maximum records to return. Existing endpoint defaults apply; workflow lists allow 1-200, or null to preserve the full legacy response.",
-        "title": "Limit",
         "type": "integer"
       },
       "offset": {
         "default": 0,
-        "description": "Zero-based record offset. Concurrent changes can shift page boundaries.",
-        "title": "Offset",
         "type": "integer"
       },
       "name": {
         "default": "",
-        "title": "Name",
         "type": "string"
       }
     },
-    "title": "list_uploadsArguments",
     "type": "object"
   },
   "get_upload": {
     "properties": {
       "file_id": {
-        "title": "File Id",
         "type": "integer"
       }
     },
     "required": [
       "file_id"
     ],
-    "title": "get_uploadArguments",
-    "type": "object"
-  },
-  "list_projects": {
-    "properties": {},
-    "title": "list_projectsArguments",
-    "type": "object"
-  },
-  "create_project": {
-    "properties": {
-      "name": {
-        "title": "Name",
-        "type": "string"
-      },
-      "team_id": {
-        "anyOf": [
-          {
-            "type": "integer"
-          },
-          {
-            "type": "null"
-          }
-        ],
-        "default": null,
-        "title": "Team Id"
-      }
-    },
-    "required": [
-      "name"
-    ],
-    "title": "create_projectArguments",
-    "type": "object"
-  },
-  "rename_project": {
-    "properties": {
-      "project_id": {
-        "title": "Project Id",
-        "type": "integer"
-      },
-      "name": {
-        "title": "Name",
-        "type": "string"
-      }
-    },
-    "required": [
-      "project_id",
-      "name"
-    ],
-    "title": "rename_projectArguments",
     "type": "object"
   },
   "list_models": {
     "properties": {
       "include_unsaved": {
         "default": false,
-        "title": "Include Unsaved",
         "type": "boolean"
       },
       "limit": {
         "default": 50,
-        "description": "Maximum records to return. Existing endpoint defaults apply; workflow lists allow 1-200, or null to preserve the full legacy response.",
-        "title": "Limit",
         "type": "integer"
       },
       "offset": {
         "default": 0,
-        "description": "Zero-based record offset. Concurrent changes can shift page boundaries.",
-        "title": "Offset",
         "type": "integer"
       }
     },
-    "title": "list_modelsArguments",
     "type": "object"
   },
   "create_model": {
     "properties": {
       "uploaded_file_id": {
-        "title": "Uploaded File Id",
         "type": "integer"
       },
       "date_column": {
-        "title": "Date Column",
         "type": "string"
       },
       "kpi_column": {
-        "title": "Kpi Column",
         "type": "string"
       },
       "hierarchy_column": {
-        "title": "Hierarchy Column",
         "type": "string"
       },
       "channels": {
@@ -165,12 +88,10 @@
           "additionalProperties": true,
           "type": "object"
         },
-        "title": "Channels",
         "type": "array"
       },
       "multiplier_column": {
         "default": "",
-        "title": "Multiplier Column",
         "type": "string"
       },
       "control_columns": {
@@ -185,12 +106,10 @@
             "type": "null"
           }
         ],
-        "default": null,
-        "title": "Control Columns"
+        "default": null
       },
       "total_media_effect": {
         "default": "Other",
-        "title": "Total Media Effect",
         "type": "string"
       },
       "priors": {
@@ -206,37 +125,30 @@
             "type": "null"
           }
         ],
-        "default": null,
-        "title": "Priors"
+        "default": null
       },
       "trend": {
         "default": false,
-        "title": "Trend",
         "type": "boolean"
       },
       "seasonality": {
         "default": false,
-        "title": "Seasonality",
         "type": "boolean"
       },
       "likelihood": {
         "default": "normal",
-        "title": "Likelihood",
         "type": "string"
       },
       "saturation_type": {
         "default": "tanh",
-        "title": "Saturation Type",
         "type": "string"
       },
       "transform_order": {
         "default": "adstock_first",
-        "title": "Transform Order",
         "type": "string"
       },
       "link": {
         "default": "identity",
-        "title": "Link",
         "type": "string"
       },
       "channel_groups": {
@@ -252,8 +164,7 @@
             "type": "null"
           }
         ],
-        "default": null,
-        "title": "Channel Groups"
+        "default": null
       },
       "control_reference": {
         "anyOf": [
@@ -265,12 +176,10 @@
             "type": "null"
           }
         ],
-        "default": null,
-        "title": "Control Reference"
+        "default": null
       },
       "name": {
         "default": "",
-        "title": "Name",
         "type": "string"
       },
       "operating_margin": {
@@ -282,17 +191,14 @@
             "type": "null"
           }
         ],
-        "default": null,
-        "title": "Operating Margin"
+        "default": null
       },
       "operating_margin_column": {
         "default": "",
-        "title": "Operating Margin Column",
         "type": "string"
       },
       "attribution": {
         "default": "",
-        "title": "Attribution",
         "type": "string"
       },
       "annual_discount_rate": {
@@ -304,8 +210,7 @@
             "type": "null"
           }
         ],
-        "default": null,
-        "title": "Annual Discount Rate"
+        "default": null
       },
       "sampler": {
         "anyOf": [
@@ -317,8 +222,7 @@
             "type": "null"
           }
         ],
-        "default": null,
-        "title": "Sampler"
+        "default": null
       },
       "reporting_kernel": {
         "anyOf": [
@@ -330,8 +234,7 @@
             "type": "null"
           }
         ],
-        "default": null,
-        "title": "Reporting Kernel"
+        "default": null
       },
       "control_priors": {
         "anyOf": [
@@ -346,9 +249,7 @@
             "type": "null"
           }
         ],
-        "default": null,
-        "description": "Optional per-control prior/transform overrides. Query get_capabilities first; backend validates names, values and support.",
-        "title": "Control Priors"
+        "default": null
       }
     },
     "required": [
@@ -358,24 +259,20 @@
       "hierarchy_column",
       "channels"
     ],
-    "title": "create_modelArguments",
     "type": "object"
   },
   "create_var_model": {
     "properties": {
       "uploaded_file_id": {
-        "title": "Uploaded File Id",
         "type": "integer"
       },
       "date_column": {
-        "title": "Date Column",
         "type": "string"
       },
       "endogenous_vars": {
         "items": {
           "type": "string"
         },
-        "title": "Endogenous Vars",
         "type": "array"
       },
       "exogenous_vars": {
@@ -390,17 +287,14 @@
             "type": "null"
           }
         ],
-        "default": null,
-        "title": "Exogenous Vars"
+        "default": null
       },
       "lags": {
         "default": 1,
-        "title": "Lags",
         "type": "integer"
       },
       "forecast_horizon": {
         "default": 12,
-        "title": "Forecast Horizon",
         "type": "integer"
       },
       "base_variable": {
@@ -412,8 +306,7 @@
             "type": "null"
           }
         ],
-        "default": null,
-        "title": "Base Variable"
+        "default": null
       },
       "equity_variables": {
         "anyOf": [
@@ -427,8 +320,7 @@
             "type": "null"
           }
         ],
-        "default": null,
-        "title": "Equity Variables"
+        "default": null
       },
       "lre_horizon": {
         "anyOf": [
@@ -439,8 +331,7 @@
             "type": "null"
           }
         ],
-        "default": null,
-        "title": "Lre Horizon"
+        "default": null
       },
       "lre_ci": {
         "anyOf": [
@@ -451,8 +342,7 @@
             "type": "null"
           }
         ],
-        "default": null,
-        "title": "Lre Ci"
+        "default": null
       },
       "var_priors": {
         "anyOf": [
@@ -464,12 +354,10 @@
             "type": "null"
           }
         ],
-        "default": null,
-        "title": "Var Priors"
+        "default": null
       },
       "name": {
         "default": "",
-        "title": "Name",
         "type": "string"
       }
     },
@@ -478,17 +366,14 @@
       "date_column",
       "endogenous_vars"
     ],
-    "title": "create_var_modelArguments",
     "type": "object"
   },
   "link_var_model": {
     "properties": {
       "model_hash": {
-        "title": "Model Hash",
         "type": "string"
       },
       "var_model_hash": {
-        "title": "Var Model Hash",
         "type": "string"
       },
       "channel_map": {
@@ -506,34 +391,29 @@
             "type": "null"
           }
         ],
-        "default": null,
-        "title": "Channel Map"
+        "default": null
       }
     },
     "required": [
       "model_hash",
       "var_model_hash"
     ],
-    "title": "link_var_modelArguments",
     "type": "object"
   },
   "unlink_var_model": {
     "properties": {
       "model_hash": {
-        "title": "Model Hash",
         "type": "string"
       }
     },
     "required": [
       "model_hash"
     ],
-    "title": "unlink_var_modelArguments",
     "type": "object"
   },
   "set_contribution_groups": {
     "properties": {
       "model_hash": {
-        "title": "Model Hash",
         "type": "string"
       },
       "contribution_groups": {
@@ -541,7 +421,6 @@
           "additionalProperties": true,
           "type": "object"
         },
-        "title": "Contribution Groups",
         "type": "array"
       }
     },
@@ -549,30 +428,25 @@
       "model_hash",
       "contribution_groups"
     ],
-    "title": "set_contribution_groupsArguments",
     "type": "object"
   },
   "get_contribution_groups": {
     "properties": {
       "model_hash": {
-        "title": "Model Hash",
         "type": "string"
       }
     },
     "required": [
       "model_hash"
     ],
-    "title": "get_contribution_groupsArguments",
     "type": "object"
   },
   "rename_model": {
     "properties": {
       "model_hash": {
-        "title": "Model Hash",
         "type": "string"
       },
       "name": {
-        "title": "Name",
         "type": "string"
       }
     },
@@ -580,17 +454,14 @@
       "model_hash",
       "name"
     ],
-    "title": "rename_modelArguments",
     "type": "object"
   },
   "save_model": {
     "properties": {
       "model_hash": {
-        "title": "Model Hash",
         "type": "string"
       },
       "name": {
-        "title": "Name",
         "type": "string"
       },
       "project_id": {
@@ -602,83 +473,111 @@
             "type": "null"
           }
         ],
-        "default": null,
-        "title": "Project Id"
+        "default": null
       }
     },
     "required": [
       "model_hash",
       "name"
     ],
-    "title": "save_modelArguments",
     "type": "object"
   },
   "unsave_model": {
     "properties": {
       "model_hash": {
-        "title": "Model Hash",
         "type": "string"
       }
     },
     "required": [
       "model_hash"
     ],
-    "title": "unsave_modelArguments",
+    "type": "object"
+  },
+  "list_projects": {
+    "properties": {},
+    "type": "object"
+  },
+  "create_project": {
+    "properties": {
+      "name": {
+        "type": "string"
+      },
+      "team_id": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    },
+    "required": [
+      "name"
+    ],
+    "type": "object"
+  },
+  "rename_project": {
+    "properties": {
+      "project_id": {
+        "type": "integer"
+      },
+      "name": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "project_id",
+      "name"
+    ],
     "type": "object"
   },
   "get_model": {
     "properties": {
       "model_hash": {
-        "title": "Model Hash",
         "type": "string"
       }
     },
     "required": [
       "model_hash"
     ],
-    "title": "get_modelArguments",
     "type": "object"
   },
   "delete_model": {
     "properties": {
       "model_hash": {
-        "title": "Model Hash",
         "type": "string"
       }
     },
     "required": [
       "model_hash"
     ],
-    "title": "delete_modelArguments",
     "type": "object"
   },
   "get_model_status": {
     "properties": {
       "model_hash": {
-        "title": "Model Hash",
         "type": "string"
       }
     },
     "required": [
       "model_hash"
     ],
-    "title": "get_model_statusArguments",
     "type": "object"
   },
   "get_model_results": {
     "properties": {
       "model_hash": {
-        "title": "Model Hash",
         "type": "string"
       },
       "sections": {
         "default": "",
-        "title": "Sections",
         "type": "string"
       },
       "format": {
         "default": "json",
-        "title": "Format",
         "type": "string"
       },
       "channels": {
@@ -693,8 +592,7 @@
             "type": "null"
           }
         ],
-        "default": null,
-        "title": "Channels"
+        "default": null
       },
       "max_grid_points": {
         "anyOf": [
@@ -705,57 +603,45 @@
             "type": "null"
           }
         ],
-        "default": null,
-        "description": "Maximum points per response/marginal curve after retrieval; use with sections and channels to bound output.",
-        "title": "Max Grid Points"
+        "default": null
       }
     },
     "required": [
       "model_hash"
     ],
-    "title": "get_model_resultsArguments",
     "type": "object"
   },
   "run_optimizer": {
     "properties": {
       "model_hash": {
-        "title": "Model Hash",
         "type": "string"
       },
       "total_budget": {
-        "title": "Total Budget",
         "type": "number"
       },
       "num_periods": {
-        "title": "Num Periods",
         "type": "integer"
       },
       "gamma": {
-        "title": "Gamma",
         "type": "number"
       },
       "currency": {
-        "title": "Currency",
         "type": "string"
       },
       "bounds": {
         "additionalProperties": true,
-        "title": "Bounds",
         "type": "object"
       },
       "laydown_weights": {
         "additionalProperties": true,
-        "title": "Laydown Weights",
         "type": "object"
       },
       "period_cpm": {
         "additionalProperties": true,
-        "title": "Period Cpm",
         "type": "object"
       },
       "objective": {
         "default": "revenue",
-        "title": "Objective",
         "type": "string"
       },
       "forward_margin": {
@@ -767,8 +653,7 @@
             "type": "null"
           }
         ],
-        "default": null,
-        "title": "Forward Margin"
+        "default": null
       },
       "period_multiplier": {
         "anyOf": [
@@ -782,27 +667,22 @@
             "type": "null"
           }
         ],
-        "default": null,
-        "title": "Period Multiplier"
+        "default": null
       },
       "include_historical_effect": {
         "default": true,
-        "title": "Include Historical Effect",
         "type": "boolean"
       },
       "enable_warm_start": {
         "default": true,
-        "title": "Enable Warm Start",
         "type": "boolean"
       },
       "optimizer_engine": {
         "default": "slsqp",
-        "title": "Optimizer Engine",
         "type": "string"
       },
       "sigma_penalty": {
         "default": "std",
-        "title": "Sigma Penalty",
         "type": "string"
       },
       "group_bounds": {
@@ -818,8 +698,7 @@
             "type": "null"
           }
         ],
-        "default": null,
-        "title": "Group Bounds"
+        "default": null
       }
     },
     "required": [
@@ -832,13 +711,11 @@
       "laydown_weights",
       "period_cpm"
     ],
-    "title": "run_optimizerArguments",
     "type": "object"
   },
   "get_optimizer_results": {
     "properties": {
       "model_hash": {
-        "title": "Model Hash",
         "type": "string"
       },
       "run_id": {
@@ -850,38 +727,32 @@
             "type": "null"
           }
         ],
-        "default": null,
-        "title": "Run Id"
+        "default": null
       }
     },
     "required": [
       "model_hash"
     ],
-    "title": "get_optimizer_resultsArguments",
     "type": "object"
   },
   "get_scenario_template": {
     "properties": {
       "model_hash": {
-        "title": "Model Hash",
         "type": "string"
       },
       "periods_forward": {
         "default": 12,
-        "title": "Periods Forward",
         "type": "integer"
       }
     },
     "required": [
       "model_hash"
     ],
-    "title": "get_scenario_templateArguments",
     "type": "object"
   },
   "run_scenario": {
     "properties": {
       "model_hash": {
-        "title": "Model Hash",
         "type": "string"
       },
       "scenario_data": {
@@ -889,7 +760,6 @@
           "additionalProperties": true,
           "type": "object"
         },
-        "title": "Scenario Data",
         "type": "array"
       },
       "spend_metadata": {
@@ -905,22 +775,18 @@
             "type": "null"
           }
         ],
-        "default": null,
-        "title": "Spend Metadata"
+        "default": null
       },
       "rebuild_model": {
         "default": true,
-        "title": "Rebuild Model",
         "type": "boolean"
       },
       "evaluate_holdout": {
         "default": false,
-        "title": "Evaluate Holdout",
         "type": "boolean"
       },
       "skip_slicing": {
         "default": false,
-        "title": "Skip Slicing",
         "type": "boolean"
       },
       "proxy_channels": {
@@ -936,21 +802,18 @@
             "type": "null"
           }
         ],
-        "default": null,
-        "title": "Proxy Channels"
+        "default": null
       }
     },
     "required": [
       "model_hash",
       "scenario_data"
     ],
-    "title": "run_scenarioArguments",
     "type": "object"
   },
   "get_scenario_results": {
     "properties": {
       "model_hash": {
-        "title": "Model Hash",
         "type": "string"
       },
       "run_id": {
@@ -962,33 +825,27 @@
             "type": "null"
           }
         ],
-        "default": null,
-        "title": "Run Id"
+        "default": null
       }
     },
     "required": [
       "model_hash"
     ],
-    "title": "get_scenario_resultsArguments",
     "type": "object"
   },
   "update_run": {
     "properties": {
       "artifact": {
-        "title": "Artifact",
         "type": "string"
       },
       "model_hash": {
-        "title": "Model Hash",
         "type": "string"
       },
       "run_id": {
-        "title": "Run Id",
         "type": "string"
       },
       "name": {
         "default": "",
-        "title": "Name",
         "type": "string"
       },
       "notes": {
@@ -1000,8 +857,7 @@
             "type": "null"
           }
         ],
-        "default": null,
-        "title": "Notes"
+        "default": null
       },
       "tags": {
         "anyOf": [
@@ -1015,8 +871,7 @@
             "type": "null"
           }
         ],
-        "default": null,
-        "title": "Tags"
+        "default": null
       }
     },
     "required": [
@@ -1024,25 +879,20 @@
       "model_hash",
       "run_id"
     ],
-    "title": "update_runArguments",
     "type": "object"
   },
   "set_run_pinned": {
     "properties": {
       "artifact": {
-        "title": "Artifact",
         "type": "string"
       },
       "model_hash": {
-        "title": "Model Hash",
         "type": "string"
       },
       "run_id": {
-        "title": "Run Id",
         "type": "string"
       },
       "pinned": {
-        "title": "Pinned",
         "type": "boolean"
       }
     },
@@ -1052,29 +902,22 @@
       "run_id",
       "pinned"
     ],
-    "title": "set_run_pinnedArguments",
     "type": "object"
   },
   "list_runs": {
     "properties": {
       "artifact": {
-        "title": "Artifact",
         "type": "string"
       },
       "model_hash": {
-        "title": "Model Hash",
         "type": "string"
       },
       "limit": {
         "default": 50,
-        "description": "Maximum records to return. Existing endpoint defaults apply; workflow lists allow 1-200, or null to preserve the full legacy response.",
-        "title": "Limit",
         "type": "integer"
       },
       "offset": {
         "default": 0,
-        "description": "Zero-based record offset. Concurrent changes can shift page boundaries.",
-        "title": "Offset",
         "type": "integer"
       }
     },
@@ -1082,65 +925,36 @@
       "artifact",
       "model_hash"
     ],
-    "title": "list_runsArguments",
     "type": "object"
   },
   "list_studies": {
     "properties": {
       "project_id": {
-        "title": "Project Id",
-        "type": "integer"
-      },
-      "limit": {
-        "anyOf": [
-          {
-            "type": "integer"
-          },
-          {
-            "type": "null"
-          }
-        ],
-        "default": null,
-        "description": "Maximum records to return. Existing endpoint defaults apply; workflow lists allow 1-200, or null to preserve the full legacy response.",
-        "title": "Limit"
-      },
-      "offset": {
-        "default": 0,
-        "description": "Zero-based record offset. Concurrent changes can shift page boundaries.",
-        "title": "Offset",
         "type": "integer"
       }
     },
     "required": [
       "project_id"
     ],
-    "title": "list_studiesArguments",
     "type": "object"
   },
   "create_study": {
     "properties": {
       "project_id": {
-        "title": "Project Id",
         "type": "integer"
       },
       "name": {
-        "title": "Name",
         "type": "string"
       },
       "question": {
-        "title": "Question",
         "type": "string"
       },
       "max_attempts": {
         "default": 5,
-        "description": "Maximum new fitting attempts permitted by the study; creating a study does not launch them.",
-        "title": "Max Attempts",
         "type": "integer"
       },
       "max_concurrent": {
         "default": 1,
-        "description": "Maximum concurrent fitting attempts within this study.",
-        "title": "Max Concurrent",
         "type": "integer"
       }
     },
@@ -1149,57 +963,41 @@
       "name",
       "question"
     ],
-    "title": "create_studyArguments",
     "type": "object"
   },
   "get_study": {
     "properties": {
       "study_id": {
-        "description": "Identifier of the existing study; project permissions are checked by Simba.",
-        "title": "Study Id",
         "type": "string"
       }
     },
     "required": [
       "study_id"
     ],
-    "title": "get_studyArguments",
     "type": "object"
   },
   "update_study": {
     "properties": {
       "study_id": {
-        "description": "Identifier of the existing study; project permissions are checked by Simba.",
-        "title": "Study Id",
         "type": "string"
       },
       "version": {
-        "description": "Current optimistic concurrency version. Read the object again after a conflict.",
-        "title": "Version",
         "type": "integer"
       },
       "name": {
-        "title": "Name",
         "type": "string"
       },
       "question": {
-        "title": "Question",
         "type": "string"
       },
       "max_attempts": {
-        "description": "Maximum new fitting attempts permitted by the study; creating a study does not launch them.",
-        "title": "Max Attempts",
         "type": "integer"
       },
       "max_concurrent": {
-        "description": "Maximum concurrent fitting attempts within this study.",
-        "title": "Max Concurrent",
         "type": "integer"
       },
       "state": {
         "default": "active",
-        "description": "Study lifecycle value: active, paused or archived. Active permits launches; it does not mean a fit is running.",
-        "title": "State",
         "type": "string"
       }
     },
@@ -1211,211 +1009,32 @@
       "max_attempts",
       "max_concurrent"
     ],
-    "title": "update_studyArguments",
-    "type": "object"
-  },
-  "launch_study_run": {
-    "properties": {
-      "study_id": {
-        "description": "Identifier of the existing study; project permissions are checked by Simba.",
-        "title": "Study Id",
-        "type": "string"
-      },
-      "revision_id": {
-        "description": "Exact immutable recipe revision identifier, not the latest recipe name.",
-        "title": "Revision Id",
-        "type": "string"
-      },
-      "policy_id": {
-        "description": "Exact quality policy identifier to pin to the run or evaluation.",
-        "title": "Policy Id",
-        "type": "string"
-      },
-      "submission_key": {
-        "description": "Stable caller-generated key for this launch. Reuse it with identical revision and policy after an uncertain response.",
-        "title": "Submission Key",
-        "type": "string"
-      }
-    },
-    "required": [
-      "study_id",
-      "revision_id",
-      "policy_id",
-      "submission_key"
-    ],
-    "title": "launch_study_runArguments",
-    "type": "object"
-  },
-  "list_study_runs": {
-    "properties": {
-      "study_id": {
-        "description": "Identifier of the existing study; project permissions are checked by Simba.",
-        "title": "Study Id",
-        "type": "string"
-      },
-      "limit": {
-        "anyOf": [
-          {
-            "type": "integer"
-          },
-          {
-            "type": "null"
-          }
-        ],
-        "default": null,
-        "description": "Maximum records to return. Existing endpoint defaults apply; workflow lists allow 1-200, or null to preserve the full legacy response.",
-        "title": "Limit"
-      },
-      "offset": {
-        "default": 0,
-        "description": "Zero-based record offset. Concurrent changes can shift page boundaries.",
-        "title": "Offset",
-        "type": "integer"
-      }
-    },
-    "required": [
-      "study_id"
-    ],
-    "title": "list_study_runsArguments",
-    "type": "object"
-  },
-  "get_study_run": {
-    "properties": {
-      "run_id": {
-        "title": "Run Id",
-        "type": "string"
-      }
-    },
-    "required": [
-      "run_id"
-    ],
-    "title": "get_study_runArguments",
-    "type": "object"
-  },
-  "cancel_study_run": {
-    "properties": {
-      "run_id": {
-        "title": "Run Id",
-        "type": "string"
-      }
-    },
-    "required": [
-      "run_id"
-    ],
-    "title": "cancel_study_runArguments",
-    "type": "object"
-  },
-  "adopt_model_into_study": {
-    "properties": {
-      "study_id": {
-        "description": "Identifier of the existing study; project permissions are checked by Simba.",
-        "title": "Study Id",
-        "type": "string"
-      },
-      "model_hash": {
-        "title": "Model Hash",
-        "type": "string"
-      },
-      "reason": {
-        "description": "Human-readable rationale retained in the study history.",
-        "title": "Reason",
-        "type": "string"
-      },
-      "confirm": {
-        "default": false,
-        "title": "Confirm",
-        "type": "boolean"
-      }
-    },
-    "required": [
-      "study_id",
-      "model_hash",
-      "reason"
-    ],
-    "title": "adopt_model_into_studyArguments",
-    "type": "object"
-  },
-  "compare_study_runs": {
-    "properties": {
-      "study_id": {
-        "description": "Identifier of the existing study; project permissions are checked by Simba.",
-        "title": "Study Id",
-        "type": "string"
-      },
-      "run_ids": {
-        "items": {
-          "type": "string"
-        },
-        "title": "Run Ids",
-        "type": "array"
-      },
-      "policy_id": {
-        "description": "Exact quality policy identifier to pin to the run or evaluation.",
-        "title": "Policy Id",
-        "type": "string"
-      }
-    },
-    "required": [
-      "study_id",
-      "run_ids",
-      "policy_id"
-    ],
-    "title": "compare_study_runsArguments",
     "type": "object"
   },
   "list_study_recipes": {
     "properties": {
       "study_id": {
-        "description": "Identifier of the existing study; project permissions are checked by Simba.",
-        "title": "Study Id",
         "type": "string"
-      },
-      "limit": {
-        "anyOf": [
-          {
-            "type": "integer"
-          },
-          {
-            "type": "null"
-          }
-        ],
-        "default": null,
-        "description": "Maximum records to return. Existing endpoint defaults apply; workflow lists allow 1-200, or null to preserve the full legacy response.",
-        "title": "Limit"
-      },
-      "offset": {
-        "default": 0,
-        "description": "Zero-based record offset. Concurrent changes can shift page boundaries.",
-        "title": "Offset",
-        "type": "integer"
       }
     },
     "required": [
       "study_id"
     ],
-    "title": "list_study_recipesArguments",
     "type": "object"
   },
   "create_study_recipe": {
     "properties": {
       "study_id": {
-        "description": "Identifier of the existing study; project permissions are checked by Simba.",
-        "title": "Study Id",
         "type": "string"
       },
       "name": {
-        "title": "Name",
         "type": "string"
       },
       "reason": {
-        "description": "Human-readable rationale retained in the study history.",
-        "title": "Reason",
         "type": "string"
       },
       "specification": {
         "additionalProperties": true,
-        "description": "Backend recipe specification. api_mmm contains request settings; model_snapshot records an existing model. Validate with validate_study_recipe before saving.",
-        "title": "Specification",
         "type": "object"
       }
     },
@@ -1425,33 +1044,24 @@
       "reason",
       "specification"
     ],
-    "title": "create_study_recipeArguments",
     "type": "object"
   },
   "revise_study_recipe": {
     "properties": {
       "recipe_id": {
-        "description": "Identifier of the recipe whose immutable history is being accessed.",
-        "title": "Recipe Id",
         "type": "string"
       },
       "expected_version": {
-        "title": "Expected Version",
         "type": "integer"
       },
       "name": {
-        "title": "Name",
         "type": "string"
       },
       "reason": {
-        "description": "Human-readable rationale retained in the study history.",
-        "title": "Reason",
         "type": "string"
       },
       "specification": {
         "additionalProperties": true,
-        "description": "Backend recipe specification. api_mmm contains request settings; model_snapshot records an existing model. Validate with validate_study_recipe before saving.",
-        "title": "Specification",
         "type": "object"
       }
     },
@@ -1462,18 +1072,14 @@
       "reason",
       "specification"
     ],
-    "title": "revise_study_recipeArguments",
     "type": "object"
   },
   "get_recipe_revision": {
     "properties": {
       "recipe_id": {
-        "description": "Identifier of the recipe whose immutable history is being accessed.",
-        "title": "Recipe Id",
         "type": "string"
       },
       "number": {
-        "title": "Number",
         "type": "integer"
       }
     },
@@ -1481,70 +1087,96 @@
       "recipe_id",
       "number"
     ],
-    "title": "get_recipe_revisionArguments",
     "type": "object"
   },
   "validate_study_recipe": {
     "properties": {
       "specification": {
         "additionalProperties": true,
-        "description": "Backend recipe specification. api_mmm contains request settings; model_snapshot records an existing model. Validate with validate_study_recipe before saving.",
-        "title": "Specification",
         "type": "object"
       }
     },
     "required": [
       "specification"
     ],
-    "title": "validate_study_recipeArguments",
     "type": "object"
   },
-  "list_quality_policies": {
+  "launch_study_run": {
     "properties": {
       "study_id": {
-        "description": "Identifier of the existing study; project permissions are checked by Simba.",
-        "title": "Study Id",
         "type": "string"
       },
-      "limit": {
-        "anyOf": [
-          {
-            "type": "integer"
-          },
-          {
-            "type": "null"
-          }
-        ],
-        "default": null,
-        "description": "Maximum records to return. Existing endpoint defaults apply; workflow lists allow 1-200, or null to preserve the full legacy response.",
-        "title": "Limit"
+      "revision_id": {
+        "type": "string"
       },
-      "offset": {
-        "default": 0,
-        "description": "Zero-based record offset. Concurrent changes can shift page boundaries.",
-        "title": "Offset",
-        "type": "integer"
+      "policy_id": {
+        "type": "string"
+      },
+      "submission_key": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "study_id",
+      "revision_id",
+      "policy_id",
+      "submission_key"
+    ],
+    "type": "object"
+  },
+  "list_study_runs": {
+    "properties": {
+      "study_id": {
+        "type": "string"
       }
     },
     "required": [
       "study_id"
     ],
-    "title": "list_quality_policiesArguments",
+    "type": "object"
+  },
+  "get_study_run": {
+    "properties": {
+      "run_id": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "run_id"
+    ],
+    "type": "object"
+  },
+  "cancel_study_run": {
+    "properties": {
+      "run_id": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "run_id"
+    ],
+    "type": "object"
+  },
+  "list_quality_policies": {
+    "properties": {
+      "study_id": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "study_id"
+    ],
     "type": "object"
   },
   "create_quality_policy": {
     "properties": {
       "study_id": {
-        "description": "Identifier of the existing study; project permissions are checked by Simba.",
-        "title": "Study Id",
         "type": "string"
       },
       "name": {
-        "title": "Name",
         "type": "string"
       },
       "rationale": {
-        "title": "Rationale",
         "type": "string"
       },
       "checks": {
@@ -1552,7 +1184,6 @@
           "additionalProperties": true,
           "type": "object"
         },
-        "title": "Checks",
         "type": "array"
       }
     },
@@ -1562,18 +1193,14 @@
       "rationale",
       "checks"
     ],
-    "title": "create_quality_policyArguments",
     "type": "object"
   },
   "evaluate_study_run": {
     "properties": {
       "run_id": {
-        "title": "Run Id",
         "type": "string"
       },
       "policy_id": {
-        "description": "Exact quality policy identifier to pin to the run or evaluation.",
-        "title": "Policy Id",
         "type": "string"
       }
     },
@@ -1581,92 +1208,42 @@
       "run_id",
       "policy_id"
     ],
-    "title": "evaluate_study_runArguments",
     "type": "object"
   },
   "list_study_evaluations": {
     "properties": {
       "run_id": {
-        "title": "Run Id",
         "type": "string"
-      },
-      "limit": {
-        "anyOf": [
-          {
-            "type": "integer"
-          },
-          {
-            "type": "null"
-          }
-        ],
-        "default": null,
-        "description": "Maximum records to return. Existing endpoint defaults apply; workflow lists allow 1-200, or null to preserve the full legacy response.",
-        "title": "Limit"
-      },
-      "offset": {
-        "default": 0,
-        "description": "Zero-based record offset. Concurrent changes can shift page boundaries.",
-        "title": "Offset",
-        "type": "integer"
       }
     },
     "required": [
       "run_id"
     ],
-    "title": "list_study_evaluationsArguments",
     "type": "object"
   },
   "list_study_decisions": {
     "properties": {
       "study_id": {
-        "description": "Identifier of the existing study; project permissions are checked by Simba.",
-        "title": "Study Id",
         "type": "string"
-      },
-      "limit": {
-        "anyOf": [
-          {
-            "type": "integer"
-          },
-          {
-            "type": "null"
-          }
-        ],
-        "default": null,
-        "description": "Maximum records to return. Existing endpoint defaults apply; workflow lists allow 1-200, or null to preserve the full legacy response.",
-        "title": "Limit"
-      },
-      "offset": {
-        "default": 0,
-        "description": "Zero-based record offset. Concurrent changes can shift page boundaries.",
-        "title": "Offset",
-        "type": "integer"
       }
     },
     "required": [
       "study_id"
     ],
-    "title": "list_study_decisionsArguments",
     "type": "object"
   },
   "recommend_study_run": {
     "properties": {
       "study_id": {
-        "description": "Identifier of the existing study; project permissions are checked by Simba.",
-        "title": "Study Id",
         "type": "string"
       },
       "run_id": {
-        "title": "Run Id",
         "type": "string"
       },
       "evaluation_id": {
-        "title": "Evaluation Id",
         "type": "string"
       },
       "reason": {
-        "description": "Human-readable rationale retained in the study history.",
-        "title": "Reason",
         "type": "string"
       }
     },
@@ -1676,7 +1253,51 @@
       "evaluation_id",
       "reason"
     ],
-    "title": "recommend_study_runArguments",
+    "type": "object"
+  },
+  "adopt_model_into_study": {
+    "properties": {
+      "study_id": {
+        "type": "string"
+      },
+      "model_hash": {
+        "type": "string"
+      },
+      "reason": {
+        "type": "string"
+      },
+      "confirm": {
+        "default": false,
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "study_id",
+      "model_hash",
+      "reason"
+    ],
+    "type": "object"
+  },
+  "compare_study_runs": {
+    "properties": {
+      "study_id": {
+        "type": "string"
+      },
+      "run_ids": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "policy_id": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "study_id",
+      "run_ids",
+      "policy_id"
+    ],
     "type": "object"
   }
 }

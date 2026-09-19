@@ -1,8 +1,10 @@
 """Results tools backed by the Simba API."""
 
-from typing import Any
+from typing import Annotated, Any
 
 from mcp.server.mcpserver import Context, MCPServer
+from mcp.types import ToolAnnotations
+from pydantic import Field
 
 from ..auth import _client
 from ..runtime import AppContext
@@ -41,7 +43,9 @@ def _downsample(records: list, max_points: int) -> list:
     return [records[i] for i in sorted(idx)]
 
 
-def _filter_results(payload: dict, channels: list | None, max_grid_points: int | None) -> dict:
+def _filter_results(
+    payload: dict, channels: list | None, max_grid_points: int | None
+) -> dict[str, Any]:
     """Client-side channel filter + curve downsampling on a results payload.
 
     Applies only where channel identity is unambiguous. `contributions` is
@@ -87,7 +91,7 @@ def _filter_results(payload: dict, channels: list | None, max_grid_points: int |
             mroi["channels"] = [
                 r for r in mroi["channels"] if _norm_channel(r.get("channel", "")) in wanted
             ]
-        # Per-period series (#591): channels x periods rows — the largest
+        # Per-period series (#591): channels x periods rows â€” the largest
         # per-channel section, so the filter matters most here.
         periods = target.get("mroi_periods")
         if isinstance(periods, dict) and isinstance(periods.get("rows"), list):
@@ -102,30 +106,35 @@ async def get_model_results(
     sections: str = "",
     format: str = "json",
     channels: list[str] | None = None,
-    max_grid_points: int | None = None,
+    max_grid_points: Annotated[
+        int | None,
+        Field(
+            description="Maximum points per response/marginal curve after retrieval; use with sections and channels to bound output."
+        ),
+    ] = None,
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> dict[str, Any]:
     """Get results from a completed model.
 
     Available sections:
     - channel_summary: per-channel aggregates {Channel, Sales, Spend, Revenue, ROI}.
     - contributions: per-period decomposition (Date, one column per channel, plus
       Base, Seasonality, Event Effect, Model, Fit Actual, Actual). Values are in
-      KPI/unit space — the multiplier is NOT applied. Use `coefficients` for
+      KPI/unit space â€” the multiplier is NOT applied. Use `coefficients` for
       per-period revenue. Multiplicative (link="log") models fitted with the
       removal_lift attribution convention add an `Overlap` column: a negative
       shared-synergy reconciliation term so that
-      Base + components + Overlap = Model. Overlap is NOT a channel — never
+      Base + components + Overlap = Model. Overlap is NOT a channel â€” never
       rank it, share it, or feed it to the optimizer/scenarios. Overlap
       requires BOTH link="log" AND attribution="removal_lift" (the API
       default): under aumann_shapley (the dashboard default for
       multiplicative models since #509), shapley, or
       proportional_normalized, the interaction is allocated across
-      components, which close exactly with NO Overlap column — its absence
+      components, which close exactly with NO Overlap column â€” its absence
       does NOT mean the model is additive or predates the feature.
       Control columns are measured against the reference point resolved at
-      fit time (#452, see model_config.control_references) — e.g. "vs.
-      average conditions" for a control that never reaches zero — not
+      fit time (#452, see model_config.control_references) â€” e.g. "vs.
+      average conditions" for a control that never reaches zero â€” not
       necessarily against zero, so a referenced control's series
       legitimately spans zero.
     - coefficients: per-period per-channel media results table (Date, Channel,
@@ -140,50 +149,50 @@ async def get_model_results(
     - marginal_curves: same grid for marginal ROI (diminishing returns).
     - saturation: fitted saturation family and parameters (saturation_type is
       tanh, michaelis_menten, negative_exponential, or generalized_log;
-      per-channel alpha/scale, plus transform_order and — for generalized_log
-      only — per-channel sat_shape).
+      per-channel alpha/scale, plus transform_order and â€” for generalized_log
+      only â€” per-channel sat_shape).
     - mroi_summary: headline marginal ROI at current spend per channel with a
       94% HDI (channel, current_spend, mroi_median, mroi_hdi_3, mroi_hdi_97).
       Post-#591 posterior fits add two averaging-convention scalars per
-      channel — mroi_allperiods_unweighted_median (+_hdi_3/_hdi_97) and
+      channel â€” mroi_allperiods_unweighted_median (+_hdi_3/_hdi_97) and
       mroi_spendweighted_active_median (+_hdi_3/_hdi_97), with *_profit_*
-      variants on margin models — plus a top-level conventions_available
+      variants on margin models â€” plus a top-level conventions_available
       array. Channels with no active periods omit the spendweighted fields.
       Post-#629 fits also carry a *_mean beside every *_median (mroi_mean,
       mroi_profit_mean, pv_kernel_mass_mean, and the convention variants).
       The median is what the product displays; the mean is the statistic that
       reconciles with the marginal-revenue curve, since derivative and mean
-      commute and median does not. Absent on anything fitted before #629 —
+      commute and median does not. Absent on anything fitted before #629 â€”
       there is no backfill, so feature-detect rather than assume.
-    - mroi_periods: OPT-IN ONLY (#591) — never in the default payload;
+    - mroi_periods: OPT-IN ONLY (#591) â€” never in the default payload;
       request it by name in `sections`. Per-period marginal ROI series:
       {available, hdi_prob, evaluation_point: "historical_period_spend",
       rows} with one row per (channel x modelled period): channel, date,
       spend, mroi_median/_hdi_3/_hdi_97, and mroi_profit_* on margin models.
       Models fitted before the artifact existed return
-      {available: false, reason: "fitted_before_mroi_periods"} — refit to
-      enable. Large (channels x periods) — pair with the channels filter.
-    - model_stats: fit diagnostics (R², MAPE, Durbin-Watson, Max R_hat, ...).
+      {available: false, reason: "fitted_before_mroi_periods"} â€” refit to
+      enable. Large (channels x periods) â€” pair with the channels filter.
+    - model_stats: fit diagnostics (RÂ², MAPE, Durbin-Watson, Max R_hat, ...).
     - actual_vs_model: actual vs predicted per period with 50%/95% HDIs.
     - long_run_rollup: MMM short-term + VAR long-run revenue rollup per channel;
       returns {available: false, reason: "no_linked_var_model"} when no VAR
       model is linked to this MMM. Joins by exact name unless the link declared
-      a channel_map (see link_var_model) — mapped rows carry var_group and an
+      a channel_map (see link_var_model) â€” mapped rows carry var_group and an
       allocated elasticity slice, with group-level truth in metadata.groups. A
       computed rollup where nothing joined stays available: true but carries
-      reason: "no_channel_overlap" — check metadata.coverage, then declare a
+      reason: "no_channel_overlap" â€” check metadata.coverage, then declare a
       channel_map on the link.
     - optimizer: latest optimization results (see get_optimizer_results).
     - predictions: latest scenario prediction rows (see get_scenario_results).
-    - posterior: full posterior summary table — one row per model variable
+    - posterior: full posterior summary table â€” one row per model variable
       with mean, sd, hdi_3%, hdi_97%, and r_hat (quotable 94% HDIs and
       per-variable convergence).
     - posterior_transforms: the importable transform-parameter posterior grid
       (what the dashboard's prior builder imports): per-channel alpha mean/sd,
       decay 94% HDI, dual-weight mean/sd, decay-slow HDI, sat-shape mean/sd,
       and the adstock structure including tied-group member aliases. Rows key
-      on activity-column names — join via channel_map.
-    - r_hat: per-parameter R-hat over ALL posterior variables — including
+      on activity-column names â€” join via channel_map.
+    - r_hat: per-parameter R-hat over ALL posterior variables â€” including
       transform RVs such as {channel}_decay that the posterior summary's
       coefficient rows do not cover. Use it to attribute a bad Max R_hat
       (model_stats) to a specific parameter block.
@@ -191,13 +200,13 @@ async def get_model_results(
       operating_margin_series}); omitted entirely for marginless models.
       operating_margin_series is a DATE-STRING-KEYED DICT
       ({"2024-01-01": 0.18, ...}), not a list of records.
-    - cohort_ledger: per-(channel, source-period) forward-allocation ledger —
+    - cohort_ledger: per-(channel, source-period) forward-allocation ledger â€”
       each period's spend is credited with the future effects its adstock
       carryover earns (horizon slices plus PV-discounted financials from the
       fit-time cohort kernels). Models fitted before the artifact existed
-      return {available: false, reason: ...} — feature-detect on `available`.
+      return {available: false, reason: ...} â€” feature-detect on `available`.
     - model_config: the resolved model specification (inputs, not posteriors)
-      to audit or reconstruct the create_model call — includes config flags
+      to audit or reconstruct the create_model call â€” includes config flags
       such as saturation_type, transform_order, and link ("log" =
       multiplicative). Multiplicative models with controls also report
       control_references (#452): per control, the requested and resolved
@@ -206,7 +215,7 @@ async def get_model_results(
       these fields existed may omit them.
       priors_resolved reports what the fit actually consumed (#643): per row,
       overridden_fields lists only the fields that took effect, and
-      accepted_not_used — present only when non-empty — names any that were
+      accepted_not_used â€” present only when non-empty â€” names any that were
       accepted but inert for this model's configuration, each with a reason.
       A prior field can be spelled correctly and still do nothing: theta_*
       needs adstock_type "delayed", dual_weight_* needs "dual_geometric",
@@ -214,16 +223,16 @@ async def get_model_results(
       half-life bounds are ignored FOR "dual_geometric". If a prior you set
       appears to have had no influence, read accepted_not_used first. The
       folded coordinates (half_marginal_*, effect_at_avg_*) are never called
-      inert — they land in the row's scalars/alpha_sd/mean/sd.
+      inert â€” they land in the row's scalars/alpha_sd/mean/sd.
     - channel_map: canonical identifier mapping, one record per channel:
       {channel, activity_column, spend_column} as configured at create time.
       This is the join key between channels[].name and the sections keyed by
       activity-column name (contributions, decay_curves, posterior_transforms).
 
-    The response envelope includes `sections_available` — trust it over any
+    The response envelope includes `sections_available` â€” trust it over any
     hardcoded list if the server is newer than these docs.
 
-    IMPORTANT — channel naming: results are keyed by the channel's ACTIVITY
+    IMPORTANT â€” channel naming: results are keyed by the channel's ACTIVITY
     COLUMN name (e.g. "search_activity"), not by the `channels[].name` passed to
     create_model. These exact keys (case- and space-sensitive) must be used in
     run_optimizer bounds, laydown_weights, and period_cpm. Always read
@@ -242,7 +251,7 @@ async def get_model_results(
                   Leave empty for all sections.
                   Common: "channel_summary,model_stats" for ROI and diagnostics.
         format: "json" (default) or "csv". CSV returns
-                {"format": "csv", "content": "..."} — concatenated
+                {"format": "csv", "content": "..."} â€” concatenated
                 "# section" + CSV blocks, useful for saving to disk.
                 Filtering below applies to JSON only.
         channels: Optional channel filter (matching is case/space-insensitive
@@ -263,4 +272,9 @@ async def get_model_results(
 
 
 def register(mcp: MCPServer) -> None:
-    mcp.tool()(get_model_results)
+    mcp.tool(
+        title="Get model results",
+        annotations=ToolAnnotations(
+            read_only_hint=True, destructive_hint=False, idempotent_hint=True, open_world_hint=True
+        ),
+    )(get_model_results)

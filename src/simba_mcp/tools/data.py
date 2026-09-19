@@ -1,9 +1,11 @@
 """Data tools backed by the Simba API."""
 
 from pathlib import Path
-from typing import Any
+from typing import Annotated, Any
 
 from mcp.server.mcpserver import Context, MCPServer
+from mcp.types import ToolAnnotations
+from pydantic import Field
 
 from ..auth import _client, _local_files_denial_reason
 from ..runtime import AppContext
@@ -11,7 +13,7 @@ from ..runtime import AppContext
 MAX_UPLOAD_BYTES = 10 * 1024 * 1024
 
 
-async def get_data_schema(ctx: Context[AppContext, Any]) -> dict:
+async def get_data_schema(ctx: Context[AppContext, Any]) -> dict[str, Any]:
     """Get the canonical CSV data schema for Simba MMM input files.
 
     Returns the JSON Schema specification describing required columns
@@ -28,12 +30,12 @@ async def upload_data(
     name: str = "",
     filename: str = "",
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> dict[str, Any]:
     """Upload a CSV dataset to Simba for use in model building.
 
     Provide EXACTLY ONE of csv_content (raw CSV text) or csv_path (a file path
     on the machine running this MCP server). Prefer csv_path for anything
-    beyond trivial size — it avoids passing megabytes of CSV through the
+    beyond trivial size â€” it avoids passing megabytes of CSV through the
     conversation.
 
     The CSV should follow the canonical schema: one row per time period
@@ -77,7 +79,7 @@ async def upload_data(
         if size > MAX_UPLOAD_BYTES:
             return {
                 "error": (
-                    f"{path.name} is {size / 1024 / 1024:.1f} MB — over the API's "
+                    f"{path.name} is {size / 1024 / 1024:.1f} MB â€” over the API's "
                     f"{MAX_UPLOAD_BYTES // (1024 * 1024)} MB ingest limit. "
                     "Aggregate or trim the file first."
                 ),
@@ -92,12 +94,22 @@ async def upload_data(
 
 
 async def list_uploads(
-    limit: int = 50,
-    offset: int = 0,
+    limit: Annotated[
+        int,
+        Field(
+            description="Maximum records to return. Existing endpoint defaults apply; workflow lists allow 1-200, or null to preserve the full legacy response."
+        ),
+    ] = 50,
+    offset: Annotated[
+        int,
+        Field(
+            description="Zero-based record offset. Concurrent changes can shift page boundaries."
+        ),
+    ] = 0,
     name: str = "",
     ctx: Context[AppContext, Any] = None,
-) -> dict:
-    """List the datasets in your workspace (newest first) — every source,
+) -> dict[str, Any]:
+    """List the datasets in your workspace (newest first) â€” every source,
     not just API uploads: dashboard/manual uploads and pipeline-ingested
     datasets appear too (see source_type per file).
 
@@ -105,7 +117,7 @@ async def list_uploads(
     uploaded_file_id create_model needs), filename, original_filename,
     source_type, row_count, column_count, created_at. Here `count` IS the
     true total matching the filter (unlike list_runs, where it is the page
-    length). Column names/dtypes are not in the listing — fetch one upload
+    length). Column names/dtypes are not in the listing â€” fetch one upload
     with get_upload for those.
 
     Args:
@@ -120,11 +132,11 @@ async def list_uploads(
 async def get_upload(
     file_id: int,
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> dict[str, Any]:
     """Get one uploaded dataset's details, including its column schema.
 
     Returns id, filename, original_filename, source_type, mime_type,
-    file_size, row_count, column_count, columns ([{name, dtype}, ...] — use
+    file_size, row_count, column_count, columns ([{name, dtype}, ...] â€” use
     these to build create_model's channel/control column arguments without
     re-reading the CSV), and created_at.
 
@@ -135,7 +147,30 @@ async def get_upload(
 
 
 def register(mcp: MCPServer) -> None:
-    mcp.tool()(get_data_schema)
-    mcp.tool()(upload_data)
-    mcp.tool()(list_uploads)
-    mcp.tool()(get_upload)
+    mcp.tool(
+        title="Get data schema",
+        annotations=ToolAnnotations(
+            read_only_hint=True, destructive_hint=False, idempotent_hint=True, open_world_hint=True
+        ),
+    )(get_data_schema)
+    mcp.tool(
+        title="Upload data",
+        annotations=ToolAnnotations(
+            read_only_hint=False,
+            destructive_hint=False,
+            idempotent_hint=False,
+            open_world_hint=True,
+        ),
+    )(upload_data)
+    mcp.tool(
+        title="List uploads",
+        annotations=ToolAnnotations(
+            read_only_hint=True, destructive_hint=False, idempotent_hint=True, open_world_hint=True
+        ),
+    )(list_uploads)
+    mcp.tool(
+        title="Get upload",
+        annotations=ToolAnnotations(
+            read_only_hint=True, destructive_hint=False, idempotent_hint=True, open_world_hint=True
+        ),
+    )(get_upload)
