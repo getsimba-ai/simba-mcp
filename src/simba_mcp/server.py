@@ -19,6 +19,7 @@ from pathlib import Path
 from typing import Any
 
 from mcp.server.mcpserver import Context, MCPServer
+from mcp.server.mcpserver.exceptions import ToolError
 
 from .api_client import CALLER_API_KEY, SimbaAPIClient
 
@@ -368,6 +369,7 @@ async def create_model(
     annual_discount_rate: float | None = None,
     sampler: dict | None = None,
     reporting_kernel: dict | None = None,
+    control_priors: list[dict] | None = None,
     ctx: Context[AppContext, Any] = None,
 ) -> dict:
     """Create and start fitting a new Bayesian Marketing Mix Model.
@@ -555,6 +557,15 @@ async def create_model(
               "in_window" choice is a separate cohort_horizon QUERY parameter
               on the results endpoint, not part of this config.)
 
+    control_priors: Optional root-level control slope overrides. Each entry names
+        a selected control_columns column with "control", plus transform
+        (N, DM, STA, DDM, LOG), distribution (normal, inversegamma,
+        truncatednormal, halfnormal), mean/sd/lower/upper as applicable.
+        LOG is log(x/mean(x)); STA divides by sample sd without centering.
+        Priors are in transformed units; changing transform does not convert
+        coefficients. Nonempty overrides require backend capability version 1;
+        unsupported or unavailable checks stop before creating a model.
+
     Returns the model_hash for status polling.
     """
     payload: dict = {
@@ -604,7 +615,26 @@ async def create_model(
     if operating_margin_column:
         payload["operating_margin_column"] = operating_margin_column
 
-    return await _client(ctx).create_model(payload)
+    client = _client(ctx)
+    if control_priors:
+        schema = await client.get_schema()
+        capabilities = (
+            schema.get("x-simba-model-capabilities") if isinstance(schema, dict) else None
+        )
+        feature = capabilities.get("control_priors") if isinstance(capabilities, dict) else None
+        version = feature.get("version") if isinstance(feature, dict) else None
+        transforms = feature.get("transforms") if isinstance(feature, dict) else None
+        if (
+            type(version) is not int
+            or version < 1
+            or not isinstance(transforms, list)
+            or not all(t in transforms for t in ("N", "DM", "STA", "DDM", "LOG"))
+        ):
+            raise ToolError(
+                "Backend does not advertise control_priors version 1 support; model was not created."
+            )
+        payload["control_priors"] = control_priors
+    return await client.create_model(payload)
 
 
 # ---------------------------------------------------------------------------

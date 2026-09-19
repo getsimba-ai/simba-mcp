@@ -1168,3 +1168,107 @@ class TestBringYourOwnKey:
                 result = await app_ctx.client.get_schema()
         assert result["_status_code"] == 401
         assert "simba_sk_env_leak" not in str(result)
+
+
+class TestControlPriors:
+    BASE_ARGS = TestCreateModelPayload.BASE_ARGS
+    _ctx_capturing = TestCreateModelPayload._ctx_capturing
+
+    @pytest.mark.anyio
+    @pytest.mark.parametrize(
+        "capability",
+        [None, {}, {"version": 0}, {"version": True}, {"version": 1, "transforms": []}],
+    )
+    async def test_unsupported_backend_never_creates(self, capability):
+        from unittest.mock import AsyncMock
+
+        from mcp.server.mcpserver.exceptions import ToolError
+
+        from simba_mcp.server import create_model
+
+        ctx, client = self._ctx_capturing()
+        client.get_schema = AsyncMock(
+            return_value={"x-simba-model-capabilities": {"control_priors": capability}}
+        )
+        with pytest.raises(ToolError, match="not created"):
+            await create_model(
+                **self.BASE_ARGS,
+                control_columns=["price"],
+                control_priors=[{"control": "price", "transform": "LOG"}],
+                ctx=ctx,
+            )
+        client.create_model.assert_not_called()
+
+    @pytest.mark.anyio
+    async def test_forward_exact_overrides_after_capability(self):
+        from unittest.mock import AsyncMock
+
+        from simba_mcp.server import create_model
+
+        ctx, client = self._ctx_capturing()
+        client.get_schema = AsyncMock(
+            return_value={
+                "x-simba-model-capabilities": {
+                    "control_priors": {"version": 1, "transforms": ["N", "DM", "STA", "DDM", "LOG"]}
+                }
+            }
+        )
+        overrides = [{"control": "price", "transform": "LOG", "mean": -1.0}]
+        await create_model(
+            **self.BASE_ARGS, control_columns=["price"], control_priors=overrides, ctx=ctx
+        )
+        assert client.create_model.call_args.args[0]["control_priors"] == overrides
+        client.get_schema.assert_awaited_once()
+
+    @pytest.mark.anyio
+    async def test_schema_failure_never_creates(self):
+        from unittest.mock import AsyncMock
+
+        from simba_mcp.server import create_model
+
+        ctx, client = self._ctx_capturing()
+        client.get_schema = AsyncMock(side_effect=RuntimeError("unavailable"))
+        with pytest.raises(RuntimeError, match="unavailable"):
+            await create_model(**self.BASE_ARGS, control_priors=[{"control": "price"}], ctx=ctx)
+        client.create_model.assert_not_called()
+
+    @pytest.mark.anyio
+    @pytest.mark.parametrize("overrides", [None, []])
+    async def test_legacy_no_preflight_or_payload(self, overrides):
+        ctx, client = self._ctx_capturing()
+        from simba_mcp.server import create_model
+
+        await create_model(**self.BASE_ARGS, control_priors=overrides, ctx=ctx)
+        client.get_schema.assert_not_called()
+        assert "control_priors" not in client.create_model.call_args.args[0]
+
+    def test_control_override_is_advertised(self):
+        tool = next(t for t in _list_tools() if t.name == "create_model")
+        assert "control_priors" in tool.input_schema["properties"]
+
+    @pytest.mark.anyio
+    async def test_api_configuration_error_is_returned_unchanged(self):
+        from unittest.mock import AsyncMock
+
+        from simba_mcp.server import create_model
+
+        ctx, client = self._ctx_capturing()
+        client.get_schema = AsyncMock(
+            return_value={
+                "x-simba-model-capabilities": {
+                    "control_priors": {"version": 1, "transforms": ["N", "DM", "STA", "DDM", "LOG"]}
+                }
+            }
+        )
+        error = {
+            "error": "Control price: LOG requires strictly positive values",
+            "status_code": 400,
+        }
+        client.create_model.return_value = error
+        assert (
+            await create_model(
+                **self.BASE_ARGS, control_priors=[{"control": "price", "transform": "LOG"}], ctx=ctx
+            )
+            == error
+        )
+        client.create_model.assert_awaited_once()

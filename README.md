@@ -387,3 +387,38 @@ uvicorn simba_mcp.server:app --host 0.0.0.0 --port 8100
 ## License
 
 MIT
+
+
+### Explicit control priors and transforms
+
+Use `control_columns` to include controls and optional `control_priors` to
+configure them. Overrides select an exact column via `control`; media `priors`
+continue to select a channel via `channel`.
+
+```json
+{"control_columns": ["price", "discount_depth"], "control_priors": [
+  {"control": "price", "transform": "LOG", "distribution": "normal", "mean": -1, "sd": 0.5},
+  {"control": "discount_depth", "transform": "N", "distribution": "normal", "mean": 1, "sd": 0.5}
+]}
+```
+
+These are illustrative coefficients, not fitted estimates or recommended priors.
+Native transforms: N = x; DM = x/mean(x); STA = x/sample_sd(x) without centering;
+DDM = x/mean(KPI); LOG = log(x/mean(x)), requiring positive x.
+Under a log link, a LOG coefficient is an elasticity; N is a semi-elasticity.
+Changing a transform does not convert prior units: explicitly choose suitable
+coefficient priors. Normal and inversegamma use mean/sd (positive mean for
+inversegamma); truncatednormal also requires ordered lower/upper bounds;
+halfnormal uses only sd. Unused fields, unknown keys, null field values and
+nonselected/duplicate controls are rejected. Omitted fields preserve applicable
+smart defaults; changing family clears inapplicable bounds/mean.
+
+Nonempty overrides preflight `get_data_schema` for
+`x-simba-model-capabilities.control_priors` version 1 and all five transforms.
+Unsupported, malformed or unavailable capability checks stop before creation;
+never retry by removing requested settings. Omitted/None/empty overrides keep
+legacy calls unchanged. Backend support must be deployed before using this
+option. Direct REST clients must perform the same capability check and put
+`control_priors` at the request root. Check `get_model`'s resolved priors and
+`overridden_fields` after creation. Prediction uses existing fit-time constants;
+this feature does not change preprocessing split order or fit a model for you.
