@@ -273,3 +273,21 @@ async def test_discovery_isolated_for_concurrent_hosted_callers(monkeypatch):
     finally:
         CALLER_API_KEY.reset(token)
         await client.close()
+
+
+@pytest.mark.parametrize(
+    "status,code",
+    [
+        (402, "entitlement_required"),
+        (405, "unsupported_operation"),
+        (413, "payload_too_large"),
+        (422, "invalid_request"),
+    ],
+)
+def test_client_failures_are_not_misreported_as_backend_outages(status, code):
+    from simba_mcp.errors import api_error
+
+    result = api_error(status, {"error": "original backend detail", "future": 3})
+    assert result["_error_code"] == code
+    assert result["error"] == "original backend detail"
+    assert result["future"] == 3
