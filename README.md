@@ -89,6 +89,8 @@ response = client.beta.messages.create(
 | Tool | Description |
 |------|-------------|
 | `get_data_schema` | Get the canonical CSV schema for MMM input files |
+| `list_recipe_drafts` / `get_recipe_draft` | Inspect authoring drafts and complete versioned snapshots on supporting backends |
+| `create_recipe_draft` / `update_recipe_draft` | Save complete draft state with retry identity and optimistic concurrency; no publication or fit |
 | `upload_data` | Upload a CSV dataset to Simba |
 | `list_uploads` | List previously uploaded datasets |
 | `get_upload` | One upload's details, including its column schema |

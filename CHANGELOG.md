@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## Unreleased
 
+### Added
+
+- Discoverable create/read/list/update recipe-draft tools with complete authoring snapshot forwarding and optimistic concurrency. Requires a backend advertising `drafts.schema_version = 1`. Draft saving does not publish or launch; older recipe tools remain available.
+
 ### Changed
 
 - Clarify optional backend study-budget status, blocked-capacity recovery and quality-policy requirements. Existing tool arguments and additive response forwarding remain compatible with older backends; absent budget is unknown rather than an eligibility claim.
