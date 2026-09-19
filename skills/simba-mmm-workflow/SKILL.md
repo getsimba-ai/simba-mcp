@@ -68,3 +68,7 @@ description: End-to-end Simba MMM workflow over MCP — upload a dataset, create
   feature-detect optional artifacts (`mroi_periods`, `cohort_ledger`,
   post-#629 `*_mean` keys) — older fits simply lack them; there is no
   backfill.
+
+For explicit control transforms/priors use `control_priors` as documented in
+`../simba-prior-conventions/SKILL.md`; verify the effective configuration after
+creation. An unsupported capability must not be bypassed by dropping settings.

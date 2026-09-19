@@ -57,6 +57,22 @@
     "default": null,
     "title": "Control Columns"
    },
+   "control_priors": {
+    "anyOf": [
+     {
+      "items": {
+       "additionalProperties": true,
+       "type": "object"
+      },
+      "type": "array"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null,
+    "title": "Control Priors"
+   },
    "control_reference": {
     "anyOf": [
      {
