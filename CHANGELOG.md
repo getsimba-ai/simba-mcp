@@ -12,11 +12,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ### Added
 
+- Explicit immutable draft publication and authoring recovery tools. Publication is atomic across brands, uses caller UUID recovery and never launches a fit.
+
 - Discoverable create/read/list/update recipe-draft tools with complete authoring snapshot forwarding and optimistic concurrency. Requires a backend advertising `drafts.schema_version = 1`. Draft saving does not publish or launch; older recipe tools remain available.
 
 ### Changed
 
-- Document backend-gated VAR draft publication alongside fixed-prior MMM. VAR quality remains unavailable under MMM policies; automatic-prior MMM publication remains unsupported.
+- Document backend-gated VAR draft publication alongside fixed-prior MMM. VAR quality remains unavailable under MMM policies; capable backends freeze automatic MMM priors during draft publication and disable rebuilding during replay.
 
 - Clarify optional backend study-budget status, blocked-capacity recovery and quality-policy requirements. Existing tool arguments and additive response forwarding remain compatible with older backends; absent budget is unknown rather than an eligibility claim.
 
@@ -191,5 +193,3 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - CLI entrypoint (`simba-mcp`).
 - CI workflow (lint + test on Python 3.11/3.12/3.13).
 - PyPI publish workflow on GitHub Release.
-
-Draft publication: `publish_recipe_draft` freezes a saved fixed-prior MMM draft as an atomic batch, using expected version and caller UUID recovery; it never launches a fit. `get_recipe_revision_authoring` retrieves the immutable authoring snapshot for copying to a new draft. Check backend publication capabilities; VAR and automatic-prior replay are not supported yet.

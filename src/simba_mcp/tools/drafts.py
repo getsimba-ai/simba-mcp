@@ -68,7 +68,7 @@ async def publish_recipe_draft(
     reason: str,
     ctx: Context[AppContext, Any] = None,
 ) -> APIResult:
-    """Publish a saved fixed-prior MMM or VAR draft as immutable recipe revisions. Supply a new UUID publication_id and reuse it with identical arguments after an uncertain response. Batch publication is atomic. Backend compiles the saved snapshot with shared wizard rules; never send separately prepared settings. Does not fit, consume an attempt or designate a champion. Automatic MMM priors are not yet supported. VAR requires family-specific evidence assessment; MMM policies cannot establish VAR acceptance. Check backend capabilities."""
+    """Publish a saved MMM or VAR draft as immutable recipe revisions. Supply a new UUID publication_id and reuse it with identical arguments after an uncertain response. Batch publication is atomic. Backend compiles the saved snapshot with shared wizard rules; never send separately prepared settings. Does not fit, consume an attempt or designate a champion. On capable backends, automatic MMM priors are resolved at publication and frozen; replay does not rebuild them. VAR requires family-specific evidence assessment; MMM policies cannot establish VAR acceptance. Check backend capabilities."""
     return await _client(ctx).workflow_request(
         "POST",
         f"/recipe-drafts/{draft_id}/publish",
