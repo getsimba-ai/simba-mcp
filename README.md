@@ -448,3 +448,34 @@ another wizard capture or a separately validated API recipe.
 Quality reports distinguish failed checks, missing evidence and required analyst
 review. Current saved-window error metrics and R-hat are not held-out validation
 or proof of business validity. No tool automatically promotes a winning model.
+
+
+## Discovery and reliable Studies workflows
+
+Start with `get_backend_capabilities` to read the connected backend's model,
+transform/prior and workflow advertisements. Missing fields mean **unknown**;
+installing this package does not upgrade the backend. All tool annotations are
+informational hints, never permission checks.
+
+For Studies: inspect the project/study budget, validate a recipe, freeze a revision,
+declare a quality policy, then launch with an explicit submission key. Preserve
+that key and the exact inputs after an uncertain response. Poll the shared run;
+requested cancellation is not confirmed completion. Reload and reconcile on 412;
+revalidate on an input-hash conflict. Optional `expected_content_hash` on recipe
+create/revise binds the validated effective inputs. Evaluate existing evidence and
+recommend with limitations; analyst acceptance remains in the frontend. Missing
+evidence never passes, and fitted-window metrics are not holdout validation.
+
+Writes are sent once, without automatic retries. Reconcile uncertain mutations
+before repeating them. Reads retain bounded transient retries. Existing error
+objects retain `error` / `_status_code`, with additive `_error_code` and
+`_next_action` guidance. Backend additive fields remain intact in structured output.
+
+For bounded results, request `sections="channel_summary,model_stats"` first and use
+`channels` / `max_grid_points` where appropriate. Optional `max_response_bytes`
+returns an actionable 413 instead of partial evidence when the filtered JSON
+payload is too large. It bounds payload serialization, not backend download or MCP
+envelope overhead. Existing defaults remain unchanged.
+
+See [architecture and compatibility](docs/architecture.md) for ownership,
+transport/authentication boundaries, known limits and validation.

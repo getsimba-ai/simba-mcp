@@ -1,4 +1,4 @@
-"""Tests for the MCP server layer — tool registration, metadata, and lifespan."""
+"""Tests for the MCP server layer â€” tool registration, metadata, and lifespan."""
 
 import importlib.metadata
 import os
@@ -9,7 +9,9 @@ from unittest.mock import patch
 import anyio
 import pytest
 
+from simba_mcp import runtime
 from simba_mcp.server import AppContext, app_lifespan, mcp
+from simba_mcp.tools import data as data_tools
 
 
 def _list_tools():
@@ -18,6 +20,7 @@ def _list_tools():
 
 
 EXPECTED_TOOLS = [
+    "get_backend_capabilities",
     "compare_study_runs",
     "list_studies",
     "create_study",
@@ -112,7 +115,7 @@ class TestResultsSectionsDoc:
     """Guard against the get_model_results section list going stale (issue #12)."""
 
     # Every section the API's results endpoint can serve must be discoverable
-    # from the tool description — for agent-driven use the docstring IS the API.
+    # from the tool description â€” for agent-driven use the docstring IS the API.
     API_SECTIONS: ClassVar[list[str]] = [
         "channel_summary",
         "contributions",
@@ -176,14 +179,14 @@ class TestResultsSectionsDoc:
 
 
 class TestReadmeHost:
-    """Issue #25: the canonical API host is demo.simba-mmm.com — verified live
+    """Issue #25: the canonical API host is demo.simba-mmm.com â€” verified live
     (app.simba-mmm.com does not answer). README examples regressed twice."""
 
     def test_no_stale_api_hosts_in_readme(self):
         readme = (Path(__file__).resolve().parent.parent / "README.md").read_text(encoding="utf-8")
         for stale in ("app.simba-mmm.com", "app.getsimba.ai"):
             assert stale not in readme, (
-                f"Stale API host {stale!r} found in README.md — the canonical "
+                f"Stale API host {stale!r} found in README.md â€” the canonical "
                 "host is demo.simba-mmm.com (issue #25)"
             )
 
@@ -203,14 +206,14 @@ class TestToolSchemaSnapshot:
         )
         live = {t.name: t.input_schema for t in _list_tools()}
         assert live == snap, (
-            "Tool input schemas drifted from tests/tool_schema_snapshot.json — "
+            "Tool input schemas drifted from tests/tool_schema_snapshot.json â€” "
             "if intentional, regenerate the snapshot in the same PR"
         )
 
 
 class TestAsgiApp:
     """The deployed entrypoint (uvicorn simba_mcp.server:app): the lazy module
-    attr must build a stateless, JSON-response app serving at "/" — previously
+    attr must build a stateless, JSON-response app serving at "/" â€” previously
     asserted by nothing but the staging deploy."""
 
     def test_lazy_app_serves_stateless_json_at_root(self, monkeypatch):
@@ -222,9 +225,9 @@ class TestAsgiApp:
         monkeypatch.setenv("SIMBA_API_URL", "http://test:9999")
         # _create_app flips the module-global HTTP-mode flag; register the
         # current value with monkeypatch so it is restored after the test.
-        monkeypatch.setattr(srv, "_serving_http", srv._serving_http)
+        monkeypatch.setattr(runtime, "_serving_http", runtime._serving_http)
 
-        app = srv.app  # lazy module __getattr__ — the uvicorn target
+        app = srv.app  # lazy module __getattr__ â€” the uvicorn target
         headers = {
             "Accept": "application/json, text/event-stream",
             "Content-Type": "application/json",
@@ -260,7 +263,7 @@ class TestAsgiApp:
 
 
 class TestMainTransportKwargs:
-    """v2 moved transport config off Settings onto run() kwargs — the CLI HTTP
+    """v2 moved transport config off Settings onto run() kwargs â€” the CLI HTTP
     path must pass stateless_http/json_response itself (Bugbot on PR #47) or
     it silently reverts to stateful sessions, unlike the deployed ASGI app."""
 
@@ -268,11 +271,10 @@ class TestMainTransportKwargs:
         import sys
 
         import simba_mcp.__main__ as entry
-        import simba_mcp.server as srv
 
-        # main() flips the module-global HTTP-mode flag for http/sse — since
+        # main() flips the module-global HTTP-mode flag for http/sse â€” since
         # #51 that flag gates auth behavior, so register it for restore.
-        monkeypatch.setattr(srv, "_serving_http", srv._serving_http)
+        monkeypatch.setattr(runtime, "_serving_http", runtime._serving_http)
         calls = {}
         monkeypatch.setattr(entry.mcp, "run", lambda **kw: calls.update(kw))
         monkeypatch.setattr(sys, "argv", ["simba-mcp", *argv])
@@ -296,7 +298,7 @@ class TestMainTransportKwargs:
         # The flag gates BYOK auth AND csv_path denial (#51 review): losing
         # set_http_mode(True) here would silently revert network callers to
         # the shared env identity with zero other test signal.
-        assert srv._serving_http is True
+        assert runtime._serving_http is True
 
     def test_body_limit_covers_the_api_upload_cap(self):
         """Every HTTP entry point must allow a legal csv_content upload: the
@@ -306,11 +308,10 @@ class TestMainTransportKwargs:
         assert srv.MAX_REQUEST_BODY_BYTES > srv.MAX_UPLOAD_BYTES
 
     def test_stdio_passes_no_transport_kwargs(self, monkeypatch):
-        import simba_mcp.server as srv
 
         calls = self._run_main(monkeypatch, [])
         assert calls == {"transport": "stdio"}
-        assert srv._serving_http is False
+        assert runtime._serving_http is False
 
     def test_sse_passes_host_and_port(self, monkeypatch):
         import simba_mcp.server as srv
@@ -322,7 +323,7 @@ class TestMainTransportKwargs:
             "port": 9002,
             "max_request_body_size": srv.MAX_REQUEST_BODY_BYTES,
         }
-        assert srv._serving_http is True
+        assert runtime._serving_http is True
 
 
 class TestLifespan:
@@ -557,7 +558,7 @@ class TestCreateModelPayload:
 
     @pytest.mark.anyio
     async def test_empty_control_reference_omitted(self):
-        """Omitted/empty keeps legacy all-'absent' semantics — the key must
+        """Omitted/empty keeps legacy all-'absent' semantics â€” the key must
         not appear in the payload at all."""
         from simba_mcp.server import create_model
 
@@ -578,7 +579,7 @@ class TestCreateModelPayload:
 
     @pytest.mark.anyio
     async def test_absent_name_omitted(self):
-        """Default payloads stay byte-identical — no empty name key."""
+        """Default payloads stay byte-identical â€” no empty name key."""
         from simba_mcp.server import create_model
 
         ctx, client = self._ctx_capturing()
@@ -589,7 +590,7 @@ class TestCreateModelPayload:
     @pytest.mark.anyio
     async def test_margin_keys_are_top_level_not_config(self):
         """#26: the API reads operating_margin/operating_margin_column from
-        the REQUEST ROOT and silently drops them inside config — placement
+        the REQUEST ROOT and silently drops them inside config â€” placement
         is the whole bug class this guards."""
         from simba_mcp.server import create_model
 
@@ -631,7 +632,7 @@ class TestCreateModelPayload:
     @pytest.mark.anyio
     async def test_absent_margin_and_extras_omitted(self):
         """Defaults keep payloads byte-identical: none of the #26 keys appear
-        when unset (annual_discount_rate=0 IS sent — 0 is a valid rate)."""
+        when unset (annual_discount_rate=0 IS sent â€” 0 is a valid rate)."""
         from simba_mcp.server import create_model
 
         ctx, client = self._ctx_capturing()
@@ -675,7 +676,7 @@ class TestNewResourceTools:
 
     def test_delete_model_docstring_states_destructive_and_failed_only(self):
         """The docstring is the only guard an agent sees before a destructive
-        call — it must say permanent AND failed-only."""
+        call â€” it must say permanent AND failed-only."""
         tool = next(t for t in _list_tools() if t.name == "delete_model")
         desc = tool.description
         assert "PERMANENTLY" in desc or "permanent" in desc.lower()
@@ -848,7 +849,7 @@ class TestUploadData:
     async def test_oversized_file_rejected_preflight(self, tmp_path, monkeypatch):
         import simba_mcp.server as server_mod
 
-        monkeypatch.setattr(server_mod, "MAX_UPLOAD_BYTES", 10)
+        monkeypatch.setattr(data_tools, "MAX_UPLOAD_BYTES", 10)
         f = tmp_path / "big.csv"
         f.write_text("x" * 100, encoding="utf-8")
         ctx, client = self._ctx_capturing()
@@ -861,7 +862,7 @@ class TestUploadData:
         import simba_mcp.server as server_mod
 
         monkeypatch.delenv("SIMBA_MCP_ALLOW_LOCAL_FILES", raising=False)
-        monkeypatch.setattr(server_mod, "_serving_http", True)
+        monkeypatch.setattr(runtime, "_serving_http", True)
         f = tmp_path / "d.csv"
         f.write_text("a,b\n", encoding="utf-8")
         ctx, client = self._ctx_capturing()
@@ -876,7 +877,7 @@ class TestUploadData:
         import simba_mcp.server as server_mod
 
         monkeypatch.setenv("SIMBA_MCP_ALLOW_LOCAL_FILES", "0")
-        monkeypatch.setattr(server_mod, "_serving_http", False)
+        monkeypatch.setattr(runtime, "_serving_http", False)
         f = tmp_path / "d.csv"
         f.write_text("a,b\n", encoding="utf-8")
         ctx, client = self._ctx_capturing()
@@ -891,7 +892,7 @@ class TestUploadData:
         import simba_mcp.server as server_mod
 
         monkeypatch.setenv("SIMBA_MCP_ALLOW_LOCAL_FILES", "1")
-        monkeypatch.setattr(server_mod, "_serving_http", True)
+        monkeypatch.setattr(runtime, "_serving_http", True)
         f = tmp_path / "d.csv"
         f.write_text("a,b\n", encoding="utf-8")
         ctx, client = self._ctx_capturing()
@@ -1077,13 +1078,12 @@ class TestBringYourOwnKey:
             assert _bearer_token(self._ctx_with_headers(headers)) == expected, headers
 
     def test_client_sets_caller_key_only_in_http_mode(self, monkeypatch):
-        import simba_mcp.server as srv
         from simba_mcp.api_client import CALLER_API_KEY
         from simba_mcp.server import _client
 
         ctx = self._ctx_with_headers({"Authorization": "Bearer simba_sk_h"})
 
-        monkeypatch.setattr(srv, "_serving_http", True)
+        monkeypatch.setattr(runtime, "_serving_http", True)
         token = CALLER_API_KEY.set(None)  # register restore point
         try:
             _client(ctx)
@@ -1094,7 +1094,7 @@ class TestBringYourOwnKey:
         finally:
             CALLER_API_KEY.reset(token)
 
-        monkeypatch.setattr(srv, "_serving_http", False)
+        monkeypatch.setattr(runtime, "_serving_http", False)
         token = CALLER_API_KEY.set(None)
         try:
             _client(ctx)
@@ -1130,7 +1130,7 @@ class TestBringYourOwnKey:
         monkeypatch.setenv("SIMBA_API_KEY", "simba_sk_env_should_never_appear")
         monkeypatch.setenv("SIMBA_API_URL", "http://test:1")
         monkeypatch.setattr(SimbaAPIClient, "_get_client", fake_get_client)
-        monkeypatch.setattr(srv, "_serving_http", srv._serving_http)
+        monkeypatch.setattr(runtime, "_serving_http", runtime._serving_http)
 
         # A fresh app, not the module-cached `srv.app`: each app's session
         # manager is single-use, and TestAsgiApp already consumed the cache.
@@ -1176,11 +1176,10 @@ class TestBringYourOwnKey:
     async def test_http_lifespan_builds_client_without_env_key(self, monkeypatch):
         """Fail closed at the boundary (#51 review): in HTTP mode the shared
         client carries NO default credential, so even a code path that
-        bypasses _client(ctx) — leaving the ContextVar at None — gets a 401
+        bypasses _client(ctx) â€” leaving the ContextVar at None â€” gets a 401
         instead of silently authenticating as the env identity."""
-        import simba_mcp.server as srv
 
-        monkeypatch.setattr(srv, "_serving_http", True)
+        monkeypatch.setattr(runtime, "_serving_http", True)
         env = {"SIMBA_API_URL": "http://test:9999", "SIMBA_API_KEY": "simba_sk_env_leak"}
         with patch.dict(os.environ, env):
             async with app_lifespan(mcp) as app_ctx:

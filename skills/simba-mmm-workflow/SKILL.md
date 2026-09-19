@@ -5,6 +5,19 @@ description: End-to-end Simba MMM workflow over MCP — upload a dataset, create
 
 # Simba MMM workflow (upload → create → poll → results)
 
+## 0. Discover and plan
+
+Call `get_backend_capabilities` first. Treat absent fields as unknown, not as
+support. Model families available outside Studies may differ from study launch.
+For study work, inspect existing recipes, policies and attempt/concurrency budgets.
+Validate before freezing; optionally bind the returned content hash when saving.
+After an uncertain launch reuse the exact submission key and inputs. Writes are
+not automatically retried; inspect existing objects before repeating other writes.
+On revision conflict reload and reconcile. A new key can spend another attempt.
+Quality evaluations use saved fitted-window evidence; missing diagnostics do not
+pass and analyst acceptance remains in the frontend. Poll after cancellation until
+the backend confirms the final state.
+
 ## 1. Upload
 
 1. Call `get_data_schema` first and validate the CSV against it — especially
