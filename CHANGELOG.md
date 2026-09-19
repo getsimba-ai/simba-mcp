@@ -12,6 +12,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ### Added
 
+- Select an owned saved pipeline version with `get_recipe_draft_template(pipeline_version_id=...)`; preserve exact source identity and frozen bytes without running a pipeline.
+
 - Explicit immutable draft publication and authoring recovery tools. Publication is atomic across brands, uses caller UUID recovery and never launches a fit.
 
 - Discoverable create/read/list/update recipe-draft tools with complete authoring snapshot forwarding and optimistic concurrency. Requires a backend advertising `drafts.schema_version = 1`. Draft saving does not publish or launch; older recipe tools remain available.

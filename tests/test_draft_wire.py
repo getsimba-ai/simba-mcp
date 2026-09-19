@@ -11,7 +11,8 @@ from simba_mcp.api_client import SimbaAPIClient
 
 
 @pytest.mark.parametrize(
-    "operation", ["create", "update", "get", "list", "template", "publish", "authoring"]
+    "operation",
+    ["create", "update", "get", "list", "template", "pipeline_template", "publish", "authoring"],
 )
 def test_authoring_snapshot_crosses_wire_without_losing_fields(monkeypatch, operation):
     snapshot = {
@@ -34,6 +35,14 @@ def test_authoring_snapshot_crosses_wire_without_losing_fields(monkeypatch, oper
             "origin": {"kind": "uploaded_file", "id": 7, "sha256": "a" * 64},
         },
     }
+    if operation == "pipeline_template":
+        snapshot["source"]["origin"] = {
+            "kind": "pipeline_version",
+            "id": 9,
+            "pipeline_id": 2,
+            "version": 3,
+            "sha256": "a" * 64,
+        }
     draft = {"id": "d1", "study_id": "s1", "version": 2, "snapshot": snapshot}
     cases = {
         "create": (
@@ -57,6 +66,12 @@ def test_authoring_snapshot_crosses_wire_without_losing_fields(monkeypatch, oper
             {"family": "var", "uploaded_file_id": 7},
         ),
     }
+    cases["pipeline_template"] = (
+        "get_recipe_draft_template",
+        "GET",
+        "/recipe-draft-template",
+        {"family": "var", "pipeline_version_id": 9},
+    )
     cases["publish"] = (
         "publish_recipe_draft",
         "POST",
@@ -76,7 +91,7 @@ def test_authoring_snapshot_crosses_wire_without_losing_fields(monkeypatch, oper
     )
     tool, method, path, arguments = cases[operation]
     response = {"drafts": [{"id": "d1", "version": 2}]} if operation == "list" else draft
-    if operation == "template":
+    if operation in ("template", "pipeline_template"):
         response = {"snapshot": snapshot, "template_hash": "abc", "publication_available": False}
     if operation == "publish":
         response = {
@@ -101,9 +116,14 @@ def test_authoring_snapshot_crosses_wire_without_losing_fields(monkeypatch, oper
     def handle(request):
         assert request.method == method
         assert request.url.path.endswith(path)
-        if operation == "template":
+        if operation in ("template", "pipeline_template"):
             assert request.url.params["family"] == "var"
-            assert request.url.params["uploaded_file_id"] == "7"
+            key, value = (
+                ("uploaded_file_id", "7")
+                if operation == "template"
+                else ("pipeline_version_id", "9")
+            )
+            assert request.url.params[key] == value
         if operation == "publish":
             assert json.loads(request.content) == {
                 "expected_version": 2,
