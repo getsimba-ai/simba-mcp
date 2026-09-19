@@ -1908,5 +1908,20 @@
     ],
     "title": "update_recipe_draftArguments",
     "type": "object"
+  },
+  "get_recipe_draft_template": {
+    "properties": {
+      "family": {
+        "default": "mmm",
+        "enum": [
+          "mmm",
+          "var"
+        ],
+        "title": "Family",
+        "type": "string"
+      }
+    },
+    "title": "get_recipe_draft_templateArguments",
+    "type": "object"
   }
 }

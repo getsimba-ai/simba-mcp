@@ -1,5 +1,7 @@
 # Changelog
 
+- Add read-only `get_recipe_draft_template` for backend-generated shared wizard defaults and authoring envelope discovery.
+
 All notable changes to the SIMBA MCP Server will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).

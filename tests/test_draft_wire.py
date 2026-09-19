@@ -10,7 +10,7 @@ from simba_mcp import runtime, server
 from simba_mcp.api_client import SimbaAPIClient
 
 
-@pytest.mark.parametrize("operation", ["create", "update", "get", "list"])
+@pytest.mark.parametrize("operation", ["create", "update", "get", "list", "template"])
 def test_authoring_snapshot_crosses_wire_without_losing_fields(monkeypatch, operation):
     snapshot = {
         "schema_version": 1,
@@ -44,13 +44,23 @@ def test_authoring_snapshot_crosses_wire_without_losing_fields(monkeypatch, oper
         ),
         "get": ("get_recipe_draft", "GET", "/recipe-drafts/d1", {"draft_id": "d1"}),
         "list": ("list_recipe_drafts", "GET", "/studies/s1/recipe-drafts", {"study_id": "s1"}),
+        "template": (
+            "get_recipe_draft_template",
+            "GET",
+            "/recipe-draft-template",
+            {"family": "var"},
+        ),
     }
     tool, method, path, arguments = cases[operation]
     response = {"drafts": [{"id": "d1", "version": 2}]} if operation == "list" else draft
+    if operation == "template":
+        response = {"snapshot": snapshot, "template_hash": "abc", "publication_available": False}
 
     def handle(request):
         assert request.method == method
         assert request.url.path.endswith(path)
+        if operation == "template":
+            assert request.url.params["family"] == "var"
         if method in ("POST", "PATCH"):
             body = json.loads(request.content)
             assert body["snapshot"] == snapshot

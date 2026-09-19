@@ -22,6 +22,7 @@ from .tools.data import (
 from .tools.drafts import (
     create_recipe_draft,
     get_recipe_draft,
+    get_recipe_draft_template,
     list_recipe_drafts,
     update_recipe_draft,
 )
@@ -110,6 +111,7 @@ mcp = MCPServer(
 TOOLS = (
     create_recipe_draft,
     get_recipe_draft,
+    get_recipe_draft_template,
     list_recipe_drafts,
     update_recipe_draft,
     get_backend_capabilities,

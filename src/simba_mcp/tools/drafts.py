@@ -1,12 +1,19 @@
 """Versioned authoring drafts; saving never launches or publishes a model."""
 
-from typing import Any
+from typing import Any, Literal
 
 from mcp.server.mcpserver import Context
 
 from ..auth import _client
 from ..runtime import AppContext
 from ..schemas import APIResult, DraftSnapshot
+
+
+async def get_recipe_draft_template(
+    family: Literal["mmm", "var"] = "mmm", ctx: Context[AppContext, Any] = None
+) -> APIResult:
+    """Get a complete blank authoring snapshot generated from the shared wizard defaults, its hash and envelope schema. Copy snapshot into create_recipe_draft and preserve unedited fields. Defaults are not a validated model; the backend remains authoritative. Does not create, publish or run anything."""
+    return await _client(ctx).workflow_request("GET", f"/recipe-draft-template?family={family}")
 
 
 async def list_recipe_drafts(study_id: str, ctx: Context[AppContext, Any] = None) -> APIResult:
@@ -26,7 +33,7 @@ async def create_recipe_draft(
     snapshot: DraftSnapshot,
     ctx: Context[AppContext, Any] = None,
 ) -> APIResult:
-    """Save an encrypted authoring draft without publishing, fitting or consuming an attempt. Supply a UUID draft_id and reuse it with identical content after an uncertain response. Backend validates version and size. UI-reopenable snapshots must retain the complete editor schema returned by get_recipe_draft."""
+    """Save an encrypted authoring draft without publishing, fitting or consuming an attempt. Supply a UUID draft_id and reuse it with identical content after an uncertain response. Start from get_recipe_draft_template for a new draft, or preserve the complete snapshot from get_recipe_draft when editing. Backend validates version and size."""
     return await _client(ctx).workflow_request(
         "POST",
         f"/studies/{study_id}/recipe-drafts",

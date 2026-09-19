@@ -5,6 +5,7 @@ from mcp.types import ToolAnnotations
 READ_ONLY = frozenset(
     [
         "get_recipe_draft",
+        "get_recipe_draft_template",
         "list_recipe_drafts",
         "get_data_schema",
         "list_uploads",
