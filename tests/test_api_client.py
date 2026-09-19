@@ -364,15 +364,22 @@ class TestAPIClientRetry:
 
         client = self._make_client(httpx.MockTransport(respond))
         with patch("asyncio.sleep", new_callable=AsyncMock):
-            await client.workflow_request(method, "/studies/example", {"version": 1} if method != "GET" else None)
+            await client.workflow_request(
+                method, "/studies/example", {"version": 1} if method != "GET" else None
+            )
         assert len(calls) == expected_calls
         await client.close()
 
     @pytest.mark.anyio
     async def test_workflow_launch_preserves_policy_and_retry_key(self, client_with_mock):
         import json
+
         client, requests = client_with_mock
-        payload = {"revision_id": "revision", "policy_id": "policy", "submission_key": "same-attempt"}
+        payload = {
+            "revision_id": "revision",
+            "policy_id": "policy",
+            "submission_key": "same-attempt",
+        }
         await client.workflow_request("POST", "/studies/study/runs", payload)
         assert requests[0]["url"] == "http://test-simba:5005/api/v1/studies/study/runs"
         assert json.loads(requests[0]["body"]) == payload
