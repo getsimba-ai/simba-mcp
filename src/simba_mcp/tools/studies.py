@@ -6,12 +6,13 @@ from mcp.server.mcpserver import Context
 
 from ..auth import _client
 from ..runtime import AppContext
+from ..schemas import APIResult, StudyState, SubmissionKey
 
 
 async def list_studies(
     project_id: int,
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> APIResult:
     """List project-owned studies, questions, budgets and access rights."""
     return await _client(ctx).workflow_request("GET", f"/projects/{project_id}/studies")
 
@@ -23,7 +24,7 @@ async def create_study(
     max_attempts: int = 5,
     max_concurrent: int = 1,
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> APIResult:
     """Create a study owned by an existing project. Does not launch models."""
     return await _client(ctx).workflow_request(
         "POST",
@@ -40,7 +41,7 @@ async def create_study(
 async def get_study(
     study_id: str,
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> APIResult:
     """Read a study and its optimistic concurrency version."""
     return await _client(ctx).workflow_request("GET", f"/studies/{study_id}")
 
@@ -52,9 +53,9 @@ async def update_study(
     question: str,
     max_attempts: int,
     max_concurrent: int,
-    state: str = "active",
+    state: StudyState = "active",
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> APIResult:
     """Update owner-controlled study settings. State is active, paused or archived. Stale versions fail."""
     return await _client(ctx).workflow_request(
         "PATCH",
@@ -74,10 +75,10 @@ async def launch_study_run(
     study_id: str,
     revision_id: str,
     policy_id: str,
-    submission_key: str,
+    submission_key: SubmissionKey,
     ctx: Context[AppContext, Any] = None,
-) -> dict:
-    """Launch a frozen revision within study budget. Reuse the same submission_key after an ambiguous response; never invent another key for a retry."""
+) -> APIResult:
+    """Launch a frozen revision within study attempt/concurrency budgets. Requires an active study, immutable executable revision and same-study policy. Budget/state conflicts require inspection, not a new attempt key. Reuse the same submission_key after an ambiguous response; never invent another key for a retry."""
     return await _client(ctx).workflow_request(
         "POST",
         f"/studies/{study_id}/runs",
@@ -88,7 +89,7 @@ async def launch_study_run(
 async def list_study_runs(
     study_id: str,
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> APIResult:
     """List preserved attempts including pending and failed runs."""
     return await _client(ctx).workflow_request("GET", f"/studies/{study_id}/runs")
 
@@ -96,7 +97,7 @@ async def list_study_runs(
 async def get_study_run(
     run_id: str,
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> APIResult:
     """Read durable run status and the linked model."""
     return await _client(ctx).workflow_request("GET", f"/study-runs/{run_id}")
 
@@ -104,7 +105,7 @@ async def get_study_run(
 async def cancel_study_run(
     run_id: str,
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> APIResult:
     """Request cancellation. Requested and confirmed stopped are distinct states."""
     return await _client(ctx).workflow_request("POST", f"/study-runs/{run_id}/cancel", {})
 
@@ -115,7 +116,7 @@ async def adopt_model_into_study(
     reason: str,
     confirm: bool = False,
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> APIResult:
     """Preview an owned completed model and provenance gaps. Set confirm only to attach it to study history; adoption does not refit."""
     return await _client(ctx).workflow_request(
         "POST",

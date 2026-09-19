@@ -4,6 +4,7 @@ from mcp.server.mcpserver import MCPServer
 
 from . import runtime
 from .auth import _bearer_token, _client, _local_files_allowed
+from .metadata import annotations_for
 from .runtime import (
     MAX_REQUEST_BODY_BYTES,
     MAX_UPLOAD_BYTES,
@@ -11,7 +12,13 @@ from .runtime import (
     app_lifespan,
     set_http_mode,
 )
-from .tools.data import get_data_schema, get_upload, list_uploads, upload_data
+from .tools.data import (
+    get_backend_capabilities,
+    get_data_schema,
+    get_upload,
+    list_uploads,
+    upload_data,
+)
 from .tools.models import (
     create_model,
     create_var_model,
@@ -80,12 +87,22 @@ mcp = MCPServer(
         "Simba is a Bayesian Marketing Mix Modeling (MMM) platform. "
         "Use these tools to upload marketing data, build MMM models, "
         "check fitting progress, retrieve results (channel ROI, contributions, "
-        "model diagnostics), and run budget optimizations."
+        "model diagnostics), and run budget optimizations. "
+        "Start with get_backend_capabilities and get_data_schema. For studies: inspect "
+        "the project and budget, validate/freeze a recipe, declare a quality policy, "
+        "then launch using an explicit submission_key. Reuse that key and identical "
+        "inputs after an uncertain launch. Poll shared run progress; cancellation "
+        "requested is not cancellation completed. Reload after revision conflicts. "
+        "Evaluate existing evidence and recommend with limitations; analyst acceptance "
+        "is in the frontend. Missing evidence never passes and fitted-window metrics "
+        "are not holdout validation. Use selected result sections and bounds. "
+        "Writes are not automatically retried; reconcile before repeating them."
     ),
     lifespan=app_lifespan,
 )
 
 TOOLS = (
+    get_backend_capabilities,
     get_data_schema,
     upload_data,
     list_uploads,
@@ -139,7 +156,11 @@ TOOLS = (
 )
 
 for tool in TOOLS:
-    mcp.add_tool(tool)
+    mcp.add_tool(
+        tool,
+        title=tool.__name__.replace("_", " ").title(),
+        annotations=annotations_for(tool.__name__),
+    )
 
 
 def _create_app():

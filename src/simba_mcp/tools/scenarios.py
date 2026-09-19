@@ -6,6 +6,7 @@ from mcp.server.mcpserver import Context
 
 from ..auth import _client
 from ..runtime import AppContext
+from ..schemas import APIResult
 
 
 async def run_optimizer(
@@ -26,7 +27,7 @@ async def run_optimizer(
     sigma_penalty: str = "std",
     group_bounds: list[dict] | None = None,
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> APIResult:
     """Run budget optimization on a completed model.
 
     Finds the optimal budget allocation across channels to maximize
@@ -140,7 +141,7 @@ async def get_optimizer_results(
     model_hash: str,
     run_id: str | None = None,
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> APIResult:
     """Get budget optimization status and results.
 
     Without run_id: returns the MODEL-LEVEL optimizer state. Top-level keys:
@@ -184,7 +185,7 @@ async def get_scenario_template(
     model_hash: str,
     periods_forward: int = 12,
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> APIResult:
     """Generate a forward-period scenario template from a completed model.
 
     Returns future dates pre-filled with values from 1 year prior,
@@ -221,7 +222,7 @@ async def run_scenario(
     skip_slicing: bool = False,
     proxy_channels: list[dict] | None = None,
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> APIResult:
     """Run a "what-if" scenario prediction on a completed model.
 
     Takes a set of future period rows with channel activity values and
@@ -277,7 +278,7 @@ async def get_scenario_results(
     model_hash: str,
     run_id: str | None = None,
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> APIResult:
     """Get scenario prediction results.
 
     Without run_id: returns the MODEL-LEVEL scenario state — status
@@ -313,7 +314,7 @@ async def update_run(
     notes: str | None = None,
     tags: list[str] | None = None,
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> APIResult:
     """Rename / annotate a saved optimizer or scenario run.
 
     Runs are auto-named at creation (e.g. "$1.2M · 12mo · Jan 5");
@@ -347,7 +348,7 @@ async def set_run_pinned(
     run_id: str,
     pinned: bool,
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> APIResult:
     """Pin or unpin a saved optimizer or scenario run.
 
     Declarative and idempotent: setting the current state again is a
@@ -368,7 +369,7 @@ async def list_runs(
     limit: int = 50,
     offset: int = 0,
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> APIResult:
     """List a model's saved optimizer or scenario run history.
 
     Returns {model_hash, runs, count, limit, offset}. Each run summary has:

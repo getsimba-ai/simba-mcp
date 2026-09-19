@@ -6,11 +6,12 @@ from mcp.server.mcpserver import Context
 
 from ..auth import _client
 from ..runtime import AppContext
+from ..schemas import APIResult
 
 
 async def list_projects(
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> APIResult:
     """List the projects (the app's model folders) you can file models into.
 
     Returns owned and team-shared projects: per project {id, name,
@@ -27,7 +28,7 @@ async def create_project(
     name: str,
     team_id: int | None = None,
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> APIResult:
     """Create a named project (model folder) to file models into.
 
     Names are sanitized the same way model names are (non-empty after
@@ -48,7 +49,7 @@ async def rename_project(
     project_id: int,
     name: str,
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> APIResult:
     """Rename a project you OWN.
 
     Team members can file models into a shared folder but not rename it

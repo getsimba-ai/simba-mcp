@@ -6,10 +6,12 @@ from typing import Any
 from mcp.server.mcpserver import Context
 
 from ..auth import _client, _local_files_denial_reason
+from ..errors import api_error
 from ..runtime import MAX_UPLOAD_BYTES, AppContext
+from ..schemas import APIResult
 
 
-async def get_data_schema(ctx: Context[AppContext, Any]) -> dict:
+async def get_data_schema(ctx: Context[AppContext, Any]) -> APIResult:
     """Get the canonical CSV data schema for Simba MMM input files.
 
     Returns the JSON Schema specification describing required columns
@@ -26,7 +28,7 @@ async def upload_data(
     name: str = "",
     filename: str = "",
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> APIResult:
     """Upload a CSV dataset to Simba for use in model building.
 
     Provide EXACTLY ONE of csv_content (raw CSV text) or csv_path (a file path
@@ -60,28 +62,42 @@ async def upload_data(
     and any validation warnings.
     """
     if bool(csv_content) == bool(csv_path):
-        return {
-            "error": "Provide exactly one of csv_content or csv_path.",
-            "_status_code": 400,
-        }
+        return api_error(
+            400,
+            {
+                "error": "Provide exactly one of csv_content or csv_path.",
+                "_status_code": 400,
+            },
+        )
     if csv_path:
         denial = _local_files_denial_reason()
         if denial:
-            return {"error": denial, "_status_code": 403}
+            return api_error(403, {"error": denial})
         path = Path(csv_path).expanduser()
         if not path.is_file():
-            return {"error": f"File not found: {path}", "_status_code": 400}
+            return api_error(400, {"error": f"File not found: {path}"})
         size = path.stat().st_size
         if size > MAX_UPLOAD_BYTES:
-            return {
-                "error": (
-                    f"{path.name} is {size / 1024 / 1024:.1f} MB — over the API's "
-                    f"{MAX_UPLOAD_BYTES // (1024 * 1024)} MB ingest limit. "
-                    "Aggregate or trim the file first."
-                ),
-                "_status_code": 413,
-            }
-        csv_content = path.read_text(encoding="utf-8-sig")
+            return api_error(
+                413,
+                {
+                    "error": (
+                        f"{path.name} is {size / 1024 / 1024:.1f} MB — over the API's "
+                        f"{MAX_UPLOAD_BYTES // (1024 * 1024)} MB ingest limit. "
+                        "Aggregate or trim the file first."
+                    ),
+                    "_status_code": 413,
+                },
+            )
+        try:
+            csv_content = path.read_text(encoding="utf-8-sig")
+        except (OSError, UnicodeError):
+            return api_error(
+                400,
+                {
+                    "error": "Cannot read CSV as UTF-8. Check file access and encoding, or use csv_content."
+                },
+            )
         if not name:
             name = path.stem
         if not filename:
@@ -94,7 +110,7 @@ async def list_uploads(
     offset: int = 0,
     name: str = "",
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> APIResult:
     """List the datasets in your workspace (newest first) — every source,
     not just API uploads: dashboard/manual uploads and pipeline-ingested
     datasets appear too (see source_type per file).
@@ -118,7 +134,7 @@ async def list_uploads(
 async def get_upload(
     file_id: int,
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> APIResult:
     """Get one uploaded dataset's details, including its column schema.
 
     Returns id, filename, original_filename, source_type, mime_type,
@@ -130,3 +146,24 @@ async def get_upload(
         file_id: The upload's id, from upload_data's response or list_uploads.
     """
     return await _client(ctx).get_upload(file_id)
+
+
+async def get_backend_capabilities(ctx: Context[AppContext, Any]) -> APIResult:
+    """Discover this caller's connected backend features before planning work.
+
+    Returns only backend advertisements: model families, transformations, priors
+    and workflow operations. A missing advertisement is unknown, not unsupported.
+    Check each field; an advertised feature still requires permission and budget.
+    No model is created and capabilities are not cached across callers.
+    """
+    schema = await _client(ctx).get_schema()
+    if schema.get("_status_code", 200) >= 400:
+        return schema
+    keys = ("x-simba-model-capabilities", "x-simba-workflow-capabilities")
+    advertisements = {key: schema[key] for key in keys if isinstance(schema.get(key), dict)}
+    return {
+        "source": "/api/v1/ingest/schema",
+        "advertisements": advertisements,
+        "unknown": [key for key in keys if key not in advertisements],
+        "guidance": "Missing fields are unknown. Backend authorization and validation remain authoritative.",
+    }

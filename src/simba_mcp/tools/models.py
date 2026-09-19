@@ -7,6 +7,7 @@ from mcp.server.mcpserver.exceptions import ToolError
 
 from ..auth import _client
 from ..runtime import AppContext
+from ..schemas import APIResult, Channel, ControlPrior
 
 
 async def list_models(
@@ -14,7 +15,7 @@ async def list_models(
     limit: int = 50,
     offset: int = 0,
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> APIResult:
     """List all Marketing Mix Models for the authenticated user.
 
     Returns model name, hash, status (pending/under way/complete/failed),
@@ -38,7 +39,7 @@ async def create_model(
     date_column: str,
     kpi_column: str,
     hierarchy_column: str,
-    channels: list[dict],
+    channels: list[Channel],
     multiplier_column: str = "",
     control_columns: list[str] | None = None,
     total_media_effect: str = "Other",
@@ -58,9 +59,9 @@ async def create_model(
     annual_discount_rate: float | None = None,
     sampler: dict | None = None,
     reporting_kernel: dict | None = None,
-    control_priors: list[dict] | None = None,
+    control_priors: list[ControlPrior] | None = None,
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> APIResult:
     """Create and start fitting a new Bayesian Marketing Mix Model.
 
     This queues an async model fit and returns immediately with a model_hash.
@@ -340,7 +341,7 @@ async def create_var_model(
     var_priors: dict | None = None,
     name: str = "",
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> APIResult:
     """Create and start fitting a long-term (VAR) model (#569).
 
     VAR models capture the joint dynamics of several series (e.g. sales and
@@ -407,7 +408,7 @@ async def link_var_model(
     var_model_hash: str,
     channel_map: dict[str, list[str]] | None = None,
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> APIResult:
     """Link a completed VAR model to an MMM (#569).
 
     After linking, the MMM's get_model_results `long_run_rollup` section
@@ -438,7 +439,7 @@ async def link_var_model(
 async def unlink_var_model(
     model_hash: str,
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> APIResult:
     """Remove an MMM's VAR link (#569). Idempotent."""
     return await _client(ctx).unlink_var_model(model_hash)
 
@@ -447,7 +448,7 @@ async def set_contribution_groups(
     model_hash: str,
     contribution_groups: list[dict],
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> APIResult:
     """Persist the driver groupings the dashboard contributions view renders
     (#436) — configure grouping once and every viewer sees it.
 
@@ -469,7 +470,7 @@ async def set_contribution_groups(
 async def get_contribution_groups(
     model_hash: str,
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> APIResult:
     """Read the stored contribution groups for a model (#436).
     Legacy dashboard-saved configs are served verbatim."""
     return await _client(ctx).get_contribution_groups(model_hash)
@@ -479,7 +480,7 @@ async def rename_model(
     model_hash: str,
     name: str,
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> APIResult:
     """Rename a model.
 
     Changes only the display name; the model's saved/unsaved state is
@@ -498,7 +499,7 @@ async def save_model(
     name: str,
     project_id: int | None = None,
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> APIResult:
     """Save a model into a project under a display name.
 
     API-created models start unsaved and are invisible to list_models
@@ -523,7 +524,7 @@ async def save_model(
 async def unsave_model(
     model_hash: str,
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> APIResult:
     """Release a model's saved slot without deleting anything — the inverse
     of save_model (#673).
 
@@ -553,7 +554,7 @@ async def unsave_model(
 async def get_model(
     model_hash: str,
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> APIResult:
     """Get a model's metadata and configuration echo — works for EVERY status,
     including failed models (unlike get_model_results, which needs 'complete').
 
@@ -579,7 +580,7 @@ async def get_model(
 async def delete_model(
     model_hash: str,
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> APIResult:
     """PERMANENTLY DELETE a FAILED model. Destructive and irreversible.
 
     Only models with status "failed" can be deleted over the API — any other
@@ -600,7 +601,7 @@ async def delete_model(
 async def get_model_status(
     model_hash: str,
     ctx: Context[AppContext, Any] = None,
-) -> dict:
+) -> APIResult:
     """Check the fitting progress of a model.
 
     Returns status (pending/under way/complete/failed), progress percentage,

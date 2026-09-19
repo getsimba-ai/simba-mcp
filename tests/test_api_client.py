@@ -475,7 +475,8 @@ class TestAPIClientRetry:
             result = await client.get_schema()
         assert result["_status_code"] == 503
         assert "unreachable" in result["error"]
-        assert "connection refused" in result["error"]
+        assert "connection refused" not in result["error"]
+        assert result["_error_code"] == "backend_unavailable"
 
     @pytest.mark.anyio
     async def test_non_retriable_status_not_retried(self):

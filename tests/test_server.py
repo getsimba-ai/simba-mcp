@@ -20,6 +20,7 @@ def _list_tools():
 
 
 EXPECTED_TOOLS = [
+    "get_backend_capabilities",
     "compare_study_runs",
     "list_studies",
     "create_study",
