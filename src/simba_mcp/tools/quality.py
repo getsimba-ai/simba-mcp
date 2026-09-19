@@ -1,5 +1,3 @@
-from .pagination import page
-
 """Quality tools backed by the Simba API."""
 
 from typing import Annotated, Any
@@ -10,6 +8,7 @@ from pydantic import Field
 
 from ..auth import _client
 from ..runtime import AppContext
+from .pagination import page
 
 
 async def list_quality_policies(
@@ -49,7 +48,12 @@ async def create_quality_policy(
     ],
     name: str,
     rationale: str,
-    checks: list[dict],
+    checks: Annotated[
+        list[dict],
+        Field(
+            description="Quality criteria with metric, maximum and optional required flag. Metrics: r_hat_max (dimensionless), mae/rmse (saved actual_vs_model units), wape (fraction, so 0.10 means 10%). Missing evidence is not a pass; checks use saved fitting-window evidence."
+        ),
+    ],
     ctx: Context[AppContext, Any] = None,
 ) -> dict[str, Any]:
     """Save project-specific checks. Each check has metric (r_hat_max, mae, rmse, wape), maximum and required. WAPE is a fraction. No default thresholds are assumed."""

@@ -1,5 +1,3 @@
-from .pagination import page
-
 """Studies tools backed by the Simba API."""
 
 from typing import Annotated, Any
@@ -10,6 +8,7 @@ from pydantic import Field
 
 from ..auth import _client
 from ..runtime import AppContext
+from .pagination import page
 
 
 async def list_studies(

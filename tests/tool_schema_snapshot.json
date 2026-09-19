@@ -1548,6 +1548,7 @@
         "type": "string"
       },
       "checks": {
+        "description": "Quality criteria with metric, maximum and optional required flag. Metrics: r_hat_max (dimensionless), mae/rmse (saved actual_vs_model units), wape (fraction, so 0.10 means 10%). Missing evidence is not a pass; checks use saved fitting-window evidence.",
         "items": {
           "additionalProperties": true,
           "type": "object"
