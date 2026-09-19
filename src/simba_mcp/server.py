@@ -23,7 +23,9 @@ from .tools.drafts import (
     create_recipe_draft,
     get_recipe_draft,
     get_recipe_draft_template,
+    get_recipe_revision_authoring,
     list_recipe_drafts,
+    publish_recipe_draft,
     update_recipe_draft,
 )
 from .tools.models import (
@@ -112,6 +114,8 @@ TOOLS = (
     create_recipe_draft,
     get_recipe_draft,
     get_recipe_draft_template,
+    publish_recipe_draft,
+    get_recipe_revision_authoring,
     list_recipe_drafts,
     update_recipe_draft,
     get_backend_capabilities,

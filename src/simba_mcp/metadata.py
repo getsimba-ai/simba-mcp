@@ -6,6 +6,7 @@ READ_ONLY = frozenset(
     [
         "get_recipe_draft",
         "get_recipe_draft_template",
+        "get_recipe_revision_authoring",
         "list_recipe_drafts",
         "get_data_schema",
         "list_uploads",
@@ -55,6 +56,7 @@ DESTRUCTIVE = frozenset(
 IDEMPOTENT_WRITES = frozenset(
     [
         "create_recipe_draft",
+        "publish_recipe_draft",
         "update_recipe_draft",
         "launch_study_run",
         "delete_model",
@@ -68,6 +70,7 @@ IDEMPOTENT_WRITES = frozenset(
 ADDITIVE_WRITES = frozenset(
     [
         "create_recipe_draft",
+        "publish_recipe_draft",
         "upload_data",
         "create_model",
         "create_var_model",

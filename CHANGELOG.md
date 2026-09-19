@@ -189,3 +189,5 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - CLI entrypoint (`simba-mcp`).
 - CI workflow (lint + test on Python 3.11/3.12/3.13).
 - PyPI publish workflow on GitHub Release.
+
+Draft publication: `publish_recipe_draft` freezes a saved fixed-prior MMM draft as an atomic batch, using expected version and caller UUID recovery; it never launches a fit. `get_recipe_revision_authoring` retrieves the immutable authoring snapshot for copying to a new draft. Check backend publication capabilities; VAR and automatic-prior replay are not supported yet.

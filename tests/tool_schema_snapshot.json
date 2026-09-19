@@ -1983,5 +1983,51 @@
     },
     "title": "get_recipe_draft_templateArguments",
     "type": "object"
+  },
+  "publish_recipe_draft": {
+    "properties": {
+      "draft_id": {
+        "title": "Draft Id",
+        "type": "string"
+      },
+      "expected_version": {
+        "title": "Expected Version",
+        "type": "integer"
+      },
+      "publication_id": {
+        "title": "Publication Id",
+        "type": "string"
+      },
+      "reason": {
+        "title": "Reason",
+        "type": "string"
+      }
+    },
+    "required": [
+      "draft_id",
+      "expected_version",
+      "publication_id",
+      "reason"
+    ],
+    "title": "publish_recipe_draftArguments",
+    "type": "object"
+  },
+  "get_recipe_revision_authoring": {
+    "properties": {
+      "recipe_id": {
+        "title": "Recipe Id",
+        "type": "string"
+      },
+      "number": {
+        "title": "Number",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "recipe_id",
+      "number"
+    ],
+    "title": "get_recipe_revision_authoringArguments",
+    "type": "object"
   }
 }

@@ -10,7 +10,9 @@ from simba_mcp import runtime, server
 from simba_mcp.api_client import SimbaAPIClient
 
 
-@pytest.mark.parametrize("operation", ["create", "update", "get", "list", "template"])
+@pytest.mark.parametrize(
+    "operation", ["create", "update", "get", "list", "template", "publish", "authoring"]
+)
 def test_authoring_snapshot_crosses_wire_without_losing_fields(monkeypatch, operation):
     snapshot = {
         "schema_version": 1,
@@ -55,6 +57,23 @@ def test_authoring_snapshot_crosses_wire_without_losing_fields(monkeypatch, oper
             {"family": "var", "uploaded_file_id": 7},
         ),
     }
+    cases["publish"] = (
+        "publish_recipe_draft",
+        "POST",
+        "/recipe-drafts/d1/publish",
+        {
+            "draft_id": "d1",
+            "expected_version": 2,
+            "publication_id": "p1",
+            "reason": "Freeze this approach",
+        },
+    )
+    cases["authoring"] = (
+        "get_recipe_revision_authoring",
+        "GET",
+        "/recipes/r1/revisions/1/authoring",
+        {"recipe_id": "r1", "number": 1},
+    )
     tool, method, path, arguments = cases[operation]
     response = {"drafts": [{"id": "d1", "version": 2}]} if operation == "list" else draft
     if operation == "template":
@@ -66,7 +85,13 @@ def test_authoring_snapshot_crosses_wire_without_losing_fields(monkeypatch, oper
         if operation == "template":
             assert request.url.params["family"] == "var"
             assert request.url.params["uploaded_file_id"] == "7"
-        if method in ("POST", "PATCH"):
+        if operation == "publish":
+            assert json.loads(request.content) == {
+                "expected_version": 2,
+                "publication_id": "p1",
+                "reason": "Freeze this approach",
+            }
+        elif method in ("POST", "PATCH"):
             body = json.loads(request.content)
             assert body["snapshot"] == snapshot
             assert body.get("id") == ("d1" if method == "POST" else None)

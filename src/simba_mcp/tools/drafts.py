@@ -1,4 +1,4 @@
-"""Versioned authoring drafts; saving never launches or publishes a model."""
+"""Versioned authoring drafts and explicit immutable publication; never launches a model."""
 
 from typing import Any, Literal
 
@@ -58,4 +58,30 @@ async def update_recipe_draft(
         "PATCH",
         f"/recipe-drafts/{draft_id}",
         {"expected_version": expected_version, "name": name, "snapshot": snapshot},
+    )
+
+
+async def publish_recipe_draft(
+    draft_id: str,
+    expected_version: int,
+    publication_id: str,
+    reason: str,
+    ctx: Context[AppContext, Any] = None,
+) -> APIResult:
+    """Publish a saved fixed-prior MMM draft as immutable recipe revisions. Supply a new UUID publication_id and reuse it with identical arguments after an uncertain response. Batch publication is atomic. Backend compiles the saved snapshot with shared wizard rules; never send separately prepared settings. Does not fit, consume an attempt or designate a champion. VAR and automatic priors are not yet supported; check backend capabilities."""
+    return await _client(ctx).workflow_request(
+        "POST",
+        f"/recipe-drafts/{draft_id}/publish",
+        {"expected_version": expected_version, "publication_id": publication_id, "reason": reason},
+    )
+
+
+async def get_recipe_revision_authoring(
+    recipe_id: str,
+    number: int,
+    ctx: Context[AppContext, Any] = None,
+) -> APIResult:
+    """Read the frozen authoring snapshot of a published draft revision. Use its complete snapshot with create_recipe_draft to edit a new copy; the published revision stays unchanged. Legacy revisions without authoring state return an explicit unavailable error. Does not create or fit anything."""
+    return await _client(ctx).workflow_request(
+        "GET", f"/recipes/{recipe_id}/revisions/{number}/authoring"
     )
