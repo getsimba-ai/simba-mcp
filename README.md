@@ -102,7 +102,7 @@ response = client.beta.messages.create(
 | `list_projects` | List the projects (model folders) you can file models into |
 | `create_project` | Create a named project, optionally team-shared |
 | `rename_project` | Rename a project you own |
-| `get_model_status` | Poll fitting progress for a model |
+| `get_model_status` | Poll fitting progress and optional heartbeat/stall-threshold metadata |
 | `get_model_results` | Get results (ROI, contributions, response curves, diagnostics, and more) |
 | `create_var_model` | Fit a long-term (VAR) model |
 | `link_var_model` / `unlink_var_model` | Attach/detach a VAR model to an MMM for the `long_run_rollup` section |
@@ -389,6 +389,21 @@ uvicorn simba_mcp.server:app --host 0.0.0.0 --port 8100
 MIT
 
 
+### Fit heartbeat visibility
+
+On backends that support it, `get_model_status` also returns `fit_liveness`.
+The MCP server passes the response through unchanged; older backends may omit
+this field. With `available: true`, `heartbeat_age_seconds`,
+`stall_timeout_seconds`, and `seconds_until_stall_threshold` are in seconds;
+`last_heartbeat_at` is a Unix timestamp in seconds. `stall_threshold_exceeded`
+reports whether heartbeat age is strictly greater than the configured threshold.
+
+The countdown is to a stale-heartbeat threshold, not completion ETA or an exact
+termination time: the watchdog runs periodically. It does not change `status`.
+With `available: false`, `reason` is `heartbeat_unavailable` (including unavailable
+heartbeat storage) or `not_fitting`. Missing or unavailable metadata is unknown,
+not evidence that a fit is healthy or stalled. Continue polling with backoff and
+use the reported model status; do not automatically restart or duplicate a fit.
 ### Explicit control priors and transforms
 
 Use `control_columns` to include controls and optional `control_priors` to
