@@ -222,12 +222,14 @@ async def test_real_stdio_handshake_discovery_and_missing_credentials():
         args=["-m", "simba_mcp"],
         env={"SIMBA_API_KEY": "", "SIMBA_API_URL": "http://127.0.0.1:1"},
     )
-    async with stdio_client(params) as (reader, writer):
-        async with ClientSession(reader, writer) as session:
-            initialized = await session.initialize()
-            assert initialized.server_info.name == "Simba MMM"
-            tools = await session.list_tools()
-            assert "get_capabilities" in {tool.name for tool in tools.tools}
-            result = await session.call_tool("get_capabilities", {})
-            assert result.structured_content["status"] == "unavailable"
-            assert result.structured_content["backend_error"]["_status_code"] == 401
+    async with (
+        stdio_client(params) as (reader, writer),
+        ClientSession(reader, writer) as session,
+    ):
+        initialized = await session.initialize()
+        assert initialized.server_info.name == "Simba MMM"
+        tools = await session.list_tools()
+        assert "get_capabilities" in {tool.name for tool in tools.tools}
+        result = await session.call_tool("get_capabilities", {})
+        assert result.structured_content["status"] == "unavailable"
+        assert result.structured_content["backend_error"]["_status_code"] == 401
