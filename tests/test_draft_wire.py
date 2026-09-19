@@ -78,6 +78,25 @@ def test_authoring_snapshot_crosses_wire_without_losing_fields(monkeypatch, oper
     response = {"drafts": [{"id": "d1", "version": 2}]} if operation == "list" else draft
     if operation == "template":
         response = {"snapshot": snapshot, "template_hash": "abc", "publication_available": False}
+    if operation == "publish":
+        response = {
+            "revisions": [
+                {
+                    "id": "r1",
+                    "effective": {
+                        "provenance": {
+                            "calibration": {
+                                "kind": "likelihood_observations",
+                                "count": 1,
+                                "units": "response",
+                                "channels": ["tv"],
+                                "content_hash": "abc",
+                            }
+                        }
+                    },
+                }
+            ]
+        }
 
     def handle(request):
         assert request.method == method

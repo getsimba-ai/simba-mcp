@@ -18,6 +18,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ### Changed
 
+- Document strict MMM calibration publication and unsupported VAR calibration; verify calibration provenance survives publication responses.
+
 - Document backend-gated VAR draft publication alongside fixed-prior MMM. VAR quality remains unavailable under MMM policies; capable backends freeze automatic MMM priors during draft publication and disable rebuilding during replay.
 
 - Clarify optional backend study-budget status, blocked-capacity recovery and quality-policy requirements. Existing tool arguments and additive response forwarding remain compatible with older backends; absent budget is unknown rather than an eligibility claim.
