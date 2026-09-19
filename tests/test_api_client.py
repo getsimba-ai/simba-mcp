@@ -354,6 +354,38 @@ class TestAPIClientRetry:
         return api_client
 
     @pytest.mark.anyio
+    @pytest.mark.parametrize("method, expected_calls", [("POST", 1), ("PATCH", 1), ("GET", 2)])
+    async def test_workflow_writes_are_not_automatically_repeated(self, method, expected_calls):
+        calls = []
+
+        async def respond(request):
+            calls.append(request)
+            return httpx.Response(502 if len(calls) == 1 else 200, json={"ok": len(calls) > 1})
+
+        client = self._make_client(httpx.MockTransport(respond))
+        with patch("asyncio.sleep", new_callable=AsyncMock):
+            await client.workflow_request(
+                method, "/studies/example", {"version": 1} if method != "GET" else None
+            )
+        assert len(calls) == expected_calls
+        await client.close()
+
+    @pytest.mark.anyio
+    async def test_workflow_launch_preserves_policy_and_retry_key(self, client_with_mock):
+        import json
+
+        client, requests = client_with_mock
+        payload = {
+            "revision_id": "revision",
+            "policy_id": "policy",
+            "submission_key": "same-attempt",
+        }
+        await client.workflow_request("POST", "/studies/study/runs", payload)
+        assert requests[0]["url"] == "http://test-simba:5005/api/v1/studies/study/runs"
+        assert json.loads(requests[0]["body"]) == payload
+        assert requests[0]["headers"]["authorization"] == "Bearer simba_sk_testkey123"
+
+    @pytest.mark.anyio
     async def test_retries_on_server_error_then_succeeds(self):
         """A 502 on attempt 1 is retried and succeeds on attempt 2."""
         call_count = 0

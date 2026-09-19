@@ -1732,3 +1732,283 @@ def __getattr__(name: str):
         app = _create_app()
         return app
     raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
+
+
+# Study workflow tools share the application API and its permission checks.
+
+
+@mcp.tool()
+async def list_studies(
+    project_id: int,
+    ctx: Context[AppContext, Any] = None,
+) -> dict:
+    """List project-owned studies, questions, budgets and access rights."""
+    return await _client(ctx).workflow_request("GET", f"/projects/{project_id}/studies")
+
+
+@mcp.tool()
+async def create_study(
+    project_id: int,
+    name: str,
+    question: str,
+    max_attempts: int = 5,
+    max_concurrent: int = 1,
+    ctx: Context[AppContext, Any] = None,
+) -> dict:
+    """Create a study owned by an existing project. Does not launch models."""
+    return await _client(ctx).workflow_request(
+        "POST",
+        f"/projects/{project_id}/studies",
+        {
+            "name": name,
+            "question": question,
+            "max_attempts": max_attempts,
+            "max_concurrent": max_concurrent,
+        },
+    )
+
+
+@mcp.tool()
+async def get_study(
+    study_id: str,
+    ctx: Context[AppContext, Any] = None,
+) -> dict:
+    """Read a study and its optimistic concurrency version."""
+    return await _client(ctx).workflow_request("GET", f"/studies/{study_id}")
+
+
+@mcp.tool()
+async def update_study(
+    study_id: str,
+    version: int,
+    name: str,
+    question: str,
+    max_attempts: int,
+    max_concurrent: int,
+    state: str = "active",
+    ctx: Context[AppContext, Any] = None,
+) -> dict:
+    """Update owner-controlled study settings. State is active, paused or archived. Stale versions fail."""
+    return await _client(ctx).workflow_request(
+        "PATCH",
+        f"/studies/{study_id}",
+        {
+            "version": version,
+            "name": name,
+            "question": question,
+            "max_attempts": max_attempts,
+            "max_concurrent": max_concurrent,
+            "state": state,
+        },
+    )
+
+
+@mcp.tool()
+async def list_study_recipes(
+    study_id: str,
+    ctx: Context[AppContext, Any] = None,
+) -> dict:
+    """Read all recipe revisions including exact effective priors, settings and data hashes. Raw datasets are omitted."""
+    return await _client(ctx).workflow_request("GET", f"/studies/{study_id}/recipes")
+
+
+@mcp.tool()
+async def create_study_recipe(
+    study_id: str,
+    name: str,
+    reason: str,
+    specification: dict,
+    ctx: Context[AppContext, Any] = None,
+) -> dict:
+    """Freeze a recipe without fitting. Specification kind api_mmm has request containing create_model API fields; model_snapshot has model_hash and is review-only."""
+    return await _client(ctx).workflow_request(
+        "POST",
+        f"/studies/{study_id}/recipes",
+        {"name": name, "reason": reason, "specification": specification, "expected_version": 0},
+    )
+
+
+@mcp.tool()
+async def revise_study_recipe(
+    recipe_id: str,
+    expected_version: int,
+    name: str,
+    reason: str,
+    specification: dict,
+    ctx: Context[AppContext, Any] = None,
+) -> dict:
+    """Create an immutable revision. Supply the current recipe version; stale edits are rejected."""
+    return await _client(ctx).workflow_request(
+        "POST",
+        f"/recipes/{recipe_id}/revisions",
+        {
+            "name": name,
+            "reason": reason,
+            "specification": specification,
+            "expected_version": expected_version,
+        },
+    )
+
+
+@mcp.tool()
+async def get_recipe_revision(
+    recipe_id: str,
+    number: int,
+    ctx: Context[AppContext, Any] = None,
+) -> dict:
+    """Read one exact immutable recipe revision."""
+    return await _client(ctx).workflow_request("GET", f"/recipes/{recipe_id}/revisions/{number}")
+
+
+@mcp.tool()
+async def validate_study_recipe(
+    specification: dict,
+    ctx: Context[AppContext, Any] = None,
+) -> dict:
+    """Resolve and validate a recipe without creating a run. Returns effective settings and provenance limits."""
+    return await _client(ctx).workflow_request(
+        "POST", "/recipe-validation", {"specification": specification}
+    )
+
+
+@mcp.tool()
+async def launch_study_run(
+    study_id: str,
+    revision_id: str,
+    policy_id: str,
+    submission_key: str,
+    ctx: Context[AppContext, Any] = None,
+) -> dict:
+    """Launch a frozen revision within study budget. Reuse the same submission_key after an ambiguous response; never invent another key for a retry."""
+    return await _client(ctx).workflow_request(
+        "POST",
+        f"/studies/{study_id}/runs",
+        {"revision_id": revision_id, "policy_id": policy_id, "submission_key": submission_key},
+    )
+
+
+@mcp.tool()
+async def list_study_runs(
+    study_id: str,
+    ctx: Context[AppContext, Any] = None,
+) -> dict:
+    """List preserved attempts including pending and failed runs."""
+    return await _client(ctx).workflow_request("GET", f"/studies/{study_id}/runs")
+
+
+@mcp.tool()
+async def get_study_run(
+    run_id: str,
+    ctx: Context[AppContext, Any] = None,
+) -> dict:
+    """Read durable run status and the linked model."""
+    return await _client(ctx).workflow_request("GET", f"/study-runs/{run_id}")
+
+
+@mcp.tool()
+async def cancel_study_run(
+    run_id: str,
+    ctx: Context[AppContext, Any] = None,
+) -> dict:
+    """Request cancellation. Requested and confirmed stopped are distinct states."""
+    return await _client(ctx).workflow_request("POST", f"/study-runs/{run_id}/cancel", {})
+
+
+@mcp.tool()
+async def list_quality_policies(
+    study_id: str,
+    ctx: Context[AppContext, Any] = None,
+) -> dict:
+    """Read immutable quality policies for the study."""
+    return await _client(ctx).workflow_request("GET", f"/studies/{study_id}/quality-policies")
+
+
+@mcp.tool()
+async def create_quality_policy(
+    study_id: str,
+    name: str,
+    rationale: str,
+    checks: list[dict],
+    ctx: Context[AppContext, Any] = None,
+) -> dict:
+    """Save project-specific checks. Each check has metric (r_hat_max, mae, rmse, wape), maximum and required. WAPE is a fraction. No default thresholds are assumed."""
+    return await _client(ctx).workflow_request(
+        "POST",
+        f"/studies/{study_id}/quality-policies",
+        {"name": name, "rationale": rationale, "checks": checks},
+    )
+
+
+@mcp.tool()
+async def evaluate_study_run(
+    run_id: str,
+    policy_id: str,
+    ctx: Context[AppContext, Any] = None,
+) -> dict:
+    """Save a quality report from existing evidence. Missing evidence never passes. Current predictive metrics cover the fitted window, not holdout."""
+    return await _client(ctx).workflow_request(
+        "POST", f"/study-runs/{run_id}/evaluations", {"policy_id": policy_id}
+    )
+
+
+@mcp.tool()
+async def list_study_evaluations(
+    run_id: str,
+    ctx: Context[AppContext, Any] = None,
+) -> dict:
+    """Read preserved quality reports and evidence hashes."""
+    return await _client(ctx).workflow_request("GET", f"/study-runs/{run_id}/evaluations")
+
+
+@mcp.tool()
+async def list_study_decisions(
+    study_id: str,
+    ctx: Context[AppContext, Any] = None,
+) -> dict:
+    """Read analyst decisions and agent recommendations."""
+    return await _client(ctx).workflow_request("GET", f"/studies/{study_id}/decisions")
+
+
+@mcp.tool()
+async def recommend_study_run(
+    study_id: str,
+    run_id: str,
+    evaluation_id: str,
+    reason: str,
+    ctx: Context[AppContext, Any] = None,
+) -> dict:
+    """Record a recommendation with evidence. This does not accept or promote a model; analyst acceptance happens in the frontend."""
+    return await _client(ctx).workflow_request(
+        "POST",
+        f"/studies/{study_id}/decisions",
+        {"run_id": run_id, "evaluation_id": evaluation_id, "action": "recommend", "reason": reason},
+    )
+
+
+@mcp.tool()
+async def adopt_model_into_study(
+    study_id: str,
+    model_hash: str,
+    reason: str,
+    confirm: bool = False,
+    ctx: Context[AppContext, Any] = None,
+) -> dict:
+    """Preview an owned completed model and provenance gaps. Set confirm only to attach it to study history; adoption does not refit."""
+    return await _client(ctx).workflow_request(
+        "POST",
+        f"/studies/{study_id}/adoptions",
+        {"model_hash": model_hash, "reason": reason, "confirm": confirm},
+    )
+
+
+@mcp.tool()
+async def compare_study_runs(
+    study_id: str,
+    run_ids: list[str],
+    policy_id: str,
+    ctx: Context[AppContext, Any] = None,
+) -> dict:
+    """Compare 2-20 candidates against one quality policy. Different datasets are flagged, not ranked. Does not fit or promote models."""
+    return await _client(ctx).workflow_request(
+        "POST", f"/studies/{study_id}/comparisons", {"run_ids": run_ids, "policy_id": policy_id}
+    )
