@@ -6,7 +6,7 @@ from mcp.server.mcpserver import Context
 
 from ..auth import _client
 from ..runtime import AppContext
-from ..schemas import APIResult, QualityCheck
+from ..schemas import APIResult, ExternalEvidence, QualityCheck
 
 
 async def list_quality_policies(
@@ -24,7 +24,7 @@ async def create_quality_policy(
     checks: list[QualityCheck],
     ctx: Context[AppContext, Any] = None,
 ) -> APIResult:
-    """Save project-specific checks. Each check has metric (r_hat_max, mae, rmse, wape), maximum and required. WAPE is a fraction. No default thresholds are assumed. Declare at least one required check, use each metric once, and set maximum R-hat at least 1. The backend validates policy rules."""
+    """Save project-specific checks. Built-in checks have metric (r_hat_max, mae, rmse, wape), maximum and required. Custom numeric checks use metric custom:<slug>, name, units, operator (lte/gte/between), applicable minimum/maximum and required. Custom bounds may be negative. WAPE is a fraction. No default thresholds are assumed. Declare at least one required check, use each metric once, and set maximum R-hat at least 1. The backend validates policy rules."""
     return await _client(ctx).workflow_request(
         "POST",
         f"/studies/{study_id}/quality-policies",
@@ -35,12 +35,17 @@ async def create_quality_policy(
 async def evaluate_study_run(
     run_id: str,
     policy_id: str,
+    expected_basis_hash: str | None = None,
+    external_evidence: list[ExternalEvidence] | None = None,
     ctx: Context[AppContext, Any] = None,
 ) -> APIResult:
-    """Save a quality report from existing evidence. Missing evidence never passes. Current predictive metrics cover the fitted window, not holdout."""
-    return await _client(ctx).workflow_request(
-        "POST", f"/study-runs/{run_id}/evaluations", {"policy_id": policy_id}
-    )
+    """Save an immutable assessment. First evaluate without external_evidence to obtain report.basis_hash; then calculate custom metrics from outputs and submit finite values, method and source reference with that expected_basis_hash. The server applies the saved rule; stale model evidence is rejected. External calculations are submitter-reported, not verified. Each submission is complete: omitted custom values stay unevaluated. No automatic champion promotion. Built-in errors are fitted-window, not holdout; VAR remains unsupported."""
+    payload: dict[str, Any] = {"policy_id": policy_id}
+    if expected_basis_hash is not None:
+        payload["expected_basis_hash"] = expected_basis_hash
+    if external_evidence is not None:
+        payload["external_evidence"] = external_evidence
+    return await _client(ctx).workflow_request("POST", f"/study-runs/{run_id}/evaluations", payload)
 
 
 async def list_study_evaluations(

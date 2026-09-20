@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 
-[Simba](https://simba-mmm.com) is a Bayesian Marketing Mix Modeling (MMM) platform. This Marketing Mix Modeling [MCP server](https://modelcontextprotocol.io/) lets AI assistants interact with your models directly — upload data, build models, check results, and run budget optimizations through natural language in Claude, Cursor, or Claude Code.
+[Simba](https://simba-mmm.com) is a Bayesian Marketing Mix Modeling (MMM) platform. This Marketing Mix Modeling [MCP server](https://modelcontextprotocol.io/) lets AI assistants interact with your models directly â€” upload data, build models, check results, and run budget optimizations through natural language in Claude, Cursor, or Claude Code.
 
 ## Installation
 
@@ -96,7 +96,7 @@ response = client.beta.messages.create(
 | `get_upload` | One upload's details, including its column schema |
 | `list_models` | List all models with their status |
 | `create_model` | Configure and start fitting a new MMM model |
-| `get_model` | Model metadata + config echo — works for any status, incl. failed |
+| `get_model` | Model metadata + config echo â€” works for any status, incl. failed |
 | `delete_model` | Permanently delete a FAILED model (409 for any other status) |
 | `rename_model` | Rename a model without saving it |
 | `save_model` | File a model into a project (makes it visible to default `list_models`) |
@@ -149,18 +149,18 @@ Try these with any connected AI assistant:
 ## Agent Skills
 
 The [`skills/`](skills/) directory ships workflow skills in the
-[Agent Skills](https://agentskills.io) format (`SKILL.md` per skill) —
+[Agent Skills](https://agentskills.io) format (`SKILL.md` per skill) â€”
 install them into any skills-aware agent (e.g. Claude Code) alongside this
 MCP server:
 
 | Skill | Covers |
 |---|---|
-| [`simba-mmm-workflow`](skills/simba-mmm-workflow/SKILL.md) | Upload → create → poll → reading results correctly (section semantics, channel naming, attribution/Overlap rules, context-size controls) |
+| [`simba-mmm-workflow`](skills/simba-mmm-workflow/SKILL.md) | Upload â†’ create â†’ poll â†’ reading results correctly (section semantics, channel naming, attribution/Overlap rules, context-size controls) |
 | [`simba-optimizer-runs`](skills/simba-optimizer-runs/SKILL.md) | Optimizer payload conventions, revenue vs profit, polling by run_id, decision- vs comparison-column semantics, run curation |
 | [`simba-prior-conventions`](skills/simba-prior-conventions/SKILL.md) | Prior-override payloads: smart-default merging, strict rejection, the half-saturation / half-marginal / half-life anchor families |
-| [`simba-var-workflow`](skills/simba-var-workflow/SKILL.md) | Long-term (VAR) modeling: create → poll → link → long_run_rollup |
+| [`simba-var-workflow`](skills/simba-var-workflow/SKILL.md) | Long-term (VAR) modeling: create â†’ poll â†’ link â†’ long_run_rollup |
 
-The skills are documentation artifacts — they ride the repo, not the wire
+The skills are documentation artifacts â€” they ride the repo, not the wire
 protocol.
 
 ## Gotchas & Tips
@@ -170,21 +170,21 @@ Things that commonly trip up both AI agents and humans:
 ### Hosted server: your bearer token IS your login
 
 On HTTP deployments each request is authenticated with the caller's own
-`Authorization: Bearer simba_sk_...` token — there is no server-side shared
+`Authorization: Bearer simba_sk_...` token â€” there is no server-side shared
 key. If tool calls return `"No API key on this request"`, your MCP client
 isn't sending the token (check the `authorization_token` / headers setting
 in its config).
 
 ### Channel names are exact-match
 
-Model results are keyed by the channel's **activity column** name (e.g. `"search_activity"`, `"TV_impressions"`), **not** by the `channels[].name` you passed to `create_model`. Keys can contain spaces and matching is **case-sensitive and space-sensitive** — the optimizer and scenario tools use them as dictionary keys.
+Model results are keyed by the channel's **activity column** name (e.g. `"search_activity"`, `"TV_impressions"`), **not** by the `channels[].name` you passed to `create_model`. Keys can contain spaces and matching is **case-sensitive and space-sensitive** â€” the optimizer and scenario tools use them as dictionary keys.
 
 **Always** call `get_model_results` with `sections="channel_summary"` first to see exact channel keys, then use those verbatim in optimizer/scenario payloads.
 
 ### Results sections
 
 `get_model_results` serves these sections (request only what you need via `sections=`):
-`channel_summary`, `contributions` (KPI/unit space — multiplier **not** applied), `coefficients` (per-period per-channel **revenue** table), `params`, `decay_curves`, `response_curves`, `marginal_curves`, `saturation`, `mroi_summary` (marginal ROI at current spend with 94% HDI; post-#591 fits add the `allperiods_unweighted` / `spendweighted_active` convention scalars, and post-#629 fits add a `*_mean` beside every `*_median` — the median is displayed, the mean is what reconciles with the marginal-revenue curve), `mroi_periods` (**opt-in only** — the per-period marginal ROI series; never in the default payload, request it by name), `model_stats`, `actual_vs_model`, `long_run_rollup`, `optimizer`, `predictions`, `posterior`, `financials`, `model_config`. The response's `sections_available` field is authoritative if the server is newer than these docs.
+`channel_summary`, `contributions` (KPI/unit space â€” multiplier **not** applied), `coefficients` (per-period per-channel **revenue** table), `params`, `decay_curves`, `response_curves`, `marginal_curves`, `saturation`, `mroi_summary` (marginal ROI at current spend with 94% HDI; post-#591 fits add the `allperiods_unweighted` / `spendweighted_active` convention scalars, and post-#629 fits add a `*_mean` beside every `*_median` â€” the median is displayed, the mean is what reconciles with the marginal-revenue curve), `mroi_periods` (**opt-in only** â€” the per-period marginal ROI series; never in the default payload, request it by name), `model_stats`, `actual_vs_model`, `long_run_rollup`, `optimizer`, `predictions`, `posterior`, `financials`, `model_config`. The response's `sections_available` field is authoritative if the server is newer than these docs.
 
 ### Models are identified by `model_hash`
 
@@ -192,7 +192,7 @@ All model endpoints use the string `model_hash` (e.g. `"f835671a25"`) returned b
 
 ### API-key management is deliberately not exposed
 
-The `/api/v1/keys` endpoints (create/list/revoke API keys) are session-auth only and have no MCP tools **by design**: a server holding one key must not be able to mint or revoke keys. Manage keys in the Simba UI (Profile → API Keys).
+The `/api/v1/keys` endpoints (create/list/revoke API keys) are session-auth only and have no MCP tools **by design**: a server holding one key must not be able to mint or revoke keys. Manage keys in the Simba UI (Profile â†’ API Keys).
 
 ### Optimizer arrays, not scalars
 
@@ -235,10 +235,10 @@ Poll every 5-10 seconds. Check the `status` field for `"complete"` or `"failed"`
 ### Data upload requirements
 
 - **CSV only** (not Excel). Maximum **10 MB** (API-enforced).
-- Row minimum: check `get_data_schema` → `x-simba-constraints.min_rows`; the upload response's `warnings` field is authoritative. More rows = tighter posteriors (104+ weekly rows recommended).
+- Row minimum: check `get_data_schema` â†’ `x-simba-constraints.min_rows`; the upload response's `warnings` field is authoritative. More rows = tighter posteriors (104+ weekly rows recommended).
 - Media columns: `{channel}_activity` and `{channel}_spend` per channel.
 - Use `0` for inactive periods, not blank or NA.
-- Large file? Pass `csv_path` (a local file path) instead of `csv_content` — the server reads it directly instead of the CSV going through the conversation. Local (stdio) servers only; disabled on HTTP/SSE deployments unless `SIMBA_MCP_ALLOW_LOCAL_FILES=1`.
+- Large file? Pass `csv_path` (a local file path) instead of `csv_content` â€” the server reads it directly instead of the CSV going through the conversation. Local (stdio) servers only; disabled on HTTP/SSE deployments unless `SIMBA_MCP_ALLOW_LOCAL_FILES=1`.
 
 ## Common Errors
 
@@ -352,10 +352,10 @@ The MCP server authenticates with the same API keys used by the Simba REST API. 
 
 How the key is supplied depends on where the server runs:
 
-- **Local (stdio — Cursor, Claude Code):** set it as the `SIMBA_API_KEY`
+- **Local (stdio â€” Cursor, Claude Code):** set it as the `SIMBA_API_KEY`
   environment variable in your MCP config (the examples above).
 - **Hosted (`https://demo.simba-mmm.com/mcp`):** send it as the HTTP
-  `Authorization: Bearer` header — the `authorization_token` field in the
+  `Authorization: Bearer` header â€” the `authorization_token` field in the
   Claude MCP connector config. **Every caller uses their own key** (v0.2.2+):
   the server never shares an identity between callers, a request without a
   key gets a structured 401 with guidance, and you only ever see your own
@@ -366,20 +366,20 @@ How the key is supplied depends on where the server runs:
 | Environment Variable | Description | Default |
 |---------------------|-------------|---------|
 | `SIMBA_API_URL` | Simba API base URL | `http://localhost:5005` |
-| `SIMBA_API_KEY` | Your Simba API key (stdio mode only — HTTP callers send their own key as the bearer token) | (required for stdio) |
+| `SIMBA_API_KEY` | Your Simba API key (stdio mode only â€” HTTP callers send their own key as the bearer token) | (required for stdio) |
 
 ## Transport Modes
 
 The server supports all MCP transport modes:
 
 ```bash
-# stdio (default) — for Cursor, Claude Code
+# stdio (default) â€” for Cursor, Claude Code
 simba-mcp
 
-# Streamable HTTP — for remote deployment
+# Streamable HTTP â€” for remote deployment
 simba-mcp --transport streamable-http --port 8100
 
-# SSE — legacy transport
+# SSE â€” legacy transport
 simba-mcp --transport sse --port 8100
 
 # Or via uvicorn directly
@@ -510,3 +510,10 @@ Pipeline sources retain the exact version ID, pipeline ID, version number and ve
 Draft `source.history` preserves up to 100 recorded column transformations/removals with parameters and before/after data hashes. The backend checks chain continuity and the terminal data hash. These are client-reported authoring records, not independently replayed operations or quality evidence. Edited data must omit an unchanged source origin. Unknown nested fields remain preserved.
 
 Optional `calibration_import` retains an original JSON file (1 MB maximum) in the authorized authoring snapshot. Preserve it independently of current editable observations. The backend verifies its bytes/hash; published provenance includes filename/hash and explicitly states current observations may differ. Ordinary recipe responses omit the raw attachment. This reference is not scientific validation.
+
+
+Custom numeric quality checks: `create_quality_policy` accepts checks such as
+`{"metric":"custom:benchmark_deviation","name":"Benchmark deviation","units":"%","operator":"lte","maximum":10,"required":true}`.
+Use `gte` with `minimum`, or `between` with both inclusive bounds. Read backend capability discovery before using this additive contract.
+
+For externally calculated metrics, call `evaluate_study_run(run_id, policy_id)` first and retain `report.basis_hash`. Calculate from that run's saved outputs, then call the same tool with `expected_basis_hash` and `external_evidence=[{"metric":"custom:benchmark_deviation","value":8,"method":"Absolute deviation as percentage of benchmark","source_reference":"Versioned model export and benchmark"}]`. An optional `source_sha256` records a reported source digest. The backend determines pass/fail and rejects stale output bases. Every submission creates a new assessment and must supply all intended custom values; omitted values remain unevaluated. Source references and calculations are submitter-reported, not independently verified. This numeric MMM contract does not execute agent code, accept a model, support VAR acceptance, or designate a champion.

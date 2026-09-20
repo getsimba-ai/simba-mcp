@@ -1551,24 +1551,41 @@
                 "r_hat_max",
                 "mae",
                 "rmse",
-                "wape"
+                "wape",
+                "custom:benchmark_deviation"
               ],
               "type": "string"
             },
             "maximum": {
-              "description": "Declared upper threshold: WAPE as a fraction, MAE/RMSE in outcome units, R-hat dimensionless.",
               "type": "number"
             },
             "required": {
               "default": true,
               "type": "boolean"
+            },
+            "name": {
+              "type": "string"
+            },
+            "units": {
+              "type": "string"
+            },
+            "operator": {
+              "enum": [
+                "lte",
+                "gte",
+                "between"
+              ],
+              "type": "string"
+            },
+            "minimum": {
+              "type": "number"
             }
           },
           "required": [
-            "metric",
-            "maximum"
+            "metric"
           ],
-          "type": "object"
+          "type": "object",
+          "description": "Built-in metric + maximum, or custom numeric gate with metric custom:<slug>, name, units, operator and applicable bounds. At least one required gate per policy."
         },
         "title": "Checks",
         "type": "array"
@@ -1592,6 +1609,62 @@
       "policy_id": {
         "title": "Policy Id",
         "type": "string"
+      },
+      "expected_basis_hash": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Expected Basis Hash"
+      },
+      "external_evidence": {
+        "anyOf": [
+          {
+            "items": {
+              "additionalProperties": false,
+              "description": "Externally calculated numeric evidence; server applies policy. Source/method/digest are submitter-reported, not independently verified. Never submit a pass/fail status.",
+              "properties": {
+                "metric": {
+                  "pattern": "^custom:[a-z][a-z0-9_]{0,63}$",
+                  "type": "string"
+                },
+                "value": {
+                  "type": "number"
+                },
+                "method": {
+                  "maxLength": 5000,
+                  "type": "string"
+                },
+                "source_reference": {
+                  "maxLength": 2000,
+                  "type": "string"
+                },
+                "source_sha256": {
+                  "pattern": "^[a-f0-9]{64}$",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "metric",
+                "value",
+                "method",
+                "source_reference"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "External Evidence"
       }
     },
     "required": [

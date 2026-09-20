@@ -139,15 +139,37 @@ QualityCheck = Annotated[
     dict,
     Field(
         json_schema_extra={
+            "description": "Built-in metric + maximum, or custom numeric gate with metric custom:<slug>, name, units, operator and applicable bounds. At least one required gate per policy.",
             "properties": {
-                "metric": {"type": "string", "examples": ["r_hat_max", "mae", "rmse", "wape"]},
-                "maximum": {
-                    "type": "number",
-                    "description": "Declared upper threshold: WAPE as a fraction, MAE/RMSE in outcome units, R-hat dimensionless.",
+                "metric": {
+                    "type": "string",
+                    "examples": ["r_hat_max", "mae", "rmse", "wape", "custom:benchmark_deviation"],
                 },
+                "name": {"type": "string"},
+                "units": {"type": "string"},
+                "operator": {"type": "string", "enum": ["lte", "gte", "between"]},
+                "minimum": {"type": "number"},
+                "maximum": {"type": "number"},
                 "required": {"type": "boolean", "default": True},
             },
-            "required": ["metric", "maximum"],
+            "required": ["metric"],
+        }
+    ),
+]
+ExternalEvidence = Annotated[
+    dict,
+    Field(
+        json_schema_extra={
+            "description": "Externally calculated numeric evidence; server applies policy. Source/method/digest are submitter-reported, not independently verified. Never submit a pass/fail status.",
+            "properties": {
+                "metric": {"type": "string", "pattern": "^custom:[a-z][a-z0-9_]{0,63}$"},
+                "value": {"type": "number"},
+                "method": {"type": "string", "maxLength": 5000},
+                "source_reference": {"type": "string", "maxLength": 2000},
+                "source_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+            },
+            "required": ["metric", "value", "method", "source_reference"],
+            "additionalProperties": False,
         }
     ),
 ]
