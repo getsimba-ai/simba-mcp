@@ -66,7 +66,13 @@ def test_authoring_snapshot_crosses_wire_without_losing_fields(monkeypatch, oper
             "create_recipe_draft",
             "POST",
             "/studies/s1/recipe-drafts",
-            {"study_id": "s1", "draft_id": "d1", "name": "Draft", "snapshot": snapshot},
+            {
+                "study_id": "s1",
+                "draft_id": "d1",
+                "name": "Draft",
+                "snapshot": snapshot,
+                "source_revision_id": "source-revision",
+            },
         ),
         "update": (
             "update_recipe_draft",
@@ -131,6 +137,8 @@ def test_authoring_snapshot_crosses_wire_without_losing_fields(monkeypatch, oper
         }
 
     def handle(request):
+        if operation == "create":
+            assert json.loads(request.content)["source_revision_id"] == "source-revision"
         assert request.method == method
         assert request.url.path.endswith(path)
         if operation in ("template", "pipeline_template"):

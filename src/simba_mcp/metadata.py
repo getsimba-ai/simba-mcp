@@ -31,6 +31,7 @@ READ_ONLY = frozenset(
         "list_study_decisions",
         "get_study_champion",
         "get_study_prediction_access",
+        "get_study_validation_resolutions",
         "get_backend_capabilities",
     ]
 )

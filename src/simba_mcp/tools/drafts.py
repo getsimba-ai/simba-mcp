@@ -40,12 +40,20 @@ async def create_recipe_draft(
     name: str,
     snapshot: DraftSnapshot,
     ctx: Context[AppContext, Any] = None,
+    source_revision_id: str | None = None,
 ) -> APIResult:
-    """Save an encrypted authoring draft without publishing, fitting or consuming an attempt. Supply a UUID draft_id and reuse it with identical content after an uncertain response. Start from get_recipe_draft_template for a new draft, or preserve the complete snapshot from get_recipe_draft when editing. Backend validates version and size."""
+    """Save an encrypted authoring draft without publishing, fitting or consuming an attempt. Supply a UUID draft_id and reuse it with identical content after an uncertain response. Start from get_recipe_draft_template for a new draft, or preserve the complete snapshot from get_recipe_draft when editing. When copying a published recipe, supply its source_revision_id from this study; the immutable link carries inherited influence through publication. Backend validates version and size."""
     return await _client(ctx).workflow_request(
         "POST",
         f"/studies/{study_id}/recipe-drafts",
-        {"id": draft_id, "name": name, "snapshot": snapshot},
+        {
+            "id": draft_id,
+            "name": name,
+            "snapshot": snapshot,
+            **(
+                {"source_revision_id": source_revision_id} if source_revision_id is not None else {}
+            ),
+        },
     )
 
 

@@ -102,7 +102,7 @@ async def compare_study_runs(
 
 
 async def get_study_champion(study_id: str, ctx: Context[AppContext, Any] = None) -> APIResult:
-    """Read incumbent, eligibility blockers, accepted candidates and immutable champion history. Stale champions retain their historical role with review_required. Reported holdout use that informed a candidate revision blocks that revision pending fresh validation; holdout_use lists the declaration IDs. Ordinary viewing does not block. No fresh-validation clearance is currently supported. Validation references are reviewer-declared; decision_grade_ready is false until independently qualified. Selection/replacement/revocation require an owner frontend session; MCP cannot promote models."""
+    """Read incumbent, eligibility blockers, accepted candidates and immutable champion history. Stale champions retain their historical role with review_required. Reported holdout use that informed a candidate revision blocks that revision pending fresh validation; holdout_use lists the declaration IDs. Ordinary viewing does not block. Current analyst-reviewed validation resolutions can clear the exact run acceptance; changed evidence or revoked review reblocks it. Recorded revision ancestry inherits influence. Validation references are reviewer-declared; decision_grade_ready is false until independently qualified. Selection/replacement/revocation require an owner frontend session; MCP cannot promote models."""
     return await _client(ctx).workflow_request("GET", f"/studies/{study_id}/champion")
 
 
@@ -153,3 +153,10 @@ async def declare_study_holdout_use(
             "affected_revision_id": affected_revision_id,
         },
     )
+
+
+async def get_study_validation_resolutions(
+    study_id: str, ctx: Context[AppContext, Any] = None
+) -> APIResult:
+    """Read analyst validation resolutions and revocations, including current/stale/revoked status re-evaluated against exact evidence. API keys cannot supply human independence sign-off or revoke it; use the signed-in owner UI. No audit serving event is added and no model is fitted or promoted."""
+    return await _client(ctx).workflow_request("GET", f"/studies/{study_id}/validation-resolutions")

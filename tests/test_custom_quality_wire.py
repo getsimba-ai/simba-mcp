@@ -19,6 +19,7 @@ from simba_mcp.api_client import SimbaAPIClient
         "boolean",
         "manual_definition",
         "champion_read",
+        "resolution_read",
         "access_read",
         "declare_use",
         "prediction",
@@ -75,6 +76,10 @@ def test_custom_quality_wire(monkeypatch, operation):
     elif operation == "access_read":
         tool = "get_study_prediction_access"
         arguments = {"run_id": "r"}
+        expected = None
+    elif operation == "resolution_read":
+        tool = "get_study_validation_resolutions"
+        arguments = {"study_id": "s"}
         expected = None
     elif operation == "champion_read":
         tool = "get_study_champion"
@@ -154,10 +159,12 @@ def test_custom_quality_wire(monkeypatch, operation):
 
     def handle(request):
         assert request.method == (
-            "GET" if operation in ("champion_read", "access_read") else "POST"
+            "GET" if operation in ("champion_read", "access_read", "resolution_read") else "POST"
         )
         if operation == "access_read":
             assert request.url.path == "/api/v1/study-runs/r/prediction-access"
+        elif operation == "resolution_read":
+            assert request.url.path == "/api/v1/studies/s/validation-resolutions"
         elif operation == "champion_read":
             assert request.url.path == "/api/v1/studies/s/champion"
         else:
@@ -166,6 +173,15 @@ def test_custom_quality_wire(monkeypatch, operation):
             201,
             json={
                 **(champion if operation == "champion_read" else {}),
+                **(
+                    {
+                        "resolutions": [
+                            {"status": "stale", "action": "accept", "evidence_hash": "a" * 64}
+                        ]
+                    }
+                    if operation == "resolution_read"
+                    else {}
+                ),
                 "id": "saved",
                 "status": "not_evaluated",
                 **(
@@ -221,6 +237,8 @@ def test_custom_quality_wire(monkeypatch, operation):
         ).json()["result"]
     assert not result.get("isError", False)
     assert result["structuredContent"]["id"] == "saved"
+    if operation == "resolution_read":
+        assert result["structuredContent"]["resolutions"][0]["status"] == "stale"
     if operation == "champion_read":
         for key, value in champion.items():
             assert result["structuredContent"][key] == value
