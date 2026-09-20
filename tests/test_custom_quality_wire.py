@@ -138,6 +138,12 @@ def test_custom_quality_wire(monkeypatch, operation):
             arguments.update(expected_basis_hash="a" * 64, external_evidence=[evidence])
         expected = {key: value for key, value in arguments.items() if key != "run_id"}
 
+    champion = {
+        "current": {"status": "review_required", "decision_grade_ready": False},
+        "candidates": [{"eligible": False, "blockers": ["Fresh validation required"],
+                        "holdout_use": {"status": "fresh_validation_required", "declaration_ids": ["report-1"]}}],
+    }
+
     def handle(request):
         assert request.method == (
             "GET" if operation in ("champion_read", "access_read") else "POST"
@@ -151,6 +157,7 @@ def test_custom_quality_wire(monkeypatch, operation):
         return httpx.Response(
             201,
             json={
+                **(champion if operation == "champion_read" else {}),
                 "id": "saved",
                 "status": "not_evaluated",
                 **(
@@ -201,6 +208,9 @@ def test_custom_quality_wire(monkeypatch, operation):
         ).json()["result"]
     assert not result.get("isError", False)
     assert result["structuredContent"]["id"] == "saved"
+    if operation == "champion_read":
+        for key, value in champion.items():
+            assert result["structuredContent"][key] == value
     if operation == "pair":
         assert result["structuredContent"]["holdout_provenance"] == provenance
         assert result["structuredContent"]["prediction_access"]["history_complete"] is False
