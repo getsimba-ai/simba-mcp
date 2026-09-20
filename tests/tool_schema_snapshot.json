@@ -1853,6 +1853,27 @@
           },
           "transformations": {
             "type": "object"
+          },
+          "calibration_import": {
+            "description": "Optional original calibration JSON reference (1 MB). Preserve separately from editable observations; backend verifies the file hash, not equivalence to current observations.",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "content_base64": {
+                "maxLength": 1400000,
+                "type": "string"
+              },
+              "sha256": {
+                "pattern": "^[a-f0-9]{64}$",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "content_base64"
+            ],
+            "type": "object"
           }
         },
         "required": [
@@ -2053,6 +2074,27 @@
             ]
           },
           "transformations": {
+            "type": "object"
+          },
+          "calibration_import": {
+            "description": "Optional original calibration JSON reference (1 MB). Preserve separately from editable observations; backend verifies the file hash, not equivalence to current observations.",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "content_base64": {
+                "maxLength": 1400000,
+                "type": "string"
+              },
+              "sha256": {
+                "pattern": "^[a-f0-9]{64}$",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "content_base64"
+            ],
             "type": "object"
           }
         },

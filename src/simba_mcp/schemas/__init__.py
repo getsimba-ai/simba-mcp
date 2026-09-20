@@ -45,6 +45,16 @@ DraftSnapshot = Annotated[
         json_schema_extra={
             "description": "Lossless editor authoring state. Backend is authoritative; preserve unknown nested fields. Source bytes are copied into encrypted draft storage (10 MB source limit); metadata limit is 5 MB. No local filesystem paths or executable code.",
             "properties": {
+                "calibration_import": {
+                    "type": "object",
+                    "description": "Optional original calibration JSON reference (1 MB). Preserve separately from editable observations; backend verifies the file hash, not equivalence to current observations.",
+                    "properties": {
+                        "name": {"type": "string"},
+                        "content_base64": {"type": "string", "maxLength": 1400000},
+                        "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+                    },
+                    "required": ["name", "content_base64"],
+                },
                 "schema_version": {"type": "integer", "enum": [1]},
                 "family": {"type": "string", "enum": ["mmm", "var"]},
                 "configuration": {"type": "object"},

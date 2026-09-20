@@ -45,6 +45,11 @@ def test_authoring_snapshot_crosses_wire_without_losing_fields(monkeypatch, oper
             "sha256": "a" * 64,
         }
     if edited:
+        snapshot["calibration_import"] = {
+            "name": "experiment.json",
+            "content_base64": "eyJsaWZ0VGVzdERhdGEiOltdfQ==",
+            "sha256": "a" * 64,
+        }
         snapshot["source"].pop("origin", None)
         snapshot["source"]["history"] = [
             {

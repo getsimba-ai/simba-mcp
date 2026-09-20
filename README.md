@@ -508,3 +508,5 @@ Calibration: check the backend `calibration` capability. MMM draft publication v
 Pipeline sources retain the exact version ID, pipeline ID, version number and verified content hash. No pipeline is executed. Existing exported uploads are not assigned inferred pipeline lineage.
 
 Draft `source.history` preserves up to 100 recorded column transformations/removals with parameters and before/after data hashes. The backend checks chain continuity and the terminal data hash. These are client-reported authoring records, not independently replayed operations or quality evidence. Edited data must omit an unchanged source origin. Unknown nested fields remain preserved.
+
+Optional `calibration_import` retains an original JSON file (1 MB maximum) in the authorized authoring snapshot. Preserve it independently of current editable observations. The backend verifies its bytes/hash; published provenance includes filename/hash and explicitly states current observations may differ. Ordinary recipe responses omit the raw attachment. This reference is not scientific validation.

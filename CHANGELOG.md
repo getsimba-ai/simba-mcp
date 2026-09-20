@@ -12,6 +12,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ### Added
 
+- Preserve optional original calibration JSON references separately from current observation inputs.
+
 - Discover and preserve bounded source edit history; clarify hash-chain-only verification. Complete pipeline-version origin schema metadata.
 
 - Select an owned saved pipeline version with `get_recipe_draft_template(pipeline_version_id=...)`; preserve exact source identity and frozen bytes without running a pipeline.
