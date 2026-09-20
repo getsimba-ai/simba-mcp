@@ -103,7 +103,23 @@ def test_custom_quality_wire(monkeypatch, operation):
             assert request.url.path == "/api/v1/studies/s/champion"
         else:
             assert json.loads(request.content) == expected
-        return httpx.Response(201, json={"id": "saved", "status": "not_evaluated"})
+        return httpx.Response(
+            201,
+            json={
+                "id": "saved",
+                "status": "not_evaluated",
+                **(
+                    {
+                        "sampling_evidence": [
+                            {"role": "full", "record": {"divergences": 0}},
+                            {"role": "validation", "record": None},
+                        ]
+                    }
+                    if operation == "pair"
+                    else {}
+                ),
+            },
+        )
 
     async def get_client(self):
         if self._client is None:
@@ -130,3 +146,6 @@ def test_custom_quality_wire(monkeypatch, operation):
         ).json()["result"]
     assert not result.get("isError", False)
     assert result["structuredContent"]["id"] == "saved"
+    if operation == "pair":
+        assert result["structuredContent"]["sampling_evidence"][0]["record"]["divergences"] == 0
+        assert result["structuredContent"]["sampling_evidence"][1]["record"] is None

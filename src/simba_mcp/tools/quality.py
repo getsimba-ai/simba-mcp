@@ -113,7 +113,7 @@ async def assess_study_validation_pair(
     policy_id: str,
     ctx: Context[AppContext, Any] = None,
 ) -> APIResult:
-    """Read-only validation-pair assessment. Checks distinct completed MMM runs launched under the declared protocol, frozen inputs/settings/runtime, configured sampling, saved R-hat, declared prediction windows/WAPE and date coverage. Returns blockers and an evidence hash; does not fit, accept or promote. Retained sampling, business validity and untouched holdout provenance remain unverified; decision_grade_ready stays false."""
+    """Read-only validation-pair assessment. Checks distinct completed MMM runs launched under the declared protocol, frozen inputs/settings/runtime, configured sampling, saved R-hat, declared prediction windows/WAPE and date coverage. Returns blockers and an evidence hash; does not fit, accept or promote. Includes saved retained chain/draw, ESS and divergence records when available, with null for older models. These records are not yet threshold-qualified. Business validity and untouched holdout provenance remain unverified; decision_grade_ready stays false."""
     return await _client(ctx).workflow_request(
         "POST",
         f"/studies/{study_id}/validation-pairs",
