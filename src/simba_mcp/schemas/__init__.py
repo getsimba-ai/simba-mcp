@@ -254,6 +254,16 @@ ValidationProtocolSpec = Annotated[
                 "min_chains": {"type": "integer", "minimum": 2},
                 "max_r_hat": {"type": "number", "minimum": 1},
                 "max_prediction_wape": {"type": "number", "minimum": 0},
+                "retained_sampling": {
+                    "type": "object",
+                    "additionalProperties": False,
+                    "required": ["min_ess_bulk", "min_ess_tail", "max_divergences"],
+                    "properties": {
+                        "min_ess_bulk": {"type": "number", "exclusiveMinimum": 0},
+                        "min_ess_tail": {"type": "number", "exclusiveMinimum": 0},
+                        "max_divergences": {"type": "integer", "minimum": 0},
+                    },
+                },
             },
             "required": [
                 "training_end",

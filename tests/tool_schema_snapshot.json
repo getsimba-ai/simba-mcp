@@ -1644,6 +1644,29 @@
               "max_prediction_wape": {
                 "minimum": 0,
                 "type": "number"
+              },
+              "retained_sampling": {
+                "additionalProperties": false,
+                "properties": {
+                  "min_ess_bulk": {
+                    "exclusiveMinimum": 0,
+                    "type": "number"
+                  },
+                  "min_ess_tail": {
+                    "exclusiveMinimum": 0,
+                    "type": "number"
+                  },
+                  "max_divergences": {
+                    "minimum": 0,
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "min_ess_bulk",
+                  "min_ess_tail",
+                  "max_divergences"
+                ],
+                "type": "object"
               }
             },
             "required": [
