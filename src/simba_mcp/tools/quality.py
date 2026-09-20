@@ -24,7 +24,7 @@ async def create_quality_policy(
     checks: list[QualityCheck],
     ctx: Context[AppContext, Any] = None,
 ) -> APIResult:
-    """Save project-specific checks. Built-in checks have metric (r_hat_max, mae, rmse, wape), maximum and required. Custom numeric checks use metric custom:<slug>, name, units, operator (lte/gte/between), applicable minimum/maximum and required. Boolean checks use kind=boolean, operator=equals and expected=true/false. Manual checks use kind=manual, equals, expected=true; agents can define these but cannot submit manual sign-off. Custom bounds may be negative. WAPE is a fraction. No default thresholds are assumed. Declare at least one required check, use each metric once, and set maximum R-hat at least 1. The backend validates policy rules."""
+    """Save project-specific checks. Built-in checks have metric (r_hat_max, mae, rmse, wape, prediction_mae, prediction_rmse, prediction_wape), maximum and required. Custom numeric checks use metric custom:<slug>, name, units, operator (lte/gte/between), applicable minimum/maximum and required. Boolean checks use kind=boolean, operator=equals and expected=true/false. Manual checks use kind=manual, equals, expected=true; agents can define these but cannot submit manual sign-off. Custom bounds may be negative. WAPE is a fraction. Prediction-window checks require saved finite actuals/predictions at unique dates after the saved training window; this does not certify untouched holdout provenance. No default thresholds are assumed. Declare at least one required check, use each metric once, and set maximum R-hat at least 1. The backend validates policy rules."""
     return await _client(ctx).workflow_request(
         "POST",
         f"/studies/{study_id}/quality-policies",

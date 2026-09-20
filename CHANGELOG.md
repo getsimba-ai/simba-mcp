@@ -12,6 +12,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ### Added
 
+- Discover native prediction-window MAE/RMSE/WAPE checks with backend date-separation checks and explicit holdout-provenance limitations.
+
 - Add read-only `get_study_champion` for incumbent, eligibility blockers and immutable replacement/revocation history; no agent promotion capability.
 
 - Discover boolean equality and manual sign-off policies, forward strict boolean observations, and document session-only manual evidence.

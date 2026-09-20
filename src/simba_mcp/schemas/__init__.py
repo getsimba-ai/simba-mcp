@@ -143,7 +143,16 @@ QualityCheck = Annotated[
             "properties": {
                 "metric": {
                     "type": "string",
-                    "examples": ["r_hat_max", "mae", "rmse", "wape", "custom:benchmark_deviation"],
+                    "examples": [
+                        "r_hat_max",
+                        "mae",
+                        "rmse",
+                        "wape",
+                        "prediction_mae",
+                        "prediction_rmse",
+                        "prediction_wape",
+                        "custom:benchmark_deviation",
+                    ],
                 },
                 "name": {"type": "string"},
                 "units": {"type": "string"},

@@ -523,3 +523,6 @@ Boolean checks use `kind: "boolean"`, `operator: "equals"` and strict boolean `e
 
 
 `get_study_champion(study_id)` reads the incumbent, accepted candidates/eligibility blockers and immutable selection/replacement/revocation history. The backend requires migration `workflow_champion_001`. Writes require the project owner's frontend session; MCP cannot promote or revoke. Stale evidence retains the incumbent with review_required. Validation references are reviewer-declared and `decision_grade_ready` remains false until scientific protocol qualification is implemented. Champion designation does not deploy or fit a model.
+
+
+Native prediction-window gates are available as `prediction_mae`, `prediction_rmse` and `prediction_wape` (WAPE is a fraction). They use the existing create_quality_policy/evaluate_study_run tools. The backend reads saved actual/prediction rows, requires unique prediction dates after the saved training window and leaves missing/malformed evidence unevaluated. Both windows are bound into the assessment hash. This does not prove untouched holdout provenance, leakage-free preprocessing or full sampling intent; decision-grade champion qualification remains separate.

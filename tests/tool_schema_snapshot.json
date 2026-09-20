@@ -1552,6 +1552,9 @@
                 "mae",
                 "rmse",
                 "wape",
+                "prediction_mae",
+                "prediction_rmse",
+                "prediction_wape",
                 "custom:benchmark_deviation"
               ],
               "type": "string"

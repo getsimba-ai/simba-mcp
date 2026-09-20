@@ -11,7 +11,8 @@ from simba_mcp.api_client import SimbaAPIClient
 
 
 @pytest.mark.parametrize(
-    "operation", ["define", "submit", "legacy", "boolean", "manual_definition", "champion_read"]
+    "operation",
+    ["define", "submit", "legacy", "boolean", "manual_definition", "champion_read", "prediction"],
 )
 def test_custom_quality_wire(monkeypatch, operation):
     evidence = {
@@ -25,7 +26,7 @@ def test_custom_quality_wire(monkeypatch, operation):
         tool = "get_study_champion"
         arguments = {"study_id": "s"}
         expected = None
-    elif operation in ("define", "manual_definition"):
+    elif operation in ("define", "manual_definition", "prediction"):
         tool = "create_quality_policy"
         arguments = {
             "study_id": "s",
@@ -43,6 +44,8 @@ def test_custom_quality_wire(monkeypatch, operation):
                 }
             ],
         }
+        if operation == "prediction":
+            arguments["checks"] = [{"metric": "prediction_wape", "maximum": 0.15, "required": True}]
         if operation == "manual_definition":
             arguments["checks"] = [
                 {
