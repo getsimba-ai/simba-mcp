@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 
-[Simba](https://simba-mmm.com) is a Bayesian Marketing Mix Modeling (MMM) platform. This Marketing Mix Modeling [MCP server](https://modelcontextprotocol.io/) lets AI assistants interact with your models directly — upload data, build models, check results, and run budget optimizations through natural language in Claude, Cursor, or Claude Code.
+[Simba](https://simba-mmm.com) is a Bayesian Marketing Mix Modeling (MMM) platform. This Marketing Mix Modeling [MCP server](https://modelcontextprotocol.io/) lets AI assistants interact with your models directly â€” upload data, build models, check results, and run budget optimizations through natural language in Claude, Cursor, or Claude Code.
 
 ## Installation
 
@@ -89,12 +89,14 @@ response = client.beta.messages.create(
 | Tool | Description |
 |------|-------------|
 | `get_data_schema` | Get the canonical CSV schema for MMM input files |
+| `list_recipe_drafts` / `get_recipe_draft` | Inspect authoring drafts and complete versioned snapshots on supporting backends |
+| `create_recipe_draft` / `update_recipe_draft` | Save complete draft state with retry identity and optimistic concurrency; no publication or fit |
 | `upload_data` | Upload a CSV dataset to Simba |
 | `list_uploads` | List previously uploaded datasets |
 | `get_upload` | One upload's details, including its column schema |
 | `list_models` | List all models with their status |
 | `create_model` | Configure and start fitting a new MMM model |
-| `get_model` | Model metadata + config echo — works for any status, incl. failed |
+| `get_model` | Model metadata + config echo â€” works for any status, incl. failed |
 | `delete_model` | Permanently delete a FAILED model (409 for any other status) |
 | `rename_model` | Rename a model without saving it |
 | `save_model` | File a model into a project (makes it visible to default `list_models`) |
@@ -147,18 +149,18 @@ Try these with any connected AI assistant:
 ## Agent Skills
 
 The [`skills/`](skills/) directory ships workflow skills in the
-[Agent Skills](https://agentskills.io) format (`SKILL.md` per skill) —
+[Agent Skills](https://agentskills.io) format (`SKILL.md` per skill) â€”
 install them into any skills-aware agent (e.g. Claude Code) alongside this
 MCP server:
 
 | Skill | Covers |
 |---|---|
-| [`simba-mmm-workflow`](skills/simba-mmm-workflow/SKILL.md) | Upload → create → poll → reading results correctly (section semantics, channel naming, attribution/Overlap rules, context-size controls) |
+| [`simba-mmm-workflow`](skills/simba-mmm-workflow/SKILL.md) | Upload â†’ create â†’ poll â†’ reading results correctly (section semantics, channel naming, attribution/Overlap rules, context-size controls) |
 | [`simba-optimizer-runs`](skills/simba-optimizer-runs/SKILL.md) | Optimizer payload conventions, revenue vs profit, polling by run_id, decision- vs comparison-column semantics, run curation |
 | [`simba-prior-conventions`](skills/simba-prior-conventions/SKILL.md) | Prior-override payloads: smart-default merging, strict rejection, the half-saturation / half-marginal / half-life anchor families |
-| [`simba-var-workflow`](skills/simba-var-workflow/SKILL.md) | Long-term (VAR) modeling: create → poll → link → long_run_rollup |
+| [`simba-var-workflow`](skills/simba-var-workflow/SKILL.md) | Long-term (VAR) modeling: create â†’ poll â†’ link â†’ long_run_rollup |
 
-The skills are documentation artifacts — they ride the repo, not the wire
+The skills are documentation artifacts â€” they ride the repo, not the wire
 protocol.
 
 ## Gotchas & Tips
@@ -168,21 +170,21 @@ Things that commonly trip up both AI agents and humans:
 ### Hosted server: your bearer token IS your login
 
 On HTTP deployments each request is authenticated with the caller's own
-`Authorization: Bearer simba_sk_...` token — there is no server-side shared
+`Authorization: Bearer simba_sk_...` token â€” there is no server-side shared
 key. If tool calls return `"No API key on this request"`, your MCP client
 isn't sending the token (check the `authorization_token` / headers setting
 in its config).
 
 ### Channel names are exact-match
 
-Model results are keyed by the channel's **activity column** name (e.g. `"search_activity"`, `"TV_impressions"`), **not** by the `channels[].name` you passed to `create_model`. Keys can contain spaces and matching is **case-sensitive and space-sensitive** — the optimizer and scenario tools use them as dictionary keys.
+Model results are keyed by the channel's **activity column** name (e.g. `"search_activity"`, `"TV_impressions"`), **not** by the `channels[].name` you passed to `create_model`. Keys can contain spaces and matching is **case-sensitive and space-sensitive** â€” the optimizer and scenario tools use them as dictionary keys.
 
 **Always** call `get_model_results` with `sections="channel_summary"` first to see exact channel keys, then use those verbatim in optimizer/scenario payloads.
 
 ### Results sections
 
 `get_model_results` serves these sections (request only what you need via `sections=`):
-`channel_summary`, `contributions` (KPI/unit space — multiplier **not** applied), `coefficients` (per-period per-channel **revenue** table), `params`, `decay_curves`, `response_curves`, `marginal_curves`, `saturation`, `mroi_summary` (marginal ROI at current spend with 94% HDI; post-#591 fits add the `allperiods_unweighted` / `spendweighted_active` convention scalars, and post-#629 fits add a `*_mean` beside every `*_median` — the median is displayed, the mean is what reconciles with the marginal-revenue curve), `mroi_periods` (**opt-in only** — the per-period marginal ROI series; never in the default payload, request it by name), `model_stats`, `actual_vs_model`, `long_run_rollup`, `optimizer`, `predictions`, `posterior`, `financials`, `model_config`. The response's `sections_available` field is authoritative if the server is newer than these docs.
+`channel_summary`, `contributions` (KPI/unit space â€” multiplier **not** applied), `coefficients` (per-period per-channel **revenue** table), `params`, `decay_curves`, `response_curves`, `marginal_curves`, `saturation`, `mroi_summary` (marginal ROI at current spend with 94% HDI; post-#591 fits add the `allperiods_unweighted` / `spendweighted_active` convention scalars, and post-#629 fits add a `*_mean` beside every `*_median` â€” the median is displayed, the mean is what reconciles with the marginal-revenue curve), `mroi_periods` (**opt-in only** â€” the per-period marginal ROI series; never in the default payload, request it by name), `model_stats`, `actual_vs_model`, `long_run_rollup`, `optimizer`, `predictions`, `posterior`, `financials`, `model_config`. The response's `sections_available` field is authoritative if the server is newer than these docs.
 
 ### Models are identified by `model_hash`
 
@@ -190,7 +192,7 @@ All model endpoints use the string `model_hash` (e.g. `"f835671a25"`) returned b
 
 ### API-key management is deliberately not exposed
 
-The `/api/v1/keys` endpoints (create/list/revoke API keys) are session-auth only and have no MCP tools **by design**: a server holding one key must not be able to mint or revoke keys. Manage keys in the Simba UI (Profile → API Keys).
+The `/api/v1/keys` endpoints (create/list/revoke API keys) are session-auth only and have no MCP tools **by design**: a server holding one key must not be able to mint or revoke keys. Manage keys in the Simba UI (Profile â†’ API Keys).
 
 ### Optimizer arrays, not scalars
 
@@ -233,10 +235,10 @@ Poll every 5-10 seconds. Check the `status` field for `"complete"` or `"failed"`
 ### Data upload requirements
 
 - **CSV only** (not Excel). Maximum **10 MB** (API-enforced).
-- Row minimum: check `get_data_schema` → `x-simba-constraints.min_rows`; the upload response's `warnings` field is authoritative. More rows = tighter posteriors (104+ weekly rows recommended).
+- Row minimum: check `get_data_schema` â†’ `x-simba-constraints.min_rows`; the upload response's `warnings` field is authoritative. More rows = tighter posteriors (104+ weekly rows recommended).
 - Media columns: `{channel}_activity` and `{channel}_spend` per channel.
 - Use `0` for inactive periods, not blank or NA.
-- Large file? Pass `csv_path` (a local file path) instead of `csv_content` — the server reads it directly instead of the CSV going through the conversation. Local (stdio) servers only; disabled on HTTP/SSE deployments unless `SIMBA_MCP_ALLOW_LOCAL_FILES=1`.
+- Large file? Pass `csv_path` (a local file path) instead of `csv_content` â€” the server reads it directly instead of the CSV going through the conversation. Local (stdio) servers only; disabled on HTTP/SSE deployments unless `SIMBA_MCP_ALLOW_LOCAL_FILES=1`.
 
 ## Common Errors
 
@@ -350,10 +352,10 @@ The MCP server authenticates with the same API keys used by the Simba REST API. 
 
 How the key is supplied depends on where the server runs:
 
-- **Local (stdio — Cursor, Claude Code):** set it as the `SIMBA_API_KEY`
+- **Local (stdio â€” Cursor, Claude Code):** set it as the `SIMBA_API_KEY`
   environment variable in your MCP config (the examples above).
 - **Hosted (`https://demo.simba-mmm.com/mcp`):** send it as the HTTP
-  `Authorization: Bearer` header — the `authorization_token` field in the
+  `Authorization: Bearer` header â€” the `authorization_token` field in the
   Claude MCP connector config. **Every caller uses their own key** (v0.2.2+):
   the server never shares an identity between callers, a request without a
   key gets a structured 401 with guidance, and you only ever see your own
@@ -364,20 +366,20 @@ How the key is supplied depends on where the server runs:
 | Environment Variable | Description | Default |
 |---------------------|-------------|---------|
 | `SIMBA_API_URL` | Simba API base URL | `http://localhost:5005` |
-| `SIMBA_API_KEY` | Your Simba API key (stdio mode only — HTTP callers send their own key as the bearer token) | (required for stdio) |
+| `SIMBA_API_KEY` | Your Simba API key (stdio mode only â€” HTTP callers send their own key as the bearer token) | (required for stdio) |
 
 ## Transport Modes
 
 The server supports all MCP transport modes:
 
 ```bash
-# stdio (default) — for Cursor, Claude Code
+# stdio (default) â€” for Cursor, Claude Code
 simba-mcp
 
-# Streamable HTTP — for remote deployment
+# Streamable HTTP â€” for remote deployment
 simba-mcp --transport streamable-http --port 8100
 
-# SSE — legacy transport
+# SSE â€” legacy transport
 simba-mcp --transport sse --port 8100
 
 # Or via uvicorn directly
@@ -494,3 +496,70 @@ envelope overhead. Existing defaults remain unchanged.
 
 See [architecture and compatibility](docs/architecture.md) for ownership,
 transport/authentication boundaries, known limits and validation.
+
+Draft authoring discovery: `get_recipe_draft_template(family="mmm" | "var")` returns complete defaults generated by the shared wizard, a template hash and the draft envelope schema. Start new drafts from this snapshot and preserve unedited fields. Defaults are not validated models; check publication capabilities before publishing. Requires the corresponding backend capability and `read:models`.
+
+Pass either `uploaded_file_id` or `pipeline_version_id` to `get_recipe_draft_template` to copy an owned uploaded dataset or saved pipeline output version into the new authoring snapshot and populate its bounded preview. Optional source origin is verified by the backend against exact bytes; detail responses include a source manifest. Reopening uses frozen data even if the original upload disappears. This does not enable publication or model fitting.
+
+Draft publication: `publish_recipe_draft` freezes a saved MMM or VAR draft as an atomic batch, using expected version and caller UUID recovery; it never launches a fit. `get_recipe_revision_authoring` retrieves the immutable authoring snapshot for copying to a new draft. Check backend publication capabilities. When `publication_constraints.automatic_prior_resolution` is `freeze_at_publication`, automatic MMM priors are resolved once and replayed without rebuilding. Original authoring choices remain recoverable for editing a new draft. This applies to draft publication; legacy `api_mmm` recipe resolution still requires fixed priors. VAR preserves its raw input and engine manifest; MMM quality policies cannot establish VAR acceptance.
+
+Calibration: check the backend `calibration` capability. MMM draft publication validates active likelihood observations and returns their count, units, channels and hash in recipe provenance. Enabled invalid or unapplied observations fail explicitly; VAR calibration is unsupported. Preserve disabled authoring rows when editing. Imported wizard JSON is retained as editable rows; multipart wizard CSV capture retains its original bytes. No new MCP route is needed.
+
+Pipeline sources retain the exact version ID, pipeline ID, version number and verified content hash. No pipeline is executed. Existing exported uploads are not assigned inferred pipeline lineage.
+
+Draft `source.history` preserves up to 100 recorded column transformations/removals with parameters and before/after data hashes. The backend checks chain continuity and the terminal data hash. These are client-reported authoring records, not independently replayed operations or quality evidence. Edited data must omit an unchanged source origin. Unknown nested fields remain preserved.
+
+Optional `calibration_import` retains an original JSON file (1 MB maximum) in the authorized authoring snapshot. Preserve it independently of current editable observations. The backend verifies its bytes/hash; published provenance includes filename/hash and explicitly states current observations may differ. Ordinary recipe responses omit the raw attachment. This reference is not scientific validation.
+
+
+Custom numeric quality checks: `create_quality_policy` accepts checks such as
+`{"metric":"custom:benchmark_deviation","name":"Benchmark deviation","units":"%","operator":"lte","maximum":10,"required":true}`.
+Use `gte` with `minimum`, or `between` with both inclusive bounds. Read backend capability discovery before using this additive contract.
+
+For externally calculated metrics, call `evaluate_study_run(run_id, policy_id)` first and retain `report.basis_hash`. Calculate from that run's saved outputs, then call the same tool with `expected_basis_hash` and `external_evidence=[{"metric":"custom:benchmark_deviation","value":8,"method":"Absolute deviation as percentage of benchmark","source_reference":"Versioned model export and benchmark"}]`. An optional `source_sha256` records a reported source digest. The backend determines pass/fail and rejects stale output bases. Every submission creates a new assessment and must supply all intended custom values; omitted values remain unevaluated. Source references and calculations are submitter-reported, not independently verified. This numeric MMM contract does not execute agent code, accept a model, support VAR acceptance, or designate a champion.
+
+
+Boolean checks use `kind: "boolean"`, `operator: "equals"` and strict boolean `expected`. Submit a JSON boolean in `external_evidence.value`; numeric or string substitutes are rejected. Manual checks use `kind: "manual"`, `operator: "equals"`, `expected: true`. MCP can define these rules and read evidence, but API keys cannot submit manual sign-off: a signed-in reviewer must supply confirmation, rationale and source through the frontend. Missing answers stay unevaluated; sign-off is not automatic model acceptance or champion selection.
+
+
+`get_study_champion(study_id)` reads the incumbent, accepted candidates/eligibility blockers and immutable selection/replacement/revocation history. The backend requires migration `workflow_champion_001`. Writes require the project owner's frontend session; MCP cannot promote or revoke. Stale evidence retains the incumbent with review_required. Validation references are reviewer-declared and `decision_grade_ready` remains false until scientific protocol qualification is implemented. Champion designation does not deploy or fit a model.
+
+
+Native prediction-window gates are available as `prediction_mae`, `prediction_rmse` and `prediction_wape` (WAPE is a fraction). They use the existing create_quality_policy/evaluate_study_run tools. The backend reads saved actual/prediction rows, requires unique prediction dates after the saved training window and leaves missing/malformed evidence unevaluated. Both windows are bound into the assessment hash. This does not prove untouched holdout provenance, leakage-free preprocessing or full sampling intent; decision-grade champion qualification remains separate.
+
+
+`create_quality_policy(..., validation_protocol=...)` can declare a temporal holdout before launching both runs. Required protocol fields are training_end, prediction_start/end, min_draws, min_tune, min_chains, max_r_hat and max_prediction_wape. Use `kind: "temporal_holdout"`; dates are ISO and WAPE a fraction. No defaults are recommended. Both runs must launch under that exact policy.
+
+`assess_study_validation_pair(study_id, full_run_id, validation_run_id, policy_id)` assesses saved evidence without fitting or writing a model decision; serving available prediction evidence appends an access audit event. It checks distinct completed MMM tasks, launch binding, matching frozen files/settings/runtime, configured sampling minima, R-hat, prediction-window WAPE/dates and full-date coverage. Missing evidence blocks. The response fingerprint identifies the assessed records. Passing compatibility does not verify retained draws/ESS/divergences, preprocessing or untouched holdout history, and decision_grade_ready remains false.
+
+Validation-pair responses include `sampling_evidence` for the full and validation runs: retained chain/draw counts, bulk/tail ESS minima and divergences when saved by the fitting engine. Missing or partial records are explicit. These values are not yet checked against acceptance limits and do not certify scientific readiness.
+
+Protocols may now opt into `retained_sampling: {min_ess_bulk, min_ess_tail, max_divergences}` before launching both models. All limits are explicit, with positive ESS minima and a nonnegative integer divergence maximum. Pair assessments also apply declared chain/draw minima to retained counts. Missing/partial native records block; `sampling_qualification` distinguishes pass, blocked and not_declared. Business validity and holdout provenance still prevent scientific certification.
+
+Set `validation_protocol.require_policy_review` before launching to require current analyst acceptance of each latest launch-policy assessment in pair checks. Stale evidence, subsequent rejection, missing acceptance or ambiguous ordering blocks. This reuses required policy gates; external business calculations remain reported evidence. MCP can declare and read these requirements but cannot supply analyst acceptance.
+
+Pair responses expose `holdout_provenance` separately from compatibility. Version 1 full-input preprocessing records remain blocked. Version 2 records identify training-only transformation/scaling and report `review_required` with `preprocessing_status: training_only`. Missing or unsupported records are unavailable; no record is silently certified. Prior-source independence and holdout access/reuse evidence remain required; `decision_grade_ready` stays false. Existing routes and tool arguments are unchanged.
+
+Pair responses also expose `prior_provenance`: native frozen automatic-prior source windows are checked against the declared training end and bound to recipe input hashes. A later source window or mismatched hashes is blocked; missing historical/uploaded provenance is unavailable. A valid window still requires review of assumptions, external calibration and holdout reuse. This does not record access history or certify independence. No tool arguments or routes changed.
+
+`get_study_prediction_access(run_id)` reads partial Studies prediction-access history (totals and latest 20 events). Pair responses include `prediction_access` with the same partial-coverage summary, independent of the assessment hash. Assessment creation/history reads, comparison and pair checks append audit events when serving available prediction evidence. The three previously read-only inspection tools are now annotated non-destructive/additive and non-idempotent. Reading access metadata itself does not add events.
+
+History is scoped to the study and matching recorded dataset/windows. Older activity, other results routes/exports, other studies and offline work are not covered. Repeated serving does not prove retuning; zero events never proves an untouched holdout. The backend requires its additive prediction-access migration; scientific qualification remains incomplete.
+
+`get_model_results(model_hash, sections="prediction_window")` explicitly exports saved prediction-window actuals/model values in JSON or CSV; it is omitted from default exports and distinct from scenario `predictions`. Serving it for a study-linked model appends a native access event, so this tool is conservatively annotated additive/non-destructive. Dashboard results now record access to the same saved window. Filters do not truncate or channel-filter prediction evidence. This broadens instrumentation without certifying untouched holdout status; other routes, source files, earlier activity and offline work remain outside coverage.
+
+`declare_study_holdout_use(run_id, declaration_id, source_access_id, disposition, reason, affected_revision_id=None)` appends a reported evidence-use declaration with project-owner credentials and `create:models`. Read access history first and select an event from that run. Use `review_only`, `informed_revision` (requires a same-study published revision) or `uncertain`. Reuse the same UUID/content on retry; conflicting content is rejected. Declarations retain submitting interface and do not certify independence, accept or promote models.
+
+Access/pair responses include `holdout_use`; reported revision influence retains `fresh_validation_required` for affected revisions even after later review-only notes. Other declarations remain `review_required`, and no declarations means `not_recorded`. Declaration history changes the pair fingerprint; additional viewing alone does not. The backend requires its additive holdout-use migration. Champion reads expose candidate-specific `holdout_use`: an informed-revision declaration blocks selection of that named revision and marks an existing champion `review_required`. Ordinary access, review-only notes and unrelated revisions do not block. Later acceptance or review-only notes cannot clear an earlier influence report. This applies to named revisions and their recorded descendants, including ordered recipe predecessors and source-revision ancestry; current analyst-reviewed validation resolutions may clear the exact accepted run; changed or revoked evidence reblocks it. No report is not proof of an untouched holdout.
+
+
+Replacement holdout preflight: `assess_study_validation_pair` returns `fresh_validation` for reports naming the full-model revision. It checks that a replacement policy follows the influence declarations, precedes both runs, and uses prediction dates strictly after the used holdouts. Recorded same-study access overlapping the new dates before policy creation blocks preflight, conservatively across dataset versions. Complete retained sampling, accepted policy evidence and supported training-only preprocessing/prior records are required. Status is `not_required`, `blocked`, or `review_required`; `resolves_champion_block` is always false. This is not a durable resolution or proof of offline independence. No extra tool or request field is needed.
+
+
+### Reviewed resolutions and recipe ancestry
+
+`get_study_validation_resolutions(study_id)` returns append-only analyst resolutions and revocations with re-evaluated `current`, `stale` or `revoked` status. The backend requires migration `workflow_resolution_001`. API keys cannot sign off independence or revoke reviews: the signed-in owner uses the UI, which binds the exact pair fingerprint and requires a rationale plus an explicit independence review. Current resolution clears only the exact accepted full run; new outputs, declarations or reviews invalidate it. Champion reads expose `resolved_by_review` and the resolution identity. No automatic scientific certification or promotion is performed.
+
+When creating a derived recipe or draft, supply `source_revision_id` from the same study. `create_recipe_draft`, `create_study_recipe` and `revise_study_recipe` forward this optional field. Draft source linkage is immutable and survives full-editor publication; previous versions of a recipe inherit influence automatically. Unrecorded/off-platform copies remain outside recorded ancestry. Resolution does not transfer to new runs or descendants.
+
+Release note: these tools require the corresponding MCP package release and updated backend. Draft-branch tests do not establish package publication or application deployment.

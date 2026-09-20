@@ -19,6 +19,15 @@ from .tools.data import (
     list_uploads,
     upload_data,
 )
+from .tools.drafts import (
+    create_recipe_draft,
+    get_recipe_draft,
+    get_recipe_draft_template,
+    get_recipe_revision_authoring,
+    list_recipe_drafts,
+    publish_recipe_draft,
+    update_recipe_draft,
+)
 from .tools.models import (
     create_model,
     create_var_model,
@@ -36,9 +45,14 @@ from .tools.models import (
 )
 from .tools.projects import create_project, list_projects, rename_project
 from .tools.quality import (
+    assess_study_validation_pair,
     compare_study_runs,
     create_quality_policy,
+    declare_study_holdout_use,
     evaluate_study_run,
+    get_study_champion,
+    get_study_prediction_access,
+    get_study_validation_resolutions,
     list_quality_policies,
     list_study_decisions,
     list_study_evaluations,
@@ -102,6 +116,13 @@ mcp = MCPServer(
 )
 
 TOOLS = (
+    create_recipe_draft,
+    get_recipe_draft,
+    get_recipe_draft_template,
+    publish_recipe_draft,
+    get_recipe_revision_authoring,
+    list_recipe_drafts,
+    update_recipe_draft,
     get_backend_capabilities,
     get_data_schema,
     upload_data,
@@ -150,6 +171,11 @@ TOOLS = (
     evaluate_study_run,
     list_study_evaluations,
     list_study_decisions,
+    get_study_champion,
+    get_study_prediction_access,
+    get_study_validation_resolutions,
+    declare_study_holdout_use,
+    assess_study_validation_pair,
     recommend_study_run,
     adopt_model_into_study,
     compare_study_runs,
@@ -189,6 +215,7 @@ __all__ = [
     "_norm_channel",
     "adopt_model_into_study",
     "app_lifespan",
+    "assess_study_validation_pair",
     "cancel_study_run",
     "compare_study_runs",
     "create_model",
@@ -197,6 +224,7 @@ __all__ = [
     "create_study",
     "create_study_recipe",
     "create_var_model",
+    "declare_study_holdout_use",
     "delete_model",
     "evaluate_study_run",
     "get_contribution_groups",
@@ -209,7 +237,10 @@ __all__ = [
     "get_scenario_results",
     "get_scenario_template",
     "get_study",
+    "get_study_champion",
+    "get_study_prediction_access",
     "get_study_run",
+    "get_study_validation_resolutions",
     "get_upload",
     "launch_study_run",
     "link_var_model",

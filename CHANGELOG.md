@@ -4,13 +4,50 @@ All notable changes to the SIMBA MCP Server will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
-## Unreleased
+## 0.5.0 (release candidate)
+
+### Added
+
+- Add read-only `get_recipe_draft_template` with optional owned upload/pipeline sources, shared authoring defaults and preserved frozen source manifests.
+- Add policy-review and validation-resolution history, retained-sampling/prior/preprocessing provenance, holdout-access and explicit use declarations, and replacement-validation preflight contracts.
+- Preserve same-study `source_revision_id` on derived recipes and drafts so supporting backends can trace inherited influence.
+
+- Add optional predeclared temporal-holdout protocols and read-only `assess_study_validation_pair` with compatibility blockers and evidence fingerprints.
+
+- Discover native prediction-window MAE/RMSE/WAPE checks with backend date-separation checks and explicit holdout-provenance limitations.
+
+- Add read-only `get_study_champion` for incumbent, eligibility blockers and immutable replacement/revocation history; no agent promotion capability.
+
+- Discover boolean equality and manual sign-off policies, forward strict boolean observations, and document session-only manual evidence.
+
+- Add custom numeric quality-rule discovery and external calculation submission with basis freshness, method/source provenance and server-evaluated results.
+
+- Preserve optional original calibration JSON references separately from current observation inputs.
+
+- Discover and preserve bounded source edit history; clarify hash-chain-only verification. Complete pipeline-version origin schema metadata.
+
+- Select an owned saved pipeline version with `get_recipe_draft_template(pipeline_version_id=...)`; preserve exact source identity and frozen bytes without running a pipeline.
+
+- Explicit immutable draft publication and authoring recovery tools. Publication is atomic across brands, uses caller UUID recovery and never launches a fit.
+
+- Discoverable create/read/list/update recipe-draft tools with complete authoring snapshot forwarding and optimistic concurrency. Requires a backend advertising `drafts.schema_version = 1`. Draft saving does not publish or launch; older recipe tools remain available.
 
 ### Changed
 
+- Document strict MMM calibration publication and unsupported VAR calibration; verify calibration provenance survives publication responses.
+
+- Document backend-gated VAR draft publication alongside fixed-prior MMM. VAR quality remains unavailable under MMM policies; capable backends freeze automatic MMM priors during draft publication and disable rebuilding during replay.
+
 - Clarify optional backend study-budget status, blocked-capacity recovery and quality-policy requirements. Existing tool arguments and additive response forwarding remain compatible with older backends; absent budget is unknown rather than an eligibility claim.
 
-## 0.4.1 — 2026-09-19
+### Compatibility and rollout
+
+- Requires the matching backend capabilities for new tools; installing the package does not deploy those routes or migrate application data.
+- Existing required inputs remain compatible. Optional lineage and additive evidence are forwarded unchanged.
+- Human independence sign-off, resolution revocation and champion promotion remain signed-in owner actions; agents can inspect their status but cannot provide those sign-offs.
+- This version is prepared for release, not yet published. After required review and merge, publish a GitHub release tagged `v0.5.0`; the existing publish workflow tests, builds and uploads to PyPI. Only then update hosted consumers to `simba-mcp==0.5.0`.
+
+## 0.4.1 â€” 2026-09-19
 
 ### Added
 
@@ -29,7 +66,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - Existing tool names, required inputs and default payloads remain. Missing backend capability advertisements mean unknown.
 - Result-byte bounds apply after download; study histories remain backend-unpaginated. Installing this release does not upgrade backend services.
 
-## 0.4.0 — 2026-09-19
+## 0.4.0 â€” 2026-09-19
 
 ### Added
 
@@ -46,107 +83,107 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - Study tools require the workflow API on the configured Simba backend. Control-prior overrides require the corresponding backend capability. Updating this package does not deploy those backend features.
 - Existing model and optimisation tools remain available. No automatic fitting or model promotion is introduced.
 
-## 0.3.2 — 2026-08-26
+## 0.3.2 â€” 2026-08-26
 
 ### Changed
 
-- `LICENSE` now names the owning legal entity, 1749 Ltd, rather than the Simba brand. No change to the terms — the project remains MIT.
+- `LICENSE` now names the owning legal entity, 1749 Ltd, rather than the Simba brand. No change to the terms â€” the project remains MIT.
 - `Homepage` metadata points at <https://getsimba.ai>, matching the repository's own homepage.
 - `SECURITY.md`'s supported-versions table tracks the 0.3.x line instead of the long-superseded 0.1.x.
 - Internal implementation paths removed from a source comment, a test docstring and a changelog line; each now describes the behaviour by its public API surface instead.
 
-## 0.3.1 — 2026-08-26
+## 0.3.1 â€” 2026-08-26
 
 ### Added
 
-- **`link_var_model` gains `channel_map` (#682)** — a declared `{var_exogenous_series: [mmm_channel, ...]}` mapping so a group-level VAR (the right specification for short monthly datasets) can bridge onto a tactic-level MMM that the exact-name join misses entirely. Each group's elasticity is allocated across its member channels pro-rata by KPI short-term contribution — slices sum exactly to the group elasticity, so the group's long-run effect is counted once, never once per member. Validation is strict and link-time (unknown names 400 with a did-you-mean; the MMM must be complete when a map is supplied; no channel in two groups). The map belongs to the link: every link replaces it (omitting `channel_map` clears a stored map), unlink clears it. Contract snapshot pins the key; tool schema snapshot regenerated.
+- **`link_var_model` gains `channel_map` (#682)** â€” a declared `{var_exogenous_series: [mmm_channel, ...]}` mapping so a group-level VAR (the right specification for short monthly datasets) can bridge onto a tactic-level MMM that the exact-name join misses entirely. Each group's elasticity is allocated across its member channels pro-rata by KPI short-term contribution â€” slices sum exactly to the group elasticity, so the group's long-run effect is counted once, never once per member. Validation is strict and link-time (unknown names 400 with a did-you-mean; the MMM must be complete when a map is supplied; no channel in two groups). The map belongs to the link: every link replaces it (omitting `channel_map` clears a stored map), unlink clears it. Contract snapshot pins the key; tool schema snapshot regenerated.
 
 ### Changed
 
-- `get_model_results` docstring: `long_run_rollup` now documents the map-aware join — per-row `var_group` + allocated elasticity, group truth in `metadata.groups`, and the new `reason: "no_channel_overlap"` carried on an `available: true` rollup where nothing joined (the coverage block says why; the bridge constants stay published).
+- `get_model_results` docstring: `long_run_rollup` now documents the map-aware join â€” per-row `var_group` + allocated elasticity, group truth in `metadata.groups`, and the new `reason: "no_channel_overlap"` carried on an `available: true` rollup where nothing joined (the coverage block says why; the bridge constants stay published).
 
-## 0.3.0 — 2026-08-26
+## 0.3.0 â€” 2026-08-26
 
 ### Added
 
-- **Project tools (issue #54)** — thin wrappers over #645's routes, closing the asymmetry where `save_model` took a `project_id` that could not be discovered or created over the MCP: `list_projects()` (owned + team-shared folders, `shared: true` on team ones, `model_count` counts SAVED models), `create_project(name, team_id?)` (201; names sanitized like model names), and `rename_project(project_id, name)` (owner-only). No delete — the API deliberately has none. `save_model`'s docstring now points at `list_projects` for discovering the id it accepts.
-- **`unsave_model` (#673)** — the non-destructive inverse of `save_model`, for cap management at the 20-saved-models limit: releases the slot while the model stays addressable by hash (fetchable, renameable, re-saveable, visible via `list_models(include_unsaved=true)`). Idempotent. The docstring carries the two sharp edges: the unsaved pool is auto-pruned by *dashboard* model creation (10+ unsaved → oldest hard-deleted), and unsaving a shared model hides it from recipients until re-saved.
+- **Project tools (issue #54)** â€” thin wrappers over #645's routes, closing the asymmetry where `save_model` took a `project_id` that could not be discovered or created over the MCP: `list_projects()` (owned + team-shared folders, `shared: true` on team ones, `model_count` counts SAVED models), `create_project(name, team_id?)` (201; names sanitized like model names), and `rename_project(project_id, name)` (owner-only). No delete â€” the API deliberately has none. `save_model`'s docstring now points at `list_projects` for discovering the id it accepts.
+- **`unsave_model` (#673)** â€” the non-destructive inverse of `save_model`, for cap management at the 20-saved-models limit: releases the slot while the model stays addressable by hash (fetchable, renameable, re-saveable, visible via `list_models(include_unsaved=true)`). Idempotent. The docstring carries the two sharp edges: the unsaved pool is auto-pruned by *dashboard* model creation (10+ unsaved â†’ oldest hard-deleted), and unsaving a shared model hides it from recipients until re-saved.
 
 ### Changed
 
-- **`create_model` docstring: saturation priors rewritten (issue #53).** The priors section now states the three mutually exclusive saturation-anchor forms explicitly, stops steering generalized_log users toward `half_saturation_*` (which overflows below `sat_shape_mean` 0.00097657 — exactly the near-log regime the family exists for), documents that `sat_shape_mean` MUST accompany `half_marginal_*` in the same override (#672), documents the new `effect_at_avg_mean/sd` coefficient coordinate (#671 — fractions, generalized_log-only, folded server-side; with `half_marginal_*` + `sat_shape_mean` it forms the full (x*, E, k) triple, the recommended generalized_log elicitation), and points at `model_config.priors_resolved` as the verification surface. Note: the issue's original premise was partially stale — `half_marginal_*`/`sat_shape_mean` were already documented by PR #39; this release syncs the doc with the new core semantics and fixes the residual steering.
+- **`create_model` docstring: saturation priors rewritten (issue #53).** The priors section now states the three mutually exclusive saturation-anchor forms explicitly, stops steering generalized_log users toward `half_saturation_*` (which overflows below `sat_shape_mean` 0.00097657 â€” exactly the near-log regime the family exists for), documents that `sat_shape_mean` MUST accompany `half_marginal_*` in the same override (#672), documents the new `effect_at_avg_mean/sd` coefficient coordinate (#671 â€” fractions, generalized_log-only, folded server-side; with `half_marginal_*` + `sat_shape_mean` it forms the full (x*, E, k) triple, the recommended generalized_log elicitation), and points at `model_config.priors_resolved` as the verification surface. Note: the issue's original premise was partially stale â€” `half_marginal_*`/`sat_shape_mean` were already documented by PR #39; this release syncs the doc with the new core semantics and fixes the residual steering.
 - `get_model_results` docstring documents `priors_resolved`'s `overridden_fields` / `accepted_not_used` semantics (#643): a correctly spelled prior field can still be inert for the model's configuration, and the folded coordinates are never called inert.
 - Contract test pins the four new endpoints; tool schema snapshot regenerated (29 tools).
 
-## 0.2.2 — 2026-08-25
+## 0.2.2 â€” 2026-08-25
 
 ### Security
 
-- **Bring-your-own-key on HTTP transports (issue #51).** Hosted deployments previously authenticated every caller's requests with the server's single env-configured key — the caller's `Authorization: Bearer` token (which the README told clients to send) was ignored, so anyone who could reach the URL acted as the shared internal account. Now, in HTTP/SSE mode each request uses **the caller's own bearer token** as the Simba API key: no token (or a malformed one) → a structured 401 telling the caller to send `Authorization: Bearer simba_sk_...`, and there is deliberately **no fallback** to the env key. The credential rides a task-local ContextVar, so concurrent callers can never observe each other's keys — pinned by a concurrency test and a wire-level ASGI test asserting the env key never reaches the backend. stdio behavior is unchanged (`SIMBA_API_KEY` remains the local user's own key). In HTTP mode the shared client is additionally constructed **without** any default credential, so even a hypothetical code path that skipped the per-request gate fails closed with a 401 rather than authenticating as a shared identity. Deployment note — order matters: `MCP_INTERNAL_API_KEY` is still **required** by every simba-mcp release before 0.2.2; remove it only **after** the deployment's pin is on `simba-mcp>=0.2.2`, at which point it is unused.
-- Streamable HTTP request-body limit raised from the SDK's 4 MiB default to 12 MiB so hosted `csv_content` uploads can actually carry the API's documented 10 MB CSV maximum (front proxies must allow the same — the hosted nginx `/mcp` location needs `client_max_body_size` ≥ 12m).
+- **Bring-your-own-key on HTTP transports (issue #51).** Hosted deployments previously authenticated every caller's requests with the server's single env-configured key â€” the caller's `Authorization: Bearer` token (which the README told clients to send) was ignored, so anyone who could reach the URL acted as the shared internal account. Now, in HTTP/SSE mode each request uses **the caller's own bearer token** as the Simba API key: no token (or a malformed one) â†’ a structured 401 telling the caller to send `Authorization: Bearer simba_sk_...`, and there is deliberately **no fallback** to the env key. The credential rides a task-local ContextVar, so concurrent callers can never observe each other's keys â€” pinned by a concurrency test and a wire-level ASGI test asserting the env key never reaches the backend. stdio behavior is unchanged (`SIMBA_API_KEY` remains the local user's own key). In HTTP mode the shared client is additionally constructed **without** any default credential, so even a hypothetical code path that skipped the per-request gate fails closed with a 401 rather than authenticating as a shared identity. Deployment note â€” order matters: `MCP_INTERNAL_API_KEY` is still **required** by every simba-mcp release before 0.2.2; remove it only **after** the deployment's pin is on `simba-mcp>=0.2.2`, at which point it is unused.
+- Streamable HTTP request-body limit raised from the SDK's 4 MiB default to 12 MiB so hosted `csv_content` uploads can actually carry the API's documented 10 MB CSV maximum (front proxies must allow the same â€” the hosted nginx `/mcp` location needs `client_max_body_size` â‰¥ 12m).
 
-## 0.2.1 — 2026-08-25
+## 0.2.1 â€” 2026-08-25
 
 ### Added
 
-- `get_model` and `delete_model` (issue #45), mirroring #658's model resource routes: `get_model` returns metadata + the create-time config echo for a model in ANY status — including failed models, with their error message — where `get_model_results` requires 'complete'. `delete_model` permanently deletes a FAILED model (any other status is a 409; the docstring says so plainly) and unlinks dependent VAR pointers. Scopes: `read:models` / `create:models`.
-- Run history is reachable (issue #21): `list_runs(artifact="optimizer"|"scenario", ...)` lists a model's saved runs (pinned-first, newest-first) with paging — documenting two API sharp edges: `count` is the page length (not the total), and the optimizer `objective` is absent from summaries (fetch the run's `inputs` via `get_optimizer_results(run_id=...)`; profit runs carry the key, revenue runs omit it). `get_scenario_results` gains `run_id` — the scenario half of the by-run getter that #33 shipped for the optimizer — so back-to-back scenario runs can finally be disambiguated.
-- Upload listing (issue #21): `list_uploads` (paging + case-insensitive filename filter; `count` here IS the true total) and `get_upload` (per-file detail including the `columns` [{name, dtype}] schema — enough to build `create_model` arguments without re-reading the CSV).
-- `create_model` exposes the financial layer and the #26-scoped config options: top-level `operating_margin` / `operating_margin_column` (mutually exclusive; the column may be uniformly fractions (0,1] or percentages (1,100]; unlocks the `financials` section and automatic profit-optimizer margins — with an explicit warning that the API reads margin keys from the request ROOT and silently ignores them inside `config`), plus `config.attribution` (non-default values require `link="log"`; determines whether the Overlap column exists), `config.annual_discount_rate` (display-time PV discounting), `config.sampler` (strictly validated; cores 1–8), and `config.reporting_kernel` (`{"classes", "channel_classes"}` shape; affects only the cohort_ledger allocation). Defaults omit every new key — existing payloads are byte-identical. Four further accepted params (`config.sample_prior`, `config.base_share_prior`, scenario `scenario_space`/`periodicity`) are deliberately deferred with reasons pinned in the contract test (issue #49).
+- `get_model` and `delete_model` (issue #45), mirroring #658's model resource routes: `get_model` returns metadata + the create-time config echo for a model in ANY status â€” including failed models, with their error message â€” where `get_model_results` requires 'complete'. `delete_model` permanently deletes a FAILED model (any other status is a 409; the docstring says so plainly) and unlinks dependent VAR pointers. Scopes: `read:models` / `create:models`.
+- Run history is reachable (issue #21): `list_runs(artifact="optimizer"|"scenario", ...)` lists a model's saved runs (pinned-first, newest-first) with paging â€” documenting two API sharp edges: `count` is the page length (not the total), and the optimizer `objective` is absent from summaries (fetch the run's `inputs` via `get_optimizer_results(run_id=...)`; profit runs carry the key, revenue runs omit it). `get_scenario_results` gains `run_id` â€” the scenario half of the by-run getter that #33 shipped for the optimizer â€” so back-to-back scenario runs can finally be disambiguated.
+- Upload listing (issue #21): `list_uploads` (paging + case-insensitive filename filter; `count` here IS the true total) and `get_upload` (per-file detail including the `columns` [{name, dtype}] schema â€” enough to build `create_model` arguments without re-reading the CSV).
+- `create_model` exposes the financial layer and the #26-scoped config options: top-level `operating_margin` / `operating_margin_column` (mutually exclusive; the column may be uniformly fractions (0,1] or percentages (1,100]; unlocks the `financials` section and automatic profit-optimizer margins â€” with an explicit warning that the API reads margin keys from the request ROOT and silently ignores them inside `config`), plus `config.attribution` (non-default values require `link="log"`; determines whether the Overlap column exists), `config.annual_discount_rate` (display-time PV discounting), `config.sampler` (strictly validated; cores 1â€“8), and `config.reporting_kernel` (`{"classes", "channel_classes"}` shape; affects only the cohort_ledger allocation). Defaults omit every new key â€” existing payloads are byte-identical. Four further accepted params (`config.sample_prior`, `config.base_share_prior`, scenario `scenario_space`/`periodicity`) are deliberately deferred with reasons pinned in the contract test (issue #49).
 - Contract snapshot pins all new request parameters and endpoints; the tool schema snapshot is regenerated for the five new tools (25 total).
-- `skills/` directory (issue #43): four workflow skills in the [Agent Skills](https://agentskills.io) format — `simba-mmm-workflow`, `simba-optimizer-runs`, `simba-prior-conventions`, `simba-var-workflow` — distilling the tool-use conventions (channel naming, Overlap/attribution gate, prior anchor families, VAR linking) into installable agent documentation, plus a README section. Repo artifacts only; no wire-surface change.
+- `skills/` directory (issue #43): four workflow skills in the [Agent Skills](https://agentskills.io) format â€” `simba-mmm-workflow`, `simba-optimizer-runs`, `simba-prior-conventions`, `simba-var-workflow` â€” distilling the tool-use conventions (channel naming, Overlap/attribution gate, prior anchor families, VAR linking) into installable agent documentation, plus a README section. Repo artifacts only; no wire-surface change.
 
 ### Fixed
 
-- Docstrings mislabeled the dashboard's default attribution convention: it is **aumann_shapley** for multiplicative models (since #509), not proportional_normalized. Three sites corrected; 0.2.0's changelog restated the error in passing. An agent picking a convention "to match the dashboard" now gets the right one — the wrong pick produces a channel table that silently fails to reconcile with a dashboard-built model.
-- Unknown-artifact errors from `update_run` / `set_run_pinned` / `list_runs` now return the structured `{"error", "_status_code": 400}` payload instead of raising — SDK v2 masks raised exceptions to an info-free "Error executing tool ..." at the client, so a typo like `artifact="optimiser"` was a dead end with zero recovery guidance.
-- New client wirings gained real HTTP-path tests (mock transport pinning URL/method/query) — the tool-level tests alone fully mocked the client, so a wrong route would have passed the whole suite.
+- Docstrings mislabeled the dashboard's default attribution convention: it is **aumann_shapley** for multiplicative models (since #509), not proportional_normalized. Three sites corrected; 0.2.0's changelog restated the error in passing. An agent picking a convention "to match the dashboard" now gets the right one â€” the wrong pick produces a channel table that silently fails to reconcile with a dashboard-built model.
+- Unknown-artifact errors from `update_run` / `set_run_pinned` / `list_runs` now return the structured `{"error", "_status_code": 400}` payload instead of raising â€” SDK v2 masks raised exceptions to an info-free "Error executing tool ..." at the client, so a typo like `artifact="optimiser"` was a dead end with zero recovery guidance.
+- New client wirings gained real HTTP-path tests (mock transport pinning URL/method/query) â€” the tool-level tests alone fully mocked the client, so a wrong route would have passed the whole suite.
 
-## 0.2.0 — 2026-08-25
+## 0.2.0 â€” 2026-08-25
 
 ### Changed
 
-- **Ported to MCP SDK v2** (`mcp>=2.1,<3`; issue #42): `FastMCP` → `MCPServer`, v2 `Context[AppContext, Any]` annotations, transport options moved off the constructor onto the app builder/run kwargs. **No tool surface change** — all 20 tool bodies are untouched and a `tools/list` capture from a 0.1.2 install diffs empty against the ported build (names, descriptions, and input schemas identical).
+- **Ported to MCP SDK v2** (`mcp>=2.1,<3`; issue #42): `FastMCP` â†’ `MCPServer`, v2 `Context[AppContext, Any]` annotations, transport options moved off the constructor onto the app builder/run kwargs. **No tool surface change** â€” all 20 tool bodies are untouched and a `tools/list` capture from a 0.1.2 install diffs empty against the ported build (names, descriptions, and input schemas identical).
 - The server now speaks the 2026-07-28 stateless protocol revision alongside earlier ones automatically: `server/discover` answers without a handshake, and sessionless clients work against any worker. The `uvicorn --workers N` session-affinity hazard (a session created on one worker 404ing on another) is retired for stateless-revision clients.
 - The #41 version workaround (`_mcp_server.version` assignment) is replaced by the v2 constructor's `version=` parameter. The handshake tests now also guard the v2 failure mode: an unversioned v2 server reports `""` rather than the SDK fallback.
 - The lifespan now enters once per process under streamable HTTP (v1 entered it per session); the shared `SimbaAPIClient` is session-safe (server-wide internal key + stateless httpx pool) and the constraint is documented at the lifespan.
 - The ASGI app opts out of the SDK's localhost-default DNS-rebinding protection (`host="0.0.0.0"`): the deployed server sits behind a reverse proxy with a public Host header, which the SDK's localhost allowlist would reject.
-- Unexpected tool exceptions now reach clients as generic "Error executing tool ..." messages (SDK 2.1 behavior — the cause stays server-side). Simba API **status** errors were always structured payloads and are unaffected. Transport-level failures (backend unreachable/timeout after retries) previously *raised* — v1 forwarded the cause text to clients, v2 would mask it — so the client now returns them as a structured `{"error": ..., "_status_code": 503}` payload naming the cause, consistent with every other failure mode.
-- **Downstream pin note:** mcp 2.1.x raises dependency floors — notably `pydantic>=2.12.0` (also `anyio>=4.9`, `sse-starlette>=3.0`, new `opentelemetry-api`, inert without an OTel SDK). A deployment that pins pydantic below 2.12 in the same environment (e.g. a shared backend image) must bump it in the same change as the simba-mcp pin or the image build fails with ResolutionImpossible.
+- Unexpected tool exceptions now reach clients as generic "Error executing tool ..." messages (SDK 2.1 behavior â€” the cause stays server-side). Simba API **status** errors were always structured payloads and are unaffected. Transport-level failures (backend unreachable/timeout after retries) previously *raised* â€” v1 forwarded the cause text to clients, v2 would mask it â€” so the client now returns them as a structured `{"error": ..., "_status_code": 503}` payload naming the cause, consistent with every other failure mode.
+- **Downstream pin note:** mcp 2.1.x raises dependency floors â€” notably `pydantic>=2.12.0` (also `anyio>=4.9`, `sse-starlette>=3.0`, new `opentelemetry-api`, inert without an OTel SDK). A deployment that pins pydantic below 2.12 in the same environment (e.g. a shared backend image) must bump it in the same change as the simba-mcp pin or the image build fails with ResolutionImpossible.
 
 ### Fixed
 
-- `run_optimizer` gamma docstring no longer inverts the semantics (issue #31): gamma is an uncertainty-aversion weight — 0 maximizes expected return (most aggressive), higher values penalize uncertainty (more conservative). The old text called 0 "conservative" and 1 "aggressive", contradicting both the objective (`mean − gamma·spread`) and its own next line. Also notes the dashboard's typical 0–0.1 range, and tags `alpha_sd`/`scalars`/`decay_lower`/`decay_upper` as legacy in `create_model`'s flat prior-field list.
-- The `Overlap` emission gate is stated correctly in both docstrings that carry it (issue #32): Overlap requires `link="log"` AND `attribution="removal_lift"` (the API default). The 0.1.2 text claimed all multiplicative models add it and that absence means additive/pre-feature — false for aumann_shapley/shapley/proportional_normalized (the dashboard default), which allocate the interaction and close exactly without an Overlap column. A docstring guard test pins the corrected gate.
-- `get_model_results` documents the four remaining undocumented sections (issue #27): `posterior_transforms` (importable transform-parameter posterior grid, keyed by activity column), `r_hat` (per-parameter R-hat over all posterior RVs, transform RVs included), `channel_map` (canonical name ↔ activity/spend column mapping — the join key), and `cohort_ledger` (per-(channel, source-period) forward-allocation ledger with PV-discounted financials; `{available: false}` on pre-artifact models). All four re-verified against the live results route. Also documents that `financials.operating_margin_series` is a date-string-keyed dict, not a list. The section-list guard test now pins all 22 sections.
-- README API host regression fixed (issue #25): all five example sites read `app.simba-mmm.com`, which does not serve the API (verified live: connection failure, while `demo.simba-mmm.com` answers). Swept back to `demo.simba-mmm.com` — the same regression 0.1.1 fixed — and a test now fails if a stale host reappears in the README.
+- `run_optimizer` gamma docstring no longer inverts the semantics (issue #31): gamma is an uncertainty-aversion weight â€” 0 maximizes expected return (most aggressive), higher values penalize uncertainty (more conservative). The old text called 0 "conservative" and 1 "aggressive", contradicting both the objective (`mean âˆ’ gammaÂ·spread`) and its own next line. Also notes the dashboard's typical 0â€“0.1 range, and tags `alpha_sd`/`scalars`/`decay_lower`/`decay_upper` as legacy in `create_model`'s flat prior-field list.
+- The `Overlap` emission gate is stated correctly in both docstrings that carry it (issue #32): Overlap requires `link="log"` AND `attribution="removal_lift"` (the API default). The 0.1.2 text claimed all multiplicative models add it and that absence means additive/pre-feature â€” false for aumann_shapley/shapley/proportional_normalized (the dashboard default), which allocate the interaction and close exactly without an Overlap column. A docstring guard test pins the corrected gate.
+- `get_model_results` documents the four remaining undocumented sections (issue #27): `posterior_transforms` (importable transform-parameter posterior grid, keyed by activity column), `r_hat` (per-parameter R-hat over all posterior RVs, transform RVs included), `channel_map` (canonical name â†” activity/spend column mapping â€” the join key), and `cohort_ledger` (per-(channel, source-period) forward-allocation ledger with PV-discounted financials; `{available: false}` on pre-artifact models). All four re-verified against the live results route. Also documents that `financials.operating_margin_series` is a date-string-keyed dict, not a list. The section-list guard test now pins all 22 sections.
+- README API host regression fixed (issue #25): all five example sites read `app.simba-mmm.com`, which does not serve the API (verified live: connection failure, while `demo.simba-mmm.com` answers). Swept back to `demo.simba-mmm.com` â€” the same regression 0.1.1 fixed â€” and a test now fails if a stale host reappears in the README.
 
-## 0.1.2 — 2026-08-25
+## 0.1.2 â€” 2026-08-25
 
 ### Added
 
-- `get_model_results` documents the `*_mean` keys the `mroi_summary` section carries on post-#629 fits (`mroi_mean`, `mroi_profit_mean`, `pv_kernel_mass_mean`, and the `allperiods_unweighted` / `spendweighted_active` variants). The median is the displayed headline; the mean is the statistic that reconciles with the marginal-revenue curve, because derivative and mean commute and the median has no such identity. Agents must feature-detect: there is no backfill, so the keys are absent on anything fitted earlier, and a mean cannot be recovered from a stored median and HDI. Documentation only — no tool surface, request parameter, or filtering behaviour changes.
+- `get_model_results` documents the `*_mean` keys the `mroi_summary` section carries on post-#629 fits (`mroi_mean`, `mroi_profit_mean`, `pv_kernel_mass_mean`, and the `allperiods_unweighted` / `spendweighted_active` variants). The median is the displayed headline; the mean is the statistic that reconciles with the marginal-revenue curve, because derivative and mean commute and the median has no such identity. Agents must feature-detect: there is no backfill, so the keys are absent on anything fitted earlier, and a mean cannot be recovered from a stored median and HDI. Documentation only â€” no tool surface, request parameter, or filtering behaviour changes.
 
-- Model curation (#575): `create_model` gains `name` (honoured verbatim by the API; omitted → generated `API_MMM_*` fallback, payload byte-identical), plus new tools `rename_model` (PATCH `/models/{hash}`) and `save_model` (POST `/models/{hash}/save` — files the model into a project so it appears in the default `list_models` listing and the dashboard's Saved Models; same saved-models cap as the dashboard, `error_type: "saved_limit"` at the cap). Contract snapshot pins all three surfaces.
-- Saved-run curation (#576): `update_run` (PATCH rename/notes/tags — flips `auto_named` false permanently) and `set_run_pinned` (declarative, idempotent pin) over both artifacts (`optimizer` → `/optimize/runs/{run_id}`, `scenario` → `/scenario/runs/{run_id}`). Write scopes mirror creation: `optimize` / `scenario`. Contract snapshot pins the four route surfaces.
+- Model curation (#575): `create_model` gains `name` (honoured verbatim by the API; omitted â†’ generated `API_MMM_*` fallback, payload byte-identical), plus new tools `rename_model` (PATCH `/models/{hash}`) and `save_model` (POST `/models/{hash}/save` â€” files the model into a project so it appears in the default `list_models` listing and the dashboard's Saved Models; same saved-models cap as the dashboard, `error_type: "saved_limit"` at the cap). Contract snapshot pins all three surfaces.
+- Saved-run curation (#576): `update_run` (PATCH rename/notes/tags â€” flips `auto_named` false permanently) and `set_run_pinned` (declarative, idempotent pin) over both artifacts (`optimizer` â†’ `/optimize/runs/{run_id}`, `scenario` â†’ `/scenario/runs/{run_id}`). Write scopes mirror creation: `optimize` / `scenario`. Contract snapshot pins the four route surfaces.
 - `run_optimizer` exposes `group_bounds` (#570): joint budget constraints over channel sets in % of total budget, disjoint and feasibility-validated server-side; presence forces the slsqp engine and results gain `GroupBounds`/`GroupBoundsReport` columns. Contract snapshot pins the key.
 - Long-term (VAR) models are now reachable through MCP (#569): `create_var_model` (endogenous/exogenous series, lags, forecast horizon, long-run-effects base/equity/horizon/ci, `var_priors`), plus `link_var_model`/`unlink_var_model` to attach a VAR to an MMM so `get_model_results` serves the `long_run_rollup` section. Contract snapshot pins all VAR request parameters.
-- `set_contribution_groups`/`get_contribution_groups` (#436): persist the dashboard contributions-view driver groupings (colors, per-driver base adjustments, the `_channel_color_overrides` pseudo-group) next to the model via the new v1 route pair — with the explicit warning that this is NOT `create_model`'s adstock `channel_groups`. Contract snapshot pins the payload.
+- `set_contribution_groups`/`get_contribution_groups` (#436): persist the dashboard contributions-view driver groupings (colors, per-driver base adjustments, the `_channel_color_overrides` pseudo-group) next to the model via the new v1 route pair â€” with the explicit warning that this is NOT `create_model`'s adstock `channel_groups`. Contract snapshot pins the payload.
 
-- `get_optimizer_results` accepts optional `run_id` (issue #33): with it, the tool fetches that specific optimization run via `GET /optimize/runs/{run_id}` — immune to later runs overwriting the model-level state, so pollers can reliably observe their own run's completion. Without it, behavior is unchanged (model-level latest). The docstring now documents the actual result surface and, critically, that the decision-math columns (`Revenue`/`ROI`, removal-lift counterfactual; `ObjectiveMarginal`) and the fitted-convention comparison columns (`OptimizedEvalRevenue`/`ROI`, `HistoricalRevenue`/`ROI`; `MroiAtOptimized` + 94% HDI bounds) answer different questions and must not be treated as interchangeable. Contract snapshot pins `run_id`.
+- `get_optimizer_results` accepts optional `run_id` (issue #33): with it, the tool fetches that specific optimization run via `GET /optimize/runs/{run_id}` â€” immune to later runs overwriting the model-level state, so pollers can reliably observe their own run's completion. Without it, behavior is unchanged (model-level latest). The docstring now documents the actual result surface and, critically, that the decision-math columns (`Revenue`/`ROI`, removal-lift counterfactual; `ObjectiveMarginal`) and the fitted-convention comparison columns (`OptimizedEvalRevenue`/`ROI`, `HistoricalRevenue`/`ROI`; `MroiAtOptimized` + 94% HDI bounds) answer different questions and must not be treated as interchangeable. Contract snapshot pins `run_id`.
 
-- `create_model` exposes `control_reference` (#452, issue #28): per-control attribution reference points for multiplicative (`link="log"`) models — `{"control": "auto" | "absent" | "average" | "lowest" | "highest", "_default": ...}`, forwarded verbatim into `config.control_reference` on the same pattern as `channel_groups` (omitted when empty, so existing payloads are byte-identical). Fixes MCP-built multiplicative models silently getting unbounded control contributions (−157% of outcome) and a negative Base when a control never approaches zero. `get_model_results` documents the fit-time resolution reported back in `model_config.control_references` and the referenced control columns in `contributions`. Contract snapshot pins `config.control_reference`.
+- `create_model` exposes `control_reference` (#452, issue #28): per-control attribution reference points for multiplicative (`link="log"`) models â€” `{"control": "auto" | "absent" | "average" | "lowest" | "highest", "_default": ...}`, forwarded verbatim into `config.control_reference` on the same pattern as `channel_groups` (omitted when empty, so existing payloads are byte-identical). Fixes MCP-built multiplicative models silently getting unbounded control contributions (âˆ’157% of outcome) and a negative Base when a control never approaches zero. `get_model_results` documents the fit-time resolution reported back in `model_config.control_references` and the referenced control columns in `contributions`. Contract snapshot pins `config.control_reference`.
 
 - `create_model` exposes the API's model-architecture options: `saturation_type` ("tanh"/"michaelis_menten"/"negative_exponential"/"generalized_log"), `transform_order` ("adstock_first"/"saturation_first"), and `link` ("identity" = additive, "log" = multiplicative Model Form). Defaults omit the keys, so existing payloads are byte-identical. Multiplicative, saturate-then-carry models are now reachable through MCP.
 - `create_model` priors docstring documents the adstock/saturation prior-override fields the API already accepts: `half_life_lower`/`half_life_upper` (preferred over legacy decay bounds), `theta_mean`/`theta_sd` (delayed adstock), `dual_weight_mean`/`dual_weight_sd` (dual_geometric), `sat_shape_mean`/`sat_shape_sd` (generalized_log). These passed through before but were undiscoverable.
-- `get_model_results` documents three previously undocumented sections — `posterior` (per-variable mean/sd/94% HDI/r_hat), `financials` (operating margin), `model_config` (resolved model specification) — plus the `Overlap` contribution column emitted by multiplicative models (negative shared-synergy reconciliation term; never a channel) and the `generalized_log` saturation family.
-- `create_model` exposes `channel_groups` (adstock groups): named groups of channels that tie their carryover parameters — and optionally saturation — to one shared value (e.g. shared "Long"/"Short" carryover classes). Serialized only when non-empty. Requires an API with `config.channel_groups` support.
+- `get_model_results` documents three previously undocumented sections â€” `posterior` (per-variable mean/sd/94% HDI/r_hat), `financials` (operating margin), `model_config` (resolved model specification) â€” plus the `Overlap` contribution column emitted by multiplicative models (negative shared-synergy reconciliation term; never a channel) and the `generalized_log` saturation family.
+- `create_model` exposes `channel_groups` (adstock groups): named groups of channels that tie their carryover parameters â€” and optionally saturation â€” to one shared value (e.g. shared "Long"/"Short" carryover classes). Serialized only when non-empty. Requires an API with `config.channel_groups` support.
 - Contract snapshot now pins `config.saturation_type`, `config.transform_order`, `config.link`, and `config.channel_groups` (snapshot re-reviewed against the core API as of 2026-08-09).
 
 - `run_optimizer` now exposes the API's remaining optimizer options: `objective` ("revenue"/"profit"), `forward_margin`, `period_multiplier`, `include_historical_effect`, `enable_warm_start`. Profit optimization is now reachable through MCP; omitting the new params produces byte-identical payloads to 0.1.1 (issue #11).
-- `upload_data` accepts `csv_path` (mutually exclusive with `csv_content`): the server reads the file directly, so large CSVs no longer transit the LLM conversation. Pre-flight existence/size checks; dataset name defaults to the file stem. Local (stdio) servers only — disabled on HTTP/SSE transports unless `SIMBA_MCP_ALLOW_LOCAL_FILES=1` (issue #14).
-- `get_model_results` gains context-size controls for LLM use (issue #13): `format="csv"` (returns `{"format": "csv", "content": ...}`; the client now handles non-JSON responses instead of raising), `channels=[...]` client-side filtering (curve sections, decay_curves, saturation, channel_summary, coefficients, mroi_summary; name matching tolerates case/spaces and the `_activity`/`_spend` suffix), and `max_grid_points` downsampling of the 100-point curves (endpoints preserved). `contributions` is never filtered — its control columns are indistinguishable from channels client-side. Defaults unchanged.
-- Parameter-completeness sweep vs API v1 (issue #15): `list_models` exposes `offset` (paging); `run_scenario` exposes `evaluate_holdout`, `skip_slicing`, `proxy_channels` (serialized only when non-default — existing payloads unchanged); `upload_data` exposes `filename`; `get_scenario_template` docstring documents the `operating_margin`, `variable_transforms`, and `variable_classification` response fields.
+- `upload_data` accepts `csv_path` (mutually exclusive with `csv_content`): the server reads the file directly, so large CSVs no longer transit the LLM conversation. Pre-flight existence/size checks; dataset name defaults to the file stem. Local (stdio) servers only â€” disabled on HTTP/SSE transports unless `SIMBA_MCP_ALLOW_LOCAL_FILES=1` (issue #14).
+- `get_model_results` gains context-size controls for LLM use (issue #13): `format="csv"` (returns `{"format": "csv", "content": ...}`; the client now handles non-JSON responses instead of raising), `channels=[...]` client-side filtering (curve sections, decay_curves, saturation, channel_summary, coefficients, mroi_summary; name matching tolerates case/spaces and the `_activity`/`_spend` suffix), and `max_grid_points` downsampling of the 100-point curves (endpoints preserved). `contributions` is never filtered â€” its control columns are indistinguishable from channels client-side. Defaults unchanged.
+- Parameter-completeness sweep vs API v1 (issue #15): `list_models` exposes `offset` (paging); `run_scenario` exposes `evaluate_holdout`, `skip_slicing`, `proxy_channels` (serialized only when non-default â€” existing payloads unchanged); `upload_data` exposes `filename`; `get_scenario_template` docstring documents the `operating_margin`, `variable_transforms`, and `variable_classification` response fields.
 - Contract test (`tests/test_contract.py`) pinning the v1 request-parameter surface: it fails when a snapshot parameter isn't reachable through any MCP tool, with an `EXCLUDED_BY_DESIGN` list for the deliberate exclusions (API-key management). README documents that exclusion.
 - Enriched MCP tool descriptions with inline gotchas (channel name matching, array requirements, NaN cleaning, async polling patterns) so AI agents get tips automatically.
 - README: Gotchas & Tips section covering the 6 most common pitfalls.
@@ -155,22 +192,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ### Fixed
 
-- The MCP initialize handshake now reports simba-mcp's own package version instead of the mcp SDK's (issue #41). FastMCP 1.x accepts no version kwarg, and the low-level server falls back to `importlib.metadata.version("mcp")` when its version is unset — so clients saw the SDK version (e.g. `1.27.0`) as the server's.
-- `create_model` likelihood docs listed `"negbinomial"`, which the API rejects — corrected to the canonical values: `normal`, `lognormal`, `logit`, `studentt`, `poisson`, `negativebinomial`, `quantile`.
-- `get_model_results` docstring now documents all 14 API sections — previously `saturation`, `mroi_summary`, and `long_run_rollup` were undiscoverable — with per-section semantics (issue #12).
+- The MCP initialize handshake now reports simba-mcp's own package version instead of the mcp SDK's (issue #41). FastMCP 1.x accepts no version kwarg, and the low-level server falls back to `importlib.metadata.version("mcp")` when its version is unset â€” so clients saw the SDK version (e.g. `1.27.0`) as the server's.
+- `create_model` likelihood docs listed `"negbinomial"`, which the API rejects â€” corrected to the canonical values: `normal`, `lognormal`, `logit`, `studentt`, `poisson`, `negativebinomial`, `quantile`.
+- `get_model_results` docstring now documents all 14 API sections â€” previously `saturation`, `mroi_summary`, and `long_run_rollup` were undiscoverable â€” with per-section semantics (issue #12).
 - `contributions` vs `coefficients` clarified: contributions are KPI/unit space (multiplier not applied); `coefficients` is the per-period per-channel revenue table.
 - Channel-naming rule stated precisely in `get_model_results`, `run_optimizer`, and `run_scenario`: results/template keys are the channel's activity-column name, not `channels[].name`; plus a note that record dates are millisecond epoch integers.
 - README: updated the channel-names gotcha and added a Results sections reference; snapshot test guards the section list against going stale.
 - Upload size limit corrected: the API enforces **10 MB**, not the previously documented 50 MB. Docstring and README updated; oversized `csv_path` uploads fail fast with a clear message (issue #14).
-- Row-minimum guidance no longer hardcodes "52 rows" — it defers to `get_data_schema` → `x-simba-constraints.min_rows` and notes that the upload response's `warnings` field is authoritative (issue #14).
+- Row-minimum guidance no longer hardcodes "52 rows" â€” it defers to `get_data_schema` â†’ `x-simba-constraints.min_rows` and notes that the upload response's `warnings` field is authoritative (issue #14).
 
-## 0.1.1 — 2026-04-06
+## 0.1.1 â€” 2026-04-06
 
 ### Fixed
 
 - Updated API URL in README examples from `app.getsimba.ai` to `demo.simba-mmm.com` (Cursor IDE, Claude Code, and Claude API connector configs).
 
-## 0.1.0 — 2026-04-05
+## 0.1.0 â€” 2026-04-05
 
 ### Added
 

@@ -6,7 +6,7 @@ import httpx
 import pytest
 from starlette.testclient import TestClient
 
-from simba_mcp import server
+from simba_mcp import runtime, server
 from simba_mcp.api_client import SimbaAPIClient
 
 
@@ -38,6 +38,7 @@ def test_list_runs_preserves_budget_and_older_backend_responses(monkeypatch, wit
             )
         return self._client
 
+    monkeypatch.setattr(runtime, "_serving_http", runtime._serving_http)
     monkeypatch.setattr(SimbaAPIClient, "_get_client", get_client)
     with TestClient(server._create_app()) as client:
         result = client.post(

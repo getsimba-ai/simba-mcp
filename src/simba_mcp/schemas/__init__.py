@@ -39,19 +39,148 @@ RecipeSpecification = Annotated[
         }
     ),
 ]
+DraftSnapshot = Annotated[
+    dict,
+    Field(
+        json_schema_extra={
+            "description": "Lossless editor authoring state. Backend is authoritative; preserve unknown nested fields. Source bytes are copied into encrypted draft storage (10 MB source limit); metadata limit is 5 MB. No local filesystem paths or executable code.",
+            "properties": {
+                "calibration_import": {
+                    "type": "object",
+                    "description": "Optional original calibration JSON reference (1 MB). Preserve separately from editable observations; backend verifies the file hash, not equivalence to current observations.",
+                    "properties": {
+                        "name": {"type": "string"},
+                        "content_base64": {"type": "string", "maxLength": 1400000},
+                        "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+                    },
+                    "required": ["name", "content_base64"],
+                },
+                "schema_version": {"type": "integer", "enum": [1]},
+                "family": {"type": "string", "enum": ["mmm", "var"]},
+                "configuration": {"type": "object"},
+                "model_setup": {"type": "object"},
+                "model_details": {"type": "object"},
+                "transformations": {"type": "object"},
+                "source": {
+                    "anyOf": [
+                        {"type": "null"},
+                        {
+                            "type": "object",
+                            "properties": {
+                                "name": {"type": "string"},
+                                "content_base64": {"type": "string"},
+                                "origin": {
+                                    "type": "object",
+                                    "description": "Optional uploaded dataset or saved pipeline-version lineage. Backend verifies ownership and exact bytes, then supplies sha256. Retain the returned origin when reopening; it never replaces frozen source bytes.",
+                                    "properties": {
+                                        "kind": {
+                                            "type": "string",
+                                            "enum": ["uploaded_file", "pipeline_version"],
+                                        },
+                                        "id": {"type": "integer", "minimum": 1},
+                                        "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+                                        "pipeline_id": {"type": "integer", "minimum": 1},
+                                        "version": {"type": "integer", "minimum": 1},
+                                    },
+                                    "required": ["kind", "id"],
+                                },
+                                "history": {
+                                    "type": "array",
+                                    "maxItems": 100,
+                                    "description": "Client-reported authoring edits. Backend validates the hash chain and final bytes, not operation semantics. Preserve when reopening. Edited sources must omit unchanged origin.",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "kind": {
+                                                "type": "string",
+                                                "enum": ["transform_column", "remove_column"],
+                                            },
+                                            "column": {"type": "string"},
+                                            "output_column": {"type": "string"},
+                                            "transformation": {"type": "string"},
+                                            "parameter": {"type": ["number", "null"]},
+                                            "input_sha256": {
+                                                "type": "string",
+                                                "pattern": "^[a-f0-9]{64}$",
+                                            },
+                                            "output_sha256": {
+                                                "type": "string",
+                                                "pattern": "^[a-f0-9]{64}$",
+                                            },
+                                            "row_count": {"type": "integer", "minimum": 0},
+                                        },
+                                        "required": [
+                                            "kind",
+                                            "column",
+                                            "input_sha256",
+                                            "output_sha256",
+                                            "row_count",
+                                        ],
+                                    },
+                                },
+                            },
+                            "required": ["name", "content_base64"],
+                        },
+                    ]
+                },
+            },
+            "required": [
+                "schema_version",
+                "family",
+                "configuration",
+                "model_setup",
+                "model_details",
+                "transformations",
+            ],
+        }
+    ),
+]
 QualityCheck = Annotated[
     dict,
     Field(
         json_schema_extra={
+            "description": "Built-in metric + maximum, or custom numeric gate with metric custom:<slug>, name, units, operator and applicable bounds. Boolean/manual checks use kind, operator equals and strict boolean expected. Manual expected must be true and sign-off is session-only. At least one required gate per policy.",
             "properties": {
-                "metric": {"type": "string", "examples": ["r_hat_max", "mae", "rmse", "wape"]},
-                "maximum": {
-                    "type": "number",
-                    "description": "Declared upper threshold: WAPE as a fraction, MAE/RMSE in outcome units, R-hat dimensionless.",
+                "metric": {
+                    "type": "string",
+                    "examples": [
+                        "r_hat_max",
+                        "mae",
+                        "rmse",
+                        "wape",
+                        "prediction_mae",
+                        "prediction_rmse",
+                        "prediction_wape",
+                        "custom:benchmark_deviation",
+                    ],
                 },
+                "name": {"type": "string"},
+                "units": {"type": "string"},
+                "kind": {"type": "string", "enum": ["boolean", "manual"]},
+                "expected": {"type": "boolean"},
+                "operator": {"type": "string", "enum": ["lte", "gte", "between", "equals"]},
+                "minimum": {"type": "number"},
+                "maximum": {"type": "number"},
                 "required": {"type": "boolean", "default": True},
             },
-            "required": ["metric", "maximum"],
+            "required": ["metric"],
+        }
+    ),
+]
+ExternalEvidence = Annotated[
+    dict,
+    Field(
+        json_schema_extra={
+            "description": "Externally calculated numeric or strict boolean evidence; server applies policy. Manual sign-off is session-only and cannot be submitted with an API key. Source/method/digest are submitter-reported, not independently verified. Never submit a pass/fail status.",
+            "properties": {
+                "metric": {"type": "string", "pattern": "^custom:[a-z][a-z0-9_]{0,63}$"},
+                "value": {"type": ["number", "boolean"]},
+                "method": {"type": "string", "maxLength": 5000},
+                "source_reference": {"type": "string", "maxLength": 2000},
+                "source_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+            },
+            "required": ["metric", "value", "method", "source_reference"],
+            "additionalProperties": False,
         }
     ),
 ]
@@ -105,6 +234,52 @@ ControlPrior = Annotated[
                 "upper": {"type": "number"},
             },
             "required": ["control"],
+        }
+    ),
+]
+
+
+ValidationProtocolSpec = Annotated[
+    dict,
+    Field(
+        json_schema_extra={
+            "description": "Declare temporal holdout before launching both models. Sampling minima describe configured intent, not retained draws or scientific certification.",
+            "properties": {
+                "kind": {"const": "temporal_holdout"},
+                "training_end": {"type": "string", "format": "date"},
+                "prediction_start": {"type": "string", "format": "date"},
+                "prediction_end": {"type": "string", "format": "date"},
+                "min_draws": {"type": "integer", "minimum": 1},
+                "min_tune": {"type": "integer", "minimum": 1},
+                "min_chains": {"type": "integer", "minimum": 2},
+                "max_r_hat": {"type": "number", "minimum": 1},
+                "max_prediction_wape": {"type": "number", "minimum": 0},
+                "require_policy_review": {
+                    "type": "boolean",
+                    "description": "Require current analyst acceptance of the latest launch-policy assessment for both runs.",
+                },
+                "retained_sampling": {
+                    "type": "object",
+                    "additionalProperties": False,
+                    "required": ["min_ess_bulk", "min_ess_tail", "max_divergences"],
+                    "properties": {
+                        "min_ess_bulk": {"type": "number", "exclusiveMinimum": 0},
+                        "min_ess_tail": {"type": "number", "exclusiveMinimum": 0},
+                        "max_divergences": {"type": "integer", "minimum": 0},
+                    },
+                },
+            },
+            "required": [
+                "training_end",
+                "prediction_start",
+                "prediction_end",
+                "min_draws",
+                "min_tune",
+                "min_chains",
+                "max_r_hat",
+                "max_prediction_wape",
+            ],
+            "additionalProperties": False,
         }
     ),
 ]

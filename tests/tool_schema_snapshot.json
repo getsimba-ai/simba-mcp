@@ -1318,6 +1318,18 @@
         ],
         "default": null,
         "title": "Expected Content Hash"
+      },
+      "source_revision_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Source Revision Id"
       }
     },
     "required": [
@@ -1383,6 +1395,18 @@
         ],
         "default": null,
         "title": "Expected Content Hash"
+      },
+      "source_revision_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Source Revision Id"
       }
     },
     "required": [
@@ -1551,27 +1575,146 @@
                 "r_hat_max",
                 "mae",
                 "rmse",
-                "wape"
+                "wape",
+                "prediction_mae",
+                "prediction_rmse",
+                "prediction_wape",
+                "custom:benchmark_deviation"
               ],
               "type": "string"
             },
             "maximum": {
-              "description": "Declared upper threshold: WAPE as a fraction, MAE/RMSE in outcome units, R-hat dimensionless.",
               "type": "number"
             },
             "required": {
               "default": true,
               "type": "boolean"
+            },
+            "name": {
+              "type": "string"
+            },
+            "units": {
+              "type": "string"
+            },
+            "operator": {
+              "enum": [
+                "lte",
+                "gte",
+                "between",
+                "equals"
+              ],
+              "type": "string"
+            },
+            "minimum": {
+              "type": "number"
+            },
+            "kind": {
+              "enum": [
+                "boolean",
+                "manual"
+              ],
+              "type": "string"
+            },
+            "expected": {
+              "type": "boolean"
             }
           },
           "required": [
-            "metric",
-            "maximum"
+            "metric"
           ],
-          "type": "object"
+          "type": "object",
+          "description": "Built-in metric + maximum, or custom numeric gate with metric custom:<slug>, name, units, operator and applicable bounds. Boolean/manual checks use kind, operator equals and strict boolean expected. Manual expected must be true and sign-off is session-only. At least one required gate per policy."
         },
         "title": "Checks",
         "type": "array"
+      },
+      "validation_protocol": {
+        "anyOf": [
+          {
+            "additionalProperties": false,
+            "description": "Declare temporal holdout before launching both models. Sampling minima describe configured intent, not retained draws or scientific certification.",
+            "properties": {
+              "kind": {
+                "const": "temporal_holdout"
+              },
+              "training_end": {
+                "format": "date",
+                "type": "string"
+              },
+              "prediction_start": {
+                "format": "date",
+                "type": "string"
+              },
+              "prediction_end": {
+                "format": "date",
+                "type": "string"
+              },
+              "min_draws": {
+                "minimum": 1,
+                "type": "integer"
+              },
+              "min_tune": {
+                "minimum": 1,
+                "type": "integer"
+              },
+              "min_chains": {
+                "minimum": 2,
+                "type": "integer"
+              },
+              "max_r_hat": {
+                "minimum": 1,
+                "type": "number"
+              },
+              "max_prediction_wape": {
+                "minimum": 0,
+                "type": "number"
+              },
+              "retained_sampling": {
+                "additionalProperties": false,
+                "properties": {
+                  "min_ess_bulk": {
+                    "exclusiveMinimum": 0,
+                    "type": "number"
+                  },
+                  "min_ess_tail": {
+                    "exclusiveMinimum": 0,
+                    "type": "number"
+                  },
+                  "max_divergences": {
+                    "minimum": 0,
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "min_ess_bulk",
+                  "min_ess_tail",
+                  "max_divergences"
+                ],
+                "type": "object"
+              },
+              "require_policy_review": {
+                "description": "Require current analyst acceptance of the latest launch-policy assessment for both runs.",
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "training_end",
+              "prediction_start",
+              "prediction_end",
+              "min_draws",
+              "min_tune",
+              "min_chains",
+              "max_r_hat",
+              "max_prediction_wape"
+            ],
+            "type": "object"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Validation Protocol"
       }
     },
     "required": [
@@ -1592,6 +1735,65 @@
       "policy_id": {
         "title": "Policy Id",
         "type": "string"
+      },
+      "expected_basis_hash": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Expected Basis Hash"
+      },
+      "external_evidence": {
+        "anyOf": [
+          {
+            "items": {
+              "additionalProperties": false,
+              "description": "Externally calculated numeric or strict boolean evidence; server applies policy. Manual sign-off is session-only and cannot be submitted with an API key. Source/method/digest are submitter-reported, not independently verified. Never submit a pass/fail status.",
+              "properties": {
+                "metric": {
+                  "pattern": "^custom:[a-z][a-z0-9_]{0,63}$",
+                  "type": "string"
+                },
+                "value": {
+                  "type": [
+                    "number",
+                    "boolean"
+                  ]
+                },
+                "method": {
+                  "maxLength": 5000,
+                  "type": "string"
+                },
+                "source_reference": {
+                  "maxLength": 2000,
+                  "type": "string"
+                },
+                "source_sha256": {
+                  "pattern": "^[a-f0-9]{64}$",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "metric",
+                "value",
+                "method",
+                "source_reference"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "External Evidence"
       }
     },
     "required": [
@@ -1707,6 +1909,630 @@
       "policy_id"
     ],
     "title": "compare_study_runsArguments",
+    "type": "object"
+  },
+  "create_recipe_draft": {
+    "properties": {
+      "study_id": {
+        "title": "Study Id",
+        "type": "string"
+      },
+      "draft_id": {
+        "title": "Draft Id",
+        "type": "string"
+      },
+      "name": {
+        "title": "Name",
+        "type": "string"
+      },
+      "snapshot": {
+        "additionalProperties": true,
+        "description": "Lossless editor authoring state. Backend is authoritative; preserve unknown nested fields. Source bytes are copied into encrypted draft storage (10 MB source limit); metadata limit is 5 MB. No local filesystem paths or executable code.",
+        "properties": {
+          "calibration_import": {
+            "description": "Optional original calibration JSON reference (1 MB). Preserve separately from editable observations; backend verifies the file hash, not equivalence to current observations.",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "content_base64": {
+                "maxLength": 1400000,
+                "type": "string"
+              },
+              "sha256": {
+                "pattern": "^[a-f0-9]{64}$",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "content_base64"
+            ],
+            "type": "object"
+          },
+          "schema_version": {
+            "enum": [
+              1
+            ],
+            "type": "integer"
+          },
+          "family": {
+            "enum": [
+              "mmm",
+              "var"
+            ],
+            "type": "string"
+          },
+          "configuration": {
+            "type": "object"
+          },
+          "model_setup": {
+            "type": "object"
+          },
+          "model_details": {
+            "type": "object"
+          },
+          "transformations": {
+            "type": "object"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "null"
+              },
+              {
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "content_base64": {
+                    "type": "string"
+                  },
+                  "origin": {
+                    "description": "Optional uploaded dataset or saved pipeline-version lineage. Backend verifies ownership and exact bytes, then supplies sha256. Retain the returned origin when reopening; it never replaces frozen source bytes.",
+                    "properties": {
+                      "kind": {
+                        "enum": [
+                          "uploaded_file",
+                          "pipeline_version"
+                        ],
+                        "type": "string"
+                      },
+                      "id": {
+                        "minimum": 1,
+                        "type": "integer"
+                      },
+                      "sha256": {
+                        "pattern": "^[a-f0-9]{64}$",
+                        "type": "string"
+                      },
+                      "pipeline_id": {
+                        "minimum": 1,
+                        "type": "integer"
+                      },
+                      "version": {
+                        "minimum": 1,
+                        "type": "integer"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "id"
+                    ],
+                    "type": "object"
+                  },
+                  "history": {
+                    "description": "Client-reported authoring edits. Backend validates the hash chain and final bytes, not operation semantics. Preserve when reopening. Edited sources must omit unchanged origin.",
+                    "items": {
+                      "properties": {
+                        "kind": {
+                          "enum": [
+                            "transform_column",
+                            "remove_column"
+                          ],
+                          "type": "string"
+                        },
+                        "column": {
+                          "type": "string"
+                        },
+                        "output_column": {
+                          "type": "string"
+                        },
+                        "transformation": {
+                          "type": "string"
+                        },
+                        "parameter": {
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        },
+                        "input_sha256": {
+                          "pattern": "^[a-f0-9]{64}$",
+                          "type": "string"
+                        },
+                        "output_sha256": {
+                          "pattern": "^[a-f0-9]{64}$",
+                          "type": "string"
+                        },
+                        "row_count": {
+                          "minimum": 0,
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "column",
+                        "input_sha256",
+                        "output_sha256",
+                        "row_count"
+                      ],
+                      "type": "object"
+                    },
+                    "maxItems": 100,
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "name",
+                  "content_base64"
+                ],
+                "type": "object"
+              }
+            ]
+          }
+        },
+        "required": [
+          "schema_version",
+          "family",
+          "configuration",
+          "model_setup",
+          "model_details",
+          "transformations"
+        ],
+        "title": "Snapshot",
+        "type": "object"
+      },
+      "source_revision_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Source Revision Id"
+      }
+    },
+    "required": [
+      "study_id",
+      "draft_id",
+      "name",
+      "snapshot"
+    ],
+    "title": "create_recipe_draftArguments",
+    "type": "object"
+  },
+  "get_recipe_draft": {
+    "properties": {
+      "draft_id": {
+        "title": "Draft Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "draft_id"
+    ],
+    "title": "get_recipe_draftArguments",
+    "type": "object"
+  },
+  "list_recipe_drafts": {
+    "properties": {
+      "study_id": {
+        "title": "Study Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "study_id"
+    ],
+    "title": "list_recipe_draftsArguments",
+    "type": "object"
+  },
+  "update_recipe_draft": {
+    "properties": {
+      "draft_id": {
+        "title": "Draft Id",
+        "type": "string"
+      },
+      "expected_version": {
+        "title": "Expected Version",
+        "type": "integer"
+      },
+      "name": {
+        "title": "Name",
+        "type": "string"
+      },
+      "snapshot": {
+        "additionalProperties": true,
+        "description": "Lossless editor authoring state. Backend is authoritative; preserve unknown nested fields. Source bytes are copied into encrypted draft storage (10 MB source limit); metadata limit is 5 MB. No local filesystem paths or executable code.",
+        "properties": {
+          "configuration": {
+            "type": "object"
+          },
+          "family": {
+            "enum": [
+              "mmm",
+              "var"
+            ],
+            "type": "string"
+          },
+          "model_details": {
+            "type": "object"
+          },
+          "model_setup": {
+            "type": "object"
+          },
+          "schema_version": {
+            "enum": [
+              1
+            ],
+            "type": "integer"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "null"
+              },
+              {
+                "properties": {
+                  "content_base64": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "origin": {
+                    "description": "Optional uploaded dataset or saved pipeline-version lineage. Backend verifies ownership and exact bytes, then supplies sha256. Retain the returned origin when reopening; it never replaces frozen source bytes.",
+                    "properties": {
+                      "kind": {
+                        "enum": [
+                          "uploaded_file",
+                          "pipeline_version"
+                        ],
+                        "type": "string"
+                      },
+                      "id": {
+                        "minimum": 1,
+                        "type": "integer"
+                      },
+                      "sha256": {
+                        "pattern": "^[a-f0-9]{64}$",
+                        "type": "string"
+                      },
+                      "pipeline_id": {
+                        "minimum": 1,
+                        "type": "integer"
+                      },
+                      "version": {
+                        "minimum": 1,
+                        "type": "integer"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "id"
+                    ],
+                    "type": "object"
+                  },
+                  "history": {
+                    "description": "Client-reported authoring edits. Backend validates the hash chain and final bytes, not operation semantics. Preserve when reopening. Edited sources must omit unchanged origin.",
+                    "items": {
+                      "properties": {
+                        "kind": {
+                          "enum": [
+                            "transform_column",
+                            "remove_column"
+                          ],
+                          "type": "string"
+                        },
+                        "column": {
+                          "type": "string"
+                        },
+                        "output_column": {
+                          "type": "string"
+                        },
+                        "transformation": {
+                          "type": "string"
+                        },
+                        "parameter": {
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        },
+                        "input_sha256": {
+                          "pattern": "^[a-f0-9]{64}$",
+                          "type": "string"
+                        },
+                        "output_sha256": {
+                          "pattern": "^[a-f0-9]{64}$",
+                          "type": "string"
+                        },
+                        "row_count": {
+                          "minimum": 0,
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "column",
+                        "input_sha256",
+                        "output_sha256",
+                        "row_count"
+                      ],
+                      "type": "object"
+                    },
+                    "maxItems": 100,
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "name",
+                  "content_base64"
+                ],
+                "type": "object"
+              }
+            ]
+          },
+          "transformations": {
+            "type": "object"
+          },
+          "calibration_import": {
+            "description": "Optional original calibration JSON reference (1 MB). Preserve separately from editable observations; backend verifies the file hash, not equivalence to current observations.",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "content_base64": {
+                "maxLength": 1400000,
+                "type": "string"
+              },
+              "sha256": {
+                "pattern": "^[a-f0-9]{64}$",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "content_base64"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "schema_version",
+          "family",
+          "configuration",
+          "model_setup",
+          "model_details",
+          "transformations"
+        ],
+        "title": "Snapshot",
+        "type": "object"
+      }
+    },
+    "required": [
+      "draft_id",
+      "expected_version",
+      "name",
+      "snapshot"
+    ],
+    "title": "update_recipe_draftArguments",
+    "type": "object"
+  },
+  "get_recipe_draft_template": {
+    "properties": {
+      "family": {
+        "default": "mmm",
+        "enum": [
+          "mmm",
+          "var"
+        ],
+        "title": "Family",
+        "type": "string"
+      },
+      "uploaded_file_id": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Uploaded File Id"
+      },
+      "pipeline_version_id": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Pipeline Version Id"
+      }
+    },
+    "title": "get_recipe_draft_templateArguments",
+    "type": "object"
+  },
+  "publish_recipe_draft": {
+    "properties": {
+      "draft_id": {
+        "title": "Draft Id",
+        "type": "string"
+      },
+      "expected_version": {
+        "title": "Expected Version",
+        "type": "integer"
+      },
+      "publication_id": {
+        "title": "Publication Id",
+        "type": "string"
+      },
+      "reason": {
+        "title": "Reason",
+        "type": "string"
+      }
+    },
+    "required": [
+      "draft_id",
+      "expected_version",
+      "publication_id",
+      "reason"
+    ],
+    "title": "publish_recipe_draftArguments",
+    "type": "object"
+  },
+  "get_recipe_revision_authoring": {
+    "properties": {
+      "recipe_id": {
+        "title": "Recipe Id",
+        "type": "string"
+      },
+      "number": {
+        "title": "Number",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "recipe_id",
+      "number"
+    ],
+    "title": "get_recipe_revision_authoringArguments",
+    "type": "object"
+  },
+  "get_study_champion": {
+    "properties": {
+      "study_id": {
+        "title": "Study Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "study_id"
+    ],
+    "title": "get_study_championArguments",
+    "type": "object"
+  },
+  "assess_study_validation_pair": {
+    "properties": {
+      "study_id": {
+        "title": "Study Id",
+        "type": "string"
+      },
+      "full_run_id": {
+        "title": "Full Run Id",
+        "type": "string"
+      },
+      "validation_run_id": {
+        "title": "Validation Run Id",
+        "type": "string"
+      },
+      "policy_id": {
+        "title": "Policy Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "study_id",
+      "full_run_id",
+      "validation_run_id",
+      "policy_id"
+    ],
+    "title": "assess_study_validation_pairArguments",
+    "type": "object"
+  },
+  "get_study_prediction_access": {
+    "properties": {
+      "run_id": {
+        "title": "Run Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "run_id"
+    ],
+    "title": "get_study_prediction_accessArguments",
+    "type": "object"
+  },
+  "declare_study_holdout_use": {
+    "properties": {
+      "run_id": {
+        "title": "Run Id",
+        "type": "string"
+      },
+      "declaration_id": {
+        "title": "Declaration Id",
+        "type": "string"
+      },
+      "source_access_id": {
+        "title": "Source Access Id",
+        "type": "string"
+      },
+      "disposition": {
+        "enum": [
+          "review_only",
+          "informed_revision",
+          "uncertain"
+        ],
+        "title": "Disposition",
+        "type": "string"
+      },
+      "reason": {
+        "title": "Reason",
+        "type": "string"
+      },
+      "affected_revision_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Affected Revision Id"
+      }
+    },
+    "required": [
+      "run_id",
+      "declaration_id",
+      "source_access_id",
+      "disposition",
+      "reason"
+    ],
+    "title": "declare_study_holdout_useArguments",
+    "type": "object"
+  },
+  "get_study_validation_resolutions": {
+    "properties": {
+      "study_id": {
+        "title": "Study Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "study_id"
+    ],
+    "title": "get_study_validation_resolutionsArguments",
     "type": "object"
   }
 }

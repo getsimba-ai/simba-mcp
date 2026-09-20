@@ -4,13 +4,16 @@ from mcp.types import ToolAnnotations
 
 READ_ONLY = frozenset(
     [
+        "get_recipe_draft",
+        "get_recipe_draft_template",
+        "get_recipe_revision_authoring",
+        "list_recipe_drafts",
         "get_data_schema",
         "list_uploads",
         "get_upload",
         "list_models",
         "get_model",
         "get_model_status",
-        "get_model_results",
         "list_projects",
         "get_contribution_groups",
         "get_optimizer_results",
@@ -25,15 +28,17 @@ READ_ONLY = frozenset(
         "list_study_runs",
         "get_study_run",
         "list_quality_policies",
-        "list_study_evaluations",
         "list_study_decisions",
-        "compare_study_runs",
+        "get_study_champion",
+        "get_study_prediction_access",
+        "get_study_validation_resolutions",
         "get_backend_capabilities",
     ]
 )
 # Any operation that can replace/remove existing state is conservative/destructive.
 DESTRUCTIVE = frozenset(
     [
+        "update_recipe_draft",
         "delete_model",
         "unsave_model",
         "save_model",
@@ -50,6 +55,10 @@ DESTRUCTIVE = frozenset(
 )
 IDEMPOTENT_WRITES = frozenset(
     [
+        "declare_study_holdout_use",
+        "create_recipe_draft",
+        "publish_recipe_draft",
+        "update_recipe_draft",
         "launch_study_run",
         "delete_model",
         "rename_model",
@@ -61,6 +70,9 @@ IDEMPOTENT_WRITES = frozenset(
 )
 ADDITIVE_WRITES = frozenset(
     [
+        "declare_study_holdout_use",
+        "create_recipe_draft",
+        "publish_recipe_draft",
         "upload_data",
         "create_model",
         "create_var_model",
@@ -73,6 +85,10 @@ ADDITIVE_WRITES = frozenset(
         "launch_study_run",
         "create_quality_policy",
         "evaluate_study_run",
+        "get_model_results",
+        "list_study_evaluations",
+        "assess_study_validation_pair",
+        "compare_study_runs",
         "recommend_study_run",
         "adopt_model_into_study",
     ]

@@ -24,8 +24,9 @@ async def create_study_recipe(
     specification: RecipeSpecification,
     ctx: Context[AppContext, Any] = None,
     expected_content_hash: str | None = None,
+    source_revision_id: str | None = None,
 ) -> APIResult:
-    """Freeze a recipe without fitting. Optional expected_content_hash binds the validated effective inputs; a mismatch returns 409 and requires a fresh preview. Specification kind api_mmm has request containing create_model API fields; model_snapshot has model_hash and is review-only."""
+    """Freeze a recipe without fitting. Supply source_revision_id when deriving from a published same-study recipe to retain influence ancestry. Optional expected_content_hash binds the validated effective inputs; a mismatch returns 409 and requires a fresh preview. Specification kind api_mmm has request containing create_model API fields; model_snapshot has model_hash and is review-only."""
     return await _client(ctx).workflow_request(
         "POST",
         f"/studies/{study_id}/recipes",
@@ -33,6 +34,9 @@ async def create_study_recipe(
             "name": name,
             "reason": reason,
             "specification": specification,
+            **(
+                {"source_revision_id": source_revision_id} if source_revision_id is not None else {}
+            ),
             "expected_version": 0,
             **(
                 {"expected_content_hash": expected_content_hash}
@@ -51,8 +55,9 @@ async def revise_study_recipe(
     specification: RecipeSpecification,
     ctx: Context[AppContext, Any] = None,
     expected_content_hash: str | None = None,
+    source_revision_id: str | None = None,
 ) -> APIResult:
-    """Create an immutable revision. Optional expected_content_hash guards effective inputs (409 requires a fresh preview). Supply the current recipe version; stale edits are rejected (412). Reload list_study_recipes, reconcile changes, then submit the current version; never overwrite blindly."""
+    """Create an immutable revision. Earlier versions inherit influence automatically; optional source_revision_id additionally links a same-study source recipe. Optional expected_content_hash guards effective inputs (409 requires a fresh preview). Supply the current recipe version; stale edits are rejected (412). Reload list_study_recipes, reconcile changes, then submit the current version; never overwrite blindly."""
     return await _client(ctx).workflow_request(
         "POST",
         f"/recipes/{recipe_id}/revisions",
@@ -60,6 +65,9 @@ async def revise_study_recipe(
             "name": name,
             "reason": reason,
             "specification": specification,
+            **(
+                {"source_revision_id": source_revision_id} if source_revision_id is not None else {}
+            ),
             "expected_version": expected_version,
             **(
                 {"expected_content_hash": expected_content_hash}

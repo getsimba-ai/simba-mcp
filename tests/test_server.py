@@ -20,6 +20,13 @@ def _list_tools():
 
 
 EXPECTED_TOOLS = [
+    "publish_recipe_draft",
+    "get_recipe_revision_authoring",
+    "get_recipe_draft_template",
+    "create_recipe_draft",
+    "get_recipe_draft",
+    "list_recipe_drafts",
+    "update_recipe_draft",
     "get_backend_capabilities",
     "compare_study_runs",
     "list_studies",
@@ -40,6 +47,11 @@ EXPECTED_TOOLS = [
     "evaluate_study_run",
     "list_study_evaluations",
     "list_study_decisions",
+    "get_study_champion",
+    "get_study_prediction_access",
+    "get_study_validation_resolutions",
+    "declare_study_holdout_use",
+    "assess_study_validation_pair",
     "recommend_study_run",
     "adopt_model_into_study",
     "get_data_schema",
@@ -132,6 +144,7 @@ class TestResultsSectionsDoc:
         "long_run_rollup",
         "optimizer",
         "predictions",
+        "prediction_window",
         "posterior",
         "posterior_transforms",
         "r_hat",
