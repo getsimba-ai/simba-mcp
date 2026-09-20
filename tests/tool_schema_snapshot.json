@@ -1667,6 +1667,10 @@
                   "max_divergences"
                 ],
                 "type": "object"
+              },
+              "require_policy_review": {
+                "description": "Require current analyst acceptance of the latest launch-policy assessment for both runs.",
+                "type": "boolean"
               }
             },
             "required": [

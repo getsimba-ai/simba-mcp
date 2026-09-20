@@ -254,6 +254,10 @@ ValidationProtocolSpec = Annotated[
                 "min_chains": {"type": "integer", "minimum": 2},
                 "max_r_hat": {"type": "number", "minimum": 1},
                 "max_prediction_wape": {"type": "number", "minimum": 0},
+                "require_policy_review": {
+                    "type": "boolean",
+                    "description": "Require current analyst acceptance of the latest launch-policy assessment for both runs.",
+                },
                 "retained_sampling": {
                     "type": "object",
                     "additionalProperties": False,

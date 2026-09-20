@@ -74,6 +74,7 @@ def test_custom_quality_wire(monkeypatch, operation):
                 "min_chains": 2,
                 "max_r_hat": 1.01,
                 "max_prediction_wape": 0.15,
+                "require_policy_review": True,
                 "retained_sampling": {
                     "min_ess_bulk": 400,
                     "min_ess_tail": 300,
