@@ -142,6 +142,7 @@ class TestResultsSectionsDoc:
         "long_run_rollup",
         "optimizer",
         "predictions",
+        "prediction_window",
         "posterior",
         "posterior_transforms",
         "r_hat",

@@ -179,6 +179,10 @@ async def get_model_results(
       channel_map on the link.
     - optimizer: latest optimization results (see get_optimizer_results).
     - predictions: latest scenario prediction rows (see get_scenario_results).
+    - prediction_window: OPT-IN ONLY saved prediction-window actuals/model values.
+      Request sections="prediction_window" (JSON or CSV); omitted by default.
+      This is not certified untouched holdout evidence. For study-linked models,
+      serving it appends an access audit event; channel/grid filters do not alter it.
     - posterior: full posterior summary table — one row per model variable
       with mean, sd, hdi_3%, hdi_97%, and r_hat (quotable 94% HDIs and
       per-variable convergence).
