@@ -1,16 +1,16 @@
 # Changelog
 
-- Extend draft-template discovery with optional owned uploaded-file inputs and source-lineage schema; forward frozen bytes and backend manifests unchanged.
-
-- Add read-only `get_recipe_draft_template` for backend-generated shared wizard defaults and authoring envelope discovery.
-
 All notable changes to the SIMBA MCP Server will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
-## Unreleased
+## 0.5.0 (release candidate)
 
 ### Added
+
+- Add read-only `get_recipe_draft_template` with optional owned upload/pipeline sources, shared authoring defaults and preserved frozen source manifests.
+- Add policy-review and validation-resolution history, retained-sampling/prior/preprocessing provenance, holdout-access and explicit use declarations, and replacement-validation preflight contracts.
+- Preserve same-study `source_revision_id` on derived recipes and drafts so supporting backends can trace inherited influence.
 
 - Add optional predeclared temporal-holdout protocols and read-only `assess_study_validation_pair` with compatibility blockers and evidence fingerprints.
 
@@ -39,6 +39,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - Document backend-gated VAR draft publication alongside fixed-prior MMM. VAR quality remains unavailable under MMM policies; capable backends freeze automatic MMM priors during draft publication and disable rebuilding during replay.
 
 - Clarify optional backend study-budget status, blocked-capacity recovery and quality-policy requirements. Existing tool arguments and additive response forwarding remain compatible with older backends; absent budget is unknown rather than an eligibility claim.
+
+### Compatibility and rollout
+
+- Requires the matching backend capabilities for new tools; installing the package does not deploy those routes or migrate application data.
+- Existing required inputs remain compatible. Optional lineage and additive evidence are forwarded unchanged.
+- Human independence sign-off, resolution revocation and champion promotion remain signed-in owner actions; agents can inspect their status but cannot provide those sign-offs.
+- This version is prepared for release, not yet published. After required review and merge, publish a GitHub release tagged `v0.5.0`; the existing publish workflow tests, builds and uploads to PyPI. Only then update hosted consumers to `simba-mcp==0.5.0`.
 
 ## 0.4.1 â€” 2026-09-19
 
