@@ -22,9 +22,21 @@ from simba_mcp.api_client import SimbaAPIClient
         "prediction",
         "protocol",
         "pair",
+        "pair_training",
     ],
 )
 def test_custom_quality_wire(monkeypatch, operation):
+    provenance = (
+        {
+            "status": "review_required",
+            "preprocessing_status": "training_only",
+            "reason": "Holdout history still requires review",
+        }
+        if operation == "pair_training"
+        else {"status": "blocked", "reason": "Full-input preprocessing"}
+    )
+    if operation == "pair_training":
+        operation = "pair"
     evidence = {
         "metric": "custom:benchmark",
         "value": 8,
@@ -116,10 +128,7 @@ def test_custom_quality_wire(monkeypatch, operation):
                 "status": "not_evaluated",
                 **(
                     {
-                        "holdout_provenance": {
-                            "status": "blocked",
-                            "reason": "Full-input preprocessing",
-                        },
+                        "holdout_provenance": provenance,
                         "sampling_evidence": [
                             {"role": "full", "record": {"divergences": 0}},
                             {"role": "validation", "record": None},
@@ -157,6 +166,6 @@ def test_custom_quality_wire(monkeypatch, operation):
     assert not result.get("isError", False)
     assert result["structuredContent"]["id"] == "saved"
     if operation == "pair":
-        assert result["structuredContent"]["holdout_provenance"]["status"] == "blocked"
+        assert result["structuredContent"]["holdout_provenance"] == provenance
         assert result["structuredContent"]["sampling_evidence"][0]["record"]["divergences"] == 0
         assert result["structuredContent"]["sampling_evidence"][1]["record"] is None
