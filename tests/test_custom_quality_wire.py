@@ -140,8 +140,16 @@ def test_custom_quality_wire(monkeypatch, operation):
 
     champion = {
         "current": {"status": "review_required", "decision_grade_ready": False},
-        "candidates": [{"eligible": False, "blockers": ["Fresh validation required"],
-                        "holdout_use": {"status": "fresh_validation_required", "declaration_ids": ["report-1"]}}],
+        "candidates": [
+            {
+                "eligible": False,
+                "blockers": ["Fresh validation required"],
+                "holdout_use": {
+                    "status": "fresh_validation_required",
+                    "declaration_ids": ["report-1"],
+                },
+            }
+        ],
     }
 
     def handle(request):
