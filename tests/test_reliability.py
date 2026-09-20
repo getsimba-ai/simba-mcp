@@ -25,8 +25,12 @@ def context(client):
 
 def test_metadata_effects_are_explicit():
     tools = {t.name: t for t in anyio.run(server.mcp.list_tools)}
+    for name in ("compare_study_runs", "assess_study_validation_pair", "list_study_evaluations"):
+        assert not tools[name].annotations.read_only_hint
+        assert not tools[name].annotations.destructive_hint
+        assert not tools[name].annotations.idempotent_hint
     assert all(t.title and t.annotations.open_world_hint for t in tools.values())
-    for name in ("compare_study_runs", "validate_study_recipe", "get_scenario_template"):
+    for name in ("get_study_prediction_access", "validate_study_recipe", "get_scenario_template"):
         assert tools[name].annotations.read_only_hint
     for name in ("evaluate_study_run", "adopt_model_into_study"):
         assert not tools[name].annotations.read_only_hint

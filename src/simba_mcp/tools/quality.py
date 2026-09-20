@@ -62,7 +62,7 @@ async def list_study_evaluations(
     run_id: str,
     ctx: Context[AppContext, Any] = None,
 ) -> APIResult:
-    """Read preserved quality reports and evidence hashes."""
+    """Read preserved quality reports and evidence hashes. Serving available prediction reports appends access audit events."""
     return await _client(ctx).workflow_request("GET", f"/study-runs/{run_id}/evaluations")
 
 
@@ -95,7 +95,7 @@ async def compare_study_runs(
     policy_id: str,
     ctx: Context[AppContext, Any] = None,
 ) -> APIResult:
-    """Compare 2-20 candidates against one quality policy. Different datasets are flagged, not ranked. Does not fit or promote models."""
+    """Compare 2-20 candidates against one quality policy. Serving prediction evidence appends access audit events. Different datasets are flagged, not ranked. Does not fit or promote models."""
     return await _client(ctx).workflow_request(
         "POST", f"/studies/{study_id}/comparisons", {"run_ids": run_ids, "policy_id": policy_id}
     )
@@ -113,7 +113,7 @@ async def assess_study_validation_pair(
     policy_id: str,
     ctx: Context[AppContext, Any] = None,
 ) -> APIResult:
-    """Read-only validation-pair assessment. Checks distinct completed MMM runs launched under the declared protocol, frozen inputs/settings/runtime, configured sampling, saved R-hat, declared prediction windows/WAPE and date coverage. Returns blockers and an evidence hash; does not fit, accept or promote. Includes saved retained chain/draw, ESS and divergence records when available, with null for older models. Optional prelaunch retained_sampling limits require complete native records and check chain/draw minima, bulk/tail ESS minima and maximum divergences; otherwise sampling_qualification is not_declared. Optional require_policy_review checks current signed-in analyst acceptance of each latest same-policy assessment, including freshness and rejection blockers. The holdout_provenance report distinguishes missing evidence, blocked version 1 full-input preprocessing and version 2 training-only preprocessing requiring further provenance review. The prior_provenance report checks recorded automatic-prior source dates and frozen input hashes; missing legacy/uploaded provenance remains unavailable, and recorded inputs after the declared training end are blocked. External business calculations and untouched holdout history remain unverified; decision_grade_ready stays false."""
+    """Assess a validation pair and append a prediction-access audit event when evidence is available. Checks distinct completed MMM runs launched under the declared protocol, frozen inputs/settings/runtime, configured sampling, saved R-hat, declared prediction windows/WAPE and date coverage. Returns blockers and an evidence hash; does not fit, accept or promote. Includes saved retained chain/draw, ESS and divergence records when available, with null for older models. Optional prelaunch retained_sampling limits require complete native records and check chain/draw minima, bulk/tail ESS minima and maximum divergences; otherwise sampling_qualification is not_declared. Optional require_policy_review checks current signed-in analyst acceptance of each latest same-policy assessment, including freshness and rejection blockers. The holdout_provenance report distinguishes missing evidence, blocked version 1 full-input preprocessing and version 2 training-only preprocessing requiring further provenance review. The prior_provenance report checks recorded automatic-prior source dates and frozen input hashes; missing legacy/uploaded provenance remains unavailable, and recorded inputs after the declared training end are blocked. External business calculations and untouched holdout history remain unverified; decision_grade_ready stays false."""
     return await _client(ctx).workflow_request(
         "POST",
         f"/studies/{study_id}/validation-pairs",
@@ -123,3 +123,10 @@ async def assess_study_validation_pair(
             "policy_id": policy_id,
         },
     )
+
+
+async def get_study_prediction_access(
+    run_id: str, ctx: Context[AppContext, Any] = None
+) -> APIResult:
+    """Read partial prediction-access history for this run and matching recorded dataset/windows in this study. Does not expose predictions or add access events. Earlier activity, other result routes and offline work are not covered; absence never proves untouched holdout status. Repeated access does not prove retuning."""
+    return await _client(ctx).workflow_request("GET", f"/study-runs/{run_id}/prediction-access")

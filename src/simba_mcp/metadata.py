@@ -29,11 +29,9 @@ READ_ONLY = frozenset(
         "list_study_runs",
         "get_study_run",
         "list_quality_policies",
-        "list_study_evaluations",
         "list_study_decisions",
         "get_study_champion",
-        "assess_study_validation_pair",
-        "compare_study_runs",
+        "get_study_prediction_access",
         "get_backend_capabilities",
     ]
 )
@@ -85,6 +83,9 @@ ADDITIVE_WRITES = frozenset(
         "launch_study_run",
         "create_quality_policy",
         "evaluate_study_run",
+        "list_study_evaluations",
+        "assess_study_validation_pair",
+        "compare_study_runs",
         "recommend_study_run",
         "adopt_model_into_study",
     ]

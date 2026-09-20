@@ -2422,5 +2422,18 @@
     ],
     "title": "assess_study_validation_pairArguments",
     "type": "object"
+  },
+  "get_study_prediction_access": {
+    "properties": {
+      "run_id": {
+        "title": "Run Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "run_id"
+    ],
+    "title": "get_study_prediction_accessArguments",
+    "type": "object"
   }
 }
