@@ -170,6 +170,11 @@ def test_custom_quality_wire(monkeypatch, operation):
                 "status": "not_evaluated",
                 **(
                     {
+                        "fresh_validation": {
+                            "status": "blocked",
+                            "resolves_champion_block": False,
+                            "checks": [{"name": "later_prediction_window", "status": "blocked"}],
+                        },
                         "holdout_provenance": provenance,
                         "prediction_access": {
                             "status": "partial_coverage",
@@ -220,6 +225,8 @@ def test_custom_quality_wire(monkeypatch, operation):
         for key, value in champion.items():
             assert result["structuredContent"][key] == value
     if operation == "pair":
+        assert result["structuredContent"]["fresh_validation"]["status"] == "blocked"
+        assert result["structuredContent"]["fresh_validation"]["resolves_champion_block"] is False
         assert result["structuredContent"]["holdout_provenance"] == provenance
         assert result["structuredContent"]["prediction_access"]["history_complete"] is False
         assert result["structuredContent"]["prior_provenance"]["status"] == "blocked"
