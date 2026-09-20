@@ -129,6 +129,10 @@ def test_custom_quality_wire(monkeypatch, operation):
                 **(
                     {
                         "holdout_provenance": provenance,
+                        "prior_provenance": {
+                            "status": "blocked",
+                            "reason": "Prior source window crosses training end",
+                        },
                         "sampling_evidence": [
                             {"role": "full", "record": {"divergences": 0}},
                             {"role": "validation", "record": None},
@@ -167,5 +171,6 @@ def test_custom_quality_wire(monkeypatch, operation):
     assert result["structuredContent"]["id"] == "saved"
     if operation == "pair":
         assert result["structuredContent"]["holdout_provenance"] == provenance
+        assert result["structuredContent"]["prior_provenance"]["status"] == "blocked"
         assert result["structuredContent"]["sampling_evidence"][0]["record"]["divergences"] == 0
         assert result["structuredContent"]["sampling_evidence"][1]["record"] is None
