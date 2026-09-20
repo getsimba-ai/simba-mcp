@@ -49,6 +49,7 @@ EXPECTED_TOOLS = [
     "list_study_decisions",
     "get_study_champion",
     "get_study_prediction_access",
+    "declare_study_holdout_use",
     "assess_study_validation_pair",
     "recommend_study_run",
     "adopt_model_into_study",

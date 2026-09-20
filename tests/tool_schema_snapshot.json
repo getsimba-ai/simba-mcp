@@ -2435,5 +2435,55 @@
     ],
     "title": "get_study_prediction_accessArguments",
     "type": "object"
+  },
+  "declare_study_holdout_use": {
+    "properties": {
+      "run_id": {
+        "title": "Run Id",
+        "type": "string"
+      },
+      "declaration_id": {
+        "title": "Declaration Id",
+        "type": "string"
+      },
+      "source_access_id": {
+        "title": "Source Access Id",
+        "type": "string"
+      },
+      "disposition": {
+        "enum": [
+          "review_only",
+          "informed_revision",
+          "uncertain"
+        ],
+        "title": "Disposition",
+        "type": "string"
+      },
+      "reason": {
+        "title": "Reason",
+        "type": "string"
+      },
+      "affected_revision_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Affected Revision Id"
+      }
+    },
+    "required": [
+      "run_id",
+      "declaration_id",
+      "source_access_id",
+      "disposition",
+      "reason"
+    ],
+    "title": "declare_study_holdout_useArguments",
+    "type": "object"
   }
 }

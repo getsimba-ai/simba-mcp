@@ -54,6 +54,7 @@ DESTRUCTIVE = frozenset(
 )
 IDEMPOTENT_WRITES = frozenset(
     [
+        "declare_study_holdout_use",
         "create_recipe_draft",
         "publish_recipe_draft",
         "update_recipe_draft",
@@ -68,6 +69,7 @@ IDEMPOTENT_WRITES = frozenset(
 )
 ADDITIVE_WRITES = frozenset(
     [
+        "declare_study_holdout_use",
         "create_recipe_draft",
         "publish_recipe_draft",
         "upload_data",

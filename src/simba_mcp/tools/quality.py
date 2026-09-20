@@ -1,6 +1,6 @@
 """Quality tools backed by the shared Simba API."""
 
-from typing import Any
+from typing import Any, Literal
 
 from mcp.server.mcpserver import Context
 
@@ -130,3 +130,26 @@ async def get_study_prediction_access(
 ) -> APIResult:
     """Read partial prediction-access history for this run and matching recorded dataset/windows in this study. Does not expose predictions or add access events. Earlier activity, other result routes and offline work are not covered; absence never proves untouched holdout status. Repeated access does not prove retuning."""
     return await _client(ctx).workflow_request("GET", f"/study-runs/{run_id}/prediction-access")
+
+
+async def declare_study_holdout_use(
+    run_id: str,
+    declaration_id: str,
+    source_access_id: str,
+    disposition: Literal["review_only", "informed_revision", "uncertain"],
+    reason: str,
+    affected_revision_id: str | None = None,
+    ctx: Context[AppContext, Any] = None,
+) -> APIResult:
+    """Append a submitter-reported evidence-use declaration using project-owner credentials and create:models. Read get_study_prediction_access first and reference an access event from this run. Use a fresh UUID declaration_id and reuse it unchanged on retry. informed_revision requires a published affected revision in the same study; other dispositions omit it. Reason must explain actual use. Reported revision influence requires fresh validation for affected revisions; later review-only notes cannot erase it. Does not certify independence, accept or promote a model. API submissions remain identified as reported declarations."""
+    return await _client(ctx).workflow_request(
+        "POST",
+        f"/study-runs/{run_id}/holdout-use",
+        {
+            "id": declaration_id,
+            "source_access_id": source_access_id,
+            "disposition": disposition,
+            "reason": reason,
+            "affected_revision_id": affected_revision_id,
+        },
+    )

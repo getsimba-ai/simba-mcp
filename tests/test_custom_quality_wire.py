@@ -20,6 +20,7 @@ from simba_mcp.api_client import SimbaAPIClient
         "manual_definition",
         "champion_read",
         "access_read",
+        "declare_use",
         "prediction",
         "protocol",
         "pair",
@@ -54,6 +55,23 @@ def test_custom_quality_wire(monkeypatch, operation):
             "policy_id": "p",
         }
         expected = {k: v for k, v in arguments.items() if k != "study_id"}
+    elif operation == "declare_use":
+        tool = "declare_study_holdout_use"
+        arguments = {
+            "run_id": "r",
+            "declaration_id": "request",
+            "source_access_id": "access",
+            "disposition": "informed_revision",
+            "affected_revision_id": "revision",
+            "reason": "Changed assumptions",
+        }
+        expected = {
+            "id": "request",
+            "source_access_id": "access",
+            "disposition": "informed_revision",
+            "affected_revision_id": "revision",
+            "reason": "Changed assumptions",
+        }
     elif operation == "access_read":
         tool = "get_study_prediction_access"
         arguments = {"run_id": "r"}
