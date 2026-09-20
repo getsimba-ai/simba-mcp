@@ -2290,5 +2290,18 @@
     ],
     "title": "get_recipe_revision_authoringArguments",
     "type": "object"
+  },
+  "get_study_champion": {
+    "properties": {
+      "study_id": {
+        "title": "Study Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "study_id"
+    ],
+    "title": "get_study_championArguments",
+    "type": "object"
   }
 }

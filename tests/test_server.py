@@ -47,6 +47,7 @@ EXPECTED_TOOLS = [
     "evaluate_study_run",
     "list_study_evaluations",
     "list_study_decisions",
+    "get_study_champion",
     "recommend_study_run",
     "adopt_model_into_study",
     "get_data_schema",

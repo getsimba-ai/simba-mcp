@@ -520,3 +520,6 @@ For externally calculated metrics, call `evaluate_study_run(run_id, policy_id)` 
 
 
 Boolean checks use `kind: "boolean"`, `operator: "equals"` and strict boolean `expected`. Submit a JSON boolean in `external_evidence.value`; numeric or string substitutes are rejected. Manual checks use `kind: "manual"`, `operator: "equals"`, `expected: true`. MCP can define these rules and read evidence, but API keys cannot submit manual sign-off: a signed-in reviewer must supply confirmation, rationale and source through the frontend. Missing answers stay unevaluated; sign-off is not automatic model acceptance or champion selection.
+
+
+`get_study_champion(study_id)` reads the incumbent, accepted candidates/eligibility blockers and immutable selection/replacement/revocation history. The backend requires migration `workflow_champion_001`. Writes require the project owner's frontend session; MCP cannot promote or revoke. Stale evidence retains the incumbent with review_required. Validation references are reviewer-declared and `decision_grade_ready` remains false until scientific protocol qualification is implemented. Champion designation does not deploy or fit a model.

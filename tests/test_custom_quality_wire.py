@@ -11,7 +11,7 @@ from simba_mcp.api_client import SimbaAPIClient
 
 
 @pytest.mark.parametrize(
-    "operation", ["define", "submit", "legacy", "boolean", "manual_definition"]
+    "operation", ["define", "submit", "legacy", "boolean", "manual_definition", "champion_read"]
 )
 def test_custom_quality_wire(monkeypatch, operation):
     evidence = {
@@ -21,7 +21,11 @@ def test_custom_quality_wire(monkeypatch, operation):
         "source_reference": "Synthetic export",
         "source_sha256": "b" * 64,
     }
-    if operation in ("define", "manual_definition"):
+    if operation == "champion_read":
+        tool = "get_study_champion"
+        arguments = {"study_id": "s"}
+        expected = None
+    elif operation in ("define", "manual_definition"):
         tool = "create_quality_policy"
         arguments = {
             "study_id": "s",
@@ -60,14 +64,17 @@ def test_custom_quality_wire(monkeypatch, operation):
         expected = {key: value for key, value in arguments.items() if key != "run_id"}
 
     def handle(request):
-        assert request.method == "POST"
-        assert json.loads(request.content) == expected
+        assert request.method == ("GET" if operation == "champion_read" else "POST")
+        if operation == "champion_read":
+            assert request.url.path == "/api/v1/studies/s/champion"
+        else:
+            assert json.loads(request.content) == expected
         return httpx.Response(201, json={"id": "saved", "status": "not_evaluated"})
 
     async def get_client(self):
         if self._client is None:
             self._client = httpx.AsyncClient(
-                base_url="https://example.test/api/v1", transport=httpx.MockTransport(handle)
+                base_url="https://example.test", transport=httpx.MockTransport(handle)
             )
         return self._client
 

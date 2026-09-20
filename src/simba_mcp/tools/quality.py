@@ -89,3 +89,8 @@ async def compare_study_runs(
     return await _client(ctx).workflow_request(
         "POST", f"/studies/{study_id}/comparisons", {"run_ids": run_ids, "policy_id": policy_id}
     )
+
+
+async def get_study_champion(study_id: str, ctx: Context[AppContext, Any] = None) -> APIResult:
+    """Read incumbent, eligibility blockers, accepted candidates and immutable champion history. Stale champions retain their historical role with review_required. Validation references are reviewer-declared; decision_grade_ready is false until independently qualified. Selection/replacement/revocation require an owner frontend session; MCP cannot promote models."""
+    return await _client(ctx).workflow_request("GET", f"/studies/{study_id}/champion")
