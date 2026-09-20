@@ -12,6 +12,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ### Added
 
+- Add optional predeclared temporal-holdout protocols and read-only `assess_study_validation_pair` with compatibility blockers and evidence fingerprints.
+
 - Discover native prediction-window MAE/RMSE/WAPE checks with backend date-separation checks and explicit holdout-provenance limitations.
 
 - Add read-only `get_study_champion` for incumbent, eligibility blockers and immutable replacement/revocation history; no agent promotion capability.

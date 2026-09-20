@@ -6,7 +6,7 @@ from mcp.server.mcpserver import Context
 
 from ..auth import _client
 from ..runtime import AppContext
-from ..schemas import APIResult, ExternalEvidence, QualityCheck
+from ..schemas import APIResult, ExternalEvidence, QualityCheck, ValidationProtocolSpec
 
 
 async def list_quality_policies(
@@ -22,13 +22,23 @@ async def create_quality_policy(
     name: str,
     rationale: str,
     checks: list[QualityCheck],
+    validation_protocol: ValidationProtocolSpec | None = None,
     ctx: Context[AppContext, Any] = None,
 ) -> APIResult:
-    """Save project-specific checks. Built-in checks have metric (r_hat_max, mae, rmse, wape, prediction_mae, prediction_rmse, prediction_wape), maximum and required. Custom numeric checks use metric custom:<slug>, name, units, operator (lte/gte/between), applicable minimum/maximum and required. Boolean checks use kind=boolean, operator=equals and expected=true/false. Manual checks use kind=manual, equals, expected=true; agents can define these but cannot submit manual sign-off. Custom bounds may be negative. WAPE is a fraction. Prediction-window checks require saved finite actuals/predictions at unique dates after the saved training window; this does not certify untouched holdout provenance. No default thresholds are assumed. Declare at least one required check, use each metric once, and set maximum R-hat at least 1. The backend validates policy rules."""
+    """Save project-specific checks. Built-in checks have metric (r_hat_max, mae, rmse, wape, prediction_mae, prediction_rmse, prediction_wape), maximum and required. Custom numeric checks use metric custom:<slug>, name, units, operator (lte/gte/between), applicable minimum/maximum and required. Boolean checks use kind=boolean, operator=equals and expected=true/false. Manual checks use kind=manual, equals, expected=true; agents can define these but cannot submit manual sign-off. Custom bounds may be negative. WAPE is a fraction. Prediction-window checks require saved finite actuals/predictions at unique dates after the saved training window; this does not certify untouched holdout provenance. No default thresholds are assumed. Declare at least one required check, use each metric once, and set maximum R-hat at least 1. Optional validation_protocol declares a temporal holdout split, configured sampling minima, R-hat and prediction WAPE limits before both runs launch under this policy. The backend validates policy rules."""
     return await _client(ctx).workflow_request(
         "POST",
         f"/studies/{study_id}/quality-policies",
-        {"name": name, "rationale": rationale, "checks": checks},
+        {
+            "name": name,
+            "rationale": rationale,
+            "checks": checks,
+            **(
+                {"validation_protocol": validation_protocol}
+                if validation_protocol is not None
+                else {}
+            ),
+        },
     )
 
 
@@ -94,3 +104,22 @@ async def compare_study_runs(
 async def get_study_champion(study_id: str, ctx: Context[AppContext, Any] = None) -> APIResult:
     """Read incumbent, eligibility blockers, accepted candidates and immutable champion history. Stale champions retain their historical role with review_required. Validation references are reviewer-declared; decision_grade_ready is false until independently qualified. Selection/replacement/revocation require an owner frontend session; MCP cannot promote models."""
     return await _client(ctx).workflow_request("GET", f"/studies/{study_id}/champion")
+
+
+async def assess_study_validation_pair(
+    study_id: str,
+    full_run_id: str,
+    validation_run_id: str,
+    policy_id: str,
+    ctx: Context[AppContext, Any] = None,
+) -> APIResult:
+    """Read-only validation-pair assessment. Checks distinct completed MMM runs launched under the declared protocol, frozen inputs/settings/runtime, configured sampling, saved R-hat, declared prediction windows/WAPE and date coverage. Returns blockers and an evidence hash; does not fit, accept or promote. Retained sampling, business validity and untouched holdout provenance remain unverified; decision_grade_ready stays false."""
+    return await _client(ctx).workflow_request(
+        "POST",
+        f"/studies/{study_id}/validation-pairs",
+        {
+            "full_run_id": full_run_id,
+            "validation_run_id": validation_run_id,
+            "policy_id": policy_id,
+        },
+    )

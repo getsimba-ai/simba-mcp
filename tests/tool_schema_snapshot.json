@@ -1603,6 +1603,67 @@
         },
         "title": "Checks",
         "type": "array"
+      },
+      "validation_protocol": {
+        "anyOf": [
+          {
+            "additionalProperties": false,
+            "description": "Declare temporal holdout before launching both models. Sampling minima describe configured intent, not retained draws or scientific certification.",
+            "properties": {
+              "kind": {
+                "const": "temporal_holdout"
+              },
+              "training_end": {
+                "format": "date",
+                "type": "string"
+              },
+              "prediction_start": {
+                "format": "date",
+                "type": "string"
+              },
+              "prediction_end": {
+                "format": "date",
+                "type": "string"
+              },
+              "min_draws": {
+                "minimum": 1,
+                "type": "integer"
+              },
+              "min_tune": {
+                "minimum": 1,
+                "type": "integer"
+              },
+              "min_chains": {
+                "minimum": 2,
+                "type": "integer"
+              },
+              "max_r_hat": {
+                "minimum": 1,
+                "type": "number"
+              },
+              "max_prediction_wape": {
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "required": [
+              "training_end",
+              "prediction_start",
+              "prediction_end",
+              "min_draws",
+              "min_tune",
+              "min_chains",
+              "max_r_hat",
+              "max_prediction_wape"
+            ],
+            "type": "object"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Validation Protocol"
       }
     },
     "required": [
@@ -2305,6 +2366,34 @@
       "study_id"
     ],
     "title": "get_study_championArguments",
+    "type": "object"
+  },
+  "assess_study_validation_pair": {
+    "properties": {
+      "study_id": {
+        "title": "Study Id",
+        "type": "string"
+      },
+      "full_run_id": {
+        "title": "Full Run Id",
+        "type": "string"
+      },
+      "validation_run_id": {
+        "title": "Validation Run Id",
+        "type": "string"
+      },
+      "policy_id": {
+        "title": "Policy Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "study_id",
+      "full_run_id",
+      "validation_run_id",
+      "policy_id"
+    ],
+    "title": "assess_study_validation_pairArguments",
     "type": "object"
   }
 }

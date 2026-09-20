@@ -45,6 +45,7 @@ from .tools.models import (
 )
 from .tools.projects import create_project, list_projects, rename_project
 from .tools.quality import (
+    assess_study_validation_pair,
     compare_study_runs,
     create_quality_policy,
     evaluate_study_run,
@@ -168,6 +169,7 @@ TOOLS = (
     list_study_evaluations,
     list_study_decisions,
     get_study_champion,
+    assess_study_validation_pair,
     recommend_study_run,
     adopt_model_into_study,
     compare_study_runs,
@@ -207,6 +209,7 @@ __all__ = [
     "_norm_channel",
     "adopt_model_into_study",
     "app_lifespan",
+    "assess_study_validation_pair",
     "cancel_study_run",
     "compare_study_runs",
     "create_model",

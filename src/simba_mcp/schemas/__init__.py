@@ -237,3 +237,35 @@ ControlPrior = Annotated[
         }
     ),
 ]
+
+
+ValidationProtocolSpec = Annotated[
+    dict,
+    Field(
+        json_schema_extra={
+            "description": "Declare temporal holdout before launching both models. Sampling minima describe configured intent, not retained draws or scientific certification.",
+            "properties": {
+                "kind": {"const": "temporal_holdout"},
+                "training_end": {"type": "string", "format": "date"},
+                "prediction_start": {"type": "string", "format": "date"},
+                "prediction_end": {"type": "string", "format": "date"},
+                "min_draws": {"type": "integer", "minimum": 1},
+                "min_tune": {"type": "integer", "minimum": 1},
+                "min_chains": {"type": "integer", "minimum": 2},
+                "max_r_hat": {"type": "number", "minimum": 1},
+                "max_prediction_wape": {"type": "number", "minimum": 0},
+            },
+            "required": [
+                "training_end",
+                "prediction_start",
+                "prediction_end",
+                "min_draws",
+                "min_tune",
+                "min_chains",
+                "max_r_hat",
+                "max_prediction_wape",
+            ],
+            "additionalProperties": False,
+        }
+    ),
+]

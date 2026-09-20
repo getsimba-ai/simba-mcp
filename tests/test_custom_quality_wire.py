@@ -12,7 +12,17 @@ from simba_mcp.api_client import SimbaAPIClient
 
 @pytest.mark.parametrize(
     "operation",
-    ["define", "submit", "legacy", "boolean", "manual_definition", "champion_read", "prediction"],
+    [
+        "define",
+        "submit",
+        "legacy",
+        "boolean",
+        "manual_definition",
+        "champion_read",
+        "prediction",
+        "protocol",
+        "pair",
+    ],
 )
 def test_custom_quality_wire(monkeypatch, operation):
     evidence = {
@@ -22,11 +32,20 @@ def test_custom_quality_wire(monkeypatch, operation):
         "source_reference": "Synthetic export",
         "source_sha256": "b" * 64,
     }
-    if operation == "champion_read":
+    if operation == "pair":
+        tool = "assess_study_validation_pair"
+        arguments = {
+            "study_id": "s",
+            "full_run_id": "full",
+            "validation_run_id": "holdout",
+            "policy_id": "p",
+        }
+        expected = {k: v for k, v in arguments.items() if k != "study_id"}
+    elif operation == "champion_read":
         tool = "get_study_champion"
         arguments = {"study_id": "s"}
         expected = None
-    elif operation in ("define", "manual_definition", "prediction"):
+    elif operation in ("define", "manual_definition", "prediction", "protocol"):
         tool = "create_quality_policy"
         arguments = {
             "study_id": "s",
@@ -44,6 +63,18 @@ def test_custom_quality_wire(monkeypatch, operation):
                 }
             ],
         }
+        if operation == "protocol":
+            arguments["validation_protocol"] = {
+                "kind": "temporal_holdout",
+                "training_end": "2026-01-08",
+                "prediction_start": "2026-01-15",
+                "prediction_end": "2026-01-22",
+                "min_draws": 1000,
+                "min_tune": 1500,
+                "min_chains": 2,
+                "max_r_hat": 1.01,
+                "max_prediction_wape": 0.15,
+            }
         if operation == "prediction":
             arguments["checks"] = [{"metric": "prediction_wape", "maximum": 0.15, "required": True}]
         if operation == "manual_definition":

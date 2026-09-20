@@ -526,3 +526,8 @@ Boolean checks use `kind: "boolean"`, `operator: "equals"` and strict boolean `e
 
 
 Native prediction-window gates are available as `prediction_mae`, `prediction_rmse` and `prediction_wape` (WAPE is a fraction). They use the existing create_quality_policy/evaluate_study_run tools. The backend reads saved actual/prediction rows, requires unique prediction dates after the saved training window and leaves missing/malformed evidence unevaluated. Both windows are bound into the assessment hash. This does not prove untouched holdout provenance, leakage-free preprocessing or full sampling intent; decision-grade champion qualification remains separate.
+
+
+`create_quality_policy(..., validation_protocol=...)` can declare a temporal holdout before launching both runs. Required protocol fields are training_end, prediction_start/end, min_draws, min_tune, min_chains, max_r_hat and max_prediction_wape. Use `kind: "temporal_holdout"`; dates are ISO and WAPE a fraction. No defaults are recommended. Both runs must launch under that exact policy.
+
+`assess_study_validation_pair(study_id, full_run_id, validation_run_id, policy_id)` reads saved evidence without fitting or writing a decision. It checks distinct completed MMM tasks, launch binding, matching frozen files/settings/runtime, configured sampling minima, R-hat, prediction-window WAPE/dates and full-date coverage. Missing evidence blocks. The response fingerprint identifies the assessed records. Passing compatibility does not verify retained draws/ESS/divergences, preprocessing or untouched holdout history, and decision_grade_ready remains false.
