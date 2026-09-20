@@ -12,6 +12,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ### Added
 
+- Discover boolean equality and manual sign-off policies, forward strict boolean observations, and document session-only manual evidence.
+
 - Add custom numeric quality-rule discovery and external calculation submission with basis freshness, method/source provenance and server-evaluated results.
 
 - Preserve optional original calibration JSON references separately from current observation inputs.

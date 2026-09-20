@@ -24,7 +24,7 @@ async def create_quality_policy(
     checks: list[QualityCheck],
     ctx: Context[AppContext, Any] = None,
 ) -> APIResult:
-    """Save project-specific checks. Built-in checks have metric (r_hat_max, mae, rmse, wape), maximum and required. Custom numeric checks use metric custom:<slug>, name, units, operator (lte/gte/between), applicable minimum/maximum and required. Custom bounds may be negative. WAPE is a fraction. No default thresholds are assumed. Declare at least one required check, use each metric once, and set maximum R-hat at least 1. The backend validates policy rules."""
+    """Save project-specific checks. Built-in checks have metric (r_hat_max, mae, rmse, wape), maximum and required. Custom numeric checks use metric custom:<slug>, name, units, operator (lte/gte/between), applicable minimum/maximum and required. Boolean checks use kind=boolean, operator=equals and expected=true/false. Manual checks use kind=manual, equals, expected=true; agents can define these but cannot submit manual sign-off. Custom bounds may be negative. WAPE is a fraction. No default thresholds are assumed. Declare at least one required check, use each metric once, and set maximum R-hat at least 1. The backend validates policy rules."""
     return await _client(ctx).workflow_request(
         "POST",
         f"/studies/{study_id}/quality-policies",
@@ -39,7 +39,7 @@ async def evaluate_study_run(
     external_evidence: list[ExternalEvidence] | None = None,
     ctx: Context[AppContext, Any] = None,
 ) -> APIResult:
-    """Save an immutable assessment. First evaluate without external_evidence to obtain report.basis_hash; then calculate custom metrics from outputs and submit finite values, method and source reference with that expected_basis_hash. The server applies the saved rule; stale model evidence is rejected. External calculations are submitter-reported, not verified. Each submission is complete: omitted custom values stay unevaluated. No automatic champion promotion. Built-in errors are fitted-window, not holdout; VAR remains unsupported."""
+    """Save an immutable assessment. First evaluate without external_evidence to obtain report.basis_hash; then calculate custom metrics from outputs and submit finite numeric or strict boolean values, method and source reference with that expected_basis_hash. The server applies the saved rule; stale model evidence is rejected. External calculations are submitter-reported, not verified. Each submission is complete: omitted custom values stay unevaluated. Manual sign-off requires a signed-in reviewer and is rejected for API keys. No automatic champion promotion. Built-in errors are fitted-window, not holdout; VAR remains unsupported."""
     payload: dict[str, Any] = {"policy_id": policy_id}
     if expected_basis_hash is not None:
         payload["expected_basis_hash"] = expected_basis_hash

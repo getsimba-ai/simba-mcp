@@ -1573,19 +1573,30 @@
               "enum": [
                 "lte",
                 "gte",
-                "between"
+                "between",
+                "equals"
               ],
               "type": "string"
             },
             "minimum": {
               "type": "number"
+            },
+            "kind": {
+              "enum": [
+                "boolean",
+                "manual"
+              ],
+              "type": "string"
+            },
+            "expected": {
+              "type": "boolean"
             }
           },
           "required": [
             "metric"
           ],
           "type": "object",
-          "description": "Built-in metric + maximum, or custom numeric gate with metric custom:<slug>, name, units, operator and applicable bounds. At least one required gate per policy."
+          "description": "Built-in metric + maximum, or custom numeric gate with metric custom:<slug>, name, units, operator and applicable bounds. Boolean/manual checks use kind, operator equals and strict boolean expected. Manual expected must be true and sign-off is session-only. At least one required gate per policy."
         },
         "title": "Checks",
         "type": "array"
@@ -1627,14 +1638,17 @@
           {
             "items": {
               "additionalProperties": false,
-              "description": "Externally calculated numeric evidence; server applies policy. Source/method/digest are submitter-reported, not independently verified. Never submit a pass/fail status.",
+              "description": "Externally calculated numeric or strict boolean evidence; server applies policy. Manual sign-off is session-only and cannot be submitted with an API key. Source/method/digest are submitter-reported, not independently verified. Never submit a pass/fail status.",
               "properties": {
                 "metric": {
                   "pattern": "^custom:[a-z][a-z0-9_]{0,63}$",
                   "type": "string"
                 },
                 "value": {
-                  "type": "number"
+                  "type": [
+                    "number",
+                    "boolean"
+                  ]
                 },
                 "method": {
                   "maxLength": 5000,

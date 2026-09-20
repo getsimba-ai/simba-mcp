@@ -139,7 +139,7 @@ QualityCheck = Annotated[
     dict,
     Field(
         json_schema_extra={
-            "description": "Built-in metric + maximum, or custom numeric gate with metric custom:<slug>, name, units, operator and applicable bounds. At least one required gate per policy.",
+            "description": "Built-in metric + maximum, or custom numeric gate with metric custom:<slug>, name, units, operator and applicable bounds. Boolean/manual checks use kind, operator equals and strict boolean expected. Manual expected must be true and sign-off is session-only. At least one required gate per policy.",
             "properties": {
                 "metric": {
                     "type": "string",
@@ -147,7 +147,9 @@ QualityCheck = Annotated[
                 },
                 "name": {"type": "string"},
                 "units": {"type": "string"},
-                "operator": {"type": "string", "enum": ["lte", "gte", "between"]},
+                "kind": {"type": "string", "enum": ["boolean", "manual"]},
+                "expected": {"type": "boolean"},
+                "operator": {"type": "string", "enum": ["lte", "gte", "between", "equals"]},
                 "minimum": {"type": "number"},
                 "maximum": {"type": "number"},
                 "required": {"type": "boolean", "default": True},
@@ -160,10 +162,10 @@ ExternalEvidence = Annotated[
     dict,
     Field(
         json_schema_extra={
-            "description": "Externally calculated numeric evidence; server applies policy. Source/method/digest are submitter-reported, not independently verified. Never submit a pass/fail status.",
+            "description": "Externally calculated numeric or strict boolean evidence; server applies policy. Manual sign-off is session-only and cannot be submitted with an API key. Source/method/digest are submitter-reported, not independently verified. Never submit a pass/fail status.",
             "properties": {
                 "metric": {"type": "string", "pattern": "^custom:[a-z][a-z0-9_]{0,63}$"},
-                "value": {"type": "number"},
+                "value": {"type": ["number", "boolean"]},
                 "method": {"type": "string", "maxLength": 5000},
                 "source_reference": {"type": "string", "maxLength": 2000},
                 "source_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},

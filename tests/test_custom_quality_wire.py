@@ -10,7 +10,9 @@ from simba_mcp import runtime, server
 from simba_mcp.api_client import SimbaAPIClient
 
 
-@pytest.mark.parametrize("operation", ["define", "submit", "legacy"])
+@pytest.mark.parametrize(
+    "operation", ["define", "submit", "legacy", "boolean", "manual_definition"]
+)
 def test_custom_quality_wire(monkeypatch, operation):
     evidence = {
         "metric": "custom:benchmark",
@@ -19,7 +21,7 @@ def test_custom_quality_wire(monkeypatch, operation):
         "source_reference": "Synthetic export",
         "source_sha256": "b" * 64,
     }
-    if operation == "define":
+    if operation in ("define", "manual_definition"):
         tool = "create_quality_policy"
         arguments = {
             "study_id": "s",
@@ -37,11 +39,23 @@ def test_custom_quality_wire(monkeypatch, operation):
                 }
             ],
         }
+        if operation == "manual_definition":
+            arguments["checks"] = [
+                {
+                    "metric": "custom:review",
+                    "name": "Review",
+                    "kind": "manual",
+                    "operator": "equals",
+                    "expected": True,
+                }
+            ]
         expected = {key: value for key, value in arguments.items() if key != "study_id"}
     else:
         tool = "evaluate_study_run"
         arguments = {"run_id": "r", "policy_id": "p"}
-        if operation == "submit":
+        if operation in ("submit", "boolean"):
+            if operation == "boolean":
+                evidence["value"] = False
             arguments.update(expected_basis_hash="a" * 64, external_evidence=[evidence])
         expected = {key: value for key, value in arguments.items() if key != "run_id"}
 
