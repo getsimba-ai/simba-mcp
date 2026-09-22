@@ -445,7 +445,7 @@ this feature does not change preprocessing split order or fit a model for you.
 The study tools require a Simba backend with the workflow API deployed. Studies
 belong to projects and provide a shared record for analysts and agents:
 
-- Create/read/update studies with declared questions, attempt limits and concurrency limits.
+- Create/read/update studies with a declared question (what to learn), optional context (scope and assumptions), attempt limits and concurrency limits. Question and context are descriptive text; no launch or evaluation path reads them, and acceptance rules live only in quality policies.
 - Validate, save and inspect immutable recipe revisions; list recipes captured by the wizard.
 - Launch a revision with a declared quality policy and caller-generated submission key.
 - Inspect progress, request cancellation, evaluate saved evidence and compare candidates.

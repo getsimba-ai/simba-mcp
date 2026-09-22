@@ -18,6 +18,25 @@ Quality evaluations use saved fitted-window evidence; missing diagnostics do not
 pass and analyst acceptance remains in the frontend. Poll after cancellation until
 the backend confirms the final state.
 
+### Studies: where each concern belongs
+
+A study separates five things. Put each in its own place and do not repeat it
+elsewhere. `question` and `context` are shown to people and never executed.
+
+- **question** (`create_study` / `update_study`): what to find out, one or two sentences.
+- **context** (same tools, optional): scope, assumptions, data caveats. Interpretation only.
+- **recipe revision** (`create_study_recipe` / `revise_study_recipe`): how a model is built. Immutable per revision.
+- **quality policy** (`create_quality_policy`): every acceptance check, threshold and required manual review. The only place rules live; evaluations run against the policy a run was launched under.
+- **run settings** (`max_attempts`, `max_concurrent`, `state`): how many fits, how many at once, whether new fits may start.
+
+Correct: question "Which channels drive weekly sales after price and seasonality, and
+how stable are those estimates?"; context "UK only, 2022-01 to 2024-12; distribution
+data missing for Q3 2023"; policy rules r_hat <= 1.2, holdout MAPE <= 15 %, manual
+review of channel signs; max_attempts 8.
+Incorrect: question "Build a 22-channel weekly model, train 2022-2024, validate on
+2025 Q1, r_hat must be <= 1.2, at most 8 fits." Nothing enforces any of that: launch
+reads only the run settings and evaluation reads only the policy.
+
 ## 1. Upload
 
 1. Call `get_data_schema` first and validate the CSV against it — especially

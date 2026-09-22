@@ -1171,6 +1171,12 @@
         "type": "string"
       },
       "question": {
+        "description": "What the study should find out, in one or two sentences. Stored and shown to humans; never executed or used as an acceptance rule. Do not put thresholds, validation rules or fit limits here: those belong in a quality policy, recipe revisions and max_attempts/max_concurrent. Exploratory and reliability questions are valid.",
+        "examples": [
+          "How much do paid search and paid social contribute to weekly sales after price, promotions and seasonality?",
+          "Which carryover and saturation choices does the data support for TV, and how sensitive are contributions to them?",
+          "Can a weekly model across all channels produce estimates that hold up on a temporal holdout?"
+        ],
         "title": "Question",
         "type": "string"
       },
@@ -1183,6 +1189,19 @@
         "default": 1,
         "title": "Max Concurrent",
         "type": "integer"
+      },
+      "context": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Optional scope, data caveats and assumptions a reader needs to interpret results. Not rules; see question. Omit to leave unchanged on update; send an empty string to clear.",
+        "title": "Context"
       }
     },
     "required": [
@@ -1221,6 +1240,12 @@
         "type": "string"
       },
       "question": {
+        "description": "What the study should find out, in one or two sentences. Stored and shown to humans; never executed or used as an acceptance rule. Do not put thresholds, validation rules or fit limits here: those belong in a quality policy, recipe revisions and max_attempts/max_concurrent. Exploratory and reliability questions are valid.",
+        "examples": [
+          "How much do paid search and paid social contribute to weekly sales after price, promotions and seasonality?",
+          "Which carryover and saturation choices does the data support for TV, and how sensitive are contributions to them?",
+          "Can a weekly model across all channels produce estimates that hold up on a temporal holdout?"
+        ],
         "title": "Question",
         "type": "string"
       },
@@ -1242,6 +1267,19 @@
         ],
         "title": "State",
         "type": "string"
+      },
+      "context": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Optional scope, data caveats and assumptions a reader needs to interpret results. Not rules; see question. Omit to leave unchanged on update; send an empty string to clear.",
+        "title": "Context"
       }
     },
     "required": [
@@ -1569,6 +1607,7 @@
       "checks": {
         "items": {
           "additionalProperties": true,
+          "description": "Built-in metric + maximum, or custom numeric gate with metric custom:<slug>, name, units, operator and applicable bounds. Boolean/manual checks use kind, operator equals and strict boolean expected. Manual expected must be true and sign-off is session-only. At least one required gate per policy.",
           "properties": {
             "metric": {
               "examples": [
@@ -1583,18 +1622,21 @@
               ],
               "type": "string"
             },
-            "maximum": {
-              "type": "number"
-            },
-            "required": {
-              "default": true,
-              "type": "boolean"
-            },
             "name": {
               "type": "string"
             },
             "units": {
               "type": "string"
+            },
+            "kind": {
+              "enum": [
+                "boolean",
+                "manual"
+              ],
+              "type": "string"
+            },
+            "expected": {
+              "type": "boolean"
             },
             "operator": {
               "enum": [
@@ -1608,22 +1650,18 @@
             "minimum": {
               "type": "number"
             },
-            "kind": {
-              "enum": [
-                "boolean",
-                "manual"
-              ],
-              "type": "string"
+            "maximum": {
+              "type": "number"
             },
-            "expected": {
+            "required": {
+              "default": true,
               "type": "boolean"
             }
           },
           "required": [
             "metric"
           ],
-          "type": "object",
-          "description": "Built-in metric + maximum, or custom numeric gate with metric custom:<slug>, name, units, operator and applicable bounds. Boolean/manual checks use kind, operator equals and strict boolean expected. Manual expected must be true and sign-off is session-only. At least one required gate per policy."
+          "type": "object"
         },
         "title": "Checks",
         "type": "array"
@@ -1669,6 +1707,10 @@
                 "minimum": 0,
                 "type": "number"
               },
+              "require_policy_review": {
+                "description": "Require current analyst acceptance of the latest launch-policy assessment for both runs.",
+                "type": "boolean"
+              },
               "retained_sampling": {
                 "additionalProperties": false,
                 "properties": {
@@ -1691,10 +1733,6 @@
                   "max_divergences"
                 ],
                 "type": "object"
-              },
-              "require_policy_review": {
-                "description": "Require current analyst acceptance of the latest launch-policy assessment for both runs.",
-                "type": "boolean"
               }
             },
             "required": [
@@ -2159,20 +2197,25 @@
         "additionalProperties": true,
         "description": "Lossless editor authoring state. Backend is authoritative; preserve unknown nested fields. Source bytes are copied into encrypted draft storage (10 MB source limit); metadata limit is 5 MB. No local filesystem paths or executable code.",
         "properties": {
-          "configuration": {
-            "type": "object"
-          },
-          "family": {
-            "enum": [
-              "mmm",
-              "var"
+          "calibration_import": {
+            "description": "Optional original calibration JSON reference (1 MB). Preserve separately from editable observations; backend verifies the file hash, not equivalence to current observations.",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "content_base64": {
+                "maxLength": 1400000,
+                "type": "string"
+              },
+              "sha256": {
+                "pattern": "^[a-f0-9]{64}$",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "content_base64"
             ],
-            "type": "string"
-          },
-          "model_details": {
-            "type": "object"
-          },
-          "model_setup": {
             "type": "object"
           },
           "schema_version": {
@@ -2181,6 +2224,25 @@
             ],
             "type": "integer"
           },
+          "family": {
+            "enum": [
+              "mmm",
+              "var"
+            ],
+            "type": "string"
+          },
+          "configuration": {
+            "type": "object"
+          },
+          "model_setup": {
+            "type": "object"
+          },
+          "model_details": {
+            "type": "object"
+          },
+          "transformations": {
+            "type": "object"
+          },
           "source": {
             "anyOf": [
               {
@@ -2188,10 +2250,10 @@
               },
               {
                 "properties": {
-                  "content_base64": {
+                  "name": {
                     "type": "string"
                   },
-                  "name": {
+                  "content_base64": {
                     "type": "string"
                   },
                   "origin": {
@@ -2286,30 +2348,6 @@
                 "type": "object"
               }
             ]
-          },
-          "transformations": {
-            "type": "object"
-          },
-          "calibration_import": {
-            "description": "Optional original calibration JSON reference (1 MB). Preserve separately from editable observations; backend verifies the file hash, not equivalence to current observations.",
-            "properties": {
-              "name": {
-                "type": "string"
-              },
-              "content_base64": {
-                "maxLength": 1400000,
-                "type": "string"
-              },
-              "sha256": {
-                "pattern": "^[a-f0-9]{64}$",
-                "type": "string"
-              }
-            },
-            "required": [
-              "name",
-              "content_base64"
-            ],
-            "type": "object"
           }
         },
         "required": [

@@ -197,6 +197,34 @@ SubmissionKey = Annotated[
         description="Caller-generated 8-128 character identity for one intentional attempt. Reuse identical key and inputs after a lost response; a new key may consume another attempt."
     ),
 ]
+StudyQuestion = Annotated[
+    str,
+    Field(
+        description=(
+            "What the study should find out, in one or two sentences. Stored and shown to "
+            "humans; never executed or used as an acceptance rule. Do not put thresholds, "
+            "validation rules or fit limits here: those belong in a quality policy, recipe "
+            "revisions and max_attempts/max_concurrent. Exploratory and reliability "
+            "questions are valid."
+        ),
+        json_schema_extra={
+            "examples": [
+                "How much do paid search and paid social contribute to weekly sales after price, promotions and seasonality?",
+                "Which carryover and saturation choices does the data support for TV, and how sensitive are contributions to them?",
+                "Can a weekly model across all channels produce estimates that hold up on a temporal holdout?",
+            ]
+        },
+    ),
+]
+StudyContext = Annotated[
+    str | None,
+    Field(
+        description=(
+            "Optional scope, data caveats and assumptions a reader needs to interpret results. "
+            "Not rules; see question. Omit to leave unchanged on update; send an empty string to clear."
+        ),
+    ),
+]
 
 Channel = Annotated[
     dict,
