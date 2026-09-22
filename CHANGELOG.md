@@ -4,6 +4,13 @@ All notable changes to the SIMBA MCP Server will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.5.1 (unreleased)
+
+### Changed
+
+- Document the study `question` on the tool input schema (`StudyQuestion`: purpose, what not to put there, three examples) and add optional `context` (scope, assumptions, caveats) to `create_study` / `update_study`; `get_study` states both are descriptive text, never executed. Backends before jellyfish #812 ignore `context` only if it is omitted, so it is sent only when supplied (nialloulton/jellyfish#812, #813).
+- Add a "Studies: where each concern belongs" section to the MMM workflow skill: question, context, recipe revision, quality policy and run settings each have one home; acceptance rules live only in quality policies.
+
 ## 0.5.0 (release candidate)
 
 ### Added

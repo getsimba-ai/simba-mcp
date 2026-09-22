@@ -191,6 +191,33 @@ class TestResultsSectionsDoc:
             )
 
 
+class TestStudyQuestionGuidance:
+    """jellyfish #812/#813: the guidance for the study question travels on the
+    parameter schema an agent reads, not only in the tool docstring."""
+
+    def _schema(self, name):
+        return next(t for t in _list_tools() if t.name == name).input_schema
+
+    def test_question_parameter_carries_description_and_examples(self):
+        for tool in ("create_study", "update_study"):
+            question = self._schema(tool)["properties"]["question"]
+            assert "never executed" in question["description"], tool
+            assert "quality policy" in question["description"], tool
+            assert len(question.get("examples", [])) == 3, tool
+
+    def test_context_is_optional_and_descriptive(self):
+        for tool in ("create_study", "update_study"):
+            schema = self._schema(tool)
+            assert "context" not in schema["required"], tool
+            assert "Not rules" in schema["properties"]["context"]["description"], tool
+
+    def test_lifecycle_limits_are_stated(self):
+        descriptions = {t.name: t.description for t in _list_tools()}
+        assert "Does not launch models" in descriptions["create_study"]
+        assert "412" in descriptions["update_study"]
+        assert "descriptive text" in descriptions["get_study"]
+
+
 class TestReadmeHost:
     """Issue #25: the canonical API host is demo.simba-mmm.com â€” verified live
     (app.simba-mmm.com does not answer). README examples regressed twice."""
