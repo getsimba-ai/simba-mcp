@@ -44,6 +44,7 @@ EXPECTED_TOOLS = [
     "cancel_study_run",
     "list_quality_policies",
     "create_quality_policy",
+    "retire_quality_policy",
     "evaluate_study_run",
     "list_study_evaluations",
     "list_study_decisions",

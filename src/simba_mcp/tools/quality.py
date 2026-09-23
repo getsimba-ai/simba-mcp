@@ -13,7 +13,7 @@ async def list_quality_policies(
     study_id: str,
     ctx: Context[AppContext, Any] = None,
 ) -> APIResult:
-    """Read immutable quality policies for the study."""
+    """Read immutable quality policies for the study. Each row carries created_at, retired_at, retired_by and usage counts (runs_launched, evaluations, resolutions, champion_acceptances). Retired policies stay listed for history but are refused for new launches, assessments and pair reviews; pick the newest policy whose retired_at is null. Deleting a policy is possible only for a policy nothing references and only from the signed-in project owner UI, never through this API key."""
     return await _client(ctx).workflow_request("GET", f"/studies/{study_id}/quality-policies")
 
 
@@ -39,6 +39,18 @@ async def create_quality_policy(
                 else {}
             ),
         },
+    )
+
+
+async def retire_quality_policy(
+    study_id: str,
+    policy_id: str,
+    retired: bool = True,
+    ctx: Context[AppContext, Any] = None,
+) -> APIResult:
+    """Retire (retired=true) or restore (retired=false) a saved policy without changing it. A retired policy is refused for new launches, new assessments and new pair-review resolutions, stops counting as the newest policy, and stays readable in every run, assessment, pair review, comparison and Champion record that already names it. Idempotent; the backend records each change. Requires create:models on the study's project. Nothing is deleted: removal of an unreferenced policy is an owner-only frontend action."""
+    return await _client(ctx).workflow_request(
+        "PATCH", f"/studies/{study_id}/quality-policies/{policy_id}", {"retired": retired}
     )
 
 
