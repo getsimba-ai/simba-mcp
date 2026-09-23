@@ -57,6 +57,7 @@ from .tools.quality import (
     list_study_decisions,
     list_study_evaluations,
     recommend_study_run,
+    retire_quality_policy,
 )
 from .tools.recipes import (
     create_study_recipe,
@@ -168,6 +169,7 @@ TOOLS = (
     cancel_study_run,
     list_quality_policies,
     create_quality_policy,
+    retire_quality_policy,
     evaluate_study_run,
     list_study_evaluations,
     list_study_decisions,
@@ -257,6 +259,7 @@ __all__ = [
     "recommend_study_run",
     "rename_model",
     "rename_project",
+    "retire_quality_policy",
     "revise_study_recipe",
     "run_optimizer",
     "run_scenario",

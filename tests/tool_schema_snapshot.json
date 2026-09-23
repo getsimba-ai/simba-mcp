@@ -1764,6 +1764,29 @@
     "title": "create_quality_policyArguments",
     "type": "object"
   },
+  "retire_quality_policy": {
+    "properties": {
+      "study_id": {
+        "title": "Study Id",
+        "type": "string"
+      },
+      "policy_id": {
+        "title": "Policy Id",
+        "type": "string"
+      },
+      "retired": {
+        "default": true,
+        "title": "Retired",
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "study_id",
+      "policy_id"
+    ],
+    "title": "retire_quality_policyArguments",
+    "type": "object"
+  },
   "evaluate_study_run": {
     "properties": {
       "run_id": {

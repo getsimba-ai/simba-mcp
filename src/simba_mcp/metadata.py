@@ -51,10 +51,12 @@ DESTRUCTIVE = frozenset(
         "set_run_pinned",
         "update_study",
         "cancel_study_run",
+        "retire_quality_policy",
     ]
 )
 IDEMPOTENT_WRITES = frozenset(
     [
+        "retire_quality_policy",
         "declare_study_holdout_use",
         "create_recipe_draft",
         "publish_recipe_draft",

@@ -4,6 +4,16 @@ All notable changes to the SIMBA MCP Server will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.5.2 (2026-09-23)
+
+### Added
+
+- `retire_quality_policy`: retire or restore a saved quality policy without changing it. A retired policy is refused for new launches, assessments and pair-review resolutions and stops counting as newest, while everything that already names it stays readable (nialloulton/jellyfish#823).
+
+### Changed
+
+- `list_quality_policies` documents the new row fields (`created_at`, `retired_at`, `retired_by`, `usage` counts) and states that deletion of an unreferenced policy is an owner-only frontend action, never available through an API key.
+
 ## 0.5.1 (2026-09-22)
 
 ### Changed
