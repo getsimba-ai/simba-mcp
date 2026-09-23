@@ -120,7 +120,7 @@ async def compare_study_runs(
     policy_id: str,
     ctx: Context[AppContext, Any] = None,
 ) -> APIResult:
-    """Compare 2-20 candidates against one quality policy. Serving prediction evidence appends access audit events. Different datasets are flagged, not ranked. Does not fit or promote models."""
+    """Compare 2-20 candidates against one quality policy. Each row carries a basis record (family, dataset and costs hashes, outcome column, units, training window, output kind, prediction window, evidence freshness) and a per-dimension compatibility against the first row; rows are comparable only when family, dataset, outcome, units, window and output kind all match, and incompatible rows are returned with the differing dimension in blockers and are never ranked. This answers predictive ranking only: sensitivity agreement is not computed, analyst acceptance lives in decisions, and business validity is a human review. Serving prediction evidence appends access audit events. Does not fit or promote models."""
     return await _client(ctx).workflow_request(
         "POST", f"/studies/{study_id}/comparisons", {"run_ids": run_ids, "policy_id": policy_id}
     )
