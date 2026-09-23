@@ -56,6 +56,73 @@
     "title": "list_uploadsArguments",
     "type": "object"
   },
+  "list_pipeline_versions": {
+    "properties": {
+      "pipeline_ref": {
+        "title": "Pipeline Ref",
+        "type": "string"
+      },
+      "limit": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Limit"
+      },
+      "cursor": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Cursor"
+      }
+    },
+    "required": [
+      "pipeline_ref"
+    ],
+    "title": "list_pipeline_versionsArguments",
+    "type": "object"
+  },
+  "list_pipelines": {
+    "properties": {
+      "limit": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Limit"
+      },
+      "cursor": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Cursor"
+      }
+    },
+    "title": "list_pipelinesArguments",
+    "type": "object"
+  },
   "get_upload": {
     "properties": {
       "file_id": {

@@ -59,6 +59,8 @@ EXPECTED_TOOLS = [
     "get_data_schema",
     "upload_data",
     "list_uploads",
+    "list_pipelines",
+    "list_pipeline_versions",
     "get_upload",
     "list_models",
     "create_model",
