@@ -1152,6 +1152,30 @@
       "project_id": {
         "title": "Project Id",
         "type": "integer"
+      },
+      "limit": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Limit"
+      },
+      "cursor": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Cursor"
       }
     },
     "required": [
@@ -1223,6 +1247,19 @@
       "study_id"
     ],
     "title": "get_studyArguments",
+    "type": "object"
+  },
+  "get_study_overview": {
+    "properties": {
+      "study_id": {
+        "title": "Study Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "study_id"
+    ],
+    "title": "get_study_overviewArguments",
     "type": "object"
   },
   "update_study": {
@@ -1298,6 +1335,50 @@
       "study_id": {
         "title": "Study Id",
         "type": "string"
+      },
+      "limit": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Limit"
+      },
+      "cursor": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Cursor"
+      },
+      "expand": {
+        "anyOf": [
+          {
+            "items": {
+              "enum": [
+                "effective",
+                "inspection",
+                "specification"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Expand"
       }
     },
     "required": [
@@ -1543,6 +1624,30 @@
       "study_id": {
         "title": "Study Id",
         "type": "string"
+      },
+      "limit": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Limit"
+      },
+      "cursor": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Cursor"
       }
     },
     "required": [
@@ -1582,6 +1687,30 @@
       "study_id": {
         "title": "Study Id",
         "type": "string"
+      },
+      "limit": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Limit"
+      },
+      "cursor": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Cursor"
       }
     },
     "required": [
@@ -1869,6 +1998,46 @@
       "run_id": {
         "title": "Run Id",
         "type": "string"
+      },
+      "limit": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Limit"
+      },
+      "cursor": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Cursor"
+      },
+      "expand": {
+        "anyOf": [
+          {
+            "items": {
+              "const": "report",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Expand"
       }
     },
     "required": [
@@ -1882,6 +2051,30 @@
       "study_id": {
         "title": "Study Id",
         "type": "string"
+      },
+      "limit": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Limit"
+      },
+      "cursor": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Cursor"
       }
     },
     "required": [
@@ -2194,6 +2387,30 @@
       "study_id": {
         "title": "Study Id",
         "type": "string"
+      },
+      "limit": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Limit"
+      },
+      "cursor": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Cursor"
       }
     },
     "required": [

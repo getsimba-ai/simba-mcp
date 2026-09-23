@@ -416,7 +416,11 @@ class SimbaAPIClient:
     async def get_upload(self, file_id: int) -> dict:
         return await self._request("GET", f"/api/v1/ingest/{file_id}")
 
-    async def workflow_request(self, method: str, path: str, payload: dict | None = None) -> dict:
+    async def workflow_request(
+        self, method: str, path: str, payload: dict | None = None, params: dict | None = None
+    ) -> dict:
         """Internal adapter for fixed workflow routes; writes are never auto-retried."""
-        kwargs = {} if payload is None else {"json": payload}
+        kwargs: dict = {} if payload is None else {"json": payload}
+        if params:
+            kwargs["params"] = {k: v for k, v in params.items() if v is not None and v != []}
         return await self._request(method, "/api/v1" + path, retry_safe=method == "GET", **kwargs)

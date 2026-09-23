@@ -22,6 +22,7 @@ READ_ONLY = frozenset(
         "list_runs",
         "list_studies",
         "get_study",
+        "get_study_overview",
         "list_study_recipes",
         "get_recipe_revision",
         "validate_study_recipe",

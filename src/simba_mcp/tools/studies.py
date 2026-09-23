@@ -4,17 +4,21 @@ from typing import Any
 
 from mcp.server.mcpserver import Context
 
-from ..auth import _client
+from ..auth import _client, _page
 from ..runtime import AppContext
 from ..schemas import APIResult, StudyContext, StudyQuestion, StudyState, SubmissionKey
 
 
 async def list_studies(
     project_id: int,
+    limit: int | None = None,
+    cursor: str | None = None,
     ctx: Context[AppContext, Any] = None,
 ) -> APIResult:
-    """List project-owned studies, questions, budgets and access rights."""
-    return await _client(ctx).workflow_request("GET", f"/projects/{project_id}/studies")
+    """List project-owned studies, questions, budgets and access rights. Paging is opt-in: pass limit (1-200) to receive a page and next_cursor; send that cursor back unchanged for the next page; null next_cursor means the end. Without limit every row is returned. Rows you cannot see are simply absent; no totals are promised."""
+    return await _client(ctx).workflow_request(
+        "GET", f"/projects/{project_id}/studies", params=_page(limit, cursor)
+    )
 
 
 async def create_study(
@@ -38,6 +42,14 @@ async def create_study(
             **({"context": context} if context is not None else {}),
         },
     )
+
+
+async def get_study_overview(
+    study_id: str,
+    ctx: Context[AppContext, Any] = None,
+) -> APIResult:
+    """Read a whole study at a glance in one small call: the study, its budget, each recipe with its latest revision (id, number, hash), run counts by state and the latest run, active policies with newest_active_id, the champion summary and the last decision. Identity and counts only, no frozen configuration or reports. Call this first, then expand exactly the recipe, run or assessment you need (list_study_recipes with expand, get_recipe_revision, list_study_evaluations with expand)."""
+    return await _client(ctx).workflow_request("GET", f"/studies/{study_id}/overview")
 
 
 async def get_study(
@@ -92,10 +104,14 @@ async def launch_study_run(
 
 async def list_study_runs(
     study_id: str,
+    limit: int | None = None,
+    cursor: str | None = None,
     ctx: Context[AppContext, Any] = None,
 ) -> APIResult:
-    """List preserved attempts including pending and failed runs. Supporting backends also return budget with attempts remaining, available slots and blocking reasons. Missing budget means unknown support, not permission to launch. Capacity is rechecked on reservation; recover an uncertain launch with its original submission key."""
-    return await _client(ctx).workflow_request("GET", f"/studies/{study_id}/runs")
+    """List preserved attempts including pending and failed runs. Supporting backends also return budget with attempts remaining, available slots and blocking reasons; the budget always counts every run even when rows are paged. Missing budget means unknown support, not permission to launch. Capacity is rechecked on reservation; recover an uncertain launch with its original submission key. Paging is opt-in: pass limit (1-200) to receive a page and next_cursor; send that cursor back unchanged for the next page; null next_cursor means the end. Without limit every row is returned. Rows you cannot see are simply absent; no totals are promised."""
+    return await _client(ctx).workflow_request(
+        "GET", f"/studies/{study_id}/runs", params=_page(limit, cursor)
+    )
 
 
 async def get_study_run(

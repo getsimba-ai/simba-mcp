@@ -1,20 +1,25 @@
 """Recipes tools backed by the shared Simba API."""
 
-from typing import Any
+from typing import Any, Literal
 
 from mcp.server.mcpserver import Context
 
-from ..auth import _client
+from ..auth import _client, _page
 from ..runtime import AppContext
 from ..schemas import APIResult, RecipeSpecification
 
 
 async def list_study_recipes(
     study_id: str,
+    limit: int | None = None,
+    cursor: str | None = None,
+    expand: list[Literal["effective", "inspection", "specification"]] | None = None,
     ctx: Context[AppContext, Any] = None,
 ) -> APIResult:
-    """Read all recipe revisions including exact effective priors, settings and data hashes. Raw datasets are omitted."""
-    return await _client(ctx).workflow_request("GET", f"/studies/{study_id}/recipes")
+    """List recipes with their revisions as summaries (id, number, content_hash, reason, created_at). Heavy fields travel only by name in expand: effective (exact frozen priors, settings, data hashes and runtime), inspection (which settings were authored vs defaulted, inert prior fields, engine state), specification (the authored request). Prefer get_recipe_revision for one revision in full. Raw datasets are never included. Paging is opt-in: pass limit (1-200) to receive a page and next_cursor; send that cursor back unchanged for the next page; null next_cursor means the end. Without limit every row is returned. Rows you cannot see are simply absent; no totals are promised."""
+    return await _client(ctx).workflow_request(
+        "GET", f"/studies/{study_id}/recipes", params=_page(limit, cursor, expand)
+    )
 
 
 async def create_study_recipe(

@@ -32,6 +32,7 @@ EXPECTED_TOOLS = [
     "list_studies",
     "create_study",
     "get_study",
+    "get_study_overview",
     "update_study",
     "list_study_recipes",
     "create_study_recipe",

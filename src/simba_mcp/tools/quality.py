@@ -4,17 +4,21 @@ from typing import Any, Literal
 
 from mcp.server.mcpserver import Context
 
-from ..auth import _client
+from ..auth import _client, _page
 from ..runtime import AppContext
 from ..schemas import APIResult, ExternalEvidence, QualityCheck, ValidationProtocolSpec
 
 
 async def list_quality_policies(
     study_id: str,
+    limit: int | None = None,
+    cursor: str | None = None,
     ctx: Context[AppContext, Any] = None,
 ) -> APIResult:
     """Read immutable quality policies for the study. Each row carries created_at, retired_at, retired_by and usage counts (runs_launched, evaluations, resolutions, champion_acceptances). Retired policies stay listed for history but are refused for new launches, assessments and pair reviews; pick the newest policy whose retired_at is null. Deleting a policy is possible only for a policy nothing references and only from the signed-in project owner UI, never through this API key."""
-    return await _client(ctx).workflow_request("GET", f"/studies/{study_id}/quality-policies")
+    return await _client(ctx).workflow_request(
+        "GET", f"/studies/{study_id}/quality-policies", params=_page(limit, cursor)
+    )
 
 
 async def create_quality_policy(
@@ -72,18 +76,27 @@ async def evaluate_study_run(
 
 async def list_study_evaluations(
     run_id: str,
+    limit: int | None = None,
+    cursor: str | None = None,
+    expand: list[Literal["report"]] | None = None,
     ctx: Context[AppContext, Any] = None,
 ) -> APIResult:
-    """Read preserved quality reports and evidence hashes. Serving available prediction reports appends access audit events."""
-    return await _client(ctx).workflow_request("GET", f"/study-runs/{run_id}/evaluations")
+    """List preserved assessments as summaries: id, policy_id, policy_name, status, basis_hash, evidence_hash, created_at. Pass expand=["report"] for the full per-check report; serving available prediction reports appends access audit events, summaries do not. Paging is opt-in: pass limit (1-200) to receive a page and next_cursor; send that cursor back unchanged for the next page; null next_cursor means the end. Without limit every row is returned. Rows you cannot see are simply absent; no totals are promised."""
+    return await _client(ctx).workflow_request(
+        "GET", f"/study-runs/{run_id}/evaluations", params=_page(limit, cursor, expand)
+    )
 
 
 async def list_study_decisions(
     study_id: str,
+    limit: int | None = None,
+    cursor: str | None = None,
     ctx: Context[AppContext, Any] = None,
 ) -> APIResult:
-    """Read analyst decisions and agent recommendations."""
-    return await _client(ctx).workflow_request("GET", f"/studies/{study_id}/decisions")
+    """Read analyst decisions and agent recommendations. Paging is opt-in: pass limit (1-200) to receive a page and next_cursor; send that cursor back unchanged for the next page; null next_cursor means the end. Without limit every row is returned. Rows you cannot see are simply absent; no totals are promised."""
+    return await _client(ctx).workflow_request(
+        "GET", f"/studies/{study_id}/decisions", params=_page(limit, cursor)
+    )
 
 
 async def recommend_study_run(
