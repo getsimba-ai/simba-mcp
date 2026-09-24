@@ -4,6 +4,12 @@ All notable changes to the SIMBA MCP Server will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.7.1 (2026-09-24)
+
+### Changed
+
+- `QualityCheck` and `create_quality_policy` describe the artifact-backed rule kinds of jellyfish #843 (O-04): saved diagnostics, retained-sampling counts and provenance status, each in its own metric namespace; `expected` may be a status string for provenance rules. No new tool (71).
+
 ## 0.7.0 (2026-09-24)
 
 ### Added

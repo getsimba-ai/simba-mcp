@@ -1892,7 +1892,7 @@
       "checks": {
         "items": {
           "additionalProperties": true,
-          "description": "Built-in metric + maximum (or operator gte/between with minimum), or custom numeric gate with metric custom:<slug>, name, units, operator and applicable bounds. Boolean/manual checks use kind, operator equals and strict boolean expected. Manual expected must be true and sign-off is session-only. At least one required gate per policy; at most 20 checks in total.",
+          "description": "Built-in metric + maximum (or operator gte/between with minimum), or custom numeric gate with metric custom:<slug>, name, units, operator and applicable bounds. Boolean/manual checks use kind, operator equals and strict boolean expected. Manual expected must be true and sign-off is session-only. Rules over saved artifacts need no external evidence: saved diagnostics (r_squared, mape, durbin_watson, pareto_k_pct, normality_p, loo_cv; bounds may be negative for loo_cv and r_squared), retained-sampling counts (retained_chains, retained_draws_per_chain, ess_bulk_min, ess_tail_min, divergences; non-negative) and provenance status (provenance:holdout, provenance:prior; operator equals, expected review_required \u2014 blocked fails, an absent record is not_collected). Every threshold is the author's; an absent artifact never passes. At least one required gate per policy; at most 20 checks in total.",
           "properties": {
             "metric": {
               "examples": [
@@ -1903,6 +1903,19 @@
                 "prediction_mae",
                 "prediction_rmse",
                 "prediction_wape",
+                "r_squared",
+                "mape",
+                "durbin_watson",
+                "pareto_k_pct",
+                "normality_p",
+                "loo_cv",
+                "retained_chains",
+                "retained_draws_per_chain",
+                "ess_bulk_min",
+                "ess_tail_min",
+                "divergences",
+                "provenance:holdout",
+                "provenance:prior",
                 "custom:benchmark_deviation"
               ],
               "type": "string"
@@ -1921,7 +1934,10 @@
               "type": "string"
             },
             "expected": {
-              "type": "boolean"
+              "type": [
+                "boolean",
+                "string"
+              ]
             },
             "operator": {
               "enum": [
