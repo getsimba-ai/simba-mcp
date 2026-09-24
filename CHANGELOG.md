@@ -4,6 +4,17 @@ All notable changes to the SIMBA MCP Server will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.6.1 (2026-09-24)
+
+### Added
+
+- `get_launch_eligibility`: read, before launching, exactly what `launch_study_run` would refuse with (stable code, message, next action), plus the budget, the policy used and the revision's engine state (jellyfish #804).
+- `refreeze_recipe_revision`: recover from `engine_changed` by creating a new revision of the same recipe on the current engine; the old revision is untouched.
+
+### Changed
+
+- `launch_study_run` says it starts a new fit (never opens results), points at `get_launch_eligibility` and the re-freeze recovery, and asks for a deliberate policy choice.
+
 ## 0.6.0 (2026-09-23)
 
 ### Changed

@@ -44,6 +44,20 @@ async def create_study(
     )
 
 
+async def get_launch_eligibility(
+    study_id: str,
+    revision_id: str,
+    policy_id: str | None = None,
+    ctx: Context[AppContext, Any] = None,
+) -> APIResult:
+    """Read, before launching, exactly what launch_study_run would refuse with: can_launch plus blockers, each with the stable code (permission_denied, policy_not_found, policy_retired, study_inactive, revision_not_found, attempts_exhausted, concurrency_exhausted, unsupported_family, engine_changed, snapshot_not_executable), the human message and a next_action. Also returns the budget, the policy used (newest active when policy_id is omitted) and the revision with its engine state. Consumes nothing. For engine_changed, call refreeze_recipe_revision and launch the new revision; never retry the old one."""
+    return await _client(ctx).workflow_request(
+        "GET",
+        f"/studies/{study_id}/launch-eligibility",
+        params={"revision_id": revision_id, "policy_id": policy_id},
+    )
+
+
 async def get_study_overview(
     study_id: str,
     ctx: Context[AppContext, Any] = None,
@@ -94,7 +108,7 @@ async def launch_study_run(
     submission_key: SubmissionKey,
     ctx: Context[AppContext, Any] = None,
 ) -> APIResult:
-    """Launch a frozen revision within study attempt/concurrency budgets. Requires an active study, immutable executable revision and same-study policy. Budget/state conflicts require inspection, not a new attempt key. Reuse the same submission_key after an ambiguous response; never invent another key for a retry."""
+    """Launch a NEW fit of a frozen revision within study attempt/concurrency budgets; it never opens existing results. Call get_launch_eligibility first: a refusal here carries the same code, message and next_action. Requires an active study, an executable revision frozen on the current engine, and an active same-study policy (choose it deliberately; the newest is not always the intended one). Budget/state conflicts require inspection, not a new attempt key. Reuse the same submission_key after an ambiguous response; never invent another key for a retry. engine_changed means re-freeze (refreeze_recipe_revision) and launch the new revision."""
     return await _client(ctx).workflow_request(
         "POST",
         f"/studies/{study_id}/runs",
