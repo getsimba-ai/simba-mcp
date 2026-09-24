@@ -167,11 +167,30 @@ QualityCheck = Annotated[
         }
     ),
 ]
+CarryForward = Annotated[
+    dict,
+    Field(
+        json_schema_extra={
+            "description": "Reuse an earlier assessment's external evidence for the named custom metrics. Allowed only when the preview listed the metric under carry_forward_available for that assessment: same run, same evidence basis, same policy rules. Manual sign-off is never carried.",
+            "properties": {
+                "from_evaluation_id": {"type": "string"},
+                "metrics": {
+                    "type": "array",
+                    "items": {"type": "string", "pattern": "^custom:[a-z][a-z0-9_]{0,63}$"},
+                    "minItems": 1,
+                    "maxItems": 20,
+                },
+            },
+            "required": ["from_evaluation_id", "metrics"],
+            "additionalProperties": False,
+        }
+    ),
+]
 ExternalEvidence = Annotated[
     dict,
     Field(
         json_schema_extra={
-            "description": "Externally calculated numeric or strict boolean evidence; server applies policy. Manual sign-off is session-only and cannot be submitted with an API key. Source/method/digest are submitter-reported, not independently verified. Never submit a pass/fail status.",
+            "description": "Externally calculated numeric or strict boolean evidence; server applies policy. Manual sign-off is session-only and cannot be submitted with an API key. Source/method/digest are submitter-reported, not independently verified. Never submit a pass/fail status. To reuse an earlier submission on the same basis, use carry_forward instead of retyping.",
             "properties": {
                 "metric": {"type": "string", "pattern": "^custom:[a-z][a-z0-9_]{0,63}$"},
                 "value": {"type": ["number", "boolean"]},

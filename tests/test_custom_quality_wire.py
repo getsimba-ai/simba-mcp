@@ -26,6 +26,8 @@ from simba_mcp.api_client import SimbaAPIClient
         "protocol",
         "pair",
         "pair_training",
+        "preview",
+        "carry",
     ],
 )
 def test_custom_quality_wire(monkeypatch, operation):
@@ -141,6 +143,13 @@ def test_custom_quality_wire(monkeypatch, operation):
             if operation == "boolean":
                 evidence["value"] = False
             arguments.update(expected_basis_hash="a" * 64, external_evidence=[evidence])
+        if operation == "preview":  # #835: a dry run travels as the same body plus preview
+            arguments.update(preview=True)
+        if operation == "carry":  # #835: carried metrics name one earlier assessment
+            arguments.update(
+                expected_basis_hash="a" * 64,
+                carry_forward={"from_evaluation_id": "earlier", "metrics": ["custom:benchmark"]},
+            )
         expected = {key: value for key, value in arguments.items() if key != "run_id"}
 
     champion = {

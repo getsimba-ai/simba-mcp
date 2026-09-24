@@ -4,6 +4,15 @@ All notable changes to the SIMBA MCP Server will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.6.3 (2026-09-24)
+
+### Changed
+
+- `evaluate_study_run` gains `preview` (see what an assessment would contain without writing) and `carry_forward` (reuse an earlier assessment's external evidence when the evidence basis and policy rules still match; manual sign-off is never carried). The text explains the closed `basis.reason` set and the 409 `why` codes (jellyfish #835).
+- `list_study_evaluations` documents the per-row content `summary` and that a newer sparse report never replaces an earlier enriched one.
+- `ExternalEvidence` points at `carry_forward` for reuse; new `CarryForward` schema.
+- Workflow skill: a "Re-evaluating a run" paragraph.
+
 ## 0.6.2 (2026-09-24)
 
 ### Added
