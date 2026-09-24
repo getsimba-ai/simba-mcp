@@ -6,7 +6,13 @@ from mcp.server.mcpserver import Context
 
 from ..auth import _client, _page
 from ..runtime import AppContext
-from ..schemas import APIResult, ExternalEvidence, QualityCheck, ValidationProtocolSpec
+from ..schemas import (
+    APIResult,
+    CarryForward,
+    ExternalEvidence,
+    QualityCheck,
+    ValidationProtocolSpec,
+)
 
 
 async def list_quality_policies(
@@ -74,14 +80,20 @@ async def evaluate_study_run(
     policy_id: str,
     expected_basis_hash: str | None = None,
     external_evidence: list[ExternalEvidence] | None = None,
+    preview: bool = False,
+    carry_forward: CarryForward | None = None,
     ctx: Context[AppContext, Any] = None,
 ) -> APIResult:
-    """Save an immutable assessment. First evaluate without external_evidence to obtain report.basis_hash; then calculate custom metrics from outputs and submit finite numeric or strict boolean values, method and source reference with that expected_basis_hash. The server applies the saved rule; stale model evidence is rejected. External calculations are submitter-reported, not verified. Each submission is complete: omitted custom values stay unevaluated. Manual sign-off requires a signed-in reviewer and is rejected for API keys. No automatic champion promotion. Built-in errors are fitted-window, not holdout; VAR remains unsupported."""
+    """Save an immutable assessment, or with preview=true see what one would contain without writing (nothing stored, no access event). The preview returns basis_hash, would_evaluate, would_not_evaluate (each with basis.reason and, when an earlier assessment of this run can lend the value, carry_forward_available; otherwise carry_forward_blocked with why: basis_changed, policy_changed, manual_signoff) and previous_assessment. Each submission is complete: a custom check has a value only if you supply it now in external_evidence or name it in carry_forward from an earlier assessment whose evidence basis and policy rules still match; a metric may not be in both. Submit finite numeric or strict boolean values with method and source_reference and the expected_basis_hash from the preview; stale evidence is 409 stale_evidence. External calculations are submitter-reported, not verified; carried rows keep carried_from provenance. Manual sign-off is never carried and requires a signed-in reviewer. Every unevaluated check carries basis.reason from a closed set and a suggested action; not_evaluated never passes. Choose policy_id explicitly; the report echoes policy_name and policy_was_newest. No automatic champion promotion. Built-in errors are fitted-window, not holdout; VAR remains unsupported."""
     payload: dict[str, Any] = {"policy_id": policy_id}
     if expected_basis_hash is not None:
         payload["expected_basis_hash"] = expected_basis_hash
     if external_evidence is not None:
         payload["external_evidence"] = external_evidence
+    if preview:
+        payload["preview"] = True
+    if carry_forward is not None:
+        payload["carry_forward"] = carry_forward
     return await _client(ctx).workflow_request("POST", f"/study-runs/{run_id}/evaluations", payload)
 
 
@@ -92,7 +104,7 @@ async def list_study_evaluations(
     expand: list[Literal["report"]] | None = None,
     ctx: Context[AppContext, Any] = None,
 ) -> APIResult:
-    """List preserved assessments as summaries: id, policy_id, policy_name, status, basis_hash, evidence_hash, created_at. Pass expand=["report"] for the full per-check report; serving available prediction reports appends access audit events, summaries do not. Paging is opt-in: pass limit (1-200) to receive a page and next_cursor; send that cursor back unchanged for the next page; null next_cursor means the end. Without limit every row is returned. Rows you cannot see are simply absent; no totals are promised."""
+    """List preserved assessments as summaries: id, policy_id, policy_name, status, basis_hash, evidence_hash, created_at and summary (evaluated / total / required_unevaluated / evidence_sources: which values were supplied and which carried). A newer sparse report does not replace an earlier enriched one; decisions bind to a specific report id. Pass expand=["report"] for the full per-check report; serving available prediction reports appends access audit events, summaries do not. Paging is opt-in: pass limit (1-200) to receive a page and next_cursor; send that cursor back unchanged for the next page; null next_cursor means the end. Without limit every row is returned. Rows you cannot see are simply absent; no totals are promised."""
     return await _client(ctx).workflow_request(
         "GET", f"/study-runs/{run_id}/evaluations", params=_page(limit, cursor, expand)
     )
