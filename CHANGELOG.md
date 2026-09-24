@@ -4,6 +4,16 @@ All notable changes to the SIMBA MCP Server will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.6.2 (2026-09-24)
+
+### Added
+
+- `get_quality_policy`: one policy in full with `content_hash`, `rules_hash`, `is_newest`, `derived_from`, check and protocol summaries, and usage with the ids behind each count (jellyfish #841).
+
+### Changed
+
+- `list_quality_policies` documents the identity fields on every row and says that newest is information, not a recommendation.
+
 ## 0.6.1 (2026-09-24)
 
 ### Added
