@@ -5,7 +5,7 @@ from typing import Any
 
 from mcp.server.mcpserver import Context
 
-from ..auth import _client, _local_files_denial_reason
+from ..auth import _client, _local_files_denial_reason, _page
 from ..errors import api_error
 from ..runtime import MAX_UPLOAD_BYTES, AppContext
 from ..schemas import APIResult
@@ -129,6 +129,27 @@ async def list_uploads(
               filename.
     """
     return await _client(ctx).list_uploads(limit=limit, offset=offset, name=name)
+
+
+async def list_pipelines(
+    limit: int | None = None,
+    cursor: str | None = None,
+    ctx: Context[AppContext, Any] = None,
+) -> APIResult:
+    """List the data pipelines this key's owner has, most recently updated first, each with id, pipeline_hash, name, description, version_count and latest_version (id, version, created_at, row_count, checksum). Identity only: no definitions, parameters or output data. Use a version id as pipeline_version_id in get_recipe_draft_template. Requires the ingest scope; the same ownership rule as the app. Paging is opt-in: pass limit (1-200) to receive a page and next_cursor; send that cursor back unchanged for the next page; null next_cursor means the end."""
+    return await _client(ctx).workflow_request("GET", "/pipelines", params=_page(limit, cursor))
+
+
+async def list_pipeline_versions(
+    pipeline_ref: str,
+    limit: int | None = None,
+    cursor: str | None = None,
+    ctx: Context[AppContext, Any] = None,
+) -> APIResult:
+    """List the saved versions of one owned pipeline (by pipeline_hash or id), newest first: id, version, created_at, row_count, column_count, column names and checksum. The checksum is the exact source identity a recipe draft freezes. Never returns the data itself; fetch a draft template with pipeline_version_id for that. Paging is opt-in: pass limit (1-200) to receive a page and next_cursor; send that cursor back unchanged for the next page; null next_cursor means the end."""
+    return await _client(ctx).workflow_request(
+        "GET", f"/pipelines/{pipeline_ref}/versions", params=_page(limit, cursor)
+    )
 
 
 async def get_upload(

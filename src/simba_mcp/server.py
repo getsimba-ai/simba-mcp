@@ -1,6 +1,10 @@
 """Simba MCP composition and registration. Backend services own durable state."""
 
+import functools
+import json
+
 from mcp.server.mcpserver import MCPServer
+from mcp.types import CallToolResult, TextContent
 
 from . import runtime
 from .auth import _bearer_token, _client, _local_files_allowed
@@ -16,6 +20,8 @@ from .tools.data import (
     get_backend_capabilities,
     get_data_schema,
     get_upload,
+    list_pipeline_versions,
+    list_pipelines,
     list_uploads,
     upload_data,
 )
@@ -88,6 +94,7 @@ from .tools.studies import (
     cancel_study_run,
     create_study,
     get_study,
+    get_study_overview,
     get_study_run,
     launch_study_run,
     list_studies,
@@ -127,6 +134,8 @@ TOOLS = (
     get_backend_capabilities,
     get_data_schema,
     upload_data,
+    list_pipeline_versions,
+    list_pipelines,
     list_uploads,
     get_upload,
     list_models,
@@ -157,6 +166,7 @@ TOOLS = (
     list_studies,
     create_study,
     get_study,
+    get_study_overview,
     update_study,
     list_study_recipes,
     create_study_recipe,
@@ -183,9 +193,34 @@ TOOLS = (
     compare_study_runs,
 )
 
+
+def _wire_errors(tool):
+    """A refused backend call is a tool execution error on the wire (jellyfish #824).
+
+    The structured payload (`error`, `_status_code`, `_error_code`, `_next_action`, extras)
+    stays exactly as before for clients that read it; `isError` is now also true, so a client
+    that only checks the flag no longer mistakes a refusal for success. Successful results
+    pass through untouched.
+    """
+
+    @functools.wraps(tool)
+    async def wrapped(*args, **kwargs):
+        result = await tool(*args, **kwargs)
+        status = result.get("_status_code") if isinstance(result, dict) else None
+        if isinstance(status, int) and status >= 400:
+            return CallToolResult(
+                content=[TextContent(type="text", text=json.dumps(result))],
+                structured_content=result,
+                is_error=True,
+            )
+        return result
+
+    return wrapped
+
+
 for tool in TOOLS:
     mcp.add_tool(
-        tool,
+        _wire_errors(tool),
         title=tool.__name__.replace("_", " ").title(),
         annotations=annotations_for(tool.__name__),
     )
@@ -240,6 +275,7 @@ __all__ = [
     "get_scenario_template",
     "get_study",
     "get_study_champion",
+    "get_study_overview",
     "get_study_prediction_access",
     "get_study_run",
     "get_study_validation_resolutions",
@@ -247,6 +283,8 @@ __all__ = [
     "launch_study_run",
     "link_var_model",
     "list_models",
+    "list_pipeline_versions",
+    "list_pipelines",
     "list_projects",
     "list_quality_policies",
     "list_runs",

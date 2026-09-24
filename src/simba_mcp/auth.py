@@ -54,6 +54,14 @@ def _bearer_token(ctx: Context[runtime.AppContext, Any]) -> str:
     return ""
 
 
+def _page(limit=None, cursor=None, expand=None):
+    """Query params for bounded, summary-first list reads (jellyfish #824)."""
+    params: dict = {"limit": limit, "cursor": cursor}
+    if expand:
+        params["expand"] = ",".join(expand)
+    return params
+
+
 def _client(ctx: Context[runtime.AppContext, Any]) -> SimbaAPIClient:
     if runtime._serving_http:
         # Bring-your-own-key (#51): every hosted caller authenticates with

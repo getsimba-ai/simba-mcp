@@ -56,6 +56,73 @@
     "title": "list_uploadsArguments",
     "type": "object"
   },
+  "list_pipeline_versions": {
+    "properties": {
+      "pipeline_ref": {
+        "title": "Pipeline Ref",
+        "type": "string"
+      },
+      "limit": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Limit"
+      },
+      "cursor": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Cursor"
+      }
+    },
+    "required": [
+      "pipeline_ref"
+    ],
+    "title": "list_pipeline_versionsArguments",
+    "type": "object"
+  },
+  "list_pipelines": {
+    "properties": {
+      "limit": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Limit"
+      },
+      "cursor": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Cursor"
+      }
+    },
+    "title": "list_pipelinesArguments",
+    "type": "object"
+  },
   "get_upload": {
     "properties": {
       "file_id": {
@@ -1152,6 +1219,30 @@
       "project_id": {
         "title": "Project Id",
         "type": "integer"
+      },
+      "limit": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Limit"
+      },
+      "cursor": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Cursor"
       }
     },
     "required": [
@@ -1223,6 +1314,19 @@
       "study_id"
     ],
     "title": "get_studyArguments",
+    "type": "object"
+  },
+  "get_study_overview": {
+    "properties": {
+      "study_id": {
+        "title": "Study Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "study_id"
+    ],
+    "title": "get_study_overviewArguments",
     "type": "object"
   },
   "update_study": {
@@ -1298,6 +1402,50 @@
       "study_id": {
         "title": "Study Id",
         "type": "string"
+      },
+      "limit": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Limit"
+      },
+      "cursor": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Cursor"
+      },
+      "expand": {
+        "anyOf": [
+          {
+            "items": {
+              "enum": [
+                "effective",
+                "inspection",
+                "specification"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Expand"
       }
     },
     "required": [
@@ -1543,6 +1691,30 @@
       "study_id": {
         "title": "Study Id",
         "type": "string"
+      },
+      "limit": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Limit"
+      },
+      "cursor": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Cursor"
       }
     },
     "required": [
@@ -1582,6 +1754,30 @@
       "study_id": {
         "title": "Study Id",
         "type": "string"
+      },
+      "limit": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Limit"
+      },
+      "cursor": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Cursor"
       }
     },
     "required": [
@@ -1869,6 +2065,46 @@
       "run_id": {
         "title": "Run Id",
         "type": "string"
+      },
+      "limit": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Limit"
+      },
+      "cursor": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Cursor"
+      },
+      "expand": {
+        "anyOf": [
+          {
+            "items": {
+              "const": "report",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Expand"
       }
     },
     "required": [
@@ -1882,6 +2118,30 @@
       "study_id": {
         "title": "Study Id",
         "type": "string"
+      },
+      "limit": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Limit"
+      },
+      "cursor": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Cursor"
       }
     },
     "required": [
@@ -2194,6 +2454,30 @@
       "study_id": {
         "title": "Study Id",
         "type": "string"
+      },
+      "limit": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Limit"
+      },
+      "cursor": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Cursor"
       }
     },
     "required": [

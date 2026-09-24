@@ -4,6 +4,18 @@ All notable changes to the SIMBA MCP Server will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.6.0 (2026-09-23)
+
+### Changed
+
+- **Refused calls are tool execution errors on the wire.** Any result whose `_status_code` is 400 or higher now carries `isError: true`; the structured payload (`error`, `_status_code`, `_error_code`, `_next_action`, extras) is unchanged and the same JSON is in the text block. A backend `code` (jellyfish #824) wins over the status-derived `_error_code`, and `_next_action` names the recovery for each of the twelve Studies codes.
+- **Bounded, summary-first lists.** `list_studies`, `list_study_runs`, `list_study_recipes`, `list_recipe_drafts`, `list_quality_policies`, `list_study_evaluations` and `list_study_decisions` take `limit` (1-200) and an opaque `cursor`; without `limit` every row is returned. `list_study_recipes` returns revision summaries and takes `expand` (`effective`, `inspection`, `specification`); `list_study_evaluations` returns assessment summaries and takes `expand` (`report`). On backends before jellyfish #824 the parameters are ignored and the old full rows come back.
+
+### Added
+
+- `get_study_overview`: a whole study in one small read (budget, recipes with latest revision, runs by state, active policies, champion, last decision).
+- `list_pipelines` and `list_pipeline_versions`: pipeline discovery for keys with the `ingest` scope, identity fields only, same ownership rule as the app; `get_recipe_draft_template` points at them for `pipeline_version_id`.
+
 ## 0.5.2 (2026-09-23)
 
 ### Added

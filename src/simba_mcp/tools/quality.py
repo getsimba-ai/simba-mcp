@@ -4,17 +4,21 @@ from typing import Any, Literal
 
 from mcp.server.mcpserver import Context
 
-from ..auth import _client
+from ..auth import _client, _page
 from ..runtime import AppContext
 from ..schemas import APIResult, ExternalEvidence, QualityCheck, ValidationProtocolSpec
 
 
 async def list_quality_policies(
     study_id: str,
+    limit: int | None = None,
+    cursor: str | None = None,
     ctx: Context[AppContext, Any] = None,
 ) -> APIResult:
     """Read immutable quality policies for the study. Each row carries created_at, retired_at, retired_by and usage counts (runs_launched, evaluations, resolutions, champion_acceptances). Retired policies stay listed for history but are refused for new launches, assessments and pair reviews; pick the newest policy whose retired_at is null. Deleting a policy is possible only for a policy nothing references and only from the signed-in project owner UI, never through this API key."""
-    return await _client(ctx).workflow_request("GET", f"/studies/{study_id}/quality-policies")
+    return await _client(ctx).workflow_request(
+        "GET", f"/studies/{study_id}/quality-policies", params=_page(limit, cursor)
+    )
 
 
 async def create_quality_policy(
@@ -72,18 +76,27 @@ async def evaluate_study_run(
 
 async def list_study_evaluations(
     run_id: str,
+    limit: int | None = None,
+    cursor: str | None = None,
+    expand: list[Literal["report"]] | None = None,
     ctx: Context[AppContext, Any] = None,
 ) -> APIResult:
-    """Read preserved quality reports and evidence hashes. Serving available prediction reports appends access audit events."""
-    return await _client(ctx).workflow_request("GET", f"/study-runs/{run_id}/evaluations")
+    """List preserved assessments as summaries: id, policy_id, policy_name, status, basis_hash, evidence_hash, created_at. Pass expand=["report"] for the full per-check report; serving available prediction reports appends access audit events, summaries do not. Paging is opt-in: pass limit (1-200) to receive a page and next_cursor; send that cursor back unchanged for the next page; null next_cursor means the end. Without limit every row is returned. Rows you cannot see are simply absent; no totals are promised."""
+    return await _client(ctx).workflow_request(
+        "GET", f"/study-runs/{run_id}/evaluations", params=_page(limit, cursor, expand)
+    )
 
 
 async def list_study_decisions(
     study_id: str,
+    limit: int | None = None,
+    cursor: str | None = None,
     ctx: Context[AppContext, Any] = None,
 ) -> APIResult:
-    """Read analyst decisions and agent recommendations."""
-    return await _client(ctx).workflow_request("GET", f"/studies/{study_id}/decisions")
+    """Read analyst decisions and agent recommendations. Paging is opt-in: pass limit (1-200) to receive a page and next_cursor; send that cursor back unchanged for the next page; null next_cursor means the end. Without limit every row is returned. Rows you cannot see are simply absent; no totals are promised."""
+    return await _client(ctx).workflow_request(
+        "GET", f"/studies/{study_id}/decisions", params=_page(limit, cursor)
+    )
 
 
 async def recommend_study_run(
@@ -107,7 +120,7 @@ async def compare_study_runs(
     policy_id: str,
     ctx: Context[AppContext, Any] = None,
 ) -> APIResult:
-    """Compare 2-20 candidates against one quality policy. Serving prediction evidence appends access audit events. Different datasets are flagged, not ranked. Does not fit or promote models."""
+    """Compare 2-20 candidates against one quality policy. Each row carries a basis record (family, dataset and costs hashes, outcome column, units, training window, output kind, prediction window, evidence freshness) and a per-dimension compatibility against the first row; rows are comparable only when family, dataset, outcome, units, window and output kind all match, and incompatible rows are returned with the differing dimension in blockers and are never ranked. This answers predictive ranking only: sensitivity agreement is not computed, analyst acceptance lives in decisions, and business validity is a human review. Serving prediction evidence appends access audit events. Does not fit or promote models."""
     return await _client(ctx).workflow_request(
         "POST", f"/studies/{study_id}/comparisons", {"run_ids": run_ids, "policy_id": policy_id}
     )

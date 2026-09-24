@@ -4,7 +4,7 @@ from typing import Any, Literal
 
 from mcp.server.mcpserver import Context
 
-from ..auth import _client
+from ..auth import _client, _page
 from ..runtime import AppContext
 from ..schemas import APIResult, DraftSnapshot
 
@@ -15,7 +15,7 @@ async def get_recipe_draft_template(
     pipeline_version_id: int | None = None,
     ctx: Context[AppContext, Any] = None,
 ) -> APIResult:
-    """Get complete shared wizard defaults, hash and envelope schema. Optionally choose an owned uploaded_file_id or pipeline_version_id (never both) into frozen source bytes with verified lineage and an editable data preview. Copy snapshot into create_recipe_draft and preserve unedited fields. Defaults are not a validated model. Does not create, publish or run anything."""
+    """Get complete shared wizard defaults, hash and envelope schema. Optionally choose an owned uploaded_file_id (from list_uploads) or pipeline_version_id (from list_pipelines / list_pipeline_versions), never both, into frozen source bytes with verified lineage and an editable data preview. Copy snapshot into create_recipe_draft and preserve unedited fields. Defaults are not a validated model. Does not create, publish or run anything."""
     path = f"/recipe-draft-template?family={family}"
     if uploaded_file_id is not None:
         path += f"&uploaded_file_id={uploaded_file_id}"
@@ -24,9 +24,16 @@ async def get_recipe_draft_template(
     return await _client(ctx).workflow_request("GET", path)
 
 
-async def list_recipe_drafts(study_id: str, ctx: Context[AppContext, Any] = None) -> APIResult:
-    """List study draft metadata without loading datasets. Check backend draft capability first."""
-    return await _client(ctx).workflow_request("GET", f"/studies/{study_id}/recipe-drafts")
+async def list_recipe_drafts(
+    study_id: str,
+    limit: int | None = None,
+    cursor: str | None = None,
+    ctx: Context[AppContext, Any] = None,
+) -> APIResult:
+    """List study draft metadata without loading datasets, newest update first. Check backend draft capability first. Paging is opt-in: pass limit (1-200) to receive a page and next_cursor; send that cursor back unchanged for the next page; null next_cursor means the end. Without limit every row is returned. Rows you cannot see are simply absent; no totals are promised."""
+    return await _client(ctx).workflow_request(
+        "GET", f"/studies/{study_id}/recipe-drafts", params=_page(limit, cursor)
+    )
 
 
 async def get_recipe_draft(draft_id: str, ctx: Context[AppContext, Any] = None) -> APIResult:
