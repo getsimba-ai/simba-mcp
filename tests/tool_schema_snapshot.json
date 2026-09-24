@@ -1329,6 +1329,54 @@
     "title": "get_study_overviewArguments",
     "type": "object"
   },
+  "get_launch_eligibility": {
+    "properties": {
+      "study_id": {
+        "title": "Study Id",
+        "type": "string"
+      },
+      "revision_id": {
+        "title": "Revision Id",
+        "type": "string"
+      },
+      "policy_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Policy Id"
+      }
+    },
+    "required": [
+      "study_id",
+      "revision_id"
+    ],
+    "title": "get_launch_eligibilityArguments",
+    "type": "object"
+  },
+  "refreeze_recipe_revision": {
+    "properties": {
+      "recipe_id": {
+        "title": "Recipe Id",
+        "type": "string"
+      },
+      "number": {
+        "title": "Number",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "recipe_id",
+      "number"
+    ],
+    "title": "refreeze_recipe_revisionArguments",
+    "type": "object"
+  },
   "update_study": {
     "properties": {
       "study_id": {

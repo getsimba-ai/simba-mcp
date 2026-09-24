@@ -83,6 +83,17 @@ async def revise_study_recipe(
     )
 
 
+async def refreeze_recipe_revision(
+    recipe_id: str,
+    number: int,
+    ctx: Context[AppContext, Any] = None,
+) -> APIResult:
+    """Recover from engine_changed without bypassing the safeguard: creates a new revision of the same recipe with the same specification, frozen on the current engine, with an auto-filled reason naming what changed. The old revision and its provenance are untouched. Returns the new revision; launch that one. 409 conflict when the revision is already frozen on the current engine; 409 snapshot_not_executable for review-only snapshots."""
+    return await _client(ctx).workflow_request(
+        "POST", f"/recipes/{recipe_id}/revisions/{number}/refreeze"
+    )
+
+
 async def get_recipe_revision(
     recipe_id: str,
     number: int,
