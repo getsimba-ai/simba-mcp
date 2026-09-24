@@ -15,9 +15,20 @@ async def list_quality_policies(
     cursor: str | None = None,
     ctx: Context[AppContext, Any] = None,
 ) -> APIResult:
-    """Read immutable quality policies for the study. Each row carries created_at, retired_at, retired_by and usage counts (runs_launched, evaluations, resolutions, champion_acceptances). Retired policies stay listed for history but are refused for new launches, assessments and pair reviews; pick the newest policy whose retired_at is null. Deleting a policy is possible only for a policy nothing references and only from the signed-in project owner UI, never through this API key."""
+    """Read immutable quality policies for the study. Each row carries the full specification plus identity: content_hash (the stored row, including name and rationale), rules_hash (the rules alone: checks sorted by metric plus the protocol, so two policies with the same rules_hash apply the same rules whatever they are called), is_newest, derived_from, created_at, retired_at, usage counts (runs_launched, evaluations, resolutions, champion_acceptances) and checks_summary / protocol_summary. Newest is information, not a recommendation: choose policy_id explicitly. Retired policies stay listed for history but are refused for new launches, assessments and pair reviews. Deleting a policy is possible only for a policy nothing references and only from the signed-in project owner UI, never through this API key."""
     return await _client(ctx).workflow_request(
         "GET", f"/studies/{study_id}/quality-policies", params=_page(limit, cursor)
+    )
+
+
+async def get_quality_policy(
+    study_id: str,
+    policy_id: str,
+    ctx: Context[AppContext, Any] = None,
+) -> APIResult:
+    """Read one immutable policy in full: specification, content_hash (identity of the stored row), rules_hash (identity of the rules alone, the value evidence carry-forward compares), is_newest, derived_from (null until a policy is created from another), checks_summary (builtin / custom_numeric / boolean / manual / diagnostic, required, advisory, cap) and protocol_summary, plus usage with the ids of every run, assessment, resolution and Champion acceptance that references it. Shared viewers can read; nothing is written."""
+    return await _client(ctx).workflow_request(
+        "GET", f"/studies/{study_id}/quality-policies/{policy_id}"
     )
 
 

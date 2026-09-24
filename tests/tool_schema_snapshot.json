@@ -1834,6 +1834,24 @@
     "title": "list_quality_policiesArguments",
     "type": "object"
   },
+  "get_quality_policy": {
+    "properties": {
+      "study_id": {
+        "title": "Study Id",
+        "type": "string"
+      },
+      "policy_id": {
+        "title": "Policy Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "study_id",
+      "policy_id"
+    ],
+    "title": "get_quality_policyArguments",
+    "type": "object"
+  },
   "create_quality_policy": {
     "properties": {
       "study_id": {
