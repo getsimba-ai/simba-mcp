@@ -28,6 +28,8 @@ from simba_mcp.api_client import SimbaAPIClient
         "pair_training",
         "preview",
         "carry",
+        "derive",
+        "diff_read",
     ],
 )
 def test_custom_quality_wire(monkeypatch, operation):
@@ -87,7 +89,11 @@ def test_custom_quality_wire(monkeypatch, operation):
         tool = "get_study_champion"
         arguments = {"study_id": "s"}
         expected = None
-    elif operation in ("define", "manual_definition", "prediction", "protocol"):
+    elif operation == "diff_read":  # #842: read-only diff between two saved policies
+        tool = "diff_quality_policies"
+        arguments = {"study_id": "s", "policy_id": "p", "other_policy_id": "q"}
+        expected = None
+    elif operation in ("define", "manual_definition", "prediction", "protocol", "derive"):
         tool = "create_quality_policy"
         arguments = {
             "study_id": "s",
@@ -135,6 +141,8 @@ def test_custom_quality_wire(monkeypatch, operation):
                     "expected": True,
                 }
             ]
+        if operation == "derive":  # #842: lineage travels as a plain top-level key
+            arguments["derived_from_policy_id"] = "p0"
         expected = {key: value for key, value in arguments.items() if key != "study_id"}
     else:
         tool = "evaluate_study_run"
@@ -168,7 +176,9 @@ def test_custom_quality_wire(monkeypatch, operation):
 
     def handle(request):
         assert request.method == (
-            "GET" if operation in ("champion_read", "access_read", "resolution_read") else "POST"
+            "GET"
+            if operation in ("champion_read", "access_read", "resolution_read", "diff_read")
+            else "POST"
         )
         if operation == "access_read":
             assert request.url.path == "/api/v1/study-runs/r/prediction-access"
@@ -176,6 +186,8 @@ def test_custom_quality_wire(monkeypatch, operation):
             assert request.url.path == "/api/v1/studies/s/validation-resolutions"
         elif operation == "champion_read":
             assert request.url.path == "/api/v1/studies/s/champion"
+        elif operation == "diff_read":
+            assert request.url.path == "/api/v1/studies/s/quality-policies/p/diff/q"
         else:
             assert json.loads(request.content) == expected
         return httpx.Response(

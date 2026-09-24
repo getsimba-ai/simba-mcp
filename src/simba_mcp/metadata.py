@@ -31,6 +31,7 @@ READ_ONLY = frozenset(
         "get_study_run",
         "list_quality_policies",
         "get_quality_policy",
+        "diff_quality_policies",
         "list_pipelines",
         "list_pipeline_versions",
         "list_study_decisions",

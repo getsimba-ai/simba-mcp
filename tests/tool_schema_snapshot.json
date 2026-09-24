@@ -1834,6 +1834,29 @@
     "title": "list_quality_policiesArguments",
     "type": "object"
   },
+  "diff_quality_policies": {
+    "properties": {
+      "study_id": {
+        "title": "Study Id",
+        "type": "string"
+      },
+      "policy_id": {
+        "title": "Policy Id",
+        "type": "string"
+      },
+      "other_policy_id": {
+        "title": "Other Policy Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "study_id",
+      "policy_id",
+      "other_policy_id"
+    ],
+    "title": "diff_quality_policiesArguments",
+    "type": "object"
+  },
   "get_quality_policy": {
     "properties": {
       "study_id": {
@@ -1869,7 +1892,7 @@
       "checks": {
         "items": {
           "additionalProperties": true,
-          "description": "Built-in metric + maximum, or custom numeric gate with metric custom:<slug>, name, units, operator and applicable bounds. Boolean/manual checks use kind, operator equals and strict boolean expected. Manual expected must be true and sign-off is session-only. At least one required gate per policy.",
+          "description": "Built-in metric + maximum (or operator gte/between with minimum), or custom numeric gate with metric custom:<slug>, name, units, operator and applicable bounds. Boolean/manual checks use kind, operator equals and strict boolean expected. Manual expected must be true and sign-off is session-only. At least one required gate per policy; at most 20 checks in total.",
           "properties": {
             "metric": {
               "examples": [
@@ -2015,6 +2038,18 @@
         ],
         "default": null,
         "title": "Validation Protocol"
+      },
+      "derived_from_policy_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Derived From Policy Id"
       }
     },
     "required": [

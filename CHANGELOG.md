@@ -4,6 +4,17 @@ All notable changes to the SIMBA MCP Server will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.7.0 (2026-09-24)
+
+### Added
+
+- `diff_quality_policies(study_id, policy_id, other_policy_id)`: the server's diff between two saved policies (checks added / removed / changed by metric and field, protocol changes, name / rationale / rules flags). 71 tools.
+
+### Changed
+
+- `create_quality_policy` gains `derived_from_policy_id`; the response then carries `derived_from` and `diff`. Text covers built-in `operator`/`minimum`, the 20-check cap message and the one-message-per-bad-check rule (jellyfish #842).
+- `get_quality_policy` documents `derived_from` and points at the diff tool.
+
 ## 0.6.3 (2026-09-24)
 
 ### Changed
