@@ -32,7 +32,7 @@ async def get_quality_policy(
     policy_id: str,
     ctx: Context[AppContext, Any] = None,
 ) -> APIResult:
-    """Read one immutable policy in full: specification, content_hash (identity of the stored row), rules_hash (identity of the rules alone, the value evidence carry-forward compares), is_newest, derived_from (null until a policy is created from another), checks_summary (builtin / custom_numeric / boolean / manual / diagnostic, required, advisory, cap) and protocol_summary, plus usage with the ids of every run, assessment, resolution and Champion acceptance that references it. Shared viewers can read; nothing is written."""
+    """Read one immutable policy in full: specification, content_hash (identity of the stored row), rules_hash (identity of the rules alone, the value evidence carry-forward compares), is_newest, derived_from ({policy_id, content_hash, name} when created from another policy via derived_from_policy_id; name and hash are null if that source was since deleted; see diff_quality_policies), checks_summary (builtin / custom_numeric / boolean / manual / diagnostic, required, advisory, cap) and protocol_summary, plus usage with the ids of every run, assessment, resolution and Champion acceptance that references it. Shared viewers can read; nothing is written."""
     return await _client(ctx).workflow_request(
         "GET", f"/studies/{study_id}/quality-policies/{policy_id}"
     )
@@ -44,9 +44,10 @@ async def create_quality_policy(
     rationale: str,
     checks: list[QualityCheck],
     validation_protocol: ValidationProtocolSpec | None = None,
+    derived_from_policy_id: str | None = None,
     ctx: Context[AppContext, Any] = None,
 ) -> APIResult:
-    """Save project-specific checks. Built-in checks have metric (r_hat_max, mae, rmse, wape, prediction_mae, prediction_rmse, prediction_wape), maximum and required. Custom numeric checks use metric custom:<slug>, name, units, operator (lte/gte/between), applicable minimum/maximum and required. Boolean checks use kind=boolean, operator=equals and expected=true/false. Manual checks use kind=manual, equals, expected=true; agents can define these but cannot submit manual sign-off. Custom bounds may be negative. WAPE is a fraction. Prediction-window checks require saved finite actuals/predictions at unique dates after the saved training window; this does not certify untouched holdout provenance. No default thresholds are assumed. Declare at least one required check, use each metric once, and set maximum R-hat at least 1. Optional validation_protocol declares a temporal holdout split, configured sampling minima, R-hat and prediction WAPE limits before both runs launch under this policy. The backend validates policy rules."""
+    """Save project-specific checks. Policies are immutable: to change one, create a new policy, ideally with derived_from_policy_id naming the saved policy you started from (same study) so lineage is kept and the response carries diff (checks added/removed/changed by metric and field, protocol changes, name_changed, rationale_changed, rules_changed) — reordering checks is not a change. Built-in checks have metric (r_hat_max, mae, rmse, wape, prediction_mae, prediction_rmse, prediction_wape), maximum and required, and may instead use operator gte/between with minimum (default lte). Custom numeric checks use metric custom:<slug>, name, units, operator (lte/gte/between), applicable minimum/maximum and required. Boolean checks use kind=boolean, operator=equals and expected=true/false. Manual checks use kind=manual, equals, expected=true; agents can define these but cannot submit manual sign-off. Custom bounds may be negative. WAPE is a fraction. Prediction-window checks require saved finite actuals/predictions at unique dates after the saved training window; this does not certify untouched holdout provenance. No default thresholds are assumed. Declare at least one required check, use each metric once, and set maximum R-hat at least 1. At most 20 checks in total; the refusal names the count. A bad check is refused with one message naming its position and declared kind. Optional validation_protocol declares a temporal holdout split, configured sampling minima, R-hat and prediction WAPE limits before both runs launch under this policy. The backend validates policy rules."""
     return await _client(ctx).workflow_request(
         "POST",
         f"/studies/{study_id}/quality-policies",
@@ -59,7 +60,24 @@ async def create_quality_policy(
                 if validation_protocol is not None
                 else {}
             ),
+            **(
+                {"derived_from_policy_id": derived_from_policy_id}
+                if derived_from_policy_id is not None
+                else {}
+            ),
         },
+    )
+
+
+async def diff_quality_policies(
+    study_id: str,
+    policy_id: str,
+    other_policy_id: str,
+    ctx: Context[AppContext, Any] = None,
+) -> APIResult:
+    """What changed from one saved policy (policy_id) to another (other_policy_id) in the same study, as the server computes it: checks added, removed and changed (per metric and field, from → to; matched by metric so reordering is not a change), protocol field changes, name_changed, rationale_changed and rules_changed (whether the rules hash differs). Read scope; nothing is written. Use it to explain a policy's lineage (get_quality_policy.derived_from) or to compare any two policies before choosing one."""
+    return await _client(ctx).workflow_request(
+        "GET", f"/studies/{study_id}/quality-policies/{policy_id}/diff/{other_policy_id}"
     )
 
 

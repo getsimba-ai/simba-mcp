@@ -139,7 +139,7 @@ QualityCheck = Annotated[
     dict,
     Field(
         json_schema_extra={
-            "description": "Built-in metric + maximum, or custom numeric gate with metric custom:<slug>, name, units, operator and applicable bounds. Boolean/manual checks use kind, operator equals and strict boolean expected. Manual expected must be true and sign-off is session-only. At least one required gate per policy.",
+            "description": "Built-in metric + maximum (or operator gte/between with minimum), or custom numeric gate with metric custom:<slug>, name, units, operator and applicable bounds. Boolean/manual checks use kind, operator equals and strict boolean expected. Manual expected must be true and sign-off is session-only. At least one required gate per policy; at most 20 checks in total.",
             "properties": {
                 "metric": {
                     "type": "string",
