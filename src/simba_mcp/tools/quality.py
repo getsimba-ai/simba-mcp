@@ -122,7 +122,7 @@ async def list_study_evaluations(
     expand: list[Literal["report"]] | None = None,
     ctx: Context[AppContext, Any] = None,
 ) -> APIResult:
-    """List preserved assessments as summaries: id, policy_id, policy_name, status, basis_hash, evidence_hash, created_at and summary (evaluated / total / required_unevaluated / evidence_sources: which values were supplied and which carried). A newer sparse report does not replace an earlier enriched one; decisions bind to a specific report id. Pass expand=["report"] for the full per-check report; serving available prediction reports appends access audit events, summaries do not. Paging is opt-in: pass limit (1-200) to receive a page and next_cursor; send that cursor back unchanged for the next page; null next_cursor means the end. Without limit every row is returned. Rows you cannot see are simply absent; no totals are promised."""
+    """List preserved assessments as summaries: id, policy_id, policy_name, status, basis_hash, evidence_hash, created_at and summary (evaluated / total / required_unevaluated / evidence_sources: which values were supplied and which carried). A newer sparse report does not replace an earlier enriched one; decisions bind to a specific report id. Pass expand=["report"] for the full per-check report. Listing never records prediction access, with or without expand (jellyfish #837): a stored report carries window metadata and aggregate errors, not prediction rows. Paging is opt-in: pass limit (1-200) to receive a page and next_cursor; send that cursor back unchanged for the next page; null next_cursor means the end. Without limit every row is returned. Rows you cannot see are simply absent; no totals are promised."""
     return await _client(ctx).workflow_request(
         "GET", f"/study-runs/{run_id}/evaluations", params=_page(limit, cursor, expand)
     )
@@ -194,7 +194,7 @@ async def assess_study_validation_pair(
 async def get_study_prediction_access(
     run_id: str, ctx: Context[AppContext, Any] = None
 ) -> APIResult:
-    """Read partial prediction-access history for this run and matching recorded dataset/windows in this study. Does not expose predictions or add access events. Earlier activity, other result routes and offline work are not covered; absence never proves untouched holdout status. Repeated access does not prove retuning."""
+    """Read partial prediction-access history for this run and matching recorded dataset/windows in this study: recorded_accesses, recorded_runs, by_action (what the total is made of) and the 20 most recent events. An event is recorded only when prediction evidence is served by a deliberate action: saving an assessment (assessment), a comparison (comparison, one per served run), a pair assessment (pair_assessment), dashboard results (dashboard_results) and prediction-window exports (results_csv, results_json). Listing assessments never records. Histories written before jellyfish #837 may also contain assessment_history rows from list reads; nothing is deleted because holdout-use declarations reference event ids. This read does not expose predictions or add events. Earlier activity, other result routes and offline work are not covered; absence never proves untouched holdout status. Repeated access does not prove retuning."""
     return await _client(ctx).workflow_request("GET", f"/study-runs/{run_id}/prediction-access")
 
 
