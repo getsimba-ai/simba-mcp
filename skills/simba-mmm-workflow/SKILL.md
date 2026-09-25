@@ -37,6 +37,18 @@ Incorrect: question "Build a 22-channel weekly model, train 2022-2024, validate 
 2025 Q1, r_hat must be <= 1.2, at most 8 fits." Nothing enforces any of that: launch
 reads only the run settings and evaluation reads only the policy.
 
+### Reading a recipe
+
+Every revision (`list_study_recipes` with `expand`, `get_recipe_revision`,
+`validate_study_recipe`) carries a read-time `inspection` block. Check
+`inspection.engine.state` before launching: `stale` means launch will be refused
+until the revision is re-frozen (`refreeze_recipe_revision`). `settings.<key>.value`
+is what the fit would use, with `status` `authored` or `default`; `effective.form_data`
+is only what was authored. A prior field with status `inert` is not a bug in the
+recipe: it is a value the current adstock or saturation choice never reads, and the
+`reason` names the gate that would make it live. Do not edit it away unless the gating
+setting changes too. Absent configuration classifies nothing.
+
 ## 1. Upload
 
 1. Call `get_data_schema` first and validate the CSV against it — especially
