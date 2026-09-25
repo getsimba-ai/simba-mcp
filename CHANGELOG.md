@@ -4,6 +4,12 @@ All notable changes to the SIMBA MCP Server will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.7.2 (2026-09-25)
+
+### Changed
+
+- `list_study_evaluations` and `get_study_prediction_access` state the recording rule of jellyfish #837: listing never records prediction access; events come only from deliberate actions that serve evidence (assessment, comparison, pair_assessment, dashboard_results, results_csv, results_json); the history carries `by_action`; nothing is deleted. Wording only, no tool or schema change (71).
+
 ## 0.7.1 (2026-09-24)
 
 ### Changed
