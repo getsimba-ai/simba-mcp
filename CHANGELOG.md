@@ -4,6 +4,12 @@ All notable changes to the SIMBA MCP Server will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.7.3 (2026-09-25)
+
+### Changed
+
+- `get_recipe_revision`, `validate_study_recipe`, `list_study_recipes` and the `RecipeSpecification` schema describe the read-time `inspection` block of jellyfish #831 (authored/default settings, inert prior fields with their gate, `engine.state` current/stale) and the recipe-envelope constraints (`api_mmm` request rules, `model_snapshot` review-only, smart priors and VAR only through authoring drafts). The MMM workflow skill gains a "Reading a recipe" section. Wording only, no tool change (71).
+
 ## 0.7.2 (2026-09-25)
 
 ### Changed

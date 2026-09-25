@@ -26,7 +26,7 @@ RecipeSpecification = Annotated[
     dict,
     Field(
         json_schema_extra={
-            "description": "Backend recipe envelope. api_mmm requires request; model_snapshot requires model_hash and is review-only. Unknown fields are forwarded for backend validation.",
+            "description": "Backend recipe envelope. api_mmm requires request (a create_model body; model_type must be mmm, config.auto_prior must be false, channel_map and var_model_hash are rejected); model_snapshot requires model_hash and is review-only (launch refused, lineage unknown). Smart priors and VAR recipes are available only through the authoring-draft tools. Unknown fields are forwarded for backend validation.",
             "properties": {
                 "kind": {"type": "string", "examples": ["api_mmm", "model_snapshot"]},
                 "request": {
