@@ -16,7 +16,7 @@ async def list_study_recipes(
     expand: list[Literal["effective", "inspection", "specification"]] | None = None,
     ctx: Context[AppContext, Any] = None,
 ) -> APIResult:
-    """List recipes with their revisions as summaries (id, number, content_hash, reason, created_at). Heavy fields travel only by name in expand: effective (exact frozen priors, settings, data hashes and runtime), inspection (which settings were authored vs defaulted, inert prior fields with their gate, engine state current/stale that predicts whether launch will be refused; treat inert values as stored-but-unused, not as recipe errors), specification (the authored request). Prefer get_recipe_revision for one revision in full. Raw datasets are never included. Paging is opt-in: pass limit (1-200) to receive a page and next_cursor; send that cursor back unchanged for the next page; null next_cursor means the end. Without limit every row is returned. Rows you cannot see are simply absent; no totals are promised."""
+    """List recipes with their revisions as summaries (id, number, content_hash, reason, created_at). Heavy fields travel only by name in expand: effective (exact frozen priors, settings, data hashes and runtime), inspection (which settings were authored vs defaulted, inert prior fields with their gate, engine state current/stale that predicts whether launch will be refused, and lineage: the recorded dataset with available checked for you and the display line people see; treat inert values as stored-but-unused, not as recipe errors), specification (the authored request). Prefer get_recipe_revision for one revision in full. Raw datasets are never included. Paging is opt-in: pass limit (1-200) to receive a page and next_cursor; send that cursor back unchanged for the next page; null next_cursor means the end. Without limit every row is returned. Rows you cannot see are simply absent; no totals are promised."""
     return await _client(ctx).workflow_request(
         "GET", f"/studies/{study_id}/recipes", params=_page(limit, cursor, expand)
     )
@@ -99,7 +99,7 @@ async def get_recipe_revision(
     number: int,
     ctx: Context[AppContext, Any] = None,
 ) -> APIResult:
-    """Read one immutable revision with its inspection block. settings.<key>.value is what a fit of this revision would use, including fitter defaults for absent keys (status authored or default); effective.form_data is what was authored. priors[].fields lists conditional prior fields that were stored but never read for that row's adstock type or the saturation family (status inert, with the gate that would make them live); treat them as stored-but-unused and do not "fix" them by editing unless the gating setting changes too. engine.state current or stale predicts whether launch will be refused. Absent configuration classifies nothing."""
+    """Read one immutable revision with its inspection block. settings.<key>.value is what a fit of this revision would use, including fitter defaults for absent keys (status authored or default); effective.form_data is what was authored. priors[].fields lists conditional prior fields that were stored but never read for that row's adstock type or the saturation family (status inert, with the gate that would make them live); treat them as stored-but-unused and do not "fix" them by editing unless the gating setting changes too. engine.state current or stale predicts whether launch will be refused. Absent configuration classifies nothing. inspection.lineage (jellyfish #896) is the dataset the model was built from, as recorded — origin {kind, id, pipeline_id, version, sha256, pipeline_name, dataset_name} — with available checked now for you (true: the recorded source is still yours and hashes the same; false: gone or changed, with reason; null: nothing was recorded, or checked is false), and display, the same line people see on the recipe card ("Retail weekly · v3 · verified", "dataset lineage not recorded · legacy"). Names are display only; ids and sha256 verify. Nothing is inferred from a pipeline name or a later output."""
     return await _client(ctx).workflow_request("GET", f"/recipes/{recipe_id}/revisions/{number}")
 
 
@@ -107,7 +107,7 @@ async def validate_study_recipe(
     specification: RecipeSpecification,
     ctx: Context[AppContext, Any] = None,
 ) -> APIResult:
-    """Resolve and validate a recipe without creating a run. Returns effective settings, provenance limits and the same inspection block a saved revision would carry (authored/default settings, inert prior fields with their gate, engine state), so an agent can check for inert fields before freezing."""
+    """Resolve and validate a recipe without creating a run. Returns effective settings, provenance limits and the same inspection block a saved revision would carry (authored/default settings, inert prior fields with their gate, engine state, lineage with the recorded dataset's availability and display line), so an agent can check for inert fields and an unavailable dataset before freezing."""
     return await _client(ctx).workflow_request(
         "POST", "/recipe-validation", {"specification": specification}
     )
