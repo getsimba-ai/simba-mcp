@@ -111,3 +111,15 @@ async def validate_study_recipe(
     return await _client(ctx).workflow_request(
         "POST", "/recipe-validation", {"specification": specification}
     )
+
+
+async def diff_recipe_revisions(
+    recipe_id: str,
+    base: int,
+    other: int,
+    ctx: Context[AppContext, Any] = None,
+) -> APIResult:
+    """What changed between two revisions of one recipe, with the viewer's labels (jellyfish #881): settings[] (key, section, label, from, to), priors[] (row, parameter, column, label, from, to), data (dataset origin and input-hash change, or null) and counts {settings, priors, data, total}, plus base and other {number, id}. Blank equals absent; prior rows are matched by variable and role. Read this after publishing revision N+1 to state exactly what an edit changed. 404 when the recipe or either revision is missing. Read-only."""
+    return await _client(ctx).workflow_request(
+        "GET", f"/recipes/{recipe_id}/revisions/{base}/diff/{other}"
+    )

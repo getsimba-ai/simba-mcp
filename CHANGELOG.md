@@ -4,6 +4,17 @@ All notable changes to the SIMBA MCP Server will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.8.0 (2026-09-26)
+
+### Added
+
+- `diff_recipe_revisions(recipe_id, base, other)`: what changed between two revisions of one recipe, with the viewer's labels (settings, priors, dataset, counts) — jellyfish #881 (72 tools).
+- `create_recipe_draft` takes an optional `target` `{recipe_id, base_revision_id}` (an edit session of that recipe, immutable after creation) and `publish_recipe_draft` an optional `target` `{recipe_id, expected_version}` (revision N+1 of the same recipe; `412 stale_version` keeps the draft and its edits; `409 target_requires_single_recipe` for a multi-brand draft). Omitted, both tools behave exactly as before on the wire.
+
+### Changed
+
+- `adopt_model_into_study` describes the executable, editable `base_model` revision 1 of jellyfish #880 and the preview's import report (`complete`, `dataset.recorded`, `settings.not_recorded`, `editable`, `evidence`). `get_recipe_revision_authoring` describes the kinds that carry a snapshot (`authoring_draft`, `wizard`, `base_model`) and the `source_available` rule. The MMM workflow skill gains "Starting a recipe from scratch" (three doors, none needs a fit) and "Editing a recipe" (edit in place, never overwrite; the stale path; the diff).
+
 ## 0.7.3 (2026-09-25)
 
 ### Changed

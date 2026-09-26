@@ -12,7 +12,19 @@ from simba_mcp.api_client import SimbaAPIClient
 
 @pytest.mark.parametrize(
     "operation",
-    ["create", "update", "get", "list", "template", "pipeline_template", "publish", "authoring"],
+    [
+        "create",
+        "create_target",
+        "update",
+        "get",
+        "list",
+        "template",
+        "pipeline_template",
+        "publish",
+        "publish_target",
+        "authoring",
+        "diff",
+    ],
 )
 @pytest.mark.parametrize("edited", [False, True])
 def test_authoring_snapshot_crosses_wire_without_losing_fields(monkeypatch, operation, edited):
@@ -112,11 +124,58 @@ def test_authoring_snapshot_crosses_wire_without_losing_fields(monkeypatch, oper
         "/recipes/r1/revisions/1/authoring",
         {"recipe_id": "r1", "number": 1},
     )
+    # #884: an edit session names its recipe; publishing with a target writes revision N+1.
+    cases["create_target"] = (
+        "create_recipe_draft",
+        "POST",
+        "/studies/s1/recipe-drafts",
+        {
+            "study_id": "s1",
+            "draft_id": "d1",
+            "name": "Draft",
+            "snapshot": snapshot,
+            "target": {"recipe_id": "r1", "base_revision_id": "rev1"},
+        },
+    )
+    cases["publish_target"] = (
+        "publish_recipe_draft",
+        "POST",
+        "/recipe-drafts/d1/publish",
+        {
+            "draft_id": "d1",
+            "expected_version": 2,
+            "publication_id": "p1",
+            "reason": "Tighten the TV prior",
+            "target": {"recipe_id": "r1", "expected_version": 3},
+        },
+    )
+    cases["diff"] = (
+        "diff_recipe_revisions",
+        "GET",
+        "/recipes/r1/revisions/1/diff/2",
+        {"recipe_id": "r1", "base": 1, "other": 2},
+    )
     tool, method, path, arguments = cases[operation]
     response = {"drafts": [{"id": "d1", "version": 2}]} if operation == "list" else draft
     if operation in ("template", "pipeline_template"):
         response = {"snapshot": snapshot, "template_hash": "abc", "publication_available": False}
-    if operation == "publish":
+    if operation == "diff":
+        response = {
+            "base": {"number": 1, "id": "rev1"},
+            "other": {"number": 2, "id": "rev2"},
+            "settings": [
+                {
+                    "key": "adstock_type",
+                    "label": "Adstock type",
+                    "from": "geometric",
+                    "to": "delayed",
+                }
+            ],
+            "priors": [],
+            "data": None,
+            "counts": {"settings": 1, "priors": 0, "data": 0, "total": 1},
+        }
+    if operation in ("publish", "publish_target"):
         response = {
             "revisions": [
                 {
@@ -138,7 +197,13 @@ def test_authoring_snapshot_crosses_wire_without_losing_fields(monkeypatch, oper
 
     def handle(request):
         if operation == "create":
-            assert json.loads(request.content)["source_revision_id"] == "source-revision"
+            body = json.loads(request.content)
+            assert body["source_revision_id"] == "source-revision"
+            assert "target" not in body  # omitted, not null: the wire is unchanged without it
+        if operation == "create_target":
+            body = json.loads(request.content)
+            assert body["target"] == {"recipe_id": "r1", "base_revision_id": "rev1"}
+            assert "source_revision_id" not in body
         assert request.method == method
         assert request.url.path.endswith(path)
         if operation in ("template", "pipeline_template"):
@@ -154,6 +219,13 @@ def test_authoring_snapshot_crosses_wire_without_losing_fields(monkeypatch, oper
                 "expected_version": 2,
                 "publication_id": "p1",
                 "reason": "Freeze this approach",
+            }
+        elif operation == "publish_target":
+            assert json.loads(request.content) == {
+                "expected_version": 2,
+                "publication_id": "p1",
+                "reason": "Tighten the TV prior",
+                "target": {"recipe_id": "r1", "expected_version": 3},
             }
         elif method in ("POST", "PATCH"):
             body = json.loads(request.content)

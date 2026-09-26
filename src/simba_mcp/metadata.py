@@ -26,6 +26,7 @@ READ_ONLY = frozenset(
         "get_launch_eligibility",
         "list_study_recipes",
         "get_recipe_revision",
+        "diff_recipe_revisions",
         "validate_study_recipe",
         "list_study_runs",
         "get_study_run",

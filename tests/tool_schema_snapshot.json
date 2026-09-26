@@ -1892,7 +1892,7 @@
       "checks": {
         "items": {
           "additionalProperties": true,
-          "description": "Built-in metric + maximum (or operator gte/between with minimum), or custom numeric gate with metric custom:<slug>, name, units, operator and applicable bounds. Boolean/manual checks use kind, operator equals and strict boolean expected. Manual expected must be true and sign-off is session-only. Rules over saved artifacts need no external evidence: saved diagnostics (r_squared, mape, durbin_watson, pareto_k_pct, normality_p, loo_cv; bounds may be negative for loo_cv and r_squared), retained-sampling counts (retained_chains, retained_draws_per_chain, ess_bulk_min, ess_tail_min, divergences; non-negative) and provenance status (provenance:holdout, provenance:prior; operator equals, expected review_required \u2014 blocked fails, an absent record is not_collected). Every threshold is the author's; an absent artifact never passes. At least one required gate per policy; at most 20 checks in total.",
+          "description": "Built-in metric + maximum (or operator gte/between with minimum), or custom numeric gate with metric custom:<slug>, name, units, operator and applicable bounds. Boolean/manual checks use kind, operator equals and strict boolean expected. Manual expected must be true and sign-off is session-only. Rules over saved artifacts need no external evidence: saved diagnostics (r_squared, mape, durbin_watson, pareto_k_pct, normality_p, loo_cv; bounds may be negative for loo_cv and r_squared), retained-sampling counts (retained_chains, retained_draws_per_chain, ess_bulk_min, ess_tail_min, divergences; non-negative) and provenance status (provenance:holdout, provenance:prior; operator equals, expected review_required — blocked fails, an absent record is not_collected). Every threshold is the author's; an absent artifact never passes. At least one required gate per policy; at most 20 checks in total.",
           "properties": {
             "metric": {
               "examples": [
@@ -2579,6 +2579,34 @@
         ],
         "default": null,
         "title": "Source Revision Id"
+      },
+      "target": {
+        "anyOf": [
+          {
+            "additionalProperties": false,
+            "description": "The recipe an edit session works on (jellyfish #881). recipe_id must belong to the draft's study; base_revision_id, when given, must belong to that recipe (404 otherwise) and is recorded as the new revision's source. Immutable after creation: a replay naming another target is refused (409).",
+            "properties": {
+              "recipe_id": {
+                "type": "string"
+              },
+              "base_revision_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "recipe_id"
+            ],
+            "type": "object"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Target"
       }
     },
     "required": [
@@ -2888,6 +2916,33 @@
       "reason": {
         "title": "Reason",
         "type": "string"
+      },
+      "target": {
+        "anyOf": [
+          {
+            "additionalProperties": false,
+            "description": "Publish into an existing recipe as its next revision (jellyfish #881). expected_version is the recipe version you last read; 412 stale_version when it moved, with the draft and every edit kept.",
+            "properties": {
+              "recipe_id": {
+                "type": "string"
+              },
+              "expected_version": {
+                "minimum": 1,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "recipe_id",
+              "expected_version"
+            ],
+            "type": "object"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Target"
       }
     },
     "required": [
@@ -3032,6 +3087,29 @@
       "study_id"
     ],
     "title": "get_study_validation_resolutionsArguments",
+    "type": "object"
+  },
+  "diff_recipe_revisions": {
+    "properties": {
+      "recipe_id": {
+        "title": "Recipe Id",
+        "type": "string"
+      },
+      "base": {
+        "title": "Base",
+        "type": "integer"
+      },
+      "other": {
+        "title": "Other",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "recipe_id",
+      "base",
+      "other"
+    ],
+    "title": "diff_recipe_revisionsArguments",
     "type": "object"
   }
 }

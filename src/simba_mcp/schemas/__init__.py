@@ -343,3 +343,31 @@ ValidationProtocolSpec = Annotated[
         }
     ),
 ]
+DraftTarget = Annotated[
+    dict,
+    Field(
+        json_schema_extra={
+            "description": "The recipe an edit session works on (jellyfish #881). recipe_id must belong to the draft's study; base_revision_id, when given, must belong to that recipe (404 otherwise) and is recorded as the new revision's source. Immutable after creation: a replay naming another target is refused (409).",
+            "properties": {
+                "recipe_id": {"type": "string"},
+                "base_revision_id": {"type": ["string", "null"]},
+            },
+            "required": ["recipe_id"],
+            "additionalProperties": False,
+        }
+    ),
+]
+PublishTarget = Annotated[
+    dict,
+    Field(
+        json_schema_extra={
+            "description": "Publish into an existing recipe as its next revision (jellyfish #881). expected_version is the recipe version you last read; 412 stale_version when it moved, with the draft and every edit kept.",
+            "properties": {
+                "recipe_id": {"type": "string"},
+                "expected_version": {"type": "integer", "minimum": 1},
+            },
+            "required": ["recipe_id", "expected_version"],
+            "additionalProperties": False,
+        }
+    ),
+]
