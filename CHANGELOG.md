@@ -4,6 +4,12 @@ All notable changes to the SIMBA MCP Server will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.8.2 (2026-09-26)
+
+### Fixed
+
+- Arguments that fail a tool's input schema now come back in the same refusal envelope as every other refusal — `code` / `_error_code` `invalid_arguments`, `_status_code` 422, `_next_action`, and `fields` (`field`, `problem`, `type` per failing argument) — instead of the SDK's plain text with no code. The rejected values are never echoed (they can carry dataset contents). The SDK validates arguments before a tool body runs, so the fix is a `call_tool` override on the server; tool bodies, schemas and the tool count are unchanged (72) (#26, found by the jellyfish Studies benchmark pilot, nialloulton/jellyfish#908).
+
 ## 0.8.1 (2026-09-26)
 
 ### Changed
