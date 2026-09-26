@@ -4,6 +4,12 @@ All notable changes to the SIMBA MCP Server will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.8.1 (2026-09-26)
+
+### Changed
+
+- `get_recipe_revision`, `list_study_recipes`, `validate_study_recipe` and `adopt_model_into_study` describe the read-time `inspection.lineage` block of jellyfish #896 (recorded dataset origin with display names, `available` checked for the reader, `checked`, `reason`, `display`) and the import preview's `report.dataset.display`; the `RecipeSpecification` schema note states lineage is recorded at build and never inferred. The MMM workflow skill's "Reading a recipe" says how to read it. Wording only, no tool or schema change (72).
+
 ## 0.8.0 (2026-09-26)
 
 ### Added

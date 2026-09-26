@@ -1380,3 +1380,19 @@ class TestImportEditArchitecture:
             assert word in d["get_recipe_revision_authoring"], word
         for word in ("editable", "not_recorded", "confirm=true", "never refits"):
             assert word in d["adopt_model_into_study"], word
+
+    def test_lineage_is_described_where_an_inspection_is_read(self):
+        """jellyfish #897 (L4 of #819): the lineage block is named on every read that carries it."""
+        d = {t.name: t.description for t in _list_tools()}
+        assert "inspection.lineage" in d["get_recipe_revision"]
+        for word in ("available", "display", "pipeline_name", "Nothing is inferred"):
+            assert word in d["get_recipe_revision"], word
+        assert "lineage" in d["list_study_recipes"] and "display line" in d["list_study_recipes"]
+        assert (
+            "lineage" in d["validate_study_recipe"]
+            and "unavailable dataset" in d["validate_study_recipe"]
+        )
+        assert (
+            "report.dataset" in d["adopt_model_into_study"]
+            and "display" in d["adopt_model_into_study"]
+        )

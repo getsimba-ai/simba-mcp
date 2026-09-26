@@ -49,6 +49,13 @@ recipe: it is a value the current adstock or saturation choice never reads, and 
 `reason` names the gate that would make it live. Do not edit it away unless the gating
 setting changes too. Absent configuration classifies nothing.
 
+`inspection.lineage` is the dataset the model was built from, as recorded: read
+`display` (the line people see, e.g. "Retail weekly · v3 · verified") and `available`
+(checked now for you; `false` with a `reason` means the recorded source is gone or changed,
+so editing that recipe will need the dataset chosen again; `null` with `origin: null` means
+the model predates capture and nothing is inferred). Quote `display`, never a pipeline's
+current name.
+
 ### Starting a recipe from scratch
 
 Three doors into a study, and none needs a fit before launch:
