@@ -39,6 +39,7 @@ EXPECTED_TOOLS = [
     "create_study_recipe",
     "revise_study_recipe",
     "get_recipe_revision",
+    "diff_recipe_revisions",
     "refreeze_recipe_revision",
     "validate_study_recipe",
     "launch_study_run",
@@ -1340,3 +1341,42 @@ class TestControlPriors:
             == error
         )
         client.create_model.assert_awaited_once()
+
+
+class TestImportEditArchitecture:
+    """jellyfish #884 (T6 of #818): the agent door describes the import/edit path the
+    backend has — a recipe edited in place, never overwritten."""
+
+    def _tools(self):
+        return {t.name: t for t in _list_tools()}
+
+    def test_seventy_two_tools_with_the_diff_read_only(self):
+        tools = self._tools()
+        assert len(tools) == 72
+        diff = tools["diff_recipe_revisions"]
+        assert diff.annotations.read_only_hint
+        assert set(diff.input_schema["required"]) == {"recipe_id", "base", "other"}
+
+    def test_target_travels_on_both_draft_writes(self):
+        tools = self._tools()
+        create = tools["create_recipe_draft"].input_schema["properties"]["target"]
+        publish = tools["publish_recipe_draft"].input_schema["properties"]["target"]
+        assert "target" not in tools["create_recipe_draft"].input_schema["required"]
+        assert "target" not in tools["publish_recipe_draft"].input_schema["required"]
+        # Optional → nullable anyOf; the object branch carries the schema and its description.
+        create_obj, publish_obj = create["anyOf"][0], publish["anyOf"][0]
+        assert create["default"] is None and publish["default"] is None
+        assert create_obj["required"] == ["recipe_id"]
+        assert publish_obj["required"] == ["recipe_id", "expected_version"]
+        assert "immutable" in create_obj["description"].lower()
+        assert "412 stale_version" in publish_obj["description"]
+
+    def test_docstrings_state_the_rules(self):
+        d = {t.name: t.description for t in _list_tools()}
+        assert "409 target_requires_single_recipe" in d["publish_recipe_draft"]
+        assert "412 stale_version" in d["publish_recipe_draft"]
+        assert "source_revision_id" in d["create_recipe_draft"]
+        for word in ("base_model", "wizard", "source_available"):
+            assert word in d["get_recipe_revision_authoring"], word
+        for word in ("editable", "not_recorded", "confirm=true", "never refits"):
+            assert word in d["adopt_model_into_study"], word

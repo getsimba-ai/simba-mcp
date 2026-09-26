@@ -446,7 +446,7 @@ The study tools require a Simba backend with the workflow API deployed. Studies
 belong to projects and provide a shared record for analysts and agents:
 
 - Create/read/update studies with a declared question (what to learn), optional context (scope and assumptions), attempt limits and concurrency limits. Question and context are descriptive text; no launch or evaluation path reads them, and acceptance rules live only in quality policies.
-- Validate, save and inspect immutable recipe revisions; list recipes captured by the wizard.
+- Validate, save and inspect immutable recipe revisions; list recipes captured by the wizard; edit a recipe in place through a draft that names its target, and diff two revisions.
 - Launch a revision with a declared quality policy and caller-generated submission key.
 - Inspect progress, request cancellation, evaluate saved evidence and compare candidates.
 - Preview/import existing models and record recommendations with a rationale.
@@ -457,10 +457,12 @@ automatic HTTP retries. A study does not autonomously launch its budget of fits.
 Its runs use the existing models, workers and progress records.
 
 Project sharing permits reading studies; mutations require ownership. The MCP
-can recommend but cannot record analyst acceptance. Imported historical recipes
-are review-only where original provenance is incomplete. Wizard-captured recipes
-can be inspected and launched; changing a captured wizard configuration requires
-another wizard capture or a separately validated API recipe.
+can recommend but cannot record analyst acceptance. `adopt_model_into_study`
+imports a fitted model as an executable, editable revision 1 (legacy snapshot
+imports stay review-only). Wizard-captured and imported recipes can be inspected,
+launched and edited in place: read the snapshot with
+`get_recipe_revision_authoring`, save a draft with `target`, publish with
+`target` for revision N+1.
 
 Quality reports distinguish failed checks, missing evidence and required analyst
 review. Current saved-window error metrics and R-hat are not held-out validation
@@ -501,7 +503,7 @@ Draft authoring discovery: `get_recipe_draft_template(family="mmm" | "var")` ret
 
 Pass either `uploaded_file_id` or `pipeline_version_id` to `get_recipe_draft_template` to copy an owned uploaded dataset or saved pipeline output version into the new authoring snapshot and populate its bounded preview. Optional source origin is verified by the backend against exact bytes; detail responses include a source manifest. Reopening uses frozen data even if the original upload disappears. This does not enable publication or model fitting.
 
-Draft publication: `publish_recipe_draft` freezes a saved MMM or VAR draft as an atomic batch, using expected version and caller UUID recovery; it never launches a fit. `get_recipe_revision_authoring` retrieves the immutable authoring snapshot for copying to a new draft. Check backend publication capabilities. When `publication_constraints.automatic_prior_resolution` is `freeze_at_publication`, automatic MMM priors are resolved once and replayed without rebuilding. Original authoring choices remain recoverable for editing a new draft. This applies to draft publication; legacy `api_mmm` recipe resolution still requires fixed priors. VAR preserves its raw input and engine manifest; MMM quality policies cannot establish VAR acceptance.
+Draft publication: `publish_recipe_draft` freezes a saved MMM or VAR draft as an atomic batch, using expected version and caller UUID recovery; it never launches a fit. With `target={recipe_id, expected_version}` it writes revision N+1 of an existing recipe instead of a new one (`412 stale_version` keeps the draft and its edits; `409 target_requires_single_recipe` for a multi-brand draft); `create_recipe_draft` with `target={recipe_id, base_revision_id}` opens that edit session. `get_recipe_revision_authoring` retrieves the authoring snapshot behind any revision that carries one (`authoring_draft`, `wizard`, `base_model`) and says whether its dataset is still available; `diff_recipe_revisions` states what changed between two revisions. Check backend publication capabilities. When `publication_constraints.automatic_prior_resolution` is `freeze_at_publication`, automatic MMM priors are resolved once and replayed without rebuilding. Original authoring choices remain recoverable for editing a new draft. This applies to draft publication; legacy `api_mmm` recipe resolution still requires fixed priors. VAR preserves its raw input and engine manifest; MMM quality policies cannot establish VAR acceptance.
 
 Calibration: check the backend `calibration` capability. MMM draft publication validates active likelihood observations and returns their count, units, channels and hash in recipe provenance. Enabled invalid or unapplied observations fail explicitly; VAR calibration is unsupported. Preserve disabled authoring rows when editing. Imported wizard JSON is retained as editable rows; multipart wizard CSV capture retains its original bytes. No new MCP route is needed.
 

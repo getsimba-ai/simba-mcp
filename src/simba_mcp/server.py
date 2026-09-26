@@ -69,6 +69,7 @@ from .tools.quality import (
 )
 from .tools.recipes import (
     create_study_recipe,
+    diff_recipe_revisions,
     get_recipe_revision,
     list_study_recipes,
     refreeze_recipe_revision,
@@ -177,6 +178,7 @@ TOOLS = (
     create_study_recipe,
     revise_study_recipe,
     get_recipe_revision,
+    diff_recipe_revisions,
     refreeze_recipe_revision,
     validate_study_recipe,
     launch_study_run,
