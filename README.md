@@ -496,6 +496,9 @@ returns an actionable 413 instead of partial evidence when the filtered JSON
 payload is too large. It bounds payload serialization, not backend download or MCP
 envelope overhead. Existing defaults remain unchanged.
 
+Every tool, its parameters and whether it reads or writes: [docs/tools.md](docs/tools.md) (generated from the
+running server — `python -m simba_mcp.reference`).
+
 See [architecture and compatibility](docs/architecture.md) for ownership,
 transport/authentication boundaries, known limits and validation.
 
