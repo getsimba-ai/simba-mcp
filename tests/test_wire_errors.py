@@ -87,3 +87,53 @@ def test_keyless_call_is_an_error_on_the_wire(monkeypatch):
     content = result["structuredContent"]
     assert content["_status_code"] == 401
     assert content["_error_code"] == "authentication_required"
+
+
+def _tool_error_text(result):
+    return " ".join(block.get("text", "") for block in result.get("content", []))
+
+
+def test_argument_validation_refusals_carry_the_envelope(monkeypatch):
+    # simba-mcp#26: the SDK validates arguments before the tool body runs and used to answer in
+    # plain text with no code; the benchmark pilot (jellyfish #908) saw exactly this.
+    reached = []
+
+    def handle(request):
+        reached.append(request.url.path)
+        return httpx.Response(200, json={"ok": True})
+
+    async def get_client(self):
+        if self._client is None:
+            self._client = httpx.AsyncClient(
+                base_url="https://example.test", transport=httpx.MockTransport(handle)
+            )
+        return self._client
+
+    monkeypatch.setattr(runtime, "_serving_http", runtime._serving_http)
+    monkeypatch.setattr(SimbaAPIClient, "_get_client", get_client)
+    secret = "tv_activity,SECRET-COLUMN-VALUE"
+    with TestClient(server._create_app()) as client:
+        result = _call(client, "get_model_results", {"model_hash": "abc", "channels": secret})
+
+    assert result["isError"] is True
+    content = result["structuredContent"]
+    assert content["_status_code"] == 422
+    assert content["code"] == content["_error_code"] == "invalid_arguments"
+    assert "not a comma-separated string" in content["_next_action"]
+    assert [f["field"] for f in content["fields"]] == ["channels"]
+    assert content["fields"][0]["type"] == "list_type"
+    assert "get_model_results" in content["error"] and "channels" in content["error"]
+    # the rejected value never goes back on the wire, in either representation
+    assert secret not in json.dumps(result)
+    assert json.loads(_tool_error_text(result)) == content
+    assert reached == []  # refused before any backend call
+
+
+def test_other_tool_errors_are_unchanged(monkeypatch):
+    monkeypatch.setattr(runtime, "_serving_http", runtime._serving_http)
+    with TestClient(server._create_app()) as client:
+        result = _call(client, "no_such_tool", {})
+    # an unknown tool is not an argument problem: the SDK's own error, as before
+    assert result["isError"] is True
+    assert "structuredContent" not in result or not result["structuredContent"]
+    assert "no_such_tool" in _tool_error_text(result)

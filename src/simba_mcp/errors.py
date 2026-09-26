@@ -17,6 +17,11 @@ NEXT_ACTIONS: dict[str, str] = {
     "provenance_missing": "Supply the source dataset or pipeline version again, or proceed without lineage claims.",
     "manual_signoff_requires_session": "Hand this step to the signed-in owner in the app; do not retry with an API key.",
     "submission_key_conflict": "Reuse a submission_key only with identical inputs; otherwise choose a new key.",
+    # simba-mcp#26: raised by this server, not the backend, before the tool body runs.
+    "invalid_arguments": (
+        "Fix the listed fields to match the tool's input schema (e.g. pass a list, not a "
+        "comma-separated string; an object, not a JSON string), then call again."
+    ),
 }
 
 
