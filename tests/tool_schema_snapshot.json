@@ -172,6 +172,101 @@
     "title": "list_pipeline_versionsArguments",
     "type": "object"
   },
+  "run_pipeline": {
+    "properties": {
+      "pipeline_ref": {
+        "title": "Pipeline Ref",
+        "type": "string"
+      },
+      "start_date": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Start Date"
+      },
+      "end_date": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "End Date"
+      }
+    },
+    "required": [
+      "pipeline_ref"
+    ],
+    "title": "run_pipelineArguments",
+    "type": "object"
+  },
+  "get_pipeline_run": {
+    "properties": {
+      "pipeline_ref": {
+        "title": "Pipeline Ref",
+        "type": "string"
+      },
+      "run_id": {
+        "title": "Run Id",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "pipeline_ref",
+      "run_id"
+    ],
+    "title": "get_pipeline_runArguments",
+    "type": "object"
+  },
+  "set_pipeline_schedule": {
+    "properties": {
+      "pipeline_ref": {
+        "title": "Pipeline Ref",
+        "type": "string"
+      },
+      "cadence": {
+        "title": "Cadence",
+        "type": "string"
+      },
+      "hour_utc": {
+        "title": "Hour Utc",
+        "type": "integer"
+      },
+      "enabled": {
+        "title": "Enabled",
+        "type": "boolean"
+      },
+      "weekday": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Weekday"
+      }
+    },
+    "required": [
+      "pipeline_ref",
+      "cadence",
+      "hour_utc",
+      "enabled"
+    ],
+    "title": "set_pipeline_scheduleArguments",
+    "type": "object"
+  },
   "list_pipelines": {
     "properties": {
       "limit": {

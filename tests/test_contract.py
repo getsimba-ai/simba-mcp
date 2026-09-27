@@ -195,6 +195,22 @@ CONTRACT = {
         "skip_slicing": "run_scenario.skip_slicing",
         "proxy_channels": "run_scenario.proxy_channels",
     },
+    "POST /api/v1/pipelines/{ref}/runs": {
+        "pipeline_ref": "run_pipeline.pipeline_ref",
+        "start_date": "run_pipeline.start_date",
+        "end_date": "run_pipeline.end_date",
+    },
+    "GET /api/v1/pipelines/{ref}/runs/{run_id}": {
+        "pipeline_ref": "get_pipeline_run.pipeline_ref",
+        "run_id": "get_pipeline_run.run_id",
+    },
+    "PUT /api/v1/pipelines/{ref}/schedule": {
+        "pipeline_ref": "set_pipeline_schedule.pipeline_ref",
+        "cadence": "set_pipeline_schedule.cadence",
+        "hour_utc": "set_pipeline_schedule.hour_utc",
+        "weekday": "set_pipeline_schedule.weekday",
+        "enabled": "set_pipeline_schedule.enabled",
+    },
 }
 
 # api_param -> reason it is intentionally unreachable via MCP
