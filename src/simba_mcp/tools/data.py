@@ -1,5 +1,6 @@
 """Data tools backed by the shared Simba API."""
 
+import json
 from pathlib import Path
 from typing import Any
 
@@ -27,6 +28,7 @@ async def upload_data(
     csv_path: str = "",
     name: str = "",
     filename: str = "",
+    roles: dict[str, Any] | None = None,
     ctx: Context[AppContext, Any] = None,
 ) -> APIResult:
     """Upload a CSV dataset to Simba for use in model building.
@@ -57,6 +59,10 @@ async def upload_data(
         name: Optional dataset name for identification. Defaults to the file
               stem when csv_path is used.
         filename: Optional original filename to record alongside the dataset.
+        roles: Optional column roles for get_data_report, stored with the dataset:
+               {column: role} or {column: {"role": role, "channel": name}}. Roles
+               are declared, never guessed; see get_data_report for the vocabulary.
+               An unknown role or a column the CSV lacks is refused.
 
     Returns the uploaded file ID (needed for create_model), row/column counts,
     and any validation warnings.
@@ -102,7 +108,7 @@ async def upload_data(
             name = path.stem
         if not filename:
             filename = path.name
-    return await _client(ctx).upload_csv(csv_content, name, filename=filename)
+    return await _client(ctx).upload_csv(csv_content, name, filename=filename, roles=roles)
 
 
 async def list_uploads(
@@ -188,3 +194,68 @@ async def get_backend_capabilities(ctx: Context[AppContext, Any]) -> APIResult:
         "unknown": [key for key in keys if key not in advertisements],
         "guidance": "Missing fields are unknown. Backend authorization and validation remain authoritative.",
     }
+
+
+async def get_data_report(
+    dataset_id: int,
+    start: str = "",
+    end: str = "",
+    granularity: str = "native",
+    group_by: str = "",
+    hierarchy: str = "",
+    metrics: list[str] | None = None,
+    roles: dict[str, Any] | None = None,
+    ctx: Context[AppContext, Any] = None,
+) -> APIResult:
+    """Report actual data from a stored dataset: any window, any grain, by brand, channel or dimension.
+
+    Reads the dataset itself (every column, any date range) rather than a fitted model's
+    training window. Use it for "sales and TV spend in the North region for August, by week".
+
+    Roles are DECLARED, never guessed from column names. Declare them with upload_data(roles=...)
+    or per request with `roles`. Without a declaration only the schema's own naming rules apply:
+    a column named `date`, `{channel}_spend` and `{channel}_activity`. Every other column is
+    reported as role "unknown" and is not aggregated — declare the KPI and hierarchy columns.
+
+    Role vocabulary (aggregation, unit) — also in get_data_schema under x-simba-roles:
+    - kpi (sum), spend (sum, currency), activity (sum), multiplier (mean)
+    - outcome:online_sales|store_sales|margin (sum, currency), outcome:orders|new_customers (sum)
+    - media:impressions|clicks|grps (sum; give a channel: {"role": "media:grps", "channel": "tv"})
+    - control:price|rate|index (mean), control:stock (each brand's last value, summed)
+    - hierarchy, dimension:market|product|campaign (keys for filtering and group_by)
+    - date
+
+    Buckets: week = ISO week from Monday; month/quarter = calendar. A weekly row counts in the
+    month of its week-start date. The response's meta.aggregation states every rule applied.
+
+    Args:
+        dataset_id: The uploaded file id (from upload_data or list_uploads). Registered
+                    pipeline outputs are uploaded files too.
+        start, end: Optional ISO dates (YYYY-MM-DD), inclusive.
+        granularity: "native" (default), "week", "month" or "quarter".
+        group_by: "hierarchy", "channel", or a dimension role such as "dimension:market".
+        hierarchy: Keep only this brand/region value.
+        metrics: Roles or role families to include, e.g. ["kpi", "spend", "outcome:orders"] or
+                 ["control"]. Default: every metric role present.
+        roles: {column: role | {"role", "channel"}} overriding roles stored at upload.
+
+    Returns {dataset: {id, name, source, version, sha256, data_through}, granularity,
+    rows: [{period_start, period_end, group, metric, value, unit}], meta: {basis: "dataset",
+    aggregation, roles, channels}}. Errors carry a code: dataset_not_found (404),
+    invalid_report_request (400), report_too_large (413, over 10,000 rows — narrow the window
+    or coarsen the granularity).
+    """
+    params: dict[str, str] = {"granularity": granularity or "native"}
+    for key, value in (
+        ("start", start),
+        ("end", end),
+        ("group_by", group_by),
+        ("hierarchy", hierarchy),
+    ):
+        if value:
+            params[key] = value
+    if metrics:
+        params["metrics"] = ",".join(metrics)
+    if roles:
+        params["roles"] = json.dumps(roles)
+    return await _client(ctx).get_data_report(dataset_id, params)

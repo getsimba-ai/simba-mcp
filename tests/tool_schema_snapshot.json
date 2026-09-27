@@ -9,6 +9,72 @@
     "title": "get_data_schemaArguments",
     "type": "object"
   },
+  "get_data_report": {
+    "properties": {
+      "dataset_id": {
+        "title": "Dataset Id",
+        "type": "integer"
+      },
+      "start": {
+        "default": "",
+        "title": "Start",
+        "type": "string"
+      },
+      "end": {
+        "default": "",
+        "title": "End",
+        "type": "string"
+      },
+      "granularity": {
+        "default": "native",
+        "title": "Granularity",
+        "type": "string"
+      },
+      "group_by": {
+        "default": "",
+        "title": "Group By",
+        "type": "string"
+      },
+      "hierarchy": {
+        "default": "",
+        "title": "Hierarchy",
+        "type": "string"
+      },
+      "metrics": {
+        "anyOf": [
+          {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Metrics"
+      },
+      "roles": {
+        "anyOf": [
+          {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Roles"
+      }
+    },
+    "required": [
+      "dataset_id"
+    ],
+    "title": "get_data_reportArguments",
+    "type": "object"
+  },
   "upload_data": {
     "properties": {
       "csv_content": {
@@ -30,6 +96,19 @@
         "default": "",
         "title": "Filename",
         "type": "string"
+      },
+      "roles": {
+        "anyOf": [
+          {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Roles"
       }
     },
     "title": "upload_dataArguments",
@@ -839,6 +918,21 @@
         ],
         "default": null,
         "title": "Max Response Bytes"
+      },
+      "start": {
+        "default": "",
+        "title": "Start",
+        "type": "string"
+      },
+      "end": {
+        "default": "",
+        "title": "End",
+        "type": "string"
+      },
+      "granularity": {
+        "default": "",
+        "title": "Granularity",
+        "type": "string"
       }
     },
     "required": [

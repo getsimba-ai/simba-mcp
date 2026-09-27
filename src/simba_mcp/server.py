@@ -21,6 +21,7 @@ from .runtime import (
 )
 from .tools.data import (
     get_backend_capabilities,
+    get_data_report,
     get_data_schema,
     get_upload,
     list_pipeline_versions,
@@ -189,6 +190,7 @@ TOOLS = (
     update_recipe_draft,
     get_backend_capabilities,
     get_data_schema,
+    get_data_report,
     upload_data,
     list_pipeline_versions,
     list_pipelines,
@@ -327,6 +329,7 @@ __all__ = [
     "diff_quality_policies",
     "evaluate_study_run",
     "get_contribution_groups",
+    "get_data_report",
     "get_data_schema",
     "get_launch_eligibility",
     "get_model",

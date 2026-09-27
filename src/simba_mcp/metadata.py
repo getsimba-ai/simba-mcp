@@ -9,6 +9,7 @@ READ_ONLY = frozenset(
         "get_recipe_revision_authoring",
         "list_recipe_drafts",
         "get_data_schema",
+        "get_data_report",
         "list_uploads",
         "get_upload",
         "list_models",

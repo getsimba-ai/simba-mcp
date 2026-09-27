@@ -61,6 +61,7 @@ EXPECTED_TOOLS = [
     "assess_study_validation_pair",
     "recommend_study_run",
     "adopt_model_into_study",
+    "get_data_report",
     "get_data_schema",
     "upload_data",
     "list_uploads",
@@ -1350,9 +1351,9 @@ class TestImportEditArchitecture:
     def _tools(self):
         return {t.name: t for t in _list_tools()}
 
-    def test_seventy_two_tools_with_the_diff_read_only(self):
+    def test_seventy_three_tools_with_the_diff_read_only(self):
         tools = self._tools()
-        assert len(tools) == 72
+        assert len(tools) == 73
         diff = tools["diff_recipe_revisions"]
         assert diff.annotations.read_only_hint
         assert set(diff.input_schema["required"]) == {"recipe_id", "base", "other"}
