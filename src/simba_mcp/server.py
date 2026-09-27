@@ -4,10 +4,13 @@ import functools
 import json
 
 from mcp.server.mcpserver import MCPServer
+from mcp.server.mcpserver.exceptions import ToolError, UnexpectedToolError
 from mcp.types import CallToolResult, TextContent
+from pydantic import ValidationError
 
 from . import runtime
 from .auth import _bearer_token, _client, _local_files_allowed
+from .errors import api_error
 from .metadata import annotations_for
 from .runtime import (
     MAX_REQUEST_BODY_BYTES,
@@ -107,7 +110,55 @@ from .tools.studies import (
     update_study,
 )
 
-mcp = MCPServer(
+
+def _argument_refusal(tool: str, exc: ValidationError) -> CallToolResult:
+    """The envelope for arguments that fail a tool's input schema (simba-mcp#26).
+
+    Field paths and pydantic's reason only: the rejected values are the caller's data (possibly
+    dataset contents) and never go back on the wire."""
+    fields = [
+        {
+            "field": ".".join(str(part) for part in err["loc"]),
+            "problem": err["msg"],
+            "type": err["type"],
+        }
+        for err in exc.errors()
+    ]
+    names = ", ".join(sorted({f["field"] for f in fields})) or "arguments"
+    payload = api_error(
+        422,
+        {
+            "error": f"Arguments do not match the input schema of {tool}: {names}.",
+            "code": "invalid_arguments",
+            "fields": fields,
+        },
+    )
+    return CallToolResult(
+        content=[TextContent(type="text", text=json.dumps(payload))],
+        structured_content=payload,
+        is_error=True,
+    )
+
+
+class SimbaMCPServer(MCPServer):
+    """MCPServer whose argument-validation refusals carry the same envelope as every other
+    refusal (`code`, `_status_code`, `_error_code`, `_next_action`).
+
+    The SDK validates arguments before a tool body runs and reports a failure as plain text;
+    `_wire_errors` wraps tool bodies and so never sees it (simba-mcp#26)."""
+
+    async def call_tool(self, name, arguments, context=None):
+        try:
+            return await super().call_tool(name, arguments, context)
+        except ToolError as exc:
+            if not isinstance(exc, UnexpectedToolError) and isinstance(
+                exc.__cause__, ValidationError
+            ):
+                return _argument_refusal(name, exc.__cause__)
+            raise
+
+
+mcp = SimbaMCPServer(
     name="Simba MMM",
     version=runtime._own_version(),
     instructions=(
