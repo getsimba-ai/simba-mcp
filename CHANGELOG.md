@@ -4,6 +4,16 @@ All notable changes to the SIMBA MCP Server will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.10.0 (2026-09-28)
+
+### Added
+
+- `run_pipeline(pipeline_ref, start_date, end_date)`: starts a refresh of an owned data pipeline and returns `{run_id, status: "queued"}` at once; the run executes on the server as the pipeline's owner. Optional dates limit the source steps to a range. One run per pipeline at a time: a second start returns `run_in_progress` with the active `run_id` and a `_next_action` to poll it (#32).
+- `get_pipeline_run(pipeline_ref, run_id)` (read-only): `status` (queued, running, succeeded, failed), timestamps, the `version_id` a successful run saved (use it as `pipeline_version_id` in `get_recipe_draft_template`), and `error_code` / `error` on failure.
+- `set_pipeline_schedule(pipeline_ref, cadence, hour_utc, enabled, weekday)` (replaces the schedule): a daily or weekly refresh at a whole UTC hour, returned with `next_run_at`; `enabled: false` pauses it. 76 tools.
+- `_next_action` guidance for `run_in_progress` and `queue_unavailable`.
+- The MMM workflow skill says how to refresh a pipeline before drafting on it.
+
 ## 0.9.0 (2026-09-27)
 
 ### Added

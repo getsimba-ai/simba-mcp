@@ -36,6 +36,7 @@ READ_ONLY = frozenset(
         "diff_quality_policies",
         "list_pipelines",
         "list_pipeline_versions",
+        "get_pipeline_run",
         "list_study_decisions",
         "get_study_champion",
         "get_study_prediction_access",
@@ -60,6 +61,7 @@ DESTRUCTIVE = frozenset(
         "update_study",
         "cancel_study_run",
         "retire_quality_policy",
+        "set_pipeline_schedule",
     ]
 )
 IDEMPOTENT_WRITES = frozenset(
@@ -76,6 +78,7 @@ IDEMPOTENT_WRITES = frozenset(
         "set_run_pinned",
         "set_contribution_groups",
         "unlink_var_model",
+        "set_pipeline_schedule",
     ]
 )
 ADDITIVE_WRITES = frozenset(
@@ -89,6 +92,7 @@ ADDITIVE_WRITES = frozenset(
         "create_project",
         "run_optimizer",
         "run_scenario",
+        "run_pipeline",
         "create_study",
         "create_study_recipe",
         "revise_study_recipe",

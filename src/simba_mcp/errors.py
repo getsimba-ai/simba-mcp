@@ -17,6 +17,8 @@ NEXT_ACTIONS: dict[str, str] = {
     "provenance_missing": "Supply the source dataset or pipeline version again, or proceed without lineage claims.",
     "manual_signoff_requires_session": "Hand this step to the signed-in owner in the app; do not retry with an API key.",
     "submission_key_conflict": "Reuse a submission_key only with identical inputs; otherwise choose a new key.",
+    "run_in_progress": "A run of this pipeline is already queued or running; poll get_pipeline_run with the returned run_id instead of starting another.",
+    "queue_unavailable": "The run could not be queued and will not run; wait a minute, then call run_pipeline again.",
     # simba-mcp#26: raised by this server, not the backend, before the tool body runs.
     "invalid_arguments": (
         "Fix the listed fields to match the tool's input schema (e.g. pass a list, not a "

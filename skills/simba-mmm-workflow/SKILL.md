@@ -78,6 +78,13 @@ Three doors into a study, and none needs a fit before launch:
 Every door yields a revision that carries a snapshot, so every recipe can be edited
 later without rebuilding it.
 
+**Fresh data from a pipeline.** To build on the newest data, `run_pipeline` then poll
+`get_pipeline_run` every few seconds until `status` is `succeeded`, and pass its
+`version_id` as `pipeline_version_id`. If `run_pipeline` returns `run_in_progress`,
+poll that `run_id` instead of starting another. `set_pipeline_schedule` keeps a
+pipeline refreshed daily or weekly (a whole UTC hour); scheduled runs are polled the
+same way.
+
 ### Editing a recipe
 
 Edit in place, never overwrite. Walkthrough, no fit until the last step:

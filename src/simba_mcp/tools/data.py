@@ -158,6 +158,45 @@ async def list_pipeline_versions(
     )
 
 
+async def run_pipeline(
+    pipeline_ref: str,
+    start_date: str | None = None,
+    end_date: str | None = None,
+    ctx: Context[AppContext, Any] = None,
+) -> APIResult:
+    """Start a refresh of one owned data pipeline (by pipeline_hash or id). Returns {run_id, status: "queued"} at once; the run executes on the server as the pipeline's owner with its saved connections. Poll get_pipeline_run until status is succeeded or failed (every few seconds; warehouse runs can take minutes, and a run stops at 30 minutes). Optional start_date / end_date (YYYY-MM-DD) limit the source steps to that range. One run per pipeline at a time: if one is already queued or running you get run_in_progress with that run_id — poll it instead of starting another. Each successful run saves a new pipeline version. Requires the create:models scope."""
+    payload = {k: v for k, v in {"start_date": start_date, "end_date": end_date}.items() if v}
+    return await _client(ctx).workflow_request(
+        "POST", f"/pipelines/{pipeline_ref}/runs", payload=payload
+    )
+
+
+async def get_pipeline_run(
+    pipeline_ref: str,
+    run_id: int,
+    ctx: Context[AppContext, Any] = None,
+) -> APIResult:
+    """Get one run of an owned pipeline: {run_id, status (queued | running | succeeded | failed), started_at, finished_at (UTC), version_id, error_code, error}. On success version_id is the new saved version — pass it as pipeline_version_id to get_recipe_draft_template to build on the refreshed data. On failure error_code says why: execution_failed (a source or transform failed; error names it), no_output, timeout, interrupted or not_started (start it again), not_queued, owner_blocked, unexpected. Scheduled runs are polled the same way. Requires the create:models scope."""
+    return await _client(ctx).workflow_request("GET", f"/pipelines/{pipeline_ref}/runs/{run_id}")
+
+
+async def set_pipeline_schedule(
+    pipeline_ref: str,
+    cadence: str,
+    hour_utc: int,
+    enabled: bool,
+    weekday: int | None = None,
+    ctx: Context[AppContext, Any] = None,
+) -> APIResult:
+    """Replace the refresh schedule of one owned pipeline. cadence is "daily" or "weekly"; hour_utc is a whole UTC hour 0-23; weekday (0 = Monday … 6 = Sunday) is required for weekly and must be omitted for daily; enabled false pauses the schedule and keeps its settings. Returns the schedule with next_run_at (UTC). Each due slot starts one ordinary run (poll it with get_pipeline_run); a slot is skipped while a run of that pipeline is still going. After a scheduled run succeeds the pipeline keeps its newest 30 versions; a version a model or recipe was built from is never removed. Requires the create:models scope."""
+    payload = {"cadence": cadence, "hour_utc": hour_utc, "enabled": enabled}
+    if weekday is not None:
+        payload["weekday"] = weekday
+    return await _client(ctx).workflow_request(
+        "PUT", f"/pipelines/{pipeline_ref}/schedule", payload=payload
+    )
+
+
 async def get_upload(
     file_id: int,
     ctx: Context[AppContext, Any] = None,
