@@ -86,37 +86,17 @@ response = client.beta.messages.create(
 
 ## Available Tools
 
-| Tool | Description |
-|------|-------------|
-| `get_data_schema` | Get the canonical CSV schema for MMM input files |
-| `list_recipe_drafts` / `get_recipe_draft` | Inspect authoring drafts and complete versioned snapshots on supporting backends |
-| `create_recipe_draft` / `update_recipe_draft` | Save complete draft state with retry identity and optimistic concurrency; no publication or fit |
-| `upload_data` | Upload a CSV dataset to Simba |
-| `list_uploads` | List previously uploaded datasets |
-| `get_upload` | One upload's details, including its column schema |
-| `list_models` | List all models with their status |
-| `create_model` | Configure and start fitting a new MMM model |
-| `get_model` | Model metadata + config echo â€” works for any status, incl. failed |
-| `delete_model` | Permanently delete a FAILED model (409 for any other status) |
-| `rename_model` | Rename a model without saving it |
-| `save_model` | File a model into a project (makes it visible to default `list_models`) |
-| `unsave_model` | Release a saved model's slot (non-destructive inverse of `save_model`) |
-| `list_projects` | List the projects (model folders) you can file models into |
-| `create_project` | Create a named project, optionally team-shared |
-| `rename_project` | Rename a project you own |
-| `get_model_status` | Poll fitting progress and optional heartbeat/stall-threshold metadata |
-| `get_model_results` | Get results (ROI, contributions, response curves, diagnostics, and more) |
-| `create_var_model` | Fit a long-term (VAR) model |
-| `link_var_model` / `unlink_var_model` | Attach/detach a VAR model to an MMM for the `long_run_rollup` section |
-| `set_contribution_groups` / `get_contribution_groups` | Persist/read the contributions-view driver groupings |
-| `run_optimizer` | Run budget optimization on a completed model |
-| `get_optimizer_results` | Get optimizer status and results (latest, or a specific `run_id`) |
-| `get_scenario_template` | Generate a forward-period template for scenario planning |
-| `run_scenario` | Run a "what-if" scenario prediction |
-| `get_scenario_results` | Get scenario results (latest, or a specific `run_id`) |
-| `list_runs` | List a model's saved optimizer/scenario run history |
-| `update_run` | Rename/annotate a saved run (notes, tags) |
-| `set_run_pinned` | Pin/unpin a saved run |
+The full, generated reference — every tool, whether it reads or writes, its description and its
+parameters — is [docs/tools.md](docs/tools.md). It is rendered from the running server
+(`python -m simba_mcp.reference`) and a test keeps it current, so it never drifts from what the
+server serves. The tools cover:
+
+- **Data and pipelines** — the canonical CSV schema, uploads, pipeline versions, backend capabilities
+- **Projects and models** — create, fit (MMM and long-run VAR), poll, save, rename, link VAR models, contribution groups
+- **Results** — ROI, contributions, response curves, diagnostics and more, with section and size controls
+- **Scenarios and optimization** — scenario templates and runs, budget optimization, saved-run history
+- **Studies** — questions, recipes and revisions, drafts, launches, quality policies, evaluation,
+  validation pairs, comparisons and recommendations (acceptance stays with a signed-in person)
 
 ## Example Prompts
 
@@ -495,6 +475,9 @@ For bounded results, request `sections="channel_summary,model_stats"` first and 
 returns an actionable 413 instead of partial evidence when the filtered JSON
 payload is too large. It bounds payload serialization, not backend download or MCP
 envelope overhead. Existing defaults remain unchanged.
+
+Every tool, its parameters and whether it reads or writes: [docs/tools.md](docs/tools.md) (generated from the
+running server — `python -m simba_mcp.reference`).
 
 See [architecture and compatibility](docs/architecture.md) for ownership,
 transport/authentication boundaries, known limits and validation.

@@ -69,10 +69,12 @@ transport exception messages and non-JSON gateway error bodies are not exposed.
 MCP log messages omit request paths, bodies and credentials. Existing tool-level
 `ToolError` for an unsupported control-prior preflight remains unchanged.
 
-Legacy error payloads remain successful protocol results containing `error` and
-`_status_code`, rather than changing to `isError=true`. Clients must inspect these
-fields. Output schemas intentionally do not require evidence that older backends
-may omit. Structured JSON and text representations are both verified on the wire.
+A refused backend call is a tool execution error on the wire: `isError` is true and
+the structured payload (`error`, `_status_code`, `_error_code`, `_next_action`) is
+unchanged, so clients may read either. Arguments that fail a tool's input schema
+return the same envelope with `_error_code` `invalid_arguments` (422). Output schemas
+intentionally do not require evidence that older backends may omit. Structured JSON
+and text representations are both verified on the wire.
 
 Result defaults remain full fidelity. Use sections, channels and max_grid_points
 first; optional max_response_bytes checks the UTF-8 JSON payload after filtering
