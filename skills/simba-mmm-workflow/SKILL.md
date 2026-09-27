@@ -113,6 +113,12 @@ snapshot exists — that discards the authored state.
 3. `list_uploads` / `get_upload` recover past uploads; `get_upload`'s
    `columns` ([{name, dtype}]) is enough to build `create_model` arguments
    without re-reading the CSV.
+4. To report actual data (any window, any column, by brand/channel/market)
+   use `get_data_report`, not model results. Declare column roles — at
+   upload (`upload_data(roles=...)`) or per call — for the KPI, hierarchy and
+   any outcome, media or control column; only `date`, `{channel}_spend` and
+   `{channel}_activity` are recognised without a declaration, and roles are
+   never guessed.
 
 ## 2. Create
 
@@ -168,6 +174,11 @@ do not automatically restart or duplicate a fit based on this metadata.
   dashboard-built model). Overlap is a
   reconciliation term, NOT a channel — never rank/share/optimize it, and
   never read its absence as "additive model".
+- **Date windows**: `get_model_results(start=, end=, granularity=)` windows
+  the per-period sections and RECOMPUTES `channel_summary` for the window
+  (ΣRevenue/ΣSpend, profit with each period's margin). Never compute a
+  window ROI yourself by averaging per-period ROIs, and never sum mROI —
+  read `meta.aggregation` for the rules applied.
 - Trust the response's `sections_available` over any hardcoded list, and
   feature-detect optional artifacts (`mroi_periods`, `cohort_ledger`,
   post-#629 `*_mean` keys) — older fits simply lack them; there is no

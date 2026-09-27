@@ -23,6 +23,17 @@ CONTRACT = {
     "POST /api/v1/ingest": {
         "name": "upload_data.name",
         "filename": "upload_data.filename",
+        "roles": "upload_data.roles",
+    },
+    "GET /api/v1/datasets/{id}/report": {
+        "dataset_id": "get_data_report.dataset_id",
+        "start": "get_data_report.start",
+        "end": "get_data_report.end",
+        "granularity": "get_data_report.granularity",
+        "group_by": "get_data_report.group_by",
+        "hierarchy": "get_data_report.hierarchy",
+        "metrics": "get_data_report.metrics",
+        "roles": "get_data_report.roles",
     },
     "GET /api/v1/ingest": {
         "limit": "list_uploads.limit",
@@ -122,6 +133,9 @@ CONTRACT = {
     "GET /api/v1/models/{hash}/results": {
         "sections": "get_model_results.sections",
         "format": "get_model_results.format",
+        "start": "get_model_results.start",
+        "end": "get_model_results.end",
+        "granularity": "get_model_results.granularity",
     },
     "POST /api/v1/models/{hash}/optimize": {
         "total_budget": "run_optimizer.total_budget",

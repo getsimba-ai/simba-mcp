@@ -6,6 +6,7 @@ Wraps all API v1 endpoints so MCP tools stay thin and declarative.
 
 import asyncio
 import contextvars
+import json
 import logging
 from typing import Any, ClassVar
 
@@ -172,13 +173,17 @@ class SimbaAPIClient:
     async def get_schema(self) -> dict:
         return await self._request("GET", "/api/v1/ingest/schema")
 
-    async def upload_csv(self, csv_content: str, name: str = "", filename: str = "") -> dict:
+    async def upload_csv(
+        self, csv_content: str, name: str = "", filename: str = "", roles: dict | None = None
+    ) -> dict:
         """Upload CSV text content. For MCP, CSV arrives as a string."""
         params = {}
         if name:
             params["name"] = name
         if filename:
             params["filename"] = filename
+        if roles:
+            params["roles"] = json.dumps(roles)
         return await self._request(
             "POST",
             "/api/v1/ingest",
@@ -283,15 +288,26 @@ class SimbaAPIClient:
         model_hash: str,
         sections: str = "",
         fmt: str = "json",
+        start: str = "",
+        end: str = "",
+        granularity: str = "",
     ) -> dict:
         params: dict[str, str] = {"format": fmt}
         if sections:
             params["sections"] = sections
+        for key, value in (("start", start), ("end", end), ("granularity", granularity)):
+            if value:
+                params[key] = value
         return await self._request(
             "GET",
             f"/api/v1/models/{model_hash}/results",
             params=params,
         )
+
+    # -- Datasets --
+
+    async def get_data_report(self, dataset_id: int, params: dict[str, str]) -> dict:
+        return await self._request("GET", f"/api/v1/datasets/{dataset_id}/report", params=params)
 
     # -- Optimizer --
 

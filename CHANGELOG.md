@@ -4,6 +4,15 @@ All notable changes to the SIMBA MCP Server will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.9.0 (2026-09-27)
+
+### Added
+
+- `get_data_report(dataset_id, start, end, granularity, group_by, hierarchy, metrics, roles)` (read-only): a role-aware report over any stored dataset — any date window, native/week/month/quarter, filtered by hierarchy, grouped by hierarchy, channel or a dimension. Rows are `{period_start, period_end, group, metric, value, unit}` with dataset identity (`sha256`, `data_through`) and the aggregation rules in `meta`. Column roles are declared, never guessed (#30). 73 tools.
+- `upload_data` takes optional `roles` to declare column roles at upload.
+- `get_model_results` takes `start`, `end` and `granularity`: windows the per-period sections and recomputes `channel_summary` for the window (ΣRevenue/ΣSpend, profit with each period's margin); the response gains `meta`. Omitted, the call behaves exactly as before.
+- The MMM workflow skill says when to use the data report and how to read a windowed result.
+
 ## 0.8.2 (2026-09-26)
 
 ### Added

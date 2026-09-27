@@ -108,6 +108,9 @@ async def get_model_results(
     max_grid_points: int | None = None,
     ctx: Context[AppContext, Any] = None,
     max_response_bytes: int | None = None,
+    start: str = "",
+    end: str = "",
+    granularity: str = "",
 ) -> APIResult:
     """Get results from a completed model.
 
@@ -240,6 +243,20 @@ async def get_model_results(
     NOTE: Date values in contributions/coefficients records are millisecond
     epoch integers.
 
+    DATE WINDOW: pass start / end (ISO dates, inclusive) and/or granularity
+    ("native", "week", "month" or "quarter") to window contributions,
+    coefficients, actual_vs_model and channel_summary. The response then
+    carries `meta` (window, basis, data_through, aggregation rules,
+    not_windowed). channel_summary is RECOMPUTED for the window — ROI =
+    ΣRevenue/ΣSpend per channel, profit priced with each period's own margin —
+    never filtered or averaged. Bucketed rows carry period_start/period_end
+    instead of Date; per-unit ratios are recomputed from sums; bucketed
+    actual_vs_model drops the per-period predictive intervals (they cannot be
+    added). mROI is never summed: mroi_periods comes back as fitted and is
+    listed in meta.not_windowed. VAR models window actual_vs_model only. The
+    window covers the model's training period; for data outside it (or
+    columns the model did not use) use get_data_report.
+
     CONTEXT-SIZE TIP: a full pull is very large (curve sections alone are 100
     grid points x channels x 5 band columns). In conversational use, request
     only the sections you need and pass channels=[...] and max_grid_points=20.
@@ -264,10 +281,14 @@ async def get_model_results(
             Bounds MCP content, not the backend HTTP download.
         max_grid_points: Optional cap on response/marginal curve grid points;
                          records are strided evenly, keeping first and last.
+        start: Optional window start (YYYY-MM-DD), inclusive.
+        end: Optional window end (YYYY-MM-DD), inclusive.
+        granularity: Optional "native", "week", "month" or "quarter".
     """
     if max_response_bytes is not None and max_response_bytes < 1:
         return api_error(400, {"error": "max_response_bytes must be positive."})
-    res = await _client(ctx).get_model_results(model_hash, sections=sections, fmt=format)
+    window = {k: v for k, v in (("start", start), ("end", end), ("granularity", granularity)) if v}
+    res = await _client(ctx).get_model_results(model_hash, sections=sections, fmt=format, **window)
     if res.get("_status_code", 200) >= 400:
         return res
     if format == "json" and (channels is not None or max_grid_points is not None):
