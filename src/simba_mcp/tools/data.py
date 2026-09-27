@@ -246,7 +246,12 @@ async def get_data_report(
     or coarsen the granularity).
     """
     params: dict[str, str] = {"granularity": granularity or "native"}
-    for key, value in (("start", start), ("end", end), ("group_by", group_by), ("hierarchy", hierarchy)):
+    for key, value in (
+        ("start", start),
+        ("end", end),
+        ("group_by", group_by),
+        ("hierarchy", hierarchy),
+    ):
         if value:
             params[key] = value
     if metrics:
