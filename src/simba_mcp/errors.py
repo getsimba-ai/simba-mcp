@@ -19,6 +19,8 @@ NEXT_ACTIONS: dict[str, str] = {
     "submission_key_conflict": "Reuse a submission_key only with identical inputs; otherwise choose a new key.",
     "run_in_progress": "A run of this pipeline is already queued or running; poll get_pipeline_run with the returned run_id instead of starting another.",
     "queue_unavailable": "The run could not be queued and will not run; wait a minute, then call run_pipeline again.",
+    "calibration_refused": "Nothing was created. Read each entry in `tests` (its reason and message): pass channel (a model activity column) for channel_not_in_model, confirm_kpi only if the test truly measured this model's KPI, add incremental spend to the test for no_spend, or drop that test.",
+    "import_invalid": "The file is not in the chosen source's format; check that source matches the tool that produced the file, or use the csv template.",
     # simba-mcp#26: raised by this server, not the backend, before the tool body runs.
     "invalid_arguments": (
         "Fix the listed fields to match the tool's input schema (e.g. pass a list, not a "

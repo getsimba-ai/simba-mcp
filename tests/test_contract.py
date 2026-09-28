@@ -73,6 +73,7 @@ CONTRACT = {
         "operating_margin": "create_model.operating_margin",
         "operating_margin_column": "create_model.operating_margin_column",
         "name": "create_model.name",
+        "calibration": "create_model.calibration",
     },
     "GET /api/v1/models/{hash}": {
         "model_hash": "get_model.model_hash",
@@ -211,6 +212,37 @@ CONTRACT = {
         "weekday": "set_pipeline_schedule.weekday",
         "enabled": "set_pipeline_schedule.enabled",
     },
+    "GET /api/v1/projects/{id}/incrementality-tests": {
+        "project_id": "list_incrementality_tests.project_id",
+        "type": "list_incrementality_tests.type",
+        "status": "list_incrementality_tests.status",
+        "channel": "list_incrementality_tests.channel",
+        "limit": "list_incrementality_tests.limit",
+        "cursor": "list_incrementality_tests.cursor",
+    },
+    "POST /api/v1/projects/{id}/incrementality-tests": {
+        "project_id": "create_incrementality_test.project_id",
+        "record": "create_incrementality_test.record",
+    },
+    "POST /api/v1/projects/{id}/incrementality-tests/import": {
+        "project_id": "import_incrementality_tests.project_id",
+        "source": "import_incrementality_tests.source",
+        "content": "import_incrementality_tests.content",
+        "dry_run": "import_incrementality_tests.dry_run",
+        "defaults": "import_incrementality_tests.defaults",
+        "overrides": "import_incrementality_tests.overrides",
+    },
+    "GET /api/v1/incrementality-tests/{id}": {
+        "test_id": "get_incrementality_test.test_id",
+        "version": "get_incrementality_test.version",
+    },
+    "GET /api/v1/incrementality-tests/{id}/calibration": {
+        "test_id": "get_incrementality_test.test_id",
+        "model_hash": "get_incrementality_test.model_hash",
+        "version": "get_incrementality_test.version",
+        "channel": "get_incrementality_test.channel",
+        "confirm_kpi": "get_incrementality_test.confirm_kpi",
+    },
 }
 
 # api_param -> reason it is intentionally unreachable via MCP
@@ -233,6 +265,16 @@ EXCLUDED_BY_DESIGN = {
     "POST /api/v1/models/{hash}/scenario periodicity": "Deferred: scenario "
     "periodicity override; document interaction with the model's own "
     "periodicity first (issue #49).",
+    "PATCH /api/v1/incrementality-tests/{id}": "Deferred: editing a recorded "
+    "test replaces a shared, versioned record other models may cite; add when "
+    "an agent needs it (issue #34).",
+    "GET /api/v1/incrementality-tests/{id}/versions": "Deferred with PATCH: the "
+    "version list matters once agents can edit (issue #34).",
+    "DELETE /api/v1/incrementality-tests/{id}": "Deferred: retiring removes a "
+    "test from every project member's list; add when an agent needs it (issue #34).",
+    "POST /api/v1/incrementality-tests/preview": "The web wizard's preview for an "
+    "unsaved model; agents derive through get_incrementality_test(model_hash=...) "
+    "or create_model(calibration=...).",
 }
 
 

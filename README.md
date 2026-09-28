@@ -93,6 +93,7 @@ server serves. The tools cover:
 
 - **Data and pipelines** — the canonical CSV schema, uploads, pipeline versions, backend capabilities
 - **Projects and models** — create, fit (MMM and long-run VAR), poll, save, rename, link VAR models, contribution groups
+- **Incrementality tests** — record, list and import geo, owned-media and platform-lift results; the calibration row each test gives a model; calibrated fits
 - **Results** — ROI, contributions, response curves, diagnostics and more, with section and size controls
 - **Scenarios and optimization** — scenario templates and runs, budget optimization, saved-run history
 - **Studies** — questions, recipes and revisions, drafts, launches, quality policies, evaluation,

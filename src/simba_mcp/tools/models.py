@@ -7,7 +7,7 @@ from mcp.server.mcpserver.exceptions import ToolError
 
 from ..auth import _client
 from ..runtime import AppContext
-from ..schemas import APIResult, Channel, ControlPrior
+from ..schemas import APIResult, Channel, ControlPrior, ModelCalibration
 
 
 async def list_models(
@@ -60,6 +60,7 @@ async def create_model(
     sampler: dict | None = None,
     reporting_kernel: dict | None = None,
     control_priors: list[ControlPrior] | None = None,
+    calibration: ModelCalibration | None = None,
     ctx: Context[AppContext, Any] = None,
 ) -> APIResult:
     """Create and start fitting a new Bayesian Marketing Mix Model.
@@ -256,6 +257,17 @@ async def create_model(
         coefficients. Nonempty overrides require backend capability version 1;
         unsupported or unavailable checks stop before creating a model.
 
+    calibration: Optional lift-test calibration: likelihood observations the
+        fit must respect. Either {"tests": [{"test_id": ..., "version"?,
+        "channel"?, "confirm_kpi"?}]} (recorded tests from
+        list_incrementality_tests, each derived against THIS model's data;
+        the model records which test versions it used), or {"units":
+        "revenue" | "response", "observations": [{channel, x, delta_x,
+        delta_y, sigma}]} for rows you derived yourself. If any test can't
+        calibrate this model, nothing is created: the error has
+        code "calibration_refused" and `tests` gives each test's reason.
+        Preview a test's row with get_incrementality_test(model_hash=...).
+
     Returns the model_hash for status polling.
     """
     payload: dict = {
@@ -304,6 +316,8 @@ async def create_model(
         payload["operating_margin"] = operating_margin
     if operating_margin_column:
         payload["operating_margin_column"] = operating_margin_column
+    if calibration:
+        payload["calibration"] = calibration
 
     client = _client(ctx)
     if control_priors:

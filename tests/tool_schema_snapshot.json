@@ -595,6 +595,101 @@
         ],
         "default": null,
         "title": "Control Priors"
+      },
+      "calibration": {
+        "anyOf": [
+          {
+            "additionalProperties": false,
+            "description": "Calibrate the fit with lift-test likelihood observations, in exactly one form: {tests: [{test_id, version?, channel?, confirm_kpi?}]} (1-50 recorded tests, each derived against this model's own data), or {units: 'revenue' | 'response', observations: [{channel, x, delta_x, delta_y, sigma, sigma_low?, sigma_high?}]} (1-200 rows you derived yourself). If any test can't calibrate this model the call fails with calibration_refused and a reason per test in `tests`; check a test first with get_incrementality_test(test_id, model_hash=...) on a saved model built on the same data.",
+            "properties": {
+              "tests": {
+                "items": {
+                  "additionalProperties": false,
+                  "description": "A recorded test by reference; the row is derived against the model's own data.",
+                  "properties": {
+                    "test_id": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "description": "Default: the current version.",
+                      "minimum": 1,
+                      "type": "integer"
+                    },
+                    "channel": {
+                      "description": "Model activity column to calibrate; default: the test's model_channel.",
+                      "type": "string"
+                    },
+                    "confirm_kpi": {
+                      "description": "Assert the test's outcome is the model's KPI when their names differ (recorded in the steps).",
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "test_id"
+                  ],
+                  "type": "object"
+                },
+                "maxItems": 50,
+                "minItems": 1,
+                "type": "array"
+              },
+              "units": {
+                "enum": [
+                  "revenue",
+                  "response"
+                ],
+                "type": "string"
+              },
+              "observations": {
+                "items": {
+                  "properties": {
+                    "channel": {
+                      "type": "string"
+                    },
+                    "x": {
+                      "type": "number"
+                    },
+                    "delta_x": {
+                      "type": "number"
+                    },
+                    "delta_y": {
+                      "type": "number"
+                    },
+                    "sigma": {
+                      "exclusiveMinimum": 0,
+                      "type": "number"
+                    },
+                    "sigma_low": {
+                      "exclusiveMinimum": 0,
+                      "type": "number"
+                    },
+                    "sigma_high": {
+                      "exclusiveMinimum": 0,
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "channel",
+                    "x",
+                    "delta_x",
+                    "delta_y",
+                    "sigma"
+                  ],
+                  "type": "object"
+                },
+                "maxItems": 200,
+                "minItems": 1,
+                "type": "array"
+              }
+            },
+            "type": "object"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Calibration"
       }
     },
     "required": [
@@ -2744,6 +2839,14 @@
                 "type": "object"
               }
             ]
+          },
+          "incrementality_tests": {
+            "description": "Optional recorded incrementality tests by reference ({test_id, version?, channel?, confirm_kpi?}); each is derived against every prepared brand's own data when the draft is published, and the revision records which test versions it used. A test that can't calibrate a brand fails publication with its reason.",
+            "items": {
+              "type": "object"
+            },
+            "maxItems": 50,
+            "type": "array"
           }
         },
         "required": [
@@ -3026,6 +3129,14 @@
                 "type": "object"
               }
             ]
+          },
+          "incrementality_tests": {
+            "description": "Optional recorded incrementality tests by reference ({test_id, version?, channel?, confirm_kpi?}); each is derived against every prepared brand's own data when the draft is published, and the revision records which test versions it used. A test that can't calibrate a brand fails publication with its reason.",
+            "items": {
+              "type": "object"
+            },
+            "maxItems": 50,
+            "type": "array"
           }
         },
         "required": [
@@ -3299,6 +3410,466 @@
       "other"
     ],
     "title": "diff_recipe_revisionsArguments",
+    "type": "object"
+  },
+  "list_incrementality_tests": {
+    "properties": {
+      "project_id": {
+        "title": "Project Id",
+        "type": "integer"
+      },
+      "type": {
+        "anyOf": [
+          {
+            "enum": [
+              "geo",
+              "owned_media_ab",
+              "platform_lift"
+            ],
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Type"
+      },
+      "status": {
+        "anyOf": [
+          {
+            "enum": [
+              "planned",
+              "running",
+              "completed",
+              "invalid"
+            ],
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Status"
+      },
+      "channel": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Channel"
+      },
+      "limit": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Limit"
+      },
+      "cursor": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Cursor"
+      }
+    },
+    "required": [
+      "project_id"
+    ],
+    "title": "list_incrementality_testsArguments",
+    "type": "object"
+  },
+  "get_incrementality_test": {
+    "properties": {
+      "test_id": {
+        "title": "Test Id",
+        "type": "string"
+      },
+      "version": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Version"
+      },
+      "model_hash": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Model Hash"
+      },
+      "channel": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Channel"
+      },
+      "confirm_kpi": {
+        "default": false,
+        "title": "Confirm Kpi",
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "test_id"
+    ],
+    "title": "get_incrementality_testArguments",
+    "type": "object"
+  },
+  "create_incrementality_test": {
+    "properties": {
+      "project_id": {
+        "title": "Project Id",
+        "type": "integer"
+      },
+      "record": {
+        "additionalProperties": true,
+        "description": "One incrementality test as analysed in its own tool (Simba fits nothing here). type picks the design block: geo, owned_media_ab or platform_lift. Dates are YYYY-MM-DD; measured_through is the end of the carryover window (default end_date). result.lift_abs is the total lift in KPI units over the window; give its interval (two-sided, level e.g. 0.9) and/or sd. Null and negative lifts are valid. spend.incremental is the extra spend the test caused (signed).",
+        "properties": {
+          "type": {
+            "enum": [
+              "geo",
+              "owned_media_ab",
+              "platform_lift"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 200,
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "planned",
+              "running",
+              "completed",
+              "invalid"
+            ],
+            "type": "string"
+          },
+          "channel": {
+            "description": "The channel as the team calls it.",
+            "type": "string"
+          },
+          "model_channel": {
+            "description": "Optional: the model activity column this test calibrates.",
+            "type": "string"
+          },
+          "kpi": {
+            "properties": {
+              "kind": {
+                "enum": [
+                  "revenue",
+                  "outcome"
+                ],
+                "type": "string"
+              },
+              "name": {
+                "description": "Required when kind is outcome.",
+                "type": "string"
+              }
+            },
+            "required": [
+              "kind"
+            ],
+            "type": "object"
+          },
+          "start_date": {
+            "format": "date",
+            "type": "string"
+          },
+          "end_date": {
+            "format": "date",
+            "type": "string"
+          },
+          "measured_through": {
+            "format": "date",
+            "type": "string"
+          },
+          "result": {
+            "properties": {
+              "lift_abs": {
+                "type": "number"
+              },
+              "interval": {
+                "properties": {
+                  "low": {
+                    "type": "number"
+                  },
+                  "high": {
+                    "type": "number"
+                  },
+                  "level": {
+                    "exclusiveMaximum": 1,
+                    "exclusiveMinimum": 0,
+                    "type": "number"
+                  },
+                  "sides": {
+                    "enum": [
+                      "two",
+                      "one"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "level"
+                ],
+                "type": "object"
+              },
+              "sd": {
+                "exclusiveMinimum": 0,
+                "type": "number"
+              },
+              "interval_on": {
+                "enum": [
+                  "response",
+                  "iroas"
+                ],
+                "type": "string"
+              },
+              "p_value": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "required": [
+              "lift_abs"
+            ],
+            "type": "object"
+          },
+          "spend": {
+            "properties": {
+              "incremental": {
+                "type": "number"
+              },
+              "currency": {
+                "pattern": "^[A-Z]{3}$",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "geo": {
+            "properties": {
+              "treatment": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "control": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "method": {
+                "enum": [
+                  "did",
+                  "tbr",
+                  "synthetic_control",
+                  "sdid",
+                  "other"
+                ],
+                "type": "string"
+              },
+              "coverage": {
+                "enum": [
+                  "national",
+                  "partial"
+                ],
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "owned_media_ab": {
+            "properties": {
+              "medium": {
+                "enum": [
+                  "email",
+                  "leaflet",
+                  "sms",
+                  "push",
+                  "other"
+                ],
+                "type": "string"
+              },
+              "unit": {
+                "enum": [
+                  "household",
+                  "customer",
+                  "store"
+                ],
+                "type": "string"
+              },
+              "arms": {
+                "properties": {
+                  "treatment": {
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "control": {
+                    "minimum": 0,
+                    "type": "integer"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "required": [
+              "medium",
+              "unit"
+            ],
+            "type": "object"
+          },
+          "platform_lift": {
+            "properties": {
+              "platform": {
+                "enum": [
+                  "meta",
+                  "google",
+                  "tiktok",
+                  "other"
+                ],
+                "type": "string"
+              },
+              "study_id": {
+                "type": "string"
+              },
+              "cell_id": {
+                "type": "string"
+              },
+              "lift_metric": {
+                "enum": [
+                  "conversions",
+                  "revenue"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "platform"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "type",
+          "name",
+          "status",
+          "channel",
+          "kpi",
+          "start_date",
+          "end_date"
+        ],
+        "title": "Record",
+        "type": "object"
+      }
+    },
+    "required": [
+      "project_id",
+      "record"
+    ],
+    "title": "create_incrementality_testArguments",
+    "type": "object"
+  },
+  "import_incrementality_tests": {
+    "properties": {
+      "project_id": {
+        "title": "Project Id",
+        "type": "integer"
+      },
+      "source": {
+        "enum": [
+          "csv",
+          "meta_conversion_lift",
+          "geox",
+          "geolift",
+          "causalpy",
+          "pymc_marketing"
+        ],
+        "title": "Source",
+        "type": "string"
+      },
+      "content": {
+        "title": "Content",
+        "type": "string"
+      },
+      "dry_run": {
+        "default": true,
+        "title": "Dry Run",
+        "type": "boolean"
+      },
+      "defaults": {
+        "anyOf": [
+          {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Defaults"
+      },
+      "overrides": {
+        "anyOf": [
+          {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Overrides"
+      }
+    },
+    "required": [
+      "project_id",
+      "source",
+      "content"
+    ],
+    "title": "import_incrementality_testsArguments",
     "type": "object"
   }
 }

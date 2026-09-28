@@ -4,6 +4,18 @@ All notable changes to the SIMBA MCP Server will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.11.0 (2026-09-28)
+
+### Added
+
+- `list_incrementality_tests(project_id, type, status, channel, limit, cursor)` (read-only): a project's recorded incrementality tests (geo, owned-media A/B, platform lift), with filters and opt-in paging. Null and negative results are listed like any other (#34).
+- `get_incrementality_test(test_id, version, model_hash, channel, confirm_kpi)` (read-only): one versioned record. With `model_hash`, it also returns `calibration`: the likelihood row the test gives that saved model, with each derivation step, or a refusal reason such as `channel_not_in_model` or `kpi_mismatch`. A refusal is an answer, not an error.
+- `create_incrementality_test(project_id, record)`: records one test as analysed in its own tool.
+- `import_incrementality_tests(project_id, source, content, dry_run, defaults, overrides)`: imports from the CSV template, Meta Conversion Lift, GeoX, GeoLift, CausalPy or pymc-marketing output. It's a dry run by default; `defaults` fills fields a file doesn't carry, such as a GeoX result's channel and KPI.
+- `create_model(..., calibration=...)`: calibrates the fit with recorded tests by reference (derived against the model's own data, with the test versions recorded) or with observations you derived yourself. A test that can't calibrate the model fails the call with `calibration_refused` and a reason per test.
+- `create_recipe_draft` and `update_recipe_draft` document the snapshot's `incrementality_tests` references.
+- `_next_action` guidance for `calibration_refused` and `import_invalid`, and the MMM workflow skill says how to calibrate with recorded tests. 80 tools.
+
 ## 0.10.0 (2026-09-28)
 
 ### Added

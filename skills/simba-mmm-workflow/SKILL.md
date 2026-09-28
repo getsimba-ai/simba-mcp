@@ -142,6 +142,17 @@ snapshot exists — that discards the authored state.
   `removal_lift` require it. Priors: see the `simba-prior-conventions`
   skill before overriding anything.
 - The response is a `model_hash` immediately — fitting is async.
+- **Calibrate with recorded incrementality tests.** `list_incrementality_tests`
+  shows the project's geo, owned-media and platform-lift results (Simba records
+  tests analysed elsewhere; it fits nothing). Check a test against a saved model
+  on the same data with `get_incrementality_test(test_id, model_hash=...)`: its
+  `calibration` is the likelihood row, or a refusal reason (e.g.
+  `channel_not_in_model`: pass `channel`; `kpi_mismatch`: pass `confirm_kpi`
+  only if the outcome truly is the model's KPI). Then
+  `create_model(..., calibration={"tests": [{"test_id": ...}]})`. A refused test
+  fails the call with `calibration_refused` and a reason per test; nothing is
+  created. New results: `create_incrementality_test`, or
+  `import_incrementality_tests` (dry run first, then `dry_run=false`).
 
 ## 3. Poll
 
