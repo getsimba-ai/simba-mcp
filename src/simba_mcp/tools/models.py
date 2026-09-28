@@ -260,13 +260,17 @@ async def create_model(
     calibration: Optional lift-test calibration: likelihood observations the
         fit must respect. Either {"tests": [{"test_id": ..., "version"?,
         "channel"?, "confirm_kpi"?}]} (recorded tests from
-        list_incrementality_tests, each derived against THIS model's data;
-        the model records which test versions it used), or {"units":
+        list_incrementality_tests, each derived against THIS model's data),
+        or {"units":
         "revenue" | "response", "observations": [{channel, x, delta_x,
         delta_y, sigma}]} for rows you derived yourself. If any test can't
         calibrate this model, nothing is created: the error has
         code "calibration_refused" and `tests` gives each test's reason.
         Preview a test's row with get_incrementality_test(model_hash=...).
+        The derived rows calibrate this fit only; the model does not keep a
+        link to the tests. To keep that lineage (the test then lists the
+        model under used_by and can't be deleted), build through a study
+        recipe or a recipe draft that references the tests.
 
     Returns the model_hash for status polling.
     """
