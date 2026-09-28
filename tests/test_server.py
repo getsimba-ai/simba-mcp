@@ -70,6 +70,10 @@ EXPECTED_TOOLS = [
     "run_pipeline",
     "get_pipeline_run",
     "set_pipeline_schedule",
+    "list_incrementality_tests",
+    "get_incrementality_test",
+    "create_incrementality_test",
+    "import_incrementality_tests",
     "get_upload",
     "list_models",
     "create_model",
@@ -1354,9 +1358,9 @@ class TestImportEditArchitecture:
     def _tools(self):
         return {t.name: t for t in _list_tools()}
 
-    def test_seventy_six_tools_with_the_diff_read_only(self):
+    def test_eighty_tools_with_the_diff_read_only(self):
         tools = self._tools()
-        assert len(tools) == 76
+        assert len(tools) == 80
         diff = tools["diff_recipe_revisions"]
         assert diff.annotations.read_only_hint
         assert set(diff.input_schema["required"]) == {"recipe_id", "base", "other"}

@@ -55,6 +55,12 @@ DraftSnapshot = Annotated[
                     },
                     "required": ["name", "content_base64"],
                 },
+                "incrementality_tests": {
+                    "type": "array",
+                    "maxItems": 50,
+                    "description": "Optional recorded incrementality tests by reference ({test_id, version?, channel?, confirm_kpi?}); each is derived against every prepared brand's own data when the draft is published, and the revision records which test versions it used. A test that can't calibrate a brand fails publication with its reason.",
+                    "items": {"type": "object"},
+                },
                 "schema_version": {"type": "integer", "enum": [1]},
                 "family": {"type": "string", "enum": ["mmm", "var"]},
                 "configuration": {"type": "object"},
@@ -367,6 +373,186 @@ PublishTarget = Annotated[
                 "expected_version": {"type": "integer", "minimum": 1},
             },
             "required": ["recipe_id", "expected_version"],
+            "additionalProperties": False,
+        }
+    ),
+]
+
+# Incrementality tests: descriptions of the backend record, which validates it.
+_TEST_REF = {
+    "type": "object",
+    "description": "A recorded test by reference; the row is derived against the model's own data.",
+    "properties": {
+        "test_id": {"type": "string"},
+        "version": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Default: the current version.",
+        },
+        "channel": {
+            "type": "string",
+            "description": "Model activity column to calibrate; default: the test's model_channel.",
+        },
+        "confirm_kpi": {
+            "type": "boolean",
+            "description": "Assert the test's outcome is the model's KPI when their names differ (recorded in the steps).",
+        },
+    },
+    "required": ["test_id"],
+    "additionalProperties": False,
+}
+
+IncrementalityTestRecord = Annotated[
+    dict,
+    Field(
+        json_schema_extra={
+            "description": (
+                "One incrementality test as analysed in its own tool (Simba fits nothing here). "
+                "type picks the design block: geo, owned_media_ab or platform_lift. Dates are "
+                "YYYY-MM-DD; measured_through is the end of the carryover window (default "
+                "end_date). result.lift_abs is the total lift in KPI units over the window; give "
+                "its interval (two-sided, level e.g. 0.9) and/or sd. Null and negative lifts are "
+                "valid. spend.incremental is the extra spend the test caused (signed)."
+            ),
+            "properties": {
+                "type": {"type": "string", "enum": ["geo", "owned_media_ab", "platform_lift"]},
+                "name": {"type": "string", "maxLength": 200},
+                "status": {
+                    "type": "string",
+                    "enum": ["planned", "running", "completed", "invalid"],
+                },
+                "channel": {"type": "string", "description": "The channel as the team calls it."},
+                "model_channel": {
+                    "type": "string",
+                    "description": "Optional: the model activity column this test calibrates.",
+                },
+                "kpi": {
+                    "type": "object",
+                    "properties": {
+                        "kind": {"type": "string", "enum": ["revenue", "outcome"]},
+                        "name": {"type": "string", "description": "Required when kind is outcome."},
+                    },
+                    "required": ["kind"],
+                },
+                "start_date": {"type": "string", "format": "date"},
+                "end_date": {"type": "string", "format": "date"},
+                "measured_through": {"type": "string", "format": "date"},
+                "result": {
+                    "type": "object",
+                    "properties": {
+                        "lift_abs": {"type": "number"},
+                        "interval": {
+                            "type": "object",
+                            "properties": {
+                                "low": {"type": "number"},
+                                "high": {"type": "number"},
+                                "level": {
+                                    "type": "number",
+                                    "exclusiveMinimum": 0,
+                                    "exclusiveMaximum": 1,
+                                },
+                                "sides": {"type": "string", "enum": ["two", "one"]},
+                            },
+                            "required": ["level"],
+                        },
+                        "sd": {"type": "number", "exclusiveMinimum": 0},
+                        "interval_on": {"type": "string", "enum": ["response", "iroas"]},
+                        "p_value": {"type": "number", "minimum": 0, "maximum": 1},
+                    },
+                    "required": ["lift_abs"],
+                },
+                "spend": {
+                    "type": "object",
+                    "properties": {
+                        "incremental": {"type": "number"},
+                        "currency": {"type": "string", "pattern": "^[A-Z]{3}$"},
+                    },
+                },
+                "geo": {
+                    "type": "object",
+                    "properties": {
+                        "treatment": {"type": "array", "items": {"type": "string"}},
+                        "control": {"type": "array", "items": {"type": "string"}},
+                        "method": {
+                            "type": "string",
+                            "enum": ["did", "tbr", "synthetic_control", "sdid", "other"],
+                        },
+                        "coverage": {"type": "string", "enum": ["national", "partial"]},
+                    },
+                },
+                "owned_media_ab": {
+                    "type": "object",
+                    "properties": {
+                        "medium": {
+                            "type": "string",
+                            "enum": ["email", "leaflet", "sms", "push", "other"],
+                        },
+                        "unit": {"type": "string", "enum": ["household", "customer", "store"]},
+                        "arms": {
+                            "type": "object",
+                            "properties": {
+                                "treatment": {"type": "integer", "minimum": 0},
+                                "control": {"type": "integer", "minimum": 0},
+                            },
+                        },
+                    },
+                    "required": ["medium", "unit"],
+                },
+                "platform_lift": {
+                    "type": "object",
+                    "properties": {
+                        "platform": {
+                            "type": "string",
+                            "enum": ["meta", "google", "tiktok", "other"],
+                        },
+                        "study_id": {"type": "string"},
+                        "cell_id": {"type": "string"},
+                        "lift_metric": {"type": "string", "enum": ["conversions", "revenue"]},
+                    },
+                    "required": ["platform"],
+                },
+            },
+            "required": ["type", "name", "status", "channel", "kpi", "start_date", "end_date"],
+        }
+    ),
+]
+
+ModelCalibration = Annotated[
+    dict,
+    Field(
+        json_schema_extra={
+            "description": (
+                "Calibrate the fit with lift-test likelihood observations, in exactly one form: "
+                "{tests: [{test_id, version?, channel?, confirm_kpi?}]} (1-50 recorded tests, each "
+                "derived against this model's own data), or {units: 'revenue' | 'response', "
+                "observations: [{channel, x, delta_x, delta_y, sigma, sigma_low?, sigma_high?}]} "
+                "(1-200 rows you derived yourself). If any test can't calibrate this model the "
+                "call fails with calibration_refused and a reason per test in `tests`; check a "
+                "test first with get_incrementality_test(test_id, model_hash=...) on a saved "
+                "model built on the same data."
+            ),
+            "properties": {
+                "tests": {"type": "array", "items": _TEST_REF, "minItems": 1, "maxItems": 50},
+                "units": {"type": "string", "enum": ["revenue", "response"]},
+                "observations": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 200,
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "channel": {"type": "string"},
+                            "x": {"type": "number"},
+                            "delta_x": {"type": "number"},
+                            "delta_y": {"type": "number"},
+                            "sigma": {"type": "number", "exclusiveMinimum": 0},
+                            "sigma_low": {"type": "number", "exclusiveMinimum": 0},
+                            "sigma_high": {"type": "number", "exclusiveMinimum": 0},
+                        },
+                        "required": ["channel", "x", "delta_x", "delta_y", "sigma"],
+                    },
+                },
+            },
             "additionalProperties": False,
         }
     ),
