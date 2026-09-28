@@ -8,8 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ### Changed
 
-- `publish_recipe_draft` says how MMM priors are set at publication: any prior the draft leaves unset gets a smart default from the Prior Builder's own calculation over the whole source. Automatic priors are retired.
-- The `api_mmm` recipe envelope schema says `config.auto_prior: true` is refused because automatic priors are retired. Descriptions only; no tool signature changes.
+- `publish_recipe_draft` says how MMM priors are set at publication: any prior the draft leaves unset gets a smart default from the Prior Builder's own calculation over the whole source.
+- The `api_mmm` recipe envelope schema says unknown `config` keys are rejected.
+- `assess_validation_pair`: the `prior_provenance` report checks which rows the recorded smart priors read, and blocks priors that read past the declared training end.
+- Descriptions only; no tool signature changes.
 
 ## 0.11.0 (2026-09-28)
 
