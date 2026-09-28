@@ -4,6 +4,13 @@ All notable changes to the SIMBA MCP Server will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.11.1 (2026-09-29)
+
+### Changed
+
+- `publish_recipe_draft` says how MMM priors are set at publication: any prior the draft leaves unset gets a smart default from the Prior Builder's own calculation over the whole source. Automatic priors are retired.
+- The `api_mmm` recipe envelope schema says `config.auto_prior: true` is refused because automatic priors are retired. Descriptions only; no tool signature changes.
+
 ## 0.11.0 (2026-09-28)
 
 ### Added
