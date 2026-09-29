@@ -51,7 +51,7 @@ def cases() -> list[Case]:
         },
     }
     created = {"model_hash": "model-example", "status": "pending"}
-    prior = {"channel": "search_clicks", "beta_mu": 0.2, "beta_sigma": 0.1}
+    prior = {"channel": "Search", "mean": 0.2, "sd": 0.1}
     advanced_args = {**deepcopy(model_args), "priors": [prior]}
     advanced_body = {**deepcopy(model_body), "priors": [deepcopy(prior)]}
     optimiser = {
@@ -59,7 +59,7 @@ def cases() -> list[Case]:
         "num_periods": 2,
         "gamma": 0.1,
         "currency": "GBP",
-        "bounds": {"search_clicks": {"lower": 20, "upper": 80}},
+        "bounds": {"search_clicks": {"lower": 20, "upper": 100}},
         "laydown_weights": {"search_clicks": [1, 2]},
         "period_cpm": {"search_clicks": [3, 4]},
         "objective": "profit",

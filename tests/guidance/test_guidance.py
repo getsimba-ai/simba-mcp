@@ -60,7 +60,7 @@ def test_unknown_identifiers_refuse_without_path_reads(topic, section, monkeypat
 
 def test_every_section_and_index_fit_the_wire_budget():
     index = guidance.read_guidance()
-    assert index["guidance_version"] == "1"
+    assert index["guidance_version"] == guidance.MANIFEST["version"]
     for row in index["topics"]:
         for section in row["sections"]:
             result = guidance.read_guidance(row["topic"], section)
@@ -85,7 +85,7 @@ async def test_real_dispatch_needs_no_socket_and_preserves_error_envelope(monkey
     monkeypatch.setattr(socket.socket, "connect", forbidden)
     good = await mcp.call_tool("get_workflow_guidance", {"topic": "results"})
     assert not good.is_error
-    assert good.structured_content["guidance_version"] == "1"
+    assert good.structured_content["guidance_version"] == guidance.MANIFEST["version"]
     bad = await mcp.call_tool("get_workflow_guidance", {"topic": "../secret"})
     assert bad.is_error
     assert bad.structured_content["_error_code"] == "unknown_guidance"

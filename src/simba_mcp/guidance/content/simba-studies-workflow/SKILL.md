@@ -2,7 +2,7 @@
 name: simba-studies-workflow
 description: Author, edit and review Simba Studies, recipes, policies and runs. Use for immutable publication, launch recovery, diagnostics and human handoff.
 metadata:
-  version: "1"
+  version: "2"
 ---
 
 # Work with Studies

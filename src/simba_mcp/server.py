@@ -2,6 +2,7 @@
 
 import functools
 import json
+import os
 
 from mcp.server.mcpserver import MCPServer
 from mcp.server.mcpserver.exceptions import ToolError, UnexpectedToolError
@@ -10,6 +11,7 @@ from pydantic import ValidationError
 
 from . import runtime, telemetry
 from .auth import _bearer_token, _client, _local_files_allowed
+from .catalogue import description_for
 from .errors import api_error
 from .metadata import annotations_for
 from .runtime import (
@@ -178,10 +180,10 @@ class SimbaMCPServer(MCPServer):
             raise
 
 
-mcp = SimbaMCPServer(
-    name="Simba MMM",
-    version=runtime._own_version(),
-    instructions=(
+_SERVER_OPTIONS = {
+    "name": "Simba MMM",
+    "version": runtime._own_version(),
+    "instructions": (
         "Simba is a Bayesian Marketing Mix Modeling (MMM) platform. "
         "Use these tools to upload marketing data, build MMM models, "
         "check fitting progress, retrieve results (channel ROI, contributions, "
@@ -199,8 +201,8 @@ mcp = SimbaMCPServer(
         "are not holdout validation. Use selected result sections and bounds. "
         "Writes are not automatically retried; reconcile before repeating them."
     ),
-    lifespan=app_lifespan,
-)
+    "lifespan": app_lifespan,
+}
 
 TOOLS = (
     create_recipe_draft,
@@ -314,12 +316,23 @@ def _wire_errors(tool):
     return wrapped
 
 
-for tool in TOOLS:
-    mcp.add_tool(
-        _wire_errors(tool),
-        title=tool.__name__.replace("_", " ").title(),
-        annotations=annotations_for(tool.__name__),
-    )
+def create_server(description_mode: str = "legacy") -> SimbaMCPServer:
+    """Build an immutable catalogue using the same contracts and execution wrappers."""
+    if description_mode not in ("legacy", "compact"):
+        raise ValueError("SIMBA_TOOL_DESCRIPTIONS must be legacy or compact")
+    instance = SimbaMCPServer(**_SERVER_OPTIONS)
+    for tool in TOOLS:
+        instance.add_tool(
+            _wire_errors(tool),
+            title=tool.__name__.replace("_", " ").title(),
+            description=description_for(tool, description_mode),
+            annotations=annotations_for(tool.__name__),
+        )
+    return instance
+
+
+TOOL_DESCRIPTION_MODE = os.environ.get("SIMBA_TOOL_DESCRIPTIONS", "legacy")
+mcp = create_server(TOOL_DESCRIPTION_MODE)
 
 
 def _create_app():
