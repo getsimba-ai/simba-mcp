@@ -1,4 +1,4 @@
-"""Run a paid, synthetic native-discovery comparison. Never connects to a live backend."""
+"""Run bounded synthetic host comparisons. Never connects to a live backend."""
 
 import argparse
 import asyncio
@@ -11,7 +11,8 @@ from pathlib import Path
 from ...measurements import provenance
 from ...server import create_server
 from .anthropic import Budget, client, definitions, session
-from .scenarios import SyntheticDispatch, answer, tasks
+from .roles import ROLE_CASES, select_tools
+from .scenarios import SyntheticDispatch, answer, role_tasks, tasks
 
 
 async def run(args):
@@ -20,12 +21,25 @@ async def run(args):
     budget = Budget(args.cap_usd, args.prior_usd)
     server = create_server("compact")
     tools = await server.list_tools()
-    selected = [task for task in tasks() if args.case is None or task[0].id == args.case]
+    role = getattr(args, "role_comparison", None)
+    if role is not None and args.mode != "eager":
+        raise ValueError("Role comparison requires eager mode to isolate catalogue visibility")
+    suite = role_tasks() if role else tasks()
+    selected = [task for task in suite if args.case is None or task[0].id == args.case]
+    if role:
+        selected = [task for task in selected if task[0].id in ROLE_CASES[role]]
+    if not selected:
+        raise ValueError("No tasks match the requested comparison")
     report = {
         "schema_version": 1,
         "status": "running",
         "provenance": provenance(),
-        "configuration": {"mode": args.mode, "samples": args.samples, "case": args.case},
+        "configuration": {
+            "mode": args.mode,
+            "samples": args.samples,
+            "case": args.case,
+            "role_comparison": role,
+        },
         "trials": [],
         "catalogue": [t.model_dump(mode="json") for t in tools],
         "tasks": [{"case": c.model_dump(), "prompt": p, "expected": e} for c, p, e in selected],
@@ -46,12 +60,22 @@ async def run(args):
                     modes = ["eager", "deferred"] if rep % 2 == 0 else ["deferred", "eager"]
                     if args.mode != "both":
                         modes = [args.mode]
-                    for mode in modes:
-                        dispatch = SyntheticDispatch(server, case)
-                        definitions_sent = definitions(tools, mode)
+                    arms = [(mode, "full") for mode in modes]
+                    if role:
+                        arms = [("eager", "full"), ("eager", role)]
+                        if rep % 2:
+                            arms.reverse()
+                    for mode, view in arms:
+                        visible = select_tools(tools, view)
+                        dispatch = SyntheticDispatch(
+                            server, case, allowed_tools=[t.name for t in visible]
+                        )
+                        definitions_sent = definitions(visible, mode)
                         row = {
                             "case": case.id,
                             "mode": mode,
+                            "view": view,
+                            "tool_names": [t.name for t in visible],
                             "repetition": rep,
                             "definitions_sha256": hashlib.sha256(
                                 json.dumps(definitions_sent, sort_keys=True).encode()
@@ -89,7 +113,10 @@ async def run(args):
                         save()
                         print(
                             json.dumps(
-                                {k: row[k] for k in ("case", "mode", "repetition", "passed")}
+                                {
+                                    k: row[k]
+                                    for k in ("case", "mode", "view", "repetition", "passed")
+                                }
                             ),
                             flush=True,
                         )
@@ -109,7 +136,8 @@ def main():
     parser.add_argument("--prior-usd", type=float, default=0)
     parser.add_argument("--samples", type=int, default=2)
     parser.add_argument("--mode", choices=("eager", "deferred", "both"), default="eager")
-    parser.add_argument("--case", choices=[case.id for case, _, _ in tasks()])
+    parser.add_argument("--case", choices=[case.id for case, _, _ in role_tasks()])
+    parser.add_argument("--role-comparison", choices=tuple(ROLE_CASES))
     args = parser.parse_args()
     if args.samples < 1:
         parser.error("samples must be positive")
