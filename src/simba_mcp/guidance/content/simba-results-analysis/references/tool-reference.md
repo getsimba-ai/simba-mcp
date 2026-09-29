@@ -127,8 +127,11 @@ hardcoded list if the server is newer than these docs.
 IMPORTANT — channel naming: results are keyed by the channel's ACTIVITY
 COLUMN name (e.g. "search_activity"), not by the `channels[].name` passed to
 create_model. These exact keys (case- and space-sensitive) must be used in
-run_optimizer bounds, laydown_weights, and period_cpm. Always read
-channel_summary first to get the exact keys.
+run_optimizer bounds, laydown_weights, and period_cpm. Use channel_summary
+for exact result keys. When relating a user-facing channel name to a result
+or activity key, retrieve channel_map and use its explicit mapping; do not
+infer identity from spelling. Request channel_map with the needed result
+sections when possible.
 
 NOTE: Date values in contributions/coefficients records are millisecond
 epoch integers.
