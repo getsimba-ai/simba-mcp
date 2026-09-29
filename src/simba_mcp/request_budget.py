@@ -165,7 +165,9 @@ class RequestAdmission:
         ticket = object()
         acquired = False
         async with self.condition:
-            immediate = not self.waiters and self.eligible(caller)
+            immediate = self.eligible(caller) and not any(
+                self.eligible(key) for _, key in self.waiters
+            )
             if not immediate:
                 if (
                     len(self.waiters) >= self.policy.max_queued
