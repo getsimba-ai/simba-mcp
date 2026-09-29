@@ -2,7 +2,7 @@
 name: simba-results-analysis
 description: Read saved Simba results, ROI and diagnostics.
 metadata:
-  version: "8"
+  version: "9"
 ---
 
 # Analyse saved results

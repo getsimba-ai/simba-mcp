@@ -4,10 +4,11 @@
   definitions; do not later call them unknown. Response omission proves neither
   storage history nor unread contents. Missing evidence stays unknown.
 - Preserve units: contributions are KPI, coefficients revenue. Window ROI is
-  summed revenue / summed spend. Respect meta.aggregation and meta.not_windowed;
-  never average period ratios or sum mROI/interval bounds.
+  summed revenue / summed spend, not an unweighted average of period ROI.
+  Respect meta.aggregation and meta.not_windowed. Do not sum mROI or HDI bounds.
 - Headline mROI uses its declared evaluation point. Mean active-period spend is
-  not latest spend; historical averages are separate. Preserve mean/median,
+  not latest spend. Historical mROI averages are valid under their declared
+  convention and separate from headline mROI. Preserve mean/median,
   interval probability and availability. HDI endpoints are not necessarily
   equal-tailed quantiles, even when field names contain percentile numbers.
   Do not invent missing bands.
