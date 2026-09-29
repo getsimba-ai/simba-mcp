@@ -4,6 +4,14 @@ import json
 import re
 
 
+def _missing_diagnostic_task(task):
+    """Apply absence equivalences only to the exact absence question contract."""
+    return (task.family or task.id) == "result_diagnostics" and task.expected == {
+        "convergence": "unknown",
+        "reason": "not_returned",
+    }
+
+
 def literal_fields(task, facts):
     """Retain the original exact-field metric separately from semantic acceptance."""
     return isinstance(facts, dict) and all(facts.get(k) == v for k, v in task.expected.items())
@@ -26,7 +34,7 @@ def semantic_facts(task, facts, supported_sections):
         if any(k in facts and facts[k] != nested.get(k) for k in ("available", "reason")):
             return False
         facts = nested
-    if (task.family or task.id) == "result_diagnostics":
+    if _missing_diagnostic_task(task):
         state = facts.get("convergence")
         established = facts.get("convergence_established")
         if "convergence" in facts and not (
@@ -78,7 +86,7 @@ def claims_in_scope(task, facts):
     if not isinstance(facts, dict):
         return False
     allowed = set(task.expected)
-    if (task.family or task.id) == "result_diagnostics":
+    if _missing_diagnostic_task(task):
         allowed.add("convergence_established")
     if (task.family or task.id) == "result_old_artifact" and "mroi_periods" in facts:
         nested = facts["mroi_periods"]
@@ -96,7 +104,7 @@ def fact_verdict(task, facts, supported_sections):
     """
     if semantic_facts(task, facts, supported_sections):
         return "pass"
-    if (task.family or task.id) == "result_diagnostics" and isinstance(facts, dict):
+    if _missing_diagnostic_task(task) and isinstance(facts, dict):
         state = facts.get("convergence")
         established = facts.get("convergence_established")
         state_valid = (

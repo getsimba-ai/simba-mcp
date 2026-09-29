@@ -65,7 +65,9 @@ live missing-diagnostic/prediction examples have not yet been checked. Keep this
 coverage limitation visible. Existing live tests covered an identity-link model,
 so signed Overlap cases remain synthetic arithmetic checks.
 
-The bounded next run is development validation across two fresh numerical datasets,
-eleven question templates and two repetitions per arm (88 sessions). Same model and
-provider as the previous comparison. Both arms use the corrected fixture/grader.
-Freeze all source and guidance before starting; make no edits during the run.
+The corrected development run completed across two fresh numerical datasets,
+eleven question templates and two repetitions per arm (88 sessions), with the same
+model and provider as the previous comparison. Both arms used the corrected
+fixture/grader, with source and guidance frozen throughout. See the
+[comparison report](selective-results-contract-comparison.md): required-evidence
+retrieval improved, but reviewed quality and lower cost are not established.

@@ -9,7 +9,7 @@ from dataclasses import asdict
 from .result_grading import claims_in_scope, fact_verdict, semantic_facts
 from .result_selection import result_tasks
 
-GRADER_VERSION = 8
+GRADER_VERSION = 9
 
 
 def calibration_cases():

@@ -247,3 +247,20 @@ def test_paraphrases_are_frozen_before_trial_and_preserve_expected_contract():
     for task in result_tasks():
         assert task.paraphrase and task.paraphrase != task.prompt
         assert "result-example" in task.paraphrase
+
+
+def test_diagnostic_equivalences_do_not_override_a_different_expected_gate():
+    from dataclasses import replace
+
+    from simba_mcp.evaluation.hosts.result_grading import fact_verdict, semantic_facts
+
+    missing = result_tasks()[1]
+    for expected in (
+        {"convergence": "failed", "reason": "r_hat_above_declared_limit"},
+        {"convergence": True, "reason": "all_declared_gates_pass"},
+        {**missing.expected, "diagnostic_count": 0},
+    ):
+        task = replace(missing, expected=expected)
+        assert semantic_facts(task, expected, set())
+        assert not semantic_facts(task, missing.expected, set())
+        assert fact_verdict(task, missing.expected, set()) == "fail"

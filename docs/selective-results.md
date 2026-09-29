@@ -315,4 +315,7 @@ different exact identifiers still trigger ambiguity warnings.
 The historical qualitative review in `selective-results-claim-review.json` is
 explicitly superseded as acceptance evidence. Original trial grades are preserved.
 Raw live responses and internal code audit records are not published. No new fits
-or paid provider sessions were used for this verification. The PR remains draft.
+or paid provider sessions were used for this API verification. The subsequent
+[88-session corrected-contract development comparison](selective-results-contract-comparison.md)
+is complete and preserves original scores. Its cost saving is inconclusive and
+quality acceptance remains unproven. The PR remains draft.
