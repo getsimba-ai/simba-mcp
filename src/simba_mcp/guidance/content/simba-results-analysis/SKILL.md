@@ -2,7 +2,7 @@
 name: simba-results-analysis
 description: Read and interpret saved Simba results, contribution, ROI, uncertainty and diagnostics.
 metadata:
-  version: "5"
+  version: "6"
 ---
 
 # Analyse saved results

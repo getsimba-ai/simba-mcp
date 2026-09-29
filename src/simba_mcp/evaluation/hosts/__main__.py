@@ -43,7 +43,7 @@ async def run(args):
     robust = getattr(args, "results_robust", False)
     acceptance = getattr(args, "results_acceptance", False)
     diagnostic = getattr(args, "results_model_diagnostic", False)
-    if diagnostic and (not robust or acceptance or baseline_path or role or args.mode != "eager"):
+    if diagnostic and (not robust or acceptance or role or args.mode != "eager"):
         raise ValueError("Model diagnostic requires robust eager mode without other comparisons")
     if acceptance and not robust:
         raise ValueError("Acceptance candidate cases require a frozen robust comparison")
@@ -214,6 +214,8 @@ async def run(args):
                             arms.reverse()
                     if guidance_arms:
                         arms = [("eager", view) for view in guidance_arms]
+                        if diagnostic and case.id not in {"acceptance_a", "acceptance_e"}:
+                            arms = [("eager", "candidate")]
                         if rep % 2:
                             arms.reverse()
                     for mode, view in arms:

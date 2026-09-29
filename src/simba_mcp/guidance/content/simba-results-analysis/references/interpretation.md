@@ -1,5 +1,12 @@
 # Interpret saved evidence
 
+- Ground each answer in the returned values, explicit metadata and supplied context.
+  Explicit definitions resolve uncertainty: do not later claim those definitions
+  are missing. Distinguish what this response omits from what the model never saved.
+  A projected absence does not establish storage history or the contents of unread
+  sections. Report signed effects without inventing raw inputs or unique causes.
+  Answer the requested question, then check every explanatory sentence against its
+  evidence. Remove unsupported additions; qualify only what remains genuinely unknown.
 - contributions is KPI space; coefficients is per-period revenue. Historical ROI,
   contribution and marginal ROI are different quantities. Preserve currency and units.
 - The headline mroi_summary fields evaluate marginal returns at the declared

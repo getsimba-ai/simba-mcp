@@ -150,9 +150,13 @@ def test_sonnet_pricing_and_model_bound_reservation():
 
 
 @pytest.mark.anyio
-async def test_single_arm_model_diagnostic_freezes_ten_reused_cases(tmp_path, monkeypatch):
+@pytest.mark.parametrize("controls", [False, True])
+async def test_single_arm_model_diagnostic_freezes_ten_reused_cases(
+    tmp_path, monkeypatch, controls
+):
     from simba_mcp.evaluation.hosts import __main__ as command
     from simba_mcp.evaluation.hosts.anthropic import SONNET
+    from simba_mcp.guidance import read_guidance
 
     requests = []
 
@@ -172,6 +176,15 @@ async def test_single_arm_model_diagnostic_freezes_ten_reused_cases(tmp_path, mo
     )
     monkeypatch.setenv("ANTHROPIC_API_KEY", "synthetic-key")
     output = tmp_path / "diagnostic.json"
+    baseline = tmp_path / "baseline.json"
+    baseline.write_text(
+        json.dumps(
+            {
+                s: read_guidance("results", s)
+                for s in ("entrypoint", "interpretation", "tool-reference")
+            }
+        )
+    )
     await command.run(
         SimpleNamespace(
             output=output,
@@ -183,11 +196,12 @@ async def test_single_arm_model_diagnostic_freezes_ten_reused_cases(tmp_path, mo
             results_robust=True,
             results_model_diagnostic=True,
             model=SONNET,
+            results_baseline=baseline if controls else None,
         )
     )
     report = json.loads(output.read_text())
     assert report["status"] == "complete"
-    assert len(report["trials"]) == len(requests) == 10
+    assert len(report["trials"]) == len(requests) == (14 if controls else 10)
     assert {r["case"] for r in report["trials"]} == {
         "acceptance_a",
         "acceptance_d",
@@ -195,11 +209,22 @@ async def test_single_arm_model_diagnostic_freezes_ten_reused_cases(tmp_path, mo
         "acceptance_f",
         "acceptance_h",
     }
-    assert {r["view"] for r in report["trials"]} == {"candidate"}
+    assert sum(r["view"] == "candidate" for r in report["trials"]) == 10
+    assert {r["case"] for r in report["trials"] if r["view"] == "baseline"} == (
+        {"acceptance_a", "acceptance_e"} if controls else set()
+    )
+    if controls:
+        for rep in (0, 1):
+            arms = [
+                r["view"]
+                for r in report["trials"]
+                if r["case"] == "acceptance_a" and r["repetition"] == rep
+            ]
+            assert arms == (["baseline", "candidate"] if rep == 0 else ["candidate", "baseline"])
     assert all(r["thinking"] == {"type": "adaptive"} and "temperature" not in r for r in requests)
     assert report["experiment_inputs"]["purpose"] == "model_selection_validation"
     assert not report["assessment"]["accepted"]
-    assert report["budget"]["charged"] == pytest.approx(0.0014)
+    assert report["budget"]["charged"] == pytest.approx(0.00196 if controls else 0.0014)
 
 
 def test_format_failure_is_separate_from_correct_facts():
