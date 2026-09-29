@@ -172,3 +172,26 @@ async def test_cross_domain_sequence_reuses_canonical_dispatch():
         assert not error
     assert dispatch.completed == 3
     assert dispatch.unintended_writes == 0
+
+
+@pytest.mark.anyio
+async def test_cli_zero_budget_stops_before_network_and_keeps_ledger(tmp_path, monkeypatch):
+    from simba_mcp.evaluation.hosts.__main__ import run
+
+    async def forbidden(*args, **kwargs):
+        raise AssertionError("Zero budget must not send a provider request")
+
+    monkeypatch.setattr(httpx.AsyncClient, "post", forbidden)
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "synthetic-test-key")
+    output = tmp_path / "evidence.json"
+    args = SimpleNamespace(
+        output=output, cap_usd=0, prior_usd=0, case="analyse_model", mode="eager", samples=1
+    )
+    with pytest.raises(RuntimeError, match="exhausted"):
+        await run(args)
+    report = json.loads(output.read_text())
+    assert report["status"] == "stopped"
+    assert report["budget"]["charged"] == 0
+    assert "synthetic-test-key" not in output.read_text()
+    with pytest.raises(ValueError, match="overwrite"):
+        await run(args)
