@@ -2,7 +2,7 @@
 name: simba-var-workflow
 description: Build and inspect Simba VAR models and linked long-run MMM results. Use for long-term effects, VAR fit recovery and long-run rollup interpretation.
 metadata:
-  version: "1"
+  version: "2"
 ---
 
 # Work with VAR models

@@ -1,5 +1,5 @@
 {
-  "version": "1",
+  "version": "2",
   "topics": {
     "mmm": {
       "skill": "simba-mmm-workflow",
@@ -7,7 +7,8 @@
       "sections": {
         "entrypoint": "simba-mmm-workflow/SKILL.md",
         "building": "simba-mmm-workflow/references/building.md",
-        "priors": "simba-prior-conventions/references/conventions.md"
+        "priors": "simba-prior-conventions/references/conventions.md",
+        "tool-reference": "simba-mmm-workflow/references/tool-reference.md"
       }
     },
     "results": {
@@ -15,7 +16,8 @@
       "description": "Read and interpret existing Simba MMM results, channel contribution, ROI, uncertainty and diagnostics. Use for results questions without loading model-building instructions.",
       "sections": {
         "entrypoint": "simba-results-analysis/SKILL.md",
-        "interpretation": "simba-results-analysis/references/interpretation.md"
+        "interpretation": "simba-results-analysis/references/interpretation.md",
+        "tool-reference": "simba-results-analysis/references/tool-reference.md"
       }
     },
     "priors": {
@@ -31,7 +33,8 @@
       "description": "Set up Simba budget optimisation and inspect saved optimiser or scenario runs. Use for channel bounds, laydown, margins and decision-versus-comparison interpretation.",
       "sections": {
         "entrypoint": "simba-optimizer-runs/SKILL.md",
-        "runs": "simba-optimizer-runs/references/runs.md"
+        "runs": "simba-optimizer-runs/references/runs.md",
+        "tool-reference": "simba-optimizer-runs/references/tool-reference.md"
       }
     },
     "studies": {

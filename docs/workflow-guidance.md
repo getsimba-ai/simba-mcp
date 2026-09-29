@@ -1,6 +1,6 @@
 # Workflow guidance
 
-Guidance version 1 separates model building, existing results, priors, optimisation,
+Guidance version 2 separates model building, existing results, priors, optimisation,
 Studies and VAR. Each entrypoint states its trigger, checks and recovery path, with
 detailed references loaded only when relevant. Guidance is not authorisation and
 does not replace backend validation or human acceptance.
@@ -79,9 +79,9 @@ into generated standalone distributions. This follows the
 Edit canonical content, update its version when guidance semantics change, then run:
 
 ```shell
+python -m simba_mcp.reference
 python -m simba_mcp.guidance
 python -m simba_mcp.guidance --check
-python -m simba_mcp.reference
 pytest tests/guidance tests/evaluation
 ```
 
@@ -90,3 +90,8 @@ recovery, exact identifiers, units, missing-evidence semantics and human authori
 Deterministic checks establish packaging and contracts, not native-client competence,
 scientific correctness or a measured token/latency improvement. Repeated model evidence
 and approved budgets remain separate acceptance gates in PERF-02.
+
+Version 2 includes generated full `tool-reference` sections for `mmm`, `results`
+and `optimiser`. Their source is the existing handler docstrings. Generate references
+before exporting Skills. See [compact descriptions](compact-descriptions.md) for
+the opt-in catalogue mode and rollback instructions.

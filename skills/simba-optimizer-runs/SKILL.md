@@ -2,7 +2,7 @@
 name: simba-optimizer-runs
 description: Set up Simba budget optimisation and inspect saved optimiser or scenario runs. Use for channel bounds, laydown, margins and decision-versus-comparison interpretation.
 metadata:
-  version: "1"
+  version: "2"
 ---
 
 # Optimise budgets
@@ -13,3 +13,5 @@ metadata:
 4. Poll the returned run_id with backoff. Reconcile uncertain submissions through run history rather than blindly repeating a write.
 5. Quote the columns appropriate to the question: solver decision values and fitted-convention comparison values have different meanings.
 6. Check constraint fidelity and uncertainty. Missing evidence is not a valid recommendation, and an optimiser output is not approval to spend.
+
+For advanced parameters or sections not covered here, read the [full tool contract](references/tool-reference.md) before calling.

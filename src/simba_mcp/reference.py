@@ -65,7 +65,7 @@ def _effect(tool: Any) -> str:
     return "writes, destructive" if hints.destructive_hint else "writes"
 
 
-def render(tools: list[Any], sections: dict[str, str]) -> str:
+def render(tools: list[Any], sections: dict[str, str], compact_mode: bool = False) -> str:
     """The Markdown page for ``tools``; ``sections`` maps a tool name to its section key."""
     by_section: dict[str, list[Any]] = {key: [] for key in SECTIONS}
     for tool in sorted(tools, key=lambda t: t.name):
@@ -94,6 +94,8 @@ def render(tools: list[Any], sections: dict[str, str]) -> str:
         out += [f"## {SECTIONS.get(key, key.title())}", ""]
         for tool in members:
             out += [f"### `{tool.name}`", ""]
+            if compact_mode:
+                out += [f"[Full tool contract](tools.md#{tool.name})", ""]
             meta = [f"**{_effect(tool)}**"]
             if tool.title:
                 meta.insert(0, tool.title)
@@ -123,13 +125,13 @@ def _anchor(heading: str) -> str:
     return "".join(c for c in heading.lower().replace(" ", "-") if c.isalnum() or c == "-")
 
 
-def current() -> str:
+def current(description_mode: str = "legacy") -> str:
     """The page for the tools this server registers right now."""
-    from simba_mcp.server import TOOLS, mcp
+    from simba_mcp.server import TOOLS, create_server
 
-    tools = anyio.run(mcp.list_tools)
+    tools = anyio.run(create_server(description_mode).list_tools)
     sections = {fn.__name__: fn.__module__.rsplit(".", 1)[-1] for fn in TOOLS}
-    return render(tools, sections)
+    return render(tools, sections, compact_mode=description_mode == "compact")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -138,18 +140,37 @@ def main(argv: list[str] | None = None) -> int:
         "--check", action="store_true", help="exit 1 when docs/tools.md is out of date"
     )
     args = parser.parse_args(argv)
-    page = current()
-    if args.check:
-        committed = DOCS.read_text(encoding="utf-8") if DOCS.exists() else ""
-        if committed != page:
-            print(
-                "docs/tools.md is out of date: run `python -m simba_mcp.reference`", file=sys.stderr
+    from simba_mcp.catalogue import COMPACT
+    from simba_mcp.guidance import CONTENT, MANIFEST
+    from simba_mcp.server import TOOLS
+
+    outputs = {DOCS: current(), DOCS.with_name("tools-compact.md"): current("compact")}
+    for tool in TOOLS:
+        entry = COMPACT.get(tool.__name__)
+        if entry:
+            relative = MANIFEST["topics"][entry.topic]["sections"]["tool-reference"]
+            outputs[Path(str(CONTENT.joinpath(relative)))] = (
+                f"# {tool.__name__}: full contract\n\n"
+                "<!-- Generated from the handler docstring by simba_mcp.reference. -->\n\n"
+                + inspect.getdoc(tool)
+                + "\n"
             )
-            return 1
-        print("docs/tools.md is current")
-        return 0
-    DOCS.write_text(page, encoding="utf-8", newline="\n")
-    print(f"wrote {DOCS}")
+    stale = []
+    for path, page in outputs.items():
+        if args.check:
+            if not path.exists() or path.read_text(encoding="utf-8") != page:
+                stale.append(str(path))
+        else:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(page, encoding="utf-8", newline="\n")
+    if stale:
+        print("Generated references are stale: " + ", ".join(stale), file=sys.stderr)
+        return 1
+    print(
+        "Generated references are current"
+        if args.check
+        else "Wrote full, compact and packaged references"
+    )
     return 0
 
 

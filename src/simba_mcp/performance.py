@@ -12,7 +12,7 @@ from typing import Any
 from .measurements import compact, provenance
 
 
-def capture_surface() -> tuple[bytes, bytes]:
+def capture_surface(description_mode: str | None = None) -> tuple[bytes, bytes]:
     """Exercise the real stateless app without opening a socket or calling a backend."""
     from starlette.testclient import TestClient
 
@@ -20,7 +20,12 @@ def capture_surface() -> tuple[bytes, bytes]:
 
     previous = runtime._serving_http
     try:
-        with TestClient(server._create_app()) as client:
+        app = (
+            server._create_app()
+            if description_mode is None
+            else runtime.create_app(server.create_server(description_mode))
+        )
+        with TestClient(app) as client:
             headers = {"Accept": "application/json, text/event-stream"}
             initial = client.post(
                 "/",
@@ -53,7 +58,9 @@ def capture_surface() -> tuple[bytes, bytes]:
         runtime.set_http_mode(previous)
 
 
-def surface_report(encoding: str = "none") -> dict:
+def surface_report(encoding: str = "none", description_mode: str | None = None) -> dict:
+    from .server import TOOL_DESCRIPTION_MODE
+
     counter = None
     if encoding != "none":
         try:
@@ -62,7 +69,7 @@ def surface_report(encoding: str = "none") -> dict:
             raise ValueError("Install simba-mcp[performance] to request tokenizer counts.") from exc
         counter = tiktoken.get_encoding(encoding)
     started = perf_counter()
-    initial_bytes, list_bytes = capture_surface()
+    initial_bytes, list_bytes = capture_surface(description_mode)
     capture_seconds = perf_counter() - started
     initial, listing = json.loads(initial_bytes)["result"], json.loads(list_bytes)["result"]
     if listing.get("nextCursor"):
@@ -84,6 +91,7 @@ def surface_report(encoding: str = "none") -> dict:
     tools = listing["tools"]
     return {
         "schema_version": 1,
+        "description_mode": description_mode or TOOL_DESCRIPTION_MODE,
         "provenance": provenance(),
         "capture": {
             "transport": "in_memory_http_json_response",
@@ -167,8 +175,9 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--encoding", choices=("none", "o200k_base", "cl100k_base"), default="none")
+    parser.add_argument("--description-mode", choices=("legacy", "compact"), default="legacy")
     args = parser.parse_args(argv)
-    report = surface_report(args.encoding)
+    report = surface_report(args.encoding, args.description_mode)
     args.output_dir.mkdir(parents=True, exist_ok=True)
     (args.output_dir / "surface.json").write_text(
         json.dumps(report, indent=2) + "\n", encoding="utf-8"

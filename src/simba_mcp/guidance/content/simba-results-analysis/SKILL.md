@@ -2,7 +2,7 @@
 name: simba-results-analysis
 description: Read and interpret existing Simba MMM results, channel contribution, ROI, uncertainty and diagnostics. Use for results questions without loading model-building instructions.
 metadata:
-  version: "1"
+  version: "2"
 ---
 
 # Analyse saved results
@@ -13,3 +13,5 @@ metadata:
 4. Missing sections or diagnostics mean missing evidence. Retrieve the relevant evidence or qualify the answer; never invent a result.
 5. On oversized results narrow sections, channels or dates deliberately. On a transient read failure follow the refusal guidance with backoff. Do not start a fit to repair a results read.
 6. Report the saved model, window, evidence and limitations. Reading prediction evidence can create access-audit records; guidance does not certify untouched holdouts.
+
+For advanced parameters or sections not covered here, read the [full tool contract](references/tool-reference.md) before calling.

@@ -14,9 +14,10 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--samples", type=int, default=3)
     parser.add_argument("--output-dir", type=Path, required=True)
+    parser.add_argument("--description-mode", choices=("legacy", "compact"), default="legacy")
     args = parser.parse_args(argv)
     logging.getLogger("httpx").setLevel(logging.WARNING)
-    report = asyncio.run(evaluate(args.samples))
+    report = asyncio.run(evaluate(args.samples, args.description_mode))
     args.output_dir.mkdir(parents=True, exist_ok=True)
     (args.output_dir / "evaluation.json").write_text(
         json.dumps(report, indent=2) + "\n", encoding="utf-8"

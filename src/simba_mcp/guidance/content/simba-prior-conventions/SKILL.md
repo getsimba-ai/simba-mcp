@@ -2,7 +2,7 @@
 name: simba-prior-conventions
 description: Construct Simba media or control prior overrides. Use before changing carryover, saturation anchors, effect-at-average coordinates or explicit control transforms.
 metadata:
-  version: "1"
+  version: "2"
 ---
 
 # Configure prior overrides

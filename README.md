@@ -143,6 +143,11 @@ packaged source. Connecting the MCP endpoint does **not** install native Skills.
 | [simba-var-workflow](skills/simba-var-workflow/SKILL.md) | VAR creation, linking and long-run rollups |
 
 See [installation, fallback lookup and maintenance](docs/workflow-guidance.md).
+
+Tool descriptions default to the full legacy catalogue. Set
+`SIMBA_TOOL_DESCRIPTIONS=compact` before starting the server to opt into shorter
+descriptions for model creation, results and optimisation. Names, schemas and
+execution stay the same. See [configuration, rollback and comparison evidence](docs/compact-descriptions.md).
 Existing-result questions can start with selected result sections directly; capability,
 schema and guidance discovery are conditional on the task. Backend validation and
 human approval remain authoritative.

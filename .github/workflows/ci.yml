@@ -56,15 +56,15 @@ jobs:
         run: python -m simba_mcp.reference --check
 
       - name: Evaluate synthetic workflow contracts
-        run: python -m simba_mcp.evaluation --samples 3 --output-dir .codex/evaluation
+        run: |
+          python -m simba_mcp.evaluation --samples 3 --description-mode legacy --output-dir .codex/evaluation/legacy
+          python -m simba_mcp.evaluation --samples 3 --description-mode compact --output-dir .codex/evaluation/compact
 
       - name: Retain workflow evidence
         uses: actions/upload-artifact@v7
         with:
           name: evaluation-${{ matrix.python-version }}-${{ matrix.sdk }}
-          path: |
-            .codex/evaluation/evaluation.json
-            .codex/evaluation/evaluation.md
+          path: .codex/evaluation/
           include-hidden-files: true
           if-no-files-found: error
           retention-days: 90
@@ -73,6 +73,7 @@ jobs:
         if: matrix.python-version == '3.11'
         run: |
           python -m simba_mcp.performance --encoding o200k_base --output-dir .codex/performance-baseline
+          python -m simba_mcp.performance --encoding o200k_base --description-mode compact --output-dir .codex/performance-baseline/compact
           python -m simba_mcp.benchmark --samples 30 --output-dir .codex/performance-baseline
 
       - name: Retain baseline evidence

@@ -27,7 +27,9 @@ def contains(actual: Any, expected: Any) -> bool:
     return type(actual) is type(expected) and actual == expected
 
 
-async def run_case(case: Case, repetition: int = 0) -> Trial:
+async def run_case(
+    case: Case, repetition: int = 0, *, mcp_server=None, observe_result=None
+) -> Trial:
     """Allow only the declared request sequence; return no arguments or result bodies."""
     assertions: dict[str, bool] = {}
     events: list[dict] = []
@@ -76,10 +78,14 @@ async def run_case(case: Case, repetition: int = 0) -> Trial:
             injected_cancellation = False
             try:
                 with telemetry.use_sink(events.append):
-                    result = await server.mcp.call_tool(step.tool, step.arguments, ctx)
+                    result = await (mcp_server or server.mcp).call_tool(
+                        step.tool, step.arguments, ctx
+                    )
                 payload = result.structured_content
                 if payload is None:
                     payload = json.loads(result.content[0].text)
+                if observe_result is not None:
+                    observe_result(payload)
                 assertions[f"step_{index}_outcome"] = (
                     not step.cancelled
                     and step.tool_error is None
@@ -123,17 +129,23 @@ async def run_case(case: Case, repetition: int = 0) -> Trial:
     )
 
 
-async def evaluate(samples: int = 3) -> dict:
+async def evaluate(samples: int = 3, description_mode: str = "legacy") -> dict:
     from .cases import cases
 
     if samples < 2:
         raise ValueError("At least two repetitions are required")
     suite = cases()
-    trials = [await run_case(case, rep) for case in suite for rep in range(samples)]
+    instance = server.create_server(description_mode)
+    trials = [
+        await run_case(case, rep, mcp_server=instance) for case in suite for rep in range(samples)
+    ]
     return {
         "schema_version": 1,
         "execution_mode": "scripted_mock",
-        "configuration": "current_full_catalogue",
+        "configuration": "current_full_catalogue"
+        if description_mode == "legacy"
+        else "compact_descriptions",
+        "description_mode": description_mode,
         "fixture_digest": hashlib.sha256(
             compact([c.model_dump() for c in suite]).encode()
         ).hexdigest(),

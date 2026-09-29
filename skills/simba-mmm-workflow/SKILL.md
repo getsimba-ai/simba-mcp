@@ -2,7 +2,7 @@
 name: simba-mmm-workflow
 description: Build a Simba MMM from uploaded or pipeline data. Use for data preparation, model creation and fit recovery; use results guidance for existing-model questions.
 metadata:
-  version: "1"
+  version: "2"
 ---
 
 # Build an MMM
@@ -15,3 +15,5 @@ metadata:
 6. Check the returned configuration, diagnostics and limitations before interpreting output. A completed fit is not scientific acceptance.
 
 For an existing model's results use the results topic via get_workflow_guidance if that Skill is not installed. Guidance does not grant permission to write.
+
+For advanced parameters or sections not covered here, read the [full tool contract](references/tool-reference.md) before calling.
