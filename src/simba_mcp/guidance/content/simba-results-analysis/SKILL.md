@@ -2,10 +2,12 @@
 name: simba-results-analysis
 description: Read saved Simba results, ROI and diagnostics.
 metadata:
-  version: "15"
+  version: "16"
 ---
 
 # Analyse saved results
+
+Reuse guidance sections already supplied in context. Fetch only missing sections.
 
 Use any supplied model identifier directly in get_model_results. Do not call
 list_models or another discovery/status tool first: the result read checks the

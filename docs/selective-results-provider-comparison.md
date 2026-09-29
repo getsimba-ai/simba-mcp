@@ -135,3 +135,16 @@ trials for one exposed validation case. It refuses invalid or duplicate identiti
 and cannot be used for final acceptance. A filtered report remains an incomplete
 paired comparison; completing one selected trial does not turn it into acceptance.
 Earlier completed trials and their original scores are not replayed or overwritten.
+
+The [completed V15 Grok validation](selective-results-v15-validation-evidence.json)
+has six supported candidate answers and six supported controls. It fails readiness
+because the candidate rereads one interpretation section already supplied in
+context, versus zero unnecessary control calls. No unsupported claims, actual
+unauthorised reads or writes were found. The earlier missing trial was completed
+separately without repeating completed answers. Cumulative accounted spend is
+US$78.507366, including all retained unknown allowances. Sonnet remains stopped.
+
+Version 16 adds a general instruction to reuse guidance already supplied and fetch
+only missing sections. Its bounded exposed validation must pass the same gates
+before the still-unopened V4 packet is released. Correct answers do not waive the
+call-efficiency requirement, and none of these selection runs grants acceptance.
