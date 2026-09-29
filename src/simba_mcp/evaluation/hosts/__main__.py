@@ -7,6 +7,8 @@ import json
 import os
 import random
 import secrets
+import time
+from copy import deepcopy
 from dataclasses import asdict
 from pathlib import Path
 
@@ -16,7 +18,9 @@ from ...server import create_server
 from ..experiments import (
     PROPOSED_THRESHOLDS,
     assess_comparison,
+    fingerprint,
     freeze_experiment,
+    source_fingerprint,
     verify_experiment,
 )
 from ..result_cases import FIXTURE_VERSION
@@ -234,6 +238,83 @@ async def run(args):
         ]
     if trial_filter:
         report["configuration"]["results_trial"] = list(trial_filter)
+    continue_from = getattr(args, "continue_from", None)
+    completed_trials = set()
+    continuation_hash = None
+    if continue_from:
+        if not robust or not guidance_arms or diagnostic or trial_filter:
+            raise ValueError("Continuation requires an unchanged robust paired comparison")
+        previous_bytes = continue_from.read_bytes()
+        previous = json.loads(previous_bytes)
+        review_path = getattr(args, "continuation_review", None)
+        if not review_path:
+            raise ValueError("Continuation requires a reviewed source transition")
+        transition = json.loads(review_path.read_text(encoding="utf-8"))
+        if (
+            transition.get("verified") is not True
+            or not transition.get("rationale")
+            or transition.get("previous_report_sha256")
+            != hashlib.sha256(previous_bytes).hexdigest()
+            or transition.get("previous_source_sha256")
+            != previous["frozen_experiment"]["source_sha256"]
+            or transition.get("current_source_sha256") != source_fingerprint()
+        ):
+            raise ValueError("Continuation source transition is not verified")
+        previous_config = dict(previous["configuration"])
+        previous_continuation = previous_config.pop("continuation", {})
+        if (
+            previous.get("status") != "stopped"
+            or previous_config != report["configuration"]
+            or any(previous[key] != report[key] for key in ("tasks", "guidance", "catalogue"))
+            or previous["calibration"] != calibrate()
+            or fingerprint(previous["calibration"])
+            != previous["frozen_experiment"]["calibration_sha256"]
+            or any(
+                previous[key] != previous["experiment_inputs"][key]
+                for key in ("configuration", "tasks", "guidance", "catalogue")
+            )
+            or previous["frozen_experiment"]["inputs_sha256"]
+            != fingerprint(previous["experiment_inputs"])
+            or previous["experiment_inputs"]["acceptance_thresholds"]
+            != getattr(args, "acceptance_thresholds", None)
+            or args.prior_usd + 1e-9
+            < sum(previous["budget"][k] for k in ("prior", "charged", "reserved"))
+        ):
+            raise ValueError("Continuation changed frozen inputs or lost prior spend")
+        valid_keys = {
+            (case.id, view, rep)
+            for case, _, _ in selected
+            for view in guidance_arms
+            for rep in range(args.samples)
+        }
+        completed_trials = {tuple(key) for key in previous_continuation.get("completed_trials", [])}
+        previous_keys = [
+            (row["case"], row["view"], row["repetition"]) for row in previous["trials"]
+        ]
+        if len(set(previous_keys)) != len(previous_keys) or not set(previous_keys) <= valid_keys:
+            raise ValueError("Continuation has invalid or duplicate trial identities")
+        completed_trials.update(
+            (row["case"], row["view"], row["repetition"])
+            for row in previous["trials"]
+            if "trajectory" in row
+        )
+        for row in previous["trials"]:
+            if "trajectory" in row and (
+                not all(
+                    key in row for key in ("assertions", "passed", "outcome", "read_authorisation")
+                )
+                or "final_text" not in row.get("session", {})
+            ):
+                raise ValueError("Continuation contains an incomplete terminal record")
+        if not completed_trials <= valid_keys or completed_trials == valid_keys:
+            raise ValueError("Continuation has no valid unfinished trials")
+        continuation_hash = hashlib.sha256(previous_bytes).hexdigest()
+        report["configuration"]["continuation"] = {
+            "previous_report_sha256": continuation_hash,
+            "completed_trials": [list(key) for key in sorted(completed_trials)],
+            "source_transition": transition,
+            "policy": "Preserve completed trials; restart incomplete trials as separately billed attempts",
+        }
     if robust:
         report["calibration"] = calibrate()
         report["experiment_inputs"] = {
@@ -258,6 +339,14 @@ async def run(args):
                 "multiple synthetic datasets",
             ],
         }
+        if continue_from:
+            old_inputs = deepcopy(previous["experiment_inputs"])
+            new_inputs = deepcopy(report["experiment_inputs"])
+            for inputs in (old_inputs, new_inputs):
+                inputs["configuration"].pop("continuation", None)
+                inputs["authorised_budget"].pop("prior_usd", None)
+            if old_inputs != new_inputs:
+                raise ValueError("Continuation changed frozen experimental inputs")
         report["frozen_experiment"] = freeze_experiment(
             report["experiment_inputs"], report["calibration"]
         )
@@ -268,13 +357,26 @@ async def run(args):
             raise RuntimeError("Operator requested stop; checkpoint and reservations retained")
         if robust:
             verify_experiment(report["frozen_experiment"], report["experiment_inputs"], calibrate())
+        if (
+            continue_from
+            and hashlib.sha256(continue_from.read_bytes()).hexdigest() != continuation_hash
+        ):
+            raise ValueError("Original continuation evidence changed")
 
     def save(_=None):
         report["budget"] = asdict(budget)
         args.output.parent.mkdir(parents=True, exist_ok=True)
         temporary = args.output.with_suffix(".tmp")
         temporary.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
-        temporary.replace(args.output)
+        for attempt in range(10):
+            try:
+                temporary.replace(args.output)
+                break
+            except PermissionError:
+                if attempt == 9:
+                    raise
+                # Retry only the local atomic rename, never a provider request.
+                time.sleep(0.1)
 
     save()
     try:
@@ -297,6 +399,8 @@ async def run(args):
                         if rep % 2:
                             arms.reverse()
                     for mode, view in arms:
+                        if (case.id, view, rep) in completed_trials:
+                            continue
                         if trial_filter and f"{view}:{rep}" not in trial_filter:
                             continue
                         arm_server = (
@@ -460,6 +564,16 @@ async def run(args):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument(
+        "--continue-from",
+        type=Path,
+        help="Preserve a stopped report and run only unfinished trials",
+    )
+    parser.add_argument(
+        "--continuation-review",
+        type=Path,
+        help="Reviewed source-transition manifest for continuation",
+    )
     parser.add_argument("--cap-usd", type=float, required=True)
     parser.add_argument("--prior-usd", type=float, default=0)
     parser.add_argument("--samples", type=int, default=2)

@@ -1,6 +1,10 @@
 # Grok selective-results acceptance
 
-Status: preflight, no final comparison executed. Acceptance remains unmet.
+Status: original run stopped after 27 completed sessions and one partially billed
+session because a local atomic checkpoint replacement failed. Acceptance remains
+unmet. The [original evidence](selective-results-grok-interrupted-evidence.json)
+preserves all completed reviews, the partial charge and a separate interpretation
+audit.
 
 Version 16 guidance passed a fixed, exposed validation on Grok 4.7 with low
 reasoning and 4,096 maximum output tokens. Both arms supported all six answers.
@@ -93,5 +97,34 @@ scores are not recalculated. Local arithmetic and actual-dispatch checks verify
 sufficient alternatives and reject wrong windows or missing channel evidence.
 Monthly behaviour follows the public tool contract; this preflight does not
 claim a new live backend verification.
+
+## Recorded interruption and continuation
+
+Source `12c35c4` passed 674 local tests and all four CI jobs before this local
+failure. xAI responses were successful. The original report remains stopped;
+its 27 completed sessions are not rerun. One unfinished baseline session incurred
+US$0.060550 before local persistence failed. All charges are known and retained:
+US$2.828072 for the interrupted stage, US$82.224678 cumulative, zero active
+reservation, and the historical US$2.672954 unknown allowance still included.
+
+An independently reviewed repair retries only the local atomic rename. It does
+not retry provider requests. Explicit continuation requires the original report
+hash, a reviewed source transition, unchanged frozen experiment inputs and the
+full cumulative ledger. Completed successes and failures are skipped equally;
+the incomplete trial restarts as a separately billed attempt. The original
+120-session schedule, cases, model, guidance, rubric and US$100 stage ceiling
+remain fixed. The continuation supplies the 93 unfinished trial identities.
+
+Completed-pair cost statistics will remain separate from interrupted overhead.
+All billed overhead is reported. Before continuation, a conservative sensitivity
+is specified: assign the interrupted US$0.060550 to the candidate in the affected
+pair, even though it was actually billed to the baseline. Lower cost must also
+hold under that allocation before acceptance. No partial response is graded.
+
+One completed candidate answer has a disputed residual-uncertainty sentence.
+The original reviewer classified it as unsupported; a second reviewer found
+material ambiguity rather than a clean supported answer. Both judgements remain
+preserved. This is an outstanding acceptance concern, not a corrected score or
+permission to assume a favourable interpretation.
 
 
