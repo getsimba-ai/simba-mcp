@@ -241,7 +241,10 @@ def test_format_failure_is_separate_from_correct_facts():
 
 
 @pytest.mark.anyio
-async def test_fresh_packet_runs_only_frozen_paired_fresh_cases(tmp_path, monkeypatch):
+@pytest.mark.parametrize("selection_validation", [False, True])
+async def test_fresh_packet_runs_only_frozen_paired_fresh_cases(
+    tmp_path, monkeypatch, selection_validation
+):
     from simba_mcp.evaluation.hosts import __main__ as command
     from simba_mcp.evaluation.result_acceptance_fresh import fresh_acceptance_tasks
     from simba_mcp.guidance import read_guidance
@@ -272,6 +275,7 @@ async def test_fresh_packet_runs_only_frozen_paired_fresh_cases(tmp_path, monkey
             results_robust=True,
             results_acceptance=True,
             results_acceptance_packet="fresh",
+            results_selection_validation=selection_validation,
             results_baseline=baseline,
             case_review={"verified": True, "guidance_unchanged": True},
         )
@@ -280,7 +284,9 @@ async def test_fresh_packet_runs_only_frozen_paired_fresh_cases(tmp_path, monkey
     assert len(report["trials"]) == 32
     assert {r["case"] for r in report["trials"]} == {t.id for t in fresh_acceptance_tasks()}
     assert report["configuration"]["results_acceptance_packet"] == "fresh"
-    assert report["experiment_inputs"]["purpose"] == "candidate_acceptance"
+    assert report["experiment_inputs"]["purpose"] == (
+        "model_selection_validation" if selection_validation else "candidate_acceptance"
+    )
     assert not report["assessment"]["accepted"]
 
 

@@ -1,31 +1,26 @@
 ---
 name: simba-results-analysis
-description: Read and interpret saved Simba results, contribution, ROI, uncertainty and diagnostics.
+description: Read saved Simba results, ROI and diagnostics.
 metadata:
-  version: "6"
+  version: "7"
 ---
 
 # Analyse saved results
 
-When the user supplies a completed model identifier, use it verbatim in
-get_model_results. It is already selected: do not call list_models, get_model,
-get_model_status or ingestion/schema discovery to verify it. Discover models only
-when the identifier is missing or the results endpoint explicitly rejects it.
+Use a supplied completed model identifier directly in get_model_results; discover
+only if missing or rejected. No repeated startup preflights.
 
-Choose sections from the question:
+Choose sufficient sections:
+- Revenue/ROI: channel_summary; coefficients for individual periods.
+- Diagnostics: model_stats,r_hat as required by the question.
+- Decomposition: contributions, plus model_config for attribution.
+- Current/historical marginal ROI: mroi_summary/mroi_periods respectively.
+- Add channel_map for unverified identity or media classification.
 
-- Revenue or ROI: channel_summary,channel_map; pass the requested start/end.
-- Individual historical ROI periods: coefficients; these are not marginal ROI.
-- Contribution decomposition: contributions,model_config; add channel_map for channel identity.
-- Convergence: model_stats,r_hat.
-- Current marginal ROI: mroi_summary,channel_map.
-- Historical marginal ROI: mroi_periods; explicitly request this optional artefact.
-- Trends or curves: actual_vs_model or the relevant curve section; add identity evidence as needed.
+Use requested dates, never guessed bounds/year. Inspect dated rows when needed.
+Return only the requested fields/format and explanations. Omit unsolicited tool
+narration. If asked about actions, report the recorded order and evidence available
+before each action, never a reconstructed motive.
 
-Use the smallest sufficient bundle, then answer. Missing evidence stays unknown.
-Keep exact identifiers for subsequent tool arguments; display names are acceptable
-in prose when channel_map verifies the relationship.
-
-Read [interpretation](references/interpretation.md) for units, intervals and
-windows. Read the [full contract](references/tool-reference.md) only for additional
-sections or parameters. Preserve backend metadata and _mcp_selection warnings.
+Apply [interpretation](references/interpretation.md); consult the
+[full contract](references/tool-reference.md) for other sections/parameters.
