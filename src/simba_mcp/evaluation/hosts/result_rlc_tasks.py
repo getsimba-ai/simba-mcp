@@ -23,13 +23,16 @@ def rlc_tasks():
             + " Explicitly explain whether interactions are allocated across components."
             " Return JSON containing link, attribution, is_additive,"
             " interaction_allocated_across_components and first_week_visits."
-            " Equivalent field names and nested objects are accepted.",
+            " Supported alternative keys: link_function, attribution_method, additive,"
+            " interactions_allocated and modelled_visits, respectively."
+            " Optional nesting keys: answer, result, configuration, first_week, reconciliation.",
         ),
         replace(
             diagnostic,
             id="rlc01_diagnostics",
             family="rlc01_diagnostics",
             prompt=diagnostic.prompt + " Unknown convergence may be represented by null."
-            " Equivalent field names and nested objects are accepted.",
+            " Supported alternative key: convergence_status. You may instead state"
+            " convergence_established=false. Optional nesting keys: answer or result.",
         ),
     ]

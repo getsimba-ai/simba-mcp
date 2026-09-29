@@ -130,6 +130,26 @@ def calibration_cases():
     expected = attribution.expected
     cases.extend(
         [
+            (
+                "rlc_established_unknown",
+                unknown,
+                {"convergence_established": False, "reason": "not_returned"},
+                set(),
+                True,
+                True,
+            ),
+            (
+                "rlc_established_contradiction",
+                unknown,
+                {
+                    "convergence": "unknown",
+                    "convergence_established": True,
+                    "reason": "not_returned",
+                },
+                set(),
+                False,
+                True,
+            ),
             ("rlc_exact", attribution, expected, set(), True, True),
             ("rlc_nested", attribution, {"answer": expected}, set(), True, True),
             (
