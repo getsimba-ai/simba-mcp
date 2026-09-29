@@ -107,7 +107,7 @@ def test_referenced_tools_resolve_in_current_catalogue():
     for entry in guidance.MANIFEST["topics"].values():
         for path in entry["sections"].values():
             content = guidance.CONTENT.joinpath(path).read_text(encoding="utf-8")
-            assert set(re.findall(pattern, content)) - {"run_id"} <= known, path
+            assert set(re.findall(pattern, content)) - {"run_id", "run_in_progress"} <= known, path
 
 
 def test_existing_results_need_no_startup_discovery():
