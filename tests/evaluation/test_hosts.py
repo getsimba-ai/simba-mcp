@@ -242,11 +242,13 @@ def test_format_failure_is_separate_from_correct_facts():
 
 @pytest.mark.anyio
 @pytest.mark.parametrize("selection_validation", [False, True])
+@pytest.mark.parametrize("packet", ["fresh", "v2"])
 async def test_fresh_packet_runs_only_frozen_paired_fresh_cases(
-    tmp_path, monkeypatch, selection_validation
+    tmp_path, monkeypatch, selection_validation, packet
 ):
     from simba_mcp.evaluation.hosts import __main__ as command
     from simba_mcp.evaluation.result_acceptance_fresh import fresh_acceptance_tasks
+    from simba_mcp.evaluation.result_acceptance_v2 import acceptance_v2_tasks
     from simba_mcp.guidance import read_guidance
 
     async def fake_session(*args, **kwargs):
@@ -274,16 +276,17 @@ async def test_fresh_packet_runs_only_frozen_paired_fresh_cases(
             case=None,
             results_robust=True,
             results_acceptance=True,
-            results_acceptance_packet="fresh",
+            results_acceptance_packet=packet,
             results_selection_validation=selection_validation,
             results_baseline=baseline,
             case_review={"verified": True, "guidance_unchanged": True},
         )
     )
     report = json.loads(output.read_text())
-    assert len(report["trials"]) == 32
-    assert {r["case"] for r in report["trials"]} == {t.id for t in fresh_acceptance_tasks()}
-    assert report["configuration"]["results_acceptance_packet"] == "fresh"
+    tasks = fresh_acceptance_tasks() if packet == "fresh" else acceptance_v2_tasks()
+    assert len(report["trials"]) == 4 * len(tasks)
+    assert {r["case"] for r in report["trials"]} == {t.id for t in tasks}
+    assert report["configuration"]["results_acceptance_packet"] == packet
     assert report["experiment_inputs"]["purpose"] == (
         "model_selection_validation" if selection_validation else "candidate_acceptance"
     )

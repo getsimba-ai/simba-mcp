@@ -45,3 +45,17 @@ The next validation targets this marginal case with two repetitions per arm,
 under a US$38.612228 cumulative stage cap. Both candidate answers must be fully
 supported, with no unauthorised reads/writes or increase in unnecessary calls.
 The independent acceptance packet remains unopened.
+
+## Version 9 readiness
+
+The four-session targeted check passes: both candidate and both control answers
+are supported, with one necessary read each and no unauthorised reads or writes.
+All claims and calls were independently reviewed. [Frozen evidence](selective-results-v9-validation-evidence.json)
+preserves the original automatic scores separately. The earlier version 8
+reconciliation check is not relabelled a version 9 rerun. Controls also passed,
+so the check does not establish that the guidance change caused improvement.
+
+Cost US$0.806112 takes cumulative accounted spend to US$37.918340 of US$55,
+leaving US$17.081660 with no reservation. Version 9 guidance and the existing
+Sonnet configuration were frozen before authorising release of a new independent
+ten-case packet. This is readiness for that comparison, not acceptance.

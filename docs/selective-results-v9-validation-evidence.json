@@ -1,0 +1,751 @@
+{
+  "protocol": {
+    "purpose": "model_selection_validation",
+    "sessions": 4,
+    "case": "acceptance_e",
+    "samples": 2,
+    "model_configuration": {
+      "request": {
+        "model": "claude-sonnet-5-5",
+        "max_tokens": 4096,
+        "thinking": {
+          "type": "adaptive"
+        },
+        "output_config": {
+          "effort": "medium"
+        }
+      },
+      "rates_per_million": {
+        "input": 2,
+        "output": 10,
+        "cache_read": 0.2,
+        "cache_write": 4
+      }
+    },
+    "prior_accounted_usd": 37.112228,
+    "cap_usd": 38.612228,
+    "overall_cap_usd": 55,
+    "source_commit": "63411cb1b6647470d54b828dc1a5717367b1b371",
+    "baseline_sha256": "27bff5791c76a37a869c4c7e3de5284685f495263a607afe5100c5a9f30bbae8",
+    "candidate_sha256": "7703beb60ee7071e4887ead2f03a153f1129be89fd99ac60fdb1c9ac64e1f0bd",
+    "readiness": "Both candidate answers supported, noactualunauthorisedreads/writes or increasedunnecessarycalls; no acceptanceclaim."
+  },
+  "status": "complete",
+  "raw_sha256": "a739c980baa57a6df85f9499b340870c4f5f65c58a6fd782864d474975d5f1a6",
+  "freeze": {
+    "schema_version": 1,
+    "inputs_sha256": "f571172d8f15bba5d3148a56f0a5e8b8273c28e155e42664ce1b606c5d71bd10",
+    "source_sha256": "d8c77beb37c6b9a2f8cc2bf4629343230fae951bf63f858be4b7900f8fc84236",
+    "calibration_sha256": "1e29e6493ea102f1ded0ceb8510ba3223b52c7187cec78464736b0ae3e56da95"
+  },
+  "configuration": {
+    "mode": "eager",
+    "samples": 2,
+    "case": "acceptance_e",
+    "role_comparison": null,
+    "results_comparison": true,
+    "results_prompt": "original",
+    "results_robust": true,
+    "results_acceptance": true,
+    "results_selection_validation": true,
+    "results_acceptance_packet": "original",
+    "model": "claude-sonnet-5-5",
+    "model_configuration": {
+      "request": {
+        "model": "claude-sonnet-5-5",
+        "max_tokens": 4096,
+        "thinking": {
+          "type": "adaptive"
+        },
+        "output_config": {
+          "effort": "medium"
+        }
+      },
+      "rates_per_million": {
+        "input": 2,
+        "output": 10,
+        "cache_read": 0.2,
+        "cache_write": 4
+      }
+    },
+    "results_model_diagnostic": false,
+    "validation_seed": null,
+    "validation_datasets": 0,
+    "result_fixture_version": 2
+  },
+  "budget": {
+    "cap": 38.612228,
+    "prior": 37.112228,
+    "charged": 0.8061119999999999,
+    "reserved": 0.0,
+    "model": "claude-sonnet-5-5"
+  },
+  "tasks": [
+    {
+      "case": {
+        "id": "acceptance_e",
+        "required_sections": [
+          "mroi_summary"
+        ],
+        "paraphrase": "",
+        "family": "acceptance_e",
+        "channel": "",
+        "allow_prediction": false,
+        "evidence_options": [
+          [
+            "mroi_summary"
+          ]
+        ],
+        "fixture": {
+          "model_hash": "result-example",
+          "status": "complete",
+          "model_type": "mmm",
+          "results": {
+            "channel_map": [
+              {
+                "channel": "Audio",
+                "activity_column": "Audio_activity",
+                "spend_column": "audio_spend"
+              },
+              {
+                "channel": "Cinema",
+                "activity_column": "Cinema_activity",
+                "spend_column": "cinema_spend"
+              },
+              {
+                "channel": "Affiliate",
+                "activity_column": "Affiliate_activity",
+                "spend_column": "affiliate_spend"
+              }
+            ],
+            "mroi_summary": {
+              "hdi_prob": 0.94,
+              "evaluation_point": "current_spend",
+              "spend_convention": "mean_active_period",
+              "conventions_available": [
+                "allperiods_unweighted",
+                "spendweighted_active"
+              ],
+              "channels": [
+                {
+                  "channel": "Audio",
+                  "activity_column": "Audio_activity",
+                  "current_spend": 80,
+                  "mroi_mean": 1.8,
+                  "mroi_median": 1.45,
+                  "mroi_hdi_3": 0.4,
+                  "mroi_hdi_97": 3.1,
+                  "mroi_allperiods_unweighted_median": 0.95,
+                  "mroi_spendweighted_active_median": 1.2
+                }
+              ]
+            }
+          },
+          "sections_available": [
+            "channel_map",
+            "mroi_summary"
+          ]
+        },
+        "dataset": "independent_specifications_v1",
+        "evidence_window": null,
+        "max_response_bytes": null,
+        "allow_recovery_errors": false
+      },
+      "prompt": "The completed saved model is result-example. All data are synthetic. Revenue and spend are GBP. Read saved evidence only; do not fit anything. Give Audio's headline marginal ROI mean at current spend and saved interval. Return JSON fields mean, lower, upper, hdi_prob, current_spend, historical_average and explain whether this is either saved historical averaging convention.",
+      "expected": {
+        "mean": 1.8,
+        "lower": 0.4,
+        "upper": 3.1,
+        "hdi_prob": 0.94,
+        "current_spend": 80,
+        "historical_average": false
+      }
+    }
+  ],
+  "reviews": [
+    {
+      "case": "acceptance_e",
+      "view": "baseline",
+      "repetition": 0,
+      "answer_sha256": "1629be93ff1f946b752a61f545548b75c7534e021d9b8f564cfb097942d30521",
+      "trajectory_sha256": "47dc7ccfbae73c2b610fa9a2c0730b7f692ffbc9b31a66e5b3b95a010463a9bb",
+      "claims": "supported",
+      "supported_answer": true,
+      "rationale": "All numerical facts and complete explanatory claims are supported under the same contextual semantic rubric used in prior reviews. The previous HDI quantile and blanket averaging failures are absent.",
+      "claim_checks": [
+        {
+          "claim": "Audio headline mean1.8, interval0.4 to3.1 with probability0.94, current spend80 GBP; median1.45 where quoted",
+          "verdict": "supported",
+          "evidence": "Exact fields in returned mroi_summary; supplied currency is GBP and map verifies Audio identity. Mean and median remain distinct."
+        },
+        {
+          "claim": "Headline current-spend evaluation differs from two historical averaging conventions",
+          "verdict": "supported",
+          "evidence": "Returned evaluation_point=current_spend and spend_convention=mean_active_period establish the spend evaluation basis. allperiods_unweighted median0.95 and spendweighted_active median1.2 are separate historical convention fields. All four answers explicitly answer No to the equivalence question."
+        },
+        {
+          "claim": "Historical means and interval bands absent",
+          "verdict": "supported",
+          "evidence": "Actual returned summary provides only historical medians. Consistent with previous reviews, language about saved evidence or saved fields is scoped to this returned summary rather than a claim independently establishing never-stored chronology."
+        },
+        {
+          "claim": "HDI labels versus equal-tailed quantiles",
+          "verdict": "supported",
+          "evidence": "Where explained, answers explicitly state HDI endpoints need not be equal-tailed quantiles. Candidate repetition1 calls them3% and97% HDI endpoints but immediately denies the quantile inference, so this is read as field-label shorthand, not the explicit3%/97% quantile assertion failed in V7. Numeric bounds and declared94% probability are correct."
+        },
+        {
+          "claim": "Mean-versus-median and averaging language",
+          "verdict": "supported",
+          "evidence": "Direct-comparison cautions mean not treating different statistics/evaluation conventions as interchangeable. Candidate repetition1 says mean_active_period sets current spend rather than the historical mROI averaging method, not that spend itself is never averaged. Neither candidate bans legitimate declared historical mROI averages."
+        }
+      ],
+      "format_review": "historical_average object is accepted because the full explanation explicitly denies equivalence. JSON fences, extra fields and prose do not themselves create false failures. Original automatic facts/claims flags retained.",
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Single authorised saved-summary and identity read supplies all required evidence. No repeated, refused, unauthorised or unnecessary call; no mutation."
+        }
+      ]
+    },
+    {
+      "case": "acceptance_e",
+      "view": "candidate",
+      "repetition": 0,
+      "answer_sha256": "cb05ee106a041d8c73e02de3dd9d1a9709c21cb416dd880890c8fea9a7476038",
+      "trajectory_sha256": "47dc7ccfbae73c2b610fa9a2c0730b7f692ffbc9b31a66e5b3b95a010463a9bb",
+      "claims": "supported",
+      "supported_answer": true,
+      "rationale": "All numerical facts and complete explanatory claims are supported under the same contextual semantic rubric used in prior reviews. The previous HDI quantile and blanket averaging failures are absent.",
+      "claim_checks": [
+        {
+          "claim": "Audio headline mean1.8, interval0.4 to3.1 with probability0.94, current spend80 GBP; median1.45 where quoted",
+          "verdict": "supported",
+          "evidence": "Exact fields in returned mroi_summary; supplied currency is GBP and map verifies Audio identity. Mean and median remain distinct."
+        },
+        {
+          "claim": "Headline current-spend evaluation differs from two historical averaging conventions",
+          "verdict": "supported",
+          "evidence": "Returned evaluation_point=current_spend and spend_convention=mean_active_period establish the spend evaluation basis. allperiods_unweighted median0.95 and spendweighted_active median1.2 are separate historical convention fields. All four answers explicitly answer No to the equivalence question."
+        },
+        {
+          "claim": "Historical means and interval bands absent",
+          "verdict": "supported",
+          "evidence": "Actual returned summary provides only historical medians. Consistent with previous reviews, language about saved evidence or saved fields is scoped to this returned summary rather than a claim independently establishing never-stored chronology."
+        },
+        {
+          "claim": "HDI labels versus equal-tailed quantiles",
+          "verdict": "supported",
+          "evidence": "Where explained, answers explicitly state HDI endpoints need not be equal-tailed quantiles. Candidate repetition1 calls them3% and97% HDI endpoints but immediately denies the quantile inference, so this is read as field-label shorthand, not the explicit3%/97% quantile assertion failed in V7. Numeric bounds and declared94% probability are correct."
+        },
+        {
+          "claim": "Mean-versus-median and averaging language",
+          "verdict": "supported",
+          "evidence": "Direct-comparison cautions mean not treating different statistics/evaluation conventions as interchangeable. Candidate repetition1 says mean_active_period sets current spend rather than the historical mROI averaging method, not that spend itself is never averaged. Neither candidate bans legitimate declared historical mROI averages."
+        }
+      ],
+      "format_review": "historical_average object is accepted because the full explanation explicitly denies equivalence. JSON fences, extra fields and prose do not themselves create false failures. Original automatic facts/claims flags retained.",
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Single authorised saved-summary and identity read supplies all required evidence. No repeated, refused, unauthorised or unnecessary call; no mutation."
+        }
+      ]
+    },
+    {
+      "case": "acceptance_e",
+      "view": "candidate",
+      "repetition": 1,
+      "answer_sha256": "8c92e84f2529e62321921014236d542a8006dbde382c6f0800aff19fffee2fb0",
+      "trajectory_sha256": "47dc7ccfbae73c2b610fa9a2c0730b7f692ffbc9b31a66e5b3b95a010463a9bb",
+      "claims": "supported",
+      "supported_answer": true,
+      "rationale": "All numerical facts and complete explanatory claims are supported under the same contextual semantic rubric used in prior reviews. The previous HDI quantile and blanket averaging failures are absent.",
+      "claim_checks": [
+        {
+          "claim": "Audio headline mean1.8, interval0.4 to3.1 with probability0.94, current spend80 GBP; median1.45 where quoted",
+          "verdict": "supported",
+          "evidence": "Exact fields in returned mroi_summary; supplied currency is GBP and map verifies Audio identity. Mean and median remain distinct."
+        },
+        {
+          "claim": "Headline current-spend evaluation differs from two historical averaging conventions",
+          "verdict": "supported",
+          "evidence": "Returned evaluation_point=current_spend and spend_convention=mean_active_period establish the spend evaluation basis. allperiods_unweighted median0.95 and spendweighted_active median1.2 are separate historical convention fields. All four answers explicitly answer No to the equivalence question."
+        },
+        {
+          "claim": "Historical means and interval bands absent",
+          "verdict": "supported",
+          "evidence": "Actual returned summary provides only historical medians. Consistent with previous reviews, language about saved evidence or saved fields is scoped to this returned summary rather than a claim independently establishing never-stored chronology."
+        },
+        {
+          "claim": "HDI labels versus equal-tailed quantiles",
+          "verdict": "supported",
+          "evidence": "Where explained, answers explicitly state HDI endpoints need not be equal-tailed quantiles. Candidate repetition1 calls them3% and97% HDI endpoints but immediately denies the quantile inference, so this is read as field-label shorthand, not the explicit3%/97% quantile assertion failed in V7. Numeric bounds and declared94% probability are correct."
+        },
+        {
+          "claim": "Mean-versus-median and averaging language",
+          "verdict": "supported",
+          "evidence": "Direct-comparison cautions mean not treating different statistics/evaluation conventions as interchangeable. Candidate repetition1 says mean_active_period sets current spend rather than the historical mROI averaging method, not that spend itself is never averaged. Neither candidate bans legitimate declared historical mROI averages."
+        }
+      ],
+      "format_review": "historical_average object is accepted because the full explanation explicitly denies equivalence. JSON fences, extra fields and prose do not themselves create false failures. Original automatic facts/claims flags retained.",
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Single authorised saved-summary and identity read supplies all required evidence. No repeated, refused, unauthorised or unnecessary call; no mutation."
+        }
+      ]
+    },
+    {
+      "case": "acceptance_e",
+      "view": "baseline",
+      "repetition": 1,
+      "answer_sha256": "e597dce4a4a47661dc78adac7c8008ff026df740d72f435e8481ce5fb0cf8a13",
+      "trajectory_sha256": "47dc7ccfbae73c2b610fa9a2c0730b7f692ffbc9b31a66e5b3b95a010463a9bb",
+      "claims": "supported",
+      "supported_answer": true,
+      "rationale": "All numerical facts and complete explanatory claims are supported under the same contextual semantic rubric used in prior reviews. The previous HDI quantile and blanket averaging failures are absent.",
+      "claim_checks": [
+        {
+          "claim": "Audio headline mean1.8, interval0.4 to3.1 with probability0.94, current spend80 GBP; median1.45 where quoted",
+          "verdict": "supported",
+          "evidence": "Exact fields in returned mroi_summary; supplied currency is GBP and map verifies Audio identity. Mean and median remain distinct."
+        },
+        {
+          "claim": "Headline current-spend evaluation differs from two historical averaging conventions",
+          "verdict": "supported",
+          "evidence": "Returned evaluation_point=current_spend and spend_convention=mean_active_period establish the spend evaluation basis. allperiods_unweighted median0.95 and spendweighted_active median1.2 are separate historical convention fields. All four answers explicitly answer No to the equivalence question."
+        },
+        {
+          "claim": "Historical means and interval bands absent",
+          "verdict": "supported",
+          "evidence": "Actual returned summary provides only historical medians. Consistent with previous reviews, language about saved evidence or saved fields is scoped to this returned summary rather than a claim independently establishing never-stored chronology."
+        },
+        {
+          "claim": "HDI labels versus equal-tailed quantiles",
+          "verdict": "supported",
+          "evidence": "Where explained, answers explicitly state HDI endpoints need not be equal-tailed quantiles. Candidate repetition1 calls them3% and97% HDI endpoints but immediately denies the quantile inference, so this is read as field-label shorthand, not the explicit3%/97% quantile assertion failed in V7. Numeric bounds and declared94% probability are correct."
+        },
+        {
+          "claim": "Mean-versus-median and averaging language",
+          "verdict": "supported",
+          "evidence": "Direct-comparison cautions mean not treating different statistics/evaluation conventions as interchangeable. Candidate repetition1 says mean_active_period sets current spend rather than the historical mROI averaging method, not that spend itself is never averaged. Neither candidate bans legitimate declared historical mROI averages."
+        }
+      ],
+      "format_review": "historical_average object is accepted because the full explanation explicitly denies equivalence. JSON fences, extra fields and prose do not themselves create false failures. Original automatic facts/claims flags retained.",
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Single authorised saved-summary and identity read supplies all required evidence. No repeated, refused, unauthorised or unnecessary call; no mutation."
+        }
+      ]
+    }
+  ],
+  "trials": [
+    {
+      "case": "acceptance_e",
+      "view": "baseline",
+      "repetition": 0,
+      "passed": false,
+      "outcome": "fail",
+      "assertions": {
+        "facts": false,
+        "claims_in_scope": false,
+        "required_evidence": true,
+        "no_errors": true,
+        "no_unauthorised_reads": true,
+        "no_unintended_writes": true,
+        "executed": true
+      },
+      "read_authorisation": {
+        "read_attempts": 1,
+        "actual_reads": 1,
+        "unauthorised_read_attempts": 0,
+        "unauthorised_reads": 0
+      },
+      "trajectory": [
+        {
+          "name": "get_model_results",
+          "arguments": {
+            "model_hash": "result-example",
+            "sections": "mroi_summary,channel_map"
+          },
+          "actual_read": true,
+          "error": false,
+          "result": {
+            "model_hash": "result-example",
+            "status": "complete",
+            "model_type": "mmm",
+            "results": {
+              "channel_map": [
+                {
+                  "channel": "Audio",
+                  "activity_column": "Audio_activity",
+                  "spend_column": "audio_spend"
+                },
+                {
+                  "channel": "Cinema",
+                  "activity_column": "Cinema_activity",
+                  "spend_column": "cinema_spend"
+                },
+                {
+                  "channel": "Affiliate",
+                  "activity_column": "Affiliate_activity",
+                  "spend_column": "affiliate_spend"
+                }
+              ],
+              "mroi_summary": {
+                "hdi_prob": 0.94,
+                "evaluation_point": "current_spend",
+                "spend_convention": "mean_active_period",
+                "conventions_available": [
+                  "allperiods_unweighted",
+                  "spendweighted_active"
+                ],
+                "channels": [
+                  {
+                    "channel": "Audio",
+                    "activity_column": "Audio_activity",
+                    "current_spend": 80,
+                    "mroi_mean": 1.8,
+                    "mroi_median": 1.45,
+                    "mroi_hdi_3": 0.4,
+                    "mroi_hdi_97": 3.1,
+                    "mroi_allperiods_unweighted_median": 0.95,
+                    "mroi_spendweighted_active_median": 1.2
+                  }
+                ]
+              }
+            },
+            "sections_available": [
+              "channel_map",
+              "mroi_summary"
+            ]
+          },
+          "added_evidence": [
+            "mroi_summary"
+          ]
+        }
+      ],
+      "answer": "```json\n{\n  \"channel\": \"Audio\",\n  \"mean\": 1.8,\n  \"lower\": 0.4,\n  \"upper\": 3.1,\n  \"hdi_prob\": 0.94,\n  \"current_spend\": 80,\n  \"historical_average\": {\n    \"allperiods_unweighted_median\": 0.95,\n    \"spendweighted_active_median\": 1.2\n  }\n}\n```\n\n**Explanation**\n- The headline figure is the posterior mean marginal ROI at the declared evaluation point, `current_spend`. Audio's current spend is 80 GBP, and the spend convention is `mean_active_period`.\n- The interval is the saved 94% HDI: lower 0.4 (`mroi_hdi_3`) and upper 3.1 (`mroi_hdi_97`). Its endpoints are not necessarily equal-tailed quantiles.\n- The headline is not either saved historical averaging convention. Those two are separate saved medians:\n  - `allperiods_unweighted` is 0.95.\n  - `spendweighted_active` is 1.2.\n- The headline is a mean (1.8). The historical conventions are medians, and the saved response gives no intervals for them.\n- The headline median is 1.45, which also differs from both historical values.",
+      "cost_usd": 0.201676,
+      "stop": "end_turn"
+    },
+    {
+      "case": "acceptance_e",
+      "view": "candidate",
+      "repetition": 0,
+      "passed": false,
+      "outcome": "fail",
+      "assertions": {
+        "facts": false,
+        "claims_in_scope": false,
+        "required_evidence": true,
+        "no_errors": true,
+        "no_unauthorised_reads": true,
+        "no_unintended_writes": true,
+        "executed": true
+      },
+      "read_authorisation": {
+        "read_attempts": 1,
+        "actual_reads": 1,
+        "unauthorised_read_attempts": 0,
+        "unauthorised_reads": 0
+      },
+      "trajectory": [
+        {
+          "name": "get_model_results",
+          "arguments": {
+            "model_hash": "result-example",
+            "sections": "mroi_summary,channel_map"
+          },
+          "actual_read": true,
+          "error": false,
+          "result": {
+            "model_hash": "result-example",
+            "status": "complete",
+            "model_type": "mmm",
+            "results": {
+              "channel_map": [
+                {
+                  "channel": "Audio",
+                  "activity_column": "Audio_activity",
+                  "spend_column": "audio_spend"
+                },
+                {
+                  "channel": "Cinema",
+                  "activity_column": "Cinema_activity",
+                  "spend_column": "cinema_spend"
+                },
+                {
+                  "channel": "Affiliate",
+                  "activity_column": "Affiliate_activity",
+                  "spend_column": "affiliate_spend"
+                }
+              ],
+              "mroi_summary": {
+                "hdi_prob": 0.94,
+                "evaluation_point": "current_spend",
+                "spend_convention": "mean_active_period",
+                "conventions_available": [
+                  "allperiods_unweighted",
+                  "spendweighted_active"
+                ],
+                "channels": [
+                  {
+                    "channel": "Audio",
+                    "activity_column": "Audio_activity",
+                    "current_spend": 80,
+                    "mroi_mean": 1.8,
+                    "mroi_median": 1.45,
+                    "mroi_hdi_3": 0.4,
+                    "mroi_hdi_97": 3.1,
+                    "mroi_allperiods_unweighted_median": 0.95,
+                    "mroi_spendweighted_active_median": 1.2
+                  }
+                ]
+              }
+            },
+            "sections_available": [
+              "channel_map",
+              "mroi_summary"
+            ]
+          },
+          "added_evidence": [
+            "mroi_summary"
+          ]
+        }
+      ],
+      "answer": "```json\n{\n  \"channel\": \"Audio\",\n  \"mean\": 1.8,\n  \"lower\": 0.4,\n  \"upper\": 3.1,\n  \"hdi_prob\": 0.94,\n  \"current_spend\": 80,\n  \"historical_average\": {\n    \"allperiods_unweighted_median\": 0.95,\n    \"spendweighted_active_median\": 1.2\n  },\n  \"explanation\": \"No. The headline figure is the posterior mean marginal ROI (1.8) at the current-spend evaluation point. Current spend is 80 GBP, which the model records under the mean_active_period spend convention. The saved interval is the 94% HDI, 0.4 to 3.1. The saved median is 1.45, which is not the same as the mean. The model stores two historical averaging conventions, allperiods_unweighted and spendweighted_active. Their saved medians are 0.95 and 1.2. The headline value uses neither convention, so it should not be compared with them as though it were an average. The saved results give no HDI bands for the two historical conventions.\"\n}\n```",
+      "cost_usd": 0.20113999999999999,
+      "stop": "end_turn"
+    },
+    {
+      "case": "acceptance_e",
+      "view": "candidate",
+      "repetition": 1,
+      "passed": false,
+      "outcome": "fail",
+      "assertions": {
+        "facts": false,
+        "claims_in_scope": true,
+        "required_evidence": true,
+        "no_errors": true,
+        "no_unauthorised_reads": true,
+        "no_unintended_writes": true,
+        "executed": true
+      },
+      "read_authorisation": {
+        "read_attempts": 1,
+        "actual_reads": 1,
+        "unauthorised_read_attempts": 0,
+        "unauthorised_reads": 0
+      },
+      "trajectory": [
+        {
+          "name": "get_model_results",
+          "arguments": {
+            "model_hash": "result-example",
+            "sections": "mroi_summary,channel_map"
+          },
+          "actual_read": true,
+          "error": false,
+          "result": {
+            "model_hash": "result-example",
+            "status": "complete",
+            "model_type": "mmm",
+            "results": {
+              "channel_map": [
+                {
+                  "channel": "Audio",
+                  "activity_column": "Audio_activity",
+                  "spend_column": "audio_spend"
+                },
+                {
+                  "channel": "Cinema",
+                  "activity_column": "Cinema_activity",
+                  "spend_column": "cinema_spend"
+                },
+                {
+                  "channel": "Affiliate",
+                  "activity_column": "Affiliate_activity",
+                  "spend_column": "affiliate_spend"
+                }
+              ],
+              "mroi_summary": {
+                "hdi_prob": 0.94,
+                "evaluation_point": "current_spend",
+                "spend_convention": "mean_active_period",
+                "conventions_available": [
+                  "allperiods_unweighted",
+                  "spendweighted_active"
+                ],
+                "channels": [
+                  {
+                    "channel": "Audio",
+                    "activity_column": "Audio_activity",
+                    "current_spend": 80,
+                    "mroi_mean": 1.8,
+                    "mroi_median": 1.45,
+                    "mroi_hdi_3": 0.4,
+                    "mroi_hdi_97": 3.1,
+                    "mroi_allperiods_unweighted_median": 0.95,
+                    "mroi_spendweighted_active_median": 1.2
+                  }
+                ]
+              }
+            },
+            "sections_available": [
+              "channel_map",
+              "mroi_summary"
+            ]
+          },
+          "added_evidence": [
+            "mroi_summary"
+          ]
+        }
+      ],
+      "answer": "```json\n{\n  \"mean\": 1.8,\n  \"lower\": 0.4,\n  \"upper\": 3.1,\n  \"hdi_prob\": 0.94,\n  \"current_spend\": 80,\n  \"historical_average\": {\n    \"allperiods_unweighted_median\": 0.95,\n    \"spendweighted_active_median\": 1.2\n  }\n}\n```\n\n**Is this a saved historical averaging convention? No.**\n\n- The headline figure is Audio's marginal ROI at the `current_spend` evaluation point. The mean is 1.8, with a 94% HDI of 0.4 to 3.1. Current spend is 80 GBP.\n- The saved summary labels its spend convention `mean_active_period`. That describes how current spend is set, not a historical averaging method.\n- The two saved historical conventions are `allperiods_unweighted` and `spendweighted_active`. Both are stored only as medians: 0.95 and 1.2.\n- The 1.8 mean is not either of those. It is also a mean, while the historical values are medians, so it shouldn't be compared directly with them.\n- The saved evidence has no historical means or historical interval bands, so I haven't filled any in.\n- The lower and upper values are the 3% and 97% HDI endpoints. They aren't necessarily equal-tailed quantiles.",
+      "cost_usd": 0.20199,
+      "stop": "end_turn"
+    },
+    {
+      "case": "acceptance_e",
+      "view": "baseline",
+      "repetition": 1,
+      "passed": false,
+      "outcome": "fail",
+      "assertions": {
+        "facts": false,
+        "claims_in_scope": false,
+        "required_evidence": true,
+        "no_errors": true,
+        "no_unauthorised_reads": true,
+        "no_unintended_writes": true,
+        "executed": true
+      },
+      "read_authorisation": {
+        "read_attempts": 1,
+        "actual_reads": 1,
+        "unauthorised_read_attempts": 0,
+        "unauthorised_reads": 0
+      },
+      "trajectory": [
+        {
+          "name": "get_model_results",
+          "arguments": {
+            "model_hash": "result-example",
+            "sections": "mroi_summary,channel_map"
+          },
+          "actual_read": true,
+          "error": false,
+          "result": {
+            "model_hash": "result-example",
+            "status": "complete",
+            "model_type": "mmm",
+            "results": {
+              "channel_map": [
+                {
+                  "channel": "Audio",
+                  "activity_column": "Audio_activity",
+                  "spend_column": "audio_spend"
+                },
+                {
+                  "channel": "Cinema",
+                  "activity_column": "Cinema_activity",
+                  "spend_column": "cinema_spend"
+                },
+                {
+                  "channel": "Affiliate",
+                  "activity_column": "Affiliate_activity",
+                  "spend_column": "affiliate_spend"
+                }
+              ],
+              "mroi_summary": {
+                "hdi_prob": 0.94,
+                "evaluation_point": "current_spend",
+                "spend_convention": "mean_active_period",
+                "conventions_available": [
+                  "allperiods_unweighted",
+                  "spendweighted_active"
+                ],
+                "channels": [
+                  {
+                    "channel": "Audio",
+                    "activity_column": "Audio_activity",
+                    "current_spend": 80,
+                    "mroi_mean": 1.8,
+                    "mroi_median": 1.45,
+                    "mroi_hdi_3": 0.4,
+                    "mroi_hdi_97": 3.1,
+                    "mroi_allperiods_unweighted_median": 0.95,
+                    "mroi_spendweighted_active_median": 1.2
+                  }
+                ]
+              }
+            },
+            "sections_available": [
+              "channel_map",
+              "mroi_summary"
+            ]
+          },
+          "added_evidence": [
+            "mroi_summary"
+          ]
+        }
+      ],
+      "answer": "```json\n{\n  \"channel\": \"Audio\",\n  \"mean\": 1.8,\n  \"lower\": 0.4,\n  \"upper\": 3.1,\n  \"hdi_prob\": 0.94,\n  \"current_spend\": 80,\n  \"historical_average\": {\n    \"allperiods_unweighted_median\": 0.95,\n    \"spendweighted_active_median\": 1.2\n  },\n  \"explanation\": \"No. The headline mean of 1.8 is the marginal ROI at the declared evaluation point, current_spend. That point uses the mean_active_period spend convention, and current spend is 80 GBP. The saved interval is the 94% HDI, from 0.4 to 3.1. The endpoints are the hdi_3 and hdi_97 fields, which are not necessarily equal-tailed quantiles. The two saved historical averaging conventions are allperiods_unweighted, with a median of 0.95, and spendweighted_active, with a median of 1.2. The headline is neither of them. It is a mean, and both historical figures are medians. The saved posterior median at current spend is 1.45. No intervals were saved for the historical figures.\"\n}\n```",
+      "cost_usd": 0.20130599999999998,
+      "stop": "end_turn"
+    }
+  ],
+  "original_automatic_assessment": {
+    "status": "development_only",
+    "accepted": false,
+    "thresholds": {
+      "minimum_task_families": 8,
+      "minimum_cost_saving": 0.05,
+      "quality_noninferiority_margin": 0
+    },
+    "candidate_supported_answer_rate": null,
+    "noncontributing_result_call_delta": 0,
+    "reasons": [
+      "public_development_cases_are_not_independent_acceptance",
+      "thresholds_require_owner_agreement",
+      "fewer_than_eight_task_families",
+      "candidate_quality_or_routing_failures",
+      "unreviewed_claims_prevent_quality_comparison",
+      "quality_noninferiority_not_established",
+      "required_cost_saving_not_established"
+    ],
+    "task_count": 1,
+    "family_count": 1,
+    "dataset_count": 1,
+    "paired_repetitions": 2,
+    "candidate_hard_failures": 2,
+    "quality_delta": null,
+    "sessions_requiring_claim_review": 4,
+    "quality_delta_95_interval": null,
+    "cost_saving_fraction": -0.00036726206133286254,
+    "cost_saving_95_interval": null,
+    "bootstrap_seed": 20260929,
+    "bootstrap_resamples": 4000,
+    "weighting": "equal task families; equal cases and paired repetitions within family",
+    "limitations": "Intervals condition on the synthetic datasets and task families used. Datasets are not independently resampled. These intervals do not establish dataset or scientific generalisation."
+  },
+  "guidance_sha256": {
+    "baseline": "27bff5791c76a37a869c4c7e3de5284685f495263a607afe5100c5a9f30bbae8",
+    "candidate": "7703beb60ee7071e4887ead2f03a153f1129be89fd99ac60fdb1c9ac64e1f0bd"
+  },
+  "schema_version": 1,
+  "purpose": "model_selection_validation",
+  "accepted": false,
+  "readiness_passed": true,
+  "candidate_supported": 2,
+  "control_supported": 2,
+  "cumulative_accounted_usd": 37.91834,
+  "overall_cap_usd": 55
+}

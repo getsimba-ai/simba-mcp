@@ -48,7 +48,7 @@ async def run(args):
             "Selection validation requires an explicitly selected reviewed case packet"
         )
     packet = getattr(args, "results_acceptance_packet", "original")
-    if packet not in ("original", "fresh") or (packet == "fresh" and not acceptance):
+    if packet not in ("original", "fresh", "v2") or (packet != "original" and not acceptance):
         raise ValueError("Fresh acceptance packet requires acceptance mode")
     diagnostic = getattr(args, "results_model_diagnostic", False)
     if diagnostic and (not robust or acceptance or role or args.mode != "eager"):
@@ -89,6 +89,8 @@ async def run(args):
         if acceptance or diagnostic:
             if packet == "fresh":
                 from ..result_acceptance_fresh import fresh_acceptance_tasks as acceptance_tasks
+            elif packet == "v2":
+                from ..result_acceptance_v2 import acceptance_v2_tasks as acceptance_tasks
             else:
                 from ..result_acceptance import acceptance_tasks
 
@@ -433,7 +435,7 @@ def main():
         help="Reuse reviewed cases for selection only, never final acceptance",
     )
     parser.add_argument(
-        "--results-acceptance-packet", choices=("original", "fresh"), default="original"
+        "--results-acceptance-packet", choices=("original", "fresh", "v2"), default="original"
     )
     parser.add_argument(
         "--results-robust",

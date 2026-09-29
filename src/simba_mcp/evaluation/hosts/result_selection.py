@@ -247,6 +247,7 @@ class ResultSelectionDispatch:
     def __init__(self, server, task, *, guidance=None):
         self.server, self.task = server, task
         self.guidance = guidance
+        self.model_hash = (task.fixture or saved_results()).get("model_hash", "result-example")
         self.completed = self.errors = self.unintended_writes = 0
         self.noncontributing_result_calls = 0
         self.observed_sections = set()
@@ -284,13 +285,13 @@ class ResultSelectionDispatch:
                 unauthorised=name in READ_ONLY,
             )
         if (
-            arguments.get("model_hash") != "result-example"
+            arguments.get("model_hash") != self.model_hash
             or arguments.get("format", "json") != "json"
         ):
             return self.refuse(
                 name,
                 "Use the exact synthetic model and JSON evidence.",
-                unauthorised=arguments.get("model_hash") != "result-example",
+                unauthorised=arguments.get("model_hash") != self.model_hash,
             )
         raw = arguments.get("sections", "")
         if not isinstance(raw, str):
@@ -334,13 +335,13 @@ class ResultSelectionDispatch:
                         exchanges=[
                             Exchange(
                                 method="GET",
-                                path="/api/v1/models/result-example/results",
+                                path=f"/api/v1/models/{self.model_hash}/results",
                                 query=query,
                                 response=payload,
                             )
                         ],
                         expected={
-                            "model_hash": "result-example",
+                            "model_hash": self.model_hash,
                         },
                     )
                 ],

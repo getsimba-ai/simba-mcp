@@ -78,8 +78,7 @@ The ten specifications are now executable and independently verified by a separa
 agent, with qualified independence rather than complete blindness. The frozen
 40-session comparison is complete. Its [reviewed decision](selective-results-acceptance-run.md)
 fails the zero-unsupported-claims and 95%-supported-answer gates. Original automatic
-scores and full reviewed synthetic evidence remain separate. No further provider
-run is scheduled. The PR stays draft and issue #45 stays open.
+scores and full reviewed synthetic evidence remain separate. This attempt did not grant acceptance. The PR stays draft and issue #45 stays open.
 
 ## Subsequent frozen grounding change and fresh attempt
 
@@ -91,5 +90,7 @@ cases. The [fresh attempt](selective-results-fresh-acceptance.md) was interrupte
 by a grader-11 sufficient-evidence defect; a genuine unsupported candidate
 explanation was also found. Grader 12 repairs the evidence rule prospectively.
 Original scores and the interrupted provider response remain preserved.
-Acceptance is still unmet, no further provider run is scheduled, and #45 remains
-open with PR #58 draft.
+Acceptance is still unmet. Subsequent tuning retired this packet to selection
+validation; see the [later validation record](selective-results-v7-validation.md).
+A new independent packet is held separately until candidate readiness and freeze.
+Issue #45 remains open with PR #58 draft.
