@@ -201,3 +201,85 @@ def test_packet_read_has_byte_ceiling(tmp_path, monkeypatch):
     monkeypatch.setattr(workflow_packet, "MAX_PACKET_BYTES", 10)
     with pytest.raises(ValueError, match="byte limit"):
         load_workflow_packet(write(tmp_path, document()))
+
+
+@pytest.mark.parametrize(
+    "window",
+    [
+        {"unexpected": True},
+        {"start": "not-a-date"},
+        {"start": "2026-02-30"},
+        {"start": "2026-02-02", "end": "2026-01-01"},
+        {"granularity": "year"},
+        {"start": 123},
+    ],
+)
+@pytest.mark.parametrize("window_field", ["evidence_window", "section_windows"])
+def test_result_windows_reject_before_execution(tmp_path, window, window_field):
+    data = document()
+    contract = {
+        "id": "packet_result",
+        "required_sections": ["channel_summary"],
+        "fixture": {"model_hash": "synthetic", "results": {}},
+    }
+    contract[window_field] = (
+        {"channel_summary": window} if window_field == "section_windows" else window
+    )
+    data["tasks"] = [
+        {
+            "kind": "result",
+            "prompt": "Read synthetic results",
+            "expected": {"x": 1},
+            "contract": contract,
+        }
+    ]
+    with pytest.raises(ValueError):
+        load_workflow_packet(write(tmp_path, data))
+
+
+@pytest.mark.parametrize("identity", [None, "", "   ", 12, False])
+def test_result_identity_cannot_fall_back_to_default(tmp_path, identity):
+    data = document()
+    data["tasks"] = [
+        {
+            "kind": "result",
+            "prompt": "Read synthetic results",
+            "expected": {"x": 1},
+            "contract": {
+                "id": "packet_result",
+                "required_sections": ["channel_summary"],
+                "fixture": {"model_hash": identity, "results": {}},
+            },
+        }
+    ]
+    with pytest.raises(ValueError, match="model_hash"):
+        load_workflow_packet(write(tmp_path, data))
+
+
+def test_overflow_number_is_rejected_during_loading(tmp_path):
+    path = tmp_path / "packet.json"
+    path.write_text('{"x":1e999}')
+    with pytest.raises(ValueError, match="Non-finite"):
+        load_workflow_packet(path)
+
+
+def test_valid_windows_preserve_canonical_argument_types(tmp_path):
+    data = document()
+    window = {"start": "2026-01-01", "end": "2026-01-31", "granularity": "month"}
+    data["tasks"] = [
+        {
+            "kind": "result",
+            "prompt": "Read synthetic results",
+            "expected": {"x": 1},
+            "contract": {
+                "id": "packet_result",
+                "required_sections": ["channel_summary"],
+                "fixture": {"model_hash": "synthetic", "results": {}},
+                "evidence_window": window,
+                "section_windows": {"channel_summary": window},
+            },
+        }
+    ]
+    task = load_workflow_packet(write(tmp_path, data)).triples()[0][0]
+    assert task.evidence_window == window
+    assert task.section_windows == {"channel_summary": window}
