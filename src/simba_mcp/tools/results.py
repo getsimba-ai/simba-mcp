@@ -185,7 +185,13 @@ def _filterable_channel_names(target: dict) -> set[str]:
     for section, key in (("mroi_summary", "channels"), ("mroi_periods", "rows")):
         item = target.get(section)
         if isinstance(item, dict) and isinstance(item.get(key), list):
-            names.update(row["channel"] for row in item[key] if isinstance(row.get("channel"), str))
+            # Modern responses label the same channel with a display name and
+            # its activity column; those are not two distinct identifiers.
+            names.update(
+                row.get("activity_column") or row["channel"]
+                for row in item[key]
+                if isinstance(row.get("channel"), str)
+            )
     decay = target.get("decay_curves")
     if isinstance(decay, dict):
         names.update(decay)

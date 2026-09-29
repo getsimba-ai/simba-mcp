@@ -44,14 +44,17 @@ def semantic_facts(task, facts, supported_sections):
         # Missing saved evidence, not failed convergence, is the fact at issue.
         normal = reason.lower().replace("_", " ")
         return normal.strip().rstrip(".") in {
-            "not saved",
-            "both diagnostic sections were not saved",
+            "not returned",
+            "both diagnostic sections were not returned",
             "the diagnostics are unavailable",
             "diagnostics are unavailable",
-            "diagnostics were not saved",
+            "diagnostics were not returned",
         }
     aliases = {"Search Activity": "Search", "TV_activity": "TV"}
-    if facts.get("channel") == aliases.get(task.channel) and "channel_map" in supported_sections:
+    if (
+        facts.get("channel") == aliases.get(task.channel)
+        and {"channel_map", "verified_channel_identity"} & supported_sections
+    ):
         facts["channel"] = task.channel
     for key, expected in task.expected.items():
         actual = facts.get(key)

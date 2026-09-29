@@ -22,7 +22,7 @@ async def test_result_contracts(case):
 
 def test_roi_oracle_and_reconciliation():
     result = saved_results()["results"]
-    periods = result["coefficients"]
+    periods = [r for r in result["coefficients"] if r["Channel"] == "Search Activity"]
     assert sum(r["Revenue"] for r in periods) / sum(r["Spend"] for r in periods) == 2.5
     assert sum(r["ROI"] for r in periods) / len(periods) != 2.5
     row = result["contributions"][0]
@@ -59,8 +59,7 @@ async def test_alternative_sequences_and_answer_faults(task):
         ("create_model", {}),
         ("get_model_results", {"model_hash": "other"}),
         ("get_model_results", {"model_hash": "result-example", "sections": "prediction_window"}),
-        ("get_model_results", {"model_hash": "result-example", "start": "2030-01-01"}),
-        ("get_model_results", {"model_hash": "result-example", "sections": "imaginary"}),
+        ("get_model_results", {"model_hash": "result-example", "granularity": "month"}),
     ],
 )
 async def test_outside_task_requests_fail(name, args):
@@ -223,19 +222,19 @@ def test_semantic_grader_keeps_literal_and_evidence_constraints_separate():
         decomposition, {"overlap_is_channel": 0, "attribution": "removal_lift"}, set()
     )
     for facts in [
-        {"convergence": False, "reason": "Both diagnostic sections were not saved."},
-        {"convergence": "unknown", "reason": "not_saved"},
+        {"convergence": False, "reason": "Both diagnostic sections were not returned."},
+        {"convergence": "unknown", "reason": "not_returned"},
         {"convergence_established": False, "reason": "The diagnostics are unavailable."},
-        {"convergence_established": False, "reason": "Diagnostics were not saved."},
+        {"convergence_established": False, "reason": "Diagnostics were not returned."},
     ]:
         assert semantic_facts(diagnostics, facts, set())
     for facts in [
-        {"convergence": 0, "reason": "not_saved"},
-        {"convergence": "pass", "reason": "not_saved"},
-        {"convergence": "failed", "reason": "not_saved"},
-        {"convergence_established": 0, "reason": "not_saved"},
-        {"convergence_established": True, "reason": "not_saved"},
-        {"convergence": "unknown", "convergence_established": True, "reason": "not_saved"},
+        {"convergence": 0, "reason": "not_returned"},
+        {"convergence": "pass", "reason": "not_returned"},
+        {"convergence": "failed", "reason": "not_returned"},
+        {"convergence_established": 0, "reason": "not_returned"},
+        {"convergence_established": True, "reason": "not_returned"},
+        {"convergence": "unknown", "convergence_established": True, "reason": "not_returned"},
         {"convergence": "unknown", "reason": "r_hat_too_high"},
     ]:
         assert not semantic_facts(diagnostics, facts, set())

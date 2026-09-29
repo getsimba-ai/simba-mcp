@@ -9,7 +9,7 @@ from dataclasses import asdict
 from .result_grading import claims_in_scope, fact_verdict, semantic_facts
 from .result_selection import result_tasks
 
-GRADER_VERSION = 6
+GRADER_VERSION = 8
 
 
 def calibration_cases():
@@ -20,7 +20,7 @@ def calibration_cases():
             diagnostic,
             {
                 "convergence": False,
-                "reason": "Both requested sections report not_saved. "
+                "reason": "Both requested sections are absent from the response. "
                 "Missing diagnostics do not prove convergence or failure.",
             },
             set(),
@@ -37,6 +37,14 @@ def calibration_cases():
             True,
         ),
         ("unverified_display_name", roi, {**roi.expected, "channel": "Search"}, set(), False, True),
+        (
+            "inline_marginal_identity",
+            marginal,
+            {**marginal.expected, "channel": "Search"},
+            {"verified_channel_identity"},
+            True,
+            True,
+        ),
         ("average_ratios", roi, {**roi.expected, "roi": 3.0}, set(), False, True),
         ("boolean_ratio", roi, {**roi.expected, "roi": True}, set(), False, True),
         ("invented_claim", roi, {**roi.expected, "causally_valid": True}, set(), True, False),
@@ -78,7 +86,7 @@ def calibration_cases():
         (
             "boolean_unknown",
             diagnostic,
-            {"convergence": False, "reason": "Both diagnostic sections were not saved."},
+            {"convergence": False, "reason": "Both diagnostic sections were not returned."},
             set(),
             True,
             True,
@@ -86,7 +94,7 @@ def calibration_cases():
         (
             "unknown_with_failure_claim",
             diagnostic,
-            {"convergence": "unknown", "reason": "Diagnostics not saved but convergence failed"},
+            {"convergence": "unknown", "reason": "Diagnostics not returned but convergence failed"},
             set(),
             False,
             True,
@@ -94,7 +102,7 @@ def calibration_cases():
         (
             "failed_not_unknown",
             diagnostic,
-            {"convergence": "failed", "reason": "not_saved"},
+            {"convergence": "failed", "reason": "not_returned"},
             set(),
             False,
             True,
@@ -102,7 +110,7 @@ def calibration_cases():
         (
             "pass_not_unknown",
             diagnostic,
-            {"convergence": True, "reason": "not_saved"},
+            {"convergence": True, "reason": "not_returned"},
             set(),
             False,
             True,
@@ -110,7 +118,7 @@ def calibration_cases():
         (
             "conflicting_unknown",
             diagnostic,
-            {"convergence": "unknown", "convergence_established": True, "reason": "not_saved"},
+            {"convergence": "unknown", "convergence_established": True, "reason": "not_returned"},
             set(),
             False,
             True,
@@ -146,6 +154,7 @@ def calibrate():
             else "fail"
         )
         case["task"]["required_sections"] = sorted(case["task"]["required_sections"])
+        case["task"]["evidence_options"] = [sorted(s) for s in case["task"]["evidence_options"]]
         rows.append(
             {
                 **case,

@@ -299,8 +299,18 @@ returned uncertainty bands by the candidate filter. These checks also confirmed
 fixture/dispatcher gaps: missing underlying channel rows, nested configuration,
 diagnostic shapes, conditional metadata, section availability and unknown-section
 behaviour. Historical marginal rows remain unwindowed with explicit disclosure.
-Those fixture/dispatcher corrections remain pending. Generated fixtures still
-inherit these limitations and must not be used to claim API fidelity or acceptance.
+Fixture version 2 corrects these observed shapes and native-window behaviour,
+including supporting TV rows, conditional metadata, omitted missing artefacts and
+successful empty responses for unknown sections. It does not emulate calendar
+bucketing, posterior fitting or audit persistence. Missing diagnostics establish
+only that they were not returned, not that they were never saved. See the
+[acceptance protocol](selective-results-acceptance-protocol.md) for coverage limits
+and agreed thresholds. No final API-wide or independent acceptance is claimed.
+
+The modern marginal-response shape also exposed a selection-disclosure defect:
+display names and their explicit activity-column identifiers were counted as two
+channels. Disclosure now uses the explicit activity column when present; genuinely
+different exact identifiers still trigger ambiguity warnings.
 
 The historical qualitative review in `selective-results-claim-review.json` is
 explicitly superseded as acceptance evidence. Original trial grades are preserved.

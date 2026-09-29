@@ -112,7 +112,29 @@ def test_opposing_family_effects_show_uncertainty():
     report = experiments.assess_comparison(rows, families, samples=2)
     low, high = report["cost_saving_95_interval"]
     assert low < 0 < high
-    assert "five_percent_cost_saving_not_established" in report["reasons"]
+    assert "required_cost_saving_not_established" in report["reasons"]
+
+
+def test_agreed_thresholds_do_not_grant_independent_acceptance():
+    families = {"a": "one", "b": "two"}
+    rows = rows_for(families)
+    for row in rows:
+        row["noncontributing_result_calls"] = 0
+    limits = {
+        "minimum_supported_answer_rate": 0.95,
+        "minimum_cost_saving": 0.0,
+        "quality_noninferiority_margin": 0.0,
+    }
+    report = experiments.assess_comparison(rows, families, samples=2, thresholds=limits)
+    assert "thresholds_require_owner_agreement" not in report["reasons"]
+    assert report["candidate_supported_answer_rate"] == 1.0
+    assert not report["accepted"]
+    rows[0]["noncontributing_result_calls"] = 2 if rows[0]["view"] == "candidate" else 0
+    for row in rows:
+        if row["view"] == "candidate":
+            row["noncontributing_result_calls"] = 1
+    report = experiments.assess_comparison(rows, families, samples=2, thresholds=limits)
+    assert "noncontributing_calls_not_nonincreasing" in report["reasons"]
 
 
 def test_pending_review_is_not_a_false_answer_or_a_quality_verdict():

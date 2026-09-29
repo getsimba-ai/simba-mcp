@@ -18,6 +18,7 @@ from ..experiments import (
     freeze_experiment,
     verify_experiment,
 )
+from ..result_cases import FIXTURE_VERSION
 from .anthropic import MODEL, Budget, client, definitions, session
 from .result_calibration import GRADER_VERSION, calibrate
 from .result_grading import fact_verdict, literal_fields, structured_answer_only
@@ -95,6 +96,7 @@ async def run(args):
             "model": MODEL,
             "validation_seed": validation_seed,
             "validation_datasets": dataset_count,
+            "result_fixture_version": FIXTURE_VERSION if guidance_arms else None,
         },
         "trials": [],
         "catalogue": [t.model_dump(mode="json") for t in tools],
@@ -128,6 +130,7 @@ async def run(args):
             "samples": args.samples,
             "configuration": report["configuration"],
             "authorised_budget": {"cap_usd": args.cap_usd, "prior_usd": args.prior_usd},
+            "acceptance_thresholds": getattr(args, "acceptance_thresholds", None),
             "tasks": report["tasks"],
             "guidance": report["guidance"],
             "catalogue": report["catalogue"],
@@ -248,6 +251,9 @@ async def run(args):
                             and dispatch.unintended_writes == 0
                         )
                         if guidance_arms:
+                            row["noncontributing_result_calls"] = (
+                                dispatch.noncontributing_result_calls
+                            )
                             row["assertions"] = dispatch.grade(actual)
                             if robust:
                                 row["fact_verdict"] = fact_verdict(
@@ -306,6 +312,7 @@ async def run(args):
                 {c.id: c.family for c, _, _ in selected},
                 samples=args.samples,
                 datasets={c.id: c.dataset for c, _, _ in selected},
+                thresholds=getattr(args, "acceptance_thresholds", None),
             )
         save()
 

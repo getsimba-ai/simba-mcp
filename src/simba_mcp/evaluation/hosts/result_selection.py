@@ -4,6 +4,7 @@ Allows alternative evidence-selection sequences without implementing a backend o
 inferring scientific correctness. All execution still uses the canonical runner.
 """
 
+from copy import deepcopy
 from dataclasses import dataclass, replace
 from decimal import Decimal
 
@@ -33,7 +34,11 @@ class ResultTask:
 
 
 def result_tasks():
-    prefix = "The completed saved model is result-example. Read existing evidence only. "
+    prefix = "The completed saved model is result-example. Revenue and spend are in GBP. Read existing evidence only. "
+    missing_diagnostics = saved_results()
+    for section in ("model_stats", "r_hat"):
+        missing_diagnostics["results"].pop(section)
+    missing_diagnostics["sections_available"] = list(missing_diagnostics["results"])
     suite = [
         ResultTask(
             "result_roi",
@@ -47,13 +52,18 @@ def result_tasks():
                 "roi": 2.5,
                 "currency": "GBP",
             },
+            evidence_options=(
+                frozenset({"channel_summary", "channel_map"}),
+                frozenset({"channel_summary", "verified_channel_identity"}),
+            ),
         ),
         ResultTask(
             "result_diagnostics",
             prefix
             + "Does the saved evidence establish convergence? Return convergence and reason as JSON.",
             frozenset({"model_stats", "r_hat"}),
-            {"convergence": "unknown", "reason": "not_saved"},
+            {"convergence": "unknown", "reason": "not_returned"},
+            fixture=missing_diagnostics,
         ),
         ResultTask(
             "result_marginal",
@@ -67,6 +77,10 @@ def result_tasks():
                 "upper": 2.1,
                 "hdi_prob": 0.94,
             },
+            evidence_options=(
+                frozenset({"mroi_summary", "channel_map"}),
+                frozenset({"mroi_summary", "verified_channel_identity"}),
+            ),
         ),
         ResultTask(
             "result_decomposition",
@@ -99,7 +113,7 @@ def result_tasks():
 
 def development_tasks():
     """Public development cases, not hidden or independent acceptance evidence."""
-    prefix = "The completed saved model is result-example. Read existing evidence only. "
+    prefix = "The completed saved model is result-example. Revenue and spend are in GBP. Read existing evidence only. "
     return [
         *result_tasks(),
         ResultTask(
@@ -116,6 +130,10 @@ def development_tasks():
             },
             family="result_roi",
             channel="TV_activity",
+            evidence_options=(
+                frozenset({"channel_summary", "channel_map"}),
+                frozenset({"channel_summary", "verified_channel_identity"}),
+            ),
         ),
         ResultTask(
             "result_total_roi",
@@ -159,7 +177,7 @@ def development_tasks():
             prefix + "I explicitly authorise reading the saved prediction window. Is that "
             "artefact available? Use JSON fields available and reason; do not create a fit.",
             frozenset({"prediction_window"}),
-            {"available": False, "reason": "not_saved"},
+            {"available": False, "reason": "not_returned"},
             allow_prediction=True,
             family="result_prediction",
         ),
@@ -200,11 +218,16 @@ def validation_tasks(seed, datasets):
             "result_overlap_value": {"overlap": rows["contributions"][0]["Overlap"]},
         }
         for task in development_tasks():
+            task_fixture = deepcopy(fixture)
+            if task.id == "result_diagnostics":
+                for section in ("model_stats", "r_hat"):
+                    task_fixture["results"].pop(section)
+                task_fixture["sections_available"] = list(task_fixture["results"])
             suite.append(
                 replace(
                     task,
                     id=f"{task.id}_dataset_{index}",
-                    fixture=fixture,
+                    fixture=task_fixture,
                     dataset=f"generated_{index}",
                     prompt=task.prompt + " Round numeric ratios to six decimal places.",
                     paraphrase="",
@@ -221,6 +244,7 @@ class ResultSelectionDispatch:
         self.server, self.task = server, task
         self.guidance = guidance
         self.completed = self.errors = self.unintended_writes = 0
+        self.noncontributing_result_calls = 0
         self.observed_sections = set()
         self.supported_sections = set()
         self.trials = []
@@ -256,17 +280,15 @@ class ResultSelectionDispatch:
         if "prediction_window" in sections and not self.task.allow_prediction:
             return self.refuse(name, "Unsolicited audited prediction-window access is forbidden.")
         fixture = self.task.fixture or saved_results()
-        allowed_window = {**fixture["meta"]["window"], "granularity": "native"}
-        if any(arguments.get(k, "") not in ("", v) for k, v in allowed_window.items()):
-            return self.refuse(name, "This fixture supports only its declared native window.")
+        window = {k: arguments[k] for k in ("start", "end", "granularity") if arguments.get(k)}
         try:
-            payload = selected_payload(sections, fixture=fixture) if sections else fixture
-        except ValueError:
-            return self.refuse(name, "Unknown synthetic result section.")
+            payload = selected_payload(sections, fixture=fixture, **window)
+        except ValueError as exc:
+            return self.refuse(name, f"Synthetic contract boundary: {exc}")
         query = {"format": "json"}
         if raw:
             query["sections"] = raw
-        query.update({k: arguments[k] for k in allowed_window if arguments.get(k)})
+        query.update(window)
         observed = []
         trial = await run_case(
             Case(
@@ -286,7 +308,6 @@ class ResultSelectionDispatch:
                         ],
                         expected={
                             "model_hash": "result-example",
-                            "meta": {"unit": fixture["meta"]["unit"]},
                         },
                     )
                 ],
@@ -300,9 +321,36 @@ class ResultSelectionDispatch:
         self.completed += int(trial.passed)
         result = observed[-1] if observed else {"error": "Invalid result call"}
         if trial.passed:
+            previous_evidence = set(self.supported_sections)
             self.observed_sections.update(result.get("results", {}))
             evidence_sections = set().union(*self.task.evidence_sets())
+            expected_display = next(
+                (
+                    r["channel"]
+                    for r in fixture["results"].get("channel_map", [])
+                    if r["activity_column"] == self.task.channel
+                ),
+                None,
+            )
+            identity_rows = list(result.get("results", {}).get("channel_summary", []))
+            for section, key in (("mroi_summary", "channels"), ("mroi_periods", "rows")):
+                identity_rows.extend(result.get("results", {}).get(section, {}).get(key, []))
+            if expected_display and any(
+                r.get("activity_column") == self.task.channel
+                and r.get("channel") == expected_display
+                for r in identity_rows
+            ):
+                self.supported_sections.add("verified_channel_identity")
             oracle = selected_payload(evidence_sections, fixture=fixture)["results"]
+            # Only an explicit request can establish that a required artefact was
+            # not returned. Empty channel-filtered rows are not missing artefacts.
+            for section in evidence_sections - set(oracle) - {"verified_channel_identity"}:
+                if (
+                    section in sections
+                    and section not in result.get("results", {})
+                    and section not in result.get("sections_available", [])
+                ):
+                    self.supported_sections.add(section)
             for section, expected in oracle.items():
                 actual = result.get("results", {}).get(section)
                 if section in ("channel_summary", "channel_map") and self.task.channel:
@@ -315,6 +363,7 @@ class ResultSelectionDispatch:
                     valid = contains(actual, expected)
                 if valid:
                     self.supported_sections.add(section)
+            self.noncontributing_result_calls += int(self.supported_sections == previous_evidence)
         return result, not trial.passed
 
     def grade(self, facts):

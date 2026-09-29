@@ -57,7 +57,9 @@ def verify_experiment(frozen, inputs, calibration):
         raise ValueError("Frozen experiment changed; stop without spending or regrading")
 
 
-def assess_comparison(rows, families, *, samples, resamples=4000, seed=20260929, datasets=None):
+def assess_comparison(
+    rows, families, *, samples, resamples=4000, seed=20260929, datasets=None, thresholds=None
+):
     """Equal-weight task-family bootstrap, keeping paired repetitions together.
 
     Intervals describe only the sampled development families, not production
@@ -158,23 +160,38 @@ def assess_comparison(rows, families, *, samples, resamples=4000, seed=20260929,
     )
     if pending_review:
         quality_ci = None
-    reasons = [
-        "public_development_cases_are_not_independent_acceptance",
-        "thresholds_require_owner_agreement",
-    ]
+    limits = {**PROPOSED_THRESHOLDS, **(thresholds or {})}
+    reasons = ["public_development_cases_are_not_independent_acceptance"]
+    if thresholds is None:
+        reasons.append("thresholds_require_owner_agreement")
     if len(units) < PROPOSED_THRESHOLDS["minimum_task_families"]:
         reasons.append("fewer_than_eight_task_families")
     if hard_failures:
         reasons.append("candidate_quality_or_routing_failures")
     if pending_review:
         reasons.append("unreviewed_claims_prevent_quality_comparison")
-    if quality_ci is None or quality_ci[0] < -PROPOSED_THRESHOLDS["quality_noninferiority_margin"]:
+    if quality_ci is None or quality_ci[0] < -limits["quality_noninferiority_margin"]:
         reasons.append("quality_noninferiority_not_established")
-    if savings_ci is None or savings_ci[0] < PROPOSED_THRESHOLDS["minimum_cost_saving"]:
-        reasons.append("five_percent_cost_saving_not_established")
+    if savings_ci is None or savings_ci[0] <= limits["minimum_cost_saving"]:
+        reasons.append("required_cost_saving_not_established")
+    supported_rate = None if pending_review else mean(r["passed"] for r in candidates)
+    if thresholds and (
+        supported_rate is None or supported_rate < thresholds["minimum_supported_answer_rate"]
+    ):
+        reasons.append("supported_answer_threshold_not_established")
+    call_delta = None
+    if all("noncontributing_result_calls" in r for r in rows):
+        call_delta = mean(r["noncontributing_result_calls"] for r in candidates) - mean(
+            r["noncontributing_result_calls"] for r in rows if r["view"] == "baseline"
+        )
+    if thresholds and (call_delta is None or call_delta > 0):
+        reasons.append("noncontributing_calls_not_nonincreasing")
     return {
         "status": "development_only",
         "accepted": False,
+        "thresholds": limits,
+        "candidate_supported_answer_rate": supported_rate,
+        "noncontributing_result_call_delta": call_delta,
         "reasons": reasons,
         "task_count": len(families),
         "family_count": len(units),

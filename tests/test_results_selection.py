@@ -6,7 +6,7 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from simba_mcp.evaluation.result_cases import saved_results
+from simba_mcp.evaluation.result_cases import saved_results, selected_payload
 from simba_mcp.tools.results import get_model_results
 
 
@@ -26,7 +26,8 @@ def context(payload):
 
 @pytest.mark.anyio
 async def test_disclosure_preserves_source_and_curve_bands():
-    source = saved_results()
+    source = selected_payload([], start="2025-01-01", end="2025-02-28")
+    source["warnings"] = ["Backend warning retained verbatim"]
     original = deepcopy(source)
     ctx, _ = context(source)
     result = await get_model_results(
@@ -148,7 +149,10 @@ async def test_bucketed_intervals_not_fabricated_and_window_forwarded():
     source["results"]["actual_vs_model"] = [
         {"period_start": "2025-01-01", "period_end": "2025-01-31", "Actual": 120.0, "Model": 110.0}
     ]
-    source["meta"]["granularity"] = "month"
+    source["meta"] = {
+        "window": {"granularity": "month"},
+        "not_windowed": {"mroi_summary": "not a per-period section"},
+    }
     ctx, client = context(source)
     result = await get_model_results(
         "result-example",
@@ -168,7 +172,15 @@ async def test_bucketed_intervals_not_fabricated_and_window_forwarded():
         granularity="month",
     )
     assert result["results"]["actual_vs_model"] == source["results"]["actual_vs_model"]
-    assert result["meta"]["not_windowed"] == ["mroi_summary"]
+    assert result["meta"]["not_windowed"] == {"mroi_summary": "not a per-period section"}
+
+
+@pytest.mark.anyio
+async def test_display_name_and_activity_column_are_not_a_collision():
+    ctx, _ = context(saved_results())
+    result = await get_model_results("result-example", channels=["search"], ctx=ctx)
+    assert result["_mcp_selection"]["ambiguous_channel_aliases"] == {}
+    assert result["results"]["mroi_summary"]["channels"][0]["activity_column"] == "Search Activity"
 
 
 @pytest.mark.anyio
