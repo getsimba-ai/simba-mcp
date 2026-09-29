@@ -1,6 +1,49 @@
 # Third independent selective-results acceptance protocol
 
-Status: pre-run verification. No acceptance result yet.
+Status: completed and independently reviewed. **Acceptance failed. Do not merge.**
+
+## Reviewed result
+
+All 40 sessions completed at `7263d3d`, with every answer and tool call independently
+reviewed against the frozen packet and supplied contracts. The
+[evidence record](selective-results-acceptance-v3-evidence.json) preserves original
+mechanical scores, synthetic answers, trajectories and hash-bound reviews.
+
+| Measure | Baseline | Candidate |
+| --- | ---: | ---: |
+| Supported answers | 11/20 | 16/20 |
+| Answers containing unsupported claims | 8 | 2 |
+| Incomplete answers with otherwise supported claims | 1 | 2 |
+| Independently reviewed unnecessary calls | 2 | 0 |
+| Unauthorised read attempts | 2 | 0 |
+| Actual unauthorised reads | 0 | 0 |
+| Provider cost, USD | 4.291498 | 4.190452 |
+
+Both candidate KPI answers omit the requested combined Sales and Revenue totals,
+despite correct per-date values. One historical mROI answer falsely says a date
+filter selects returned rows, although the section is explicitly unwindowed.
+One diagnostic answer says all-variable coverage cannot be established, contrary
+to the supplied full r_hat contract. The reviewer distinguishes these explicit
+contradictions from merely noting that payload metadata was not independently
+checked. These four failures remain in the result.
+
+Candidate support is 80%, below the required 95%. The zero-unsupported-claims
+gate also fails. Estimated cost saving is **2.35%**, with a family-clustered 95%
+interval of **-7.55% to 12.91%**. Quality difference is **+25 percentage points**,
+with interval **-5 to +55 points**. Cost improvement and quality nonregression
+are both inconclusive. The reviewed unnecessary-call gate passes; the section
+completion proxy is retained separately and does not replace call adjudication.
+
+Run cost US$8.481950 brings cumulative accounted spend to **US$66.961418 of US$70**,
+including the retained older interrupted allowance. Reserved spend is zero and
+no provider session remains. The remaining US$3.038582 cannot fund another
+validation stage plus fresh acceptance comparison. No additional paid run has
+started. All 607 local tests and all four CI jobs passed at the frozen source.
+
+The original protocol follows. Any later tuning informed by these outcomes makes
+these cases validation material, requiring new independent final acceptance cases.
+
+## Frozen protocol
 
 Following targeted version 13 validation, the candidate guidance was frozen at
 `40431fa` before the new packet was released. Its guidance fingerprint is
