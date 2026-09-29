@@ -80,7 +80,16 @@ class Responses:
 
 
 async def session(
-    client, tools, prompt, dispatch, budget, checkpoint, *, max_turns=8, system_context=""
+    client,
+    tools,
+    prompt,
+    dispatch,
+    budget,
+    checkpoint,
+    *,
+    max_turns=8,
+    system_context="",
+    session_timeout_seconds=180.0,
 ):
     return await run_session(
         client,
@@ -92,6 +101,7 @@ async def session(
         codec=Responses(),
         max_turns=max_turns,
         system_context=system_context,
+        session_timeout_seconds=session_timeout_seconds,
     )
 
 
