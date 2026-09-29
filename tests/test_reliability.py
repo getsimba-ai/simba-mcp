@@ -34,7 +34,13 @@ def test_metadata_effects_are_explicit():
         assert not tools[name].annotations.read_only_hint
         assert not tools[name].annotations.destructive_hint
         assert not tools[name].annotations.idempotent_hint
-    assert all(t.title and t.annotations.open_world_hint for t in tools.values())
+    assert all(t.title for t in tools.values())
+    assert all(
+        t.annotations.open_world_hint
+        for name, t in tools.items()
+        if name != "get_workflow_guidance"
+    )
+    assert not tools["get_workflow_guidance"].annotations.open_world_hint
     for name in ("get_study_prediction_access", "validate_study_recipe", "get_scenario_template"):
         assert tools[name].annotations.read_only_hint
     for name in ("evaluate_study_run", "adopt_model_into_study"):

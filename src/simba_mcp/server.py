@@ -41,6 +41,7 @@ from .tools.drafts import (
     publish_recipe_draft,
     update_recipe_draft,
 )
+from .tools.guidance import get_workflow_guidance
 from .tools.incrementality import (
     create_incrementality_test,
     get_incrementality_test,
@@ -185,7 +186,10 @@ mcp = SimbaMCPServer(
         "Use these tools to upload marketing data, build MMM models, "
         "check fitting progress, retrieve results (channel ROI, contributions, "
         "model diagnostics), and run budget optimizations. "
-        "Start with get_backend_capabilities and get_data_schema. For studies: inspect "
+        "For new data use get_data_schema; discover capabilities when the planned operation "
+        "requires them. Existing-result questions can start with selected results directly. "
+        "If native Skills are unavailable, use get_workflow_guidance for relevant guidance. "
+        "For studies: inspect "
         "the project and budget, validate/freeze a recipe, declare a quality policy, "
         "then launch using an explicit submission_key. Reuse that key and identical "
         "inputs after an uncertain launch. Poll shared run progress; cancellation "
@@ -279,6 +283,7 @@ TOOLS = (
     recommend_study_run,
     adopt_model_into_study,
     compare_study_runs,
+    get_workflow_guidance,
 )
 
 

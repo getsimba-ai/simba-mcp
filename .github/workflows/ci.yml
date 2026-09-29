@@ -8,6 +8,7 @@ on:
 
 jobs:
   test:
+    name: ${{ matrix.sdk == 'current' && format('test ({0})', matrix.python-version) || format('test ({0}, {1})', matrix.python-version, matrix.sdk) }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -42,6 +43,14 @@ jobs:
 
       - name: Test
         run: pytest -v
+
+      - name: Check generated native Skills
+        run: python -m simba_mcp.guidance --check
+
+      - name: Verify guidance in built wheel
+        run: |
+          python -m pip wheel . --no-deps --wheel-dir .codex/wheel
+          python -I tests/guidance/wheel_smoke.py .codex/wheel
 
       - name: Check generated reference
         run: python -m simba_mcp.reference --check

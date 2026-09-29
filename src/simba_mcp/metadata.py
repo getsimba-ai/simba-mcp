@@ -4,6 +4,7 @@ from mcp.types import ToolAnnotations
 
 READ_ONLY = frozenset(
     [
+        "get_workflow_guidance",
         "get_recipe_draft",
         "get_recipe_draft_template",
         "get_recipe_revision_authoring",
@@ -121,5 +122,5 @@ def annotations_for(name: str) -> ToolAnnotations:
         read_only_hint=name in READ_ONLY,
         destructive_hint=name in DESTRUCTIVE,
         idempotent_hint=name in READ_ONLY | IDEMPOTENT_WRITES,
-        open_world_hint=True,
+        open_world_hint=name != "get_workflow_guidance",
     )
