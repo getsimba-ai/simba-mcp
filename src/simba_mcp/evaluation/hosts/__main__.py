@@ -96,8 +96,8 @@ async def run(args):
         ]
     selected = [task for task in suite if args.case is None or task[0].id == args.case]
     if diagnostic:
-        if args.case is not None or args.samples != 2 or dataset_count:
-            raise ValueError("Model diagnostic fixes five cases and two repetitions")
+        if args.samples != 2 or dataset_count:
+            raise ValueError("Model diagnostic requires two repetitions on the fixed case set")
         selected = [
             task
             for task in selected
