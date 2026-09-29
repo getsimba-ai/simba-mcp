@@ -2,7 +2,7 @@
 
 from copy import deepcopy
 
-from .evaluation import Case, Exchange, Step
+from .contracts import Case, Exchange, Step
 
 
 def cases() -> list[Case]:

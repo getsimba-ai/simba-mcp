@@ -62,6 +62,10 @@ This project uses [Ruff](https://docs.astral.sh/ruff/) for linting, configured i
 
 ### Module ownership and contract changes
 
+Every issue and PR must follow the [engineering objective](docs/engineering.md):
+record package ownership, reuse and dependency direction at pickup, and include an
+architecture note at review. For performance epic #38 this is a standing acceptance gate.
+
 Add plain async functions to a domain module in `src/simba_mcp/tools/`, export and
 register them in `server.py`, and explicitly classify their effects in
 `metadata.py`. Registration fails for an unclassified tool. Keep business rules

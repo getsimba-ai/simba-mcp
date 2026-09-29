@@ -3,7 +3,7 @@
 import pytest
 from pydantic import ValidationError
 
-from simba_mcp.evaluation_reports import HostTrial
+from simba_mcp.evaluation.contracts import HostTrial
 
 
 def valid_report():

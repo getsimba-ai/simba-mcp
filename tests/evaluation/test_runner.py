@@ -8,9 +8,11 @@ from copy import deepcopy
 import pytest
 from pydantic import ValidationError
 
-from simba_mcp import evaluation, telemetry
+from simba_mcp import telemetry
 from simba_mcp.api_client import CALLER_API_KEY
-from simba_mcp.evaluation_cases import cases
+from simba_mcp.evaluation import runner as evaluation
+from simba_mcp.evaluation.cases import cases
+from simba_mcp.evaluation.contracts import Case, Step, Trial
 
 
 @pytest.fixture
@@ -93,9 +95,9 @@ def test_manifest_validation_and_exact_values():
     data = cases()[0].model_dump()
     data["unexpected"] = True
     with pytest.raises(ValidationError):
-        evaluation.Case.model_validate(data)
+        Case.model_validate(data)
     with pytest.raises(ValidationError):
-        evaluation.Step(tool="x", arguments={}, exchanges=[], expected={})
+        Step(tool="x", arguments={}, exchanges=[], expected={})
     assert not evaluation.contains({"channel": "Search"}, {"channel": "search"})
     assert not evaluation.contains({"interval": [1, 2]}, {"interval": [2, 1]})
     assert not evaluation.contains({"value": True}, {"value": 1})
@@ -112,8 +114,8 @@ async def test_report_omits_raw_data_and_rejects_fabricated_usage():
     bad = deepcopy(data)
     bad["provider_usage"] = {"input_tokens": 0}
     with pytest.raises(ValidationError):
-        evaluation.Trial.model_validate(bad)
+        Trial.model_validate(bad)
     bad = deepcopy(data)
     bad["unintended_writes"] = 1
     with pytest.raises(ValidationError):
-        evaluation.Trial.model_validate(bad)
+        Trial.model_validate(bad)

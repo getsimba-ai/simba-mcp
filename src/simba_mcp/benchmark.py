@@ -7,8 +7,6 @@ import asyncio
 import hashlib
 import json
 import logging
-import math
-import statistics
 import tempfile
 from contextlib import redirect_stderr
 from pathlib import Path
@@ -19,7 +17,7 @@ import httpx
 
 from . import runtime, server, telemetry
 from .api_client import CALLER_API_KEY, SimbaAPIClient
-from .performance import compact, provenance
+from .measurements import compact, distribution, provenance
 
 FIXTURE_VERSION = 1
 
@@ -75,17 +73,6 @@ def fixtures() -> list[dict]:
             "response": results,
         },
     ]
-
-
-def distribution(values: list[float]) -> dict:
-    ordered = sorted(values)
-    return {
-        "samples": len(values),
-        "min": ordered[0],
-        "median": statistics.median(values),
-        "p95": ordered[math.ceil(len(values) * 0.95) - 1],
-        "max": ordered[-1],
-    }
 
 
 async def benchmark(samples: int = 30) -> dict:

@@ -16,7 +16,7 @@ scientific recovery.
 
 ## Cases and grading
 
-The versioned source manifest is `src/simba_mcp/evaluation_cases.py`. Each case
+The versioned source manifest is `src/simba_mcp/evaluation/cases.py`. Each case
 declares its tool arguments, allowed HTTP request sequence, synthetic responses,
 independent expected result fields and refusal/cancellation outcome. Request
 bodies and query strings are checked exactly. Result dictionaries permit additive
@@ -62,11 +62,11 @@ free. Use `simba_mcp.performance` for actual catalogue measurements and
 
 ## Optional host-side evidence
 
-`simba_mcp.evaluation_reports.HostTrial` defines a separate versioned host report:
+`simba_mcp.evaluation.contracts.HostTrial` defines a separate versioned host report:
 
 ```python
 import json
-from simba_mcp.evaluation_reports import HostTrial
+from simba_mcp.evaluation.contracts import HostTrial
 
 trial = HostTrial.model_validate(json.loads(report_text))
 schema = HostTrial.model_json_schema()
