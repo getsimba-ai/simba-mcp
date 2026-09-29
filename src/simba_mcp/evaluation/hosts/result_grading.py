@@ -41,7 +41,9 @@ def _rlc_normalise(task, facts):
                 visit(value)
                 continue
             key = aliases.get(key, key)
-            if key not in task.expected:
+            if key not in task.expected and not (
+                family == "rlc01_diagnostics" and key == "convergence_established"
+            ):
                 scoped = False
                 continue
             if family == "rlc01_diagnostics" and key == "convergence" and value is None:
