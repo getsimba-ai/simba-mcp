@@ -24,6 +24,13 @@ async def run_session(
         response = await client.post(codec.endpoint, json=request)
         if response.status_code != 200:
             record["stop"] = f"provider_http_{response.status_code}"
+            # Private checkpoint diagnostics only. Public evidence exporters must
+            # not copy provider bodies or headers containing account information.
+            record["provider_error"] = {
+                "status": response.status_code,
+                "retry_after": response.headers.get("retry-after"),
+                "body": response.text[:4096],
+            }
             checkpoint(record)
             raise RuntimeError(record["stop"] + "; no replay or automatic fallback")
         data = response.json()

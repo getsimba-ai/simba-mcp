@@ -64,3 +64,37 @@ packet, then compared with the original guidance on that same model. The existin
 95% support, zero unsupported claims/unauthorised reads, call-efficiency and
 cost/quality interval gates remain binding. Synthetic success does not establish
 scientific MMM validity, production behaviour or owner merge approval.
+
+## Partial observed results
+
+The [preserved validation evidence](selective-results-provider-validation-evidence.json)
+records source `754e3a1`, unchanged version 14 guidance and independently reviewed
+synthetic answers. The requested fast profile is implemented and tested, but is
+not yet accepted for PERF07.
+
+| Profile | Completed answers | Supported | Mean session time | Completed-session cost |
+| --- | ---: | ---: | ---: | ---: |
+| Grok 4.7 low reasoning | 14 | 14 | 14.9 seconds | US$1.020270 |
+| Sonnet medium reasoning | 16 | 14 | 6.7 seconds | US$3.267200 |
+
+These incomplete groups have different case coverage. Times and costs are
+descriptive, with unequal automatic caching, output lengths and provider order.
+On the matched first KPI case, Grok low took 13.7/14.0 seconds and US$0.161530,
+Grok medium 38.5/32.7 seconds and US$0.232630, and Sonnet 6.8/5.5 seconds and
+US$0.409000. Two answers per profile cannot establish general superiority.
+
+Sonnet's two window answers correctly calculate aggregate ROI, but assert that
+the unweighted period mean would differ without reading period evidence. A
+second independent interpretation confirmed this unsupported inference. The
+initial charitable interpretation, its disclosed reconstruction and correction
+are retained separately. Grok low read period rows before making that claim.
+All completed reviews report zero unnecessary calls or unauthorised reads.
+
+An xAI HTTP 429 stopped the remaining batch before its next answer. This is an
+execution error, not an unsupported answer or a completed trial. The original
+checkpoint and US$1.191824 reservation remain intact; no automatic retry occurred.
+Accounted spend is US$73.493620 including that reservation and the older
+US$0.289594 retained allowance. Subsequent continuation must carry both forward.
+Private checkpoints now retain bounded provider error text and Retry-After for
+diagnosis; public exporters exclude those bodies and all encrypted reasoning.
+V4 remains unopened. Issue #45 remains open and PR #58 remains draft.

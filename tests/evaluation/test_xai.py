@@ -113,7 +113,7 @@ async def test_xai_roundtrips_reasoning_and_all_local_tool_results(effort):
 
 @pytest.mark.anyio
 @pytest.mark.parametrize(
-    "fault", ["http", "usage", "model", "arguments", "incomplete", "server_tool"]
+    "fault", ["http", "rate_limit", "usage", "model", "arguments", "incomplete", "server_tool"]
 )
 async def test_xai_errors_never_dispatch_or_retry(fault):
     called = []
@@ -131,17 +131,26 @@ async def test_xai_errors_never_dispatch_or_retry(fault):
 
     def transport(request):
         called.append(True)
+        if fault == "rate_limit":
+            return httpx.Response(429, text="synthetic limit " * 500, headers={"Retry-After": "60"})
         return httpx.Response(500 if fault == "http" else 200, json=data)
 
     async def dispatch(*_):
         raise AssertionError("Invalid response must not execute tools")
 
     budget = Budget(2, model=GROK)
+    checkpoints = []
     async with httpx.AsyncClient(transport=httpx.MockTransport(transport)) as client:
         with pytest.raises((RuntimeError, ValueError)):
-            await session(client, [], "read", dispatch, budget, lambda _: None)
+            await session(
+                client, [], "read", dispatch, budget, lambda r: checkpoints.append(dict(r))
+            )
     assert len(called) == 1
-    assert (budget.reserved > 0) == (fault in ("http", "usage"))
+    assert (budget.reserved > 0) == (fault in ("http", "rate_limit", "usage"))
+    if fault == "rate_limit":
+        error = checkpoints[-1]["provider_error"]
+        assert error["status"] == 429 and error["retry_after"] == "60"
+        assert error["body"] == ("synthetic limit " * 500)[:4096]
 
 
 @pytest.mark.anyio
