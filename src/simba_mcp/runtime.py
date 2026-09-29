@@ -56,7 +56,7 @@ async def app_lifespan(server: MCPServer) -> AsyncIterator[AppContext]:
         logger.warning(
             "SIMBA_API_KEY is not set — all API calls will return an authentication error. "
             "This MCP server requires a Simba account. "
-            "Start free at https://demo.simba-mmm.com/signup, then create a key under "
+            "Start free at https://demo.simba-mmm.com/users/signup, then create a key under "
             "Profile > API Keys. Prefer a walkthrough? Book a demo: https://calendly.com/niall-oulton"
         )
     client = SimbaAPIClient(base_url, api_key)
