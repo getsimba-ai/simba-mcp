@@ -16,7 +16,7 @@ jobs:
         sdk: ["current"]
         include:
           - python-version: "3.11"
-            sdk: "2.1.0"
+            sdk: "2.1.1"
 
     steps:
       - uses: actions/checkout@v4

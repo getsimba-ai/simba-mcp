@@ -4,6 +4,16 @@ All notable changes to the SIMBA MCP Server will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.12.0 (2026-09-29)
+
+### Added
+- Optional **OAuth resource-server mode** (#59), off by default. With `MCP_OAUTH_ENABLED=1` the server serves `/.well-known/oauth-protected-resource/mcp`, answers 401 with `WWW-Authenticate: Bearer resource_metadata=…` to any request without a verified bearer (including `initialize` and `tools/list`), and verifies each bearer against the backend's token-info route with that same bearer. OAuth access tokens and API keys both verify; the token is forwarded unchanged (the MCP and the API are one protected resource). Positive answers are cached for 60 s under a hash of the token; a backend timeout or 5xx is a 401, never a crash. `SIMBA_PUBLIC_URL` names the issuer and resource.
+- With the flag off, nothing changes: bring-your-own-key per request, and `initialize` / `tools/list` answer without a bearer.
+
+### Changed
+- The `mcp` SDK requirement is `>=2.1.1,<2.2`: 2.1.1 is the resource-server implementation this mode relies on, and the CI floor job now installs it.
+- No tool changes; the generated reference is unchanged.
+
 ## 0.11.1 (2026-09-29)
 
 ### Changed

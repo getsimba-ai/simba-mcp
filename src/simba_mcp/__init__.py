@@ -1,6 +1,6 @@
 """Simba MCP Server — connect AI assistants to Simba MMM."""
 
-__version__ = "0.11.1"
+__version__ = "0.12.0"
 
 from .api_client import SimbaAPIClient
 from .server import mcp

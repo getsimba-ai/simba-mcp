@@ -174,6 +174,13 @@ key. If tool calls return `"No API key on this request"`, your MCP client
 isn't sending the token (check the `authorization_token` / headers setting
 in its config).
 
+**OAuth (optional, from 0.12.0).** A deployment can also run in OAuth resource-server mode
+(`MCP_OAUTH_ENABLED=1`). Clients whose connector UI expects OAuth — claude.ai custom connectors and
+ChatGPT connectors — then sign in through the Simba backend and get a token; the server verifies it
+against the backend and forwards it unchanged. An API key still works everywhere, and it is the
+method for Claude Code, Cursor and the Claude API connector. Step-by-step connection guides per
+client are in the [product documentation](https://docs.simba-mmm.com/docs/integrations/simba-mcp).
+
 ### Channel names are exact-match
 
 Model results are keyed by the channel's **activity column** name (e.g. `"search_activity"`, `"TV_impressions"`), **not** by the `channels[].name` you passed to `create_model`. Keys can contain spaces and matching is **case-sensitive and space-sensitive** â€” the optimizer and scenario tools use them as dictionary keys.

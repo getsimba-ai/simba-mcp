@@ -15,6 +15,7 @@ from .auth import _bearer_token, _client, _local_files_allowed
 from .catalogue import description_for
 from .errors import api_error
 from .metadata import annotations_for
+from .oauth import server_auth_options
 from .profiles import select_tools
 from .runtime import (
     MAX_REQUEST_BODY_BYTES,
@@ -357,6 +358,9 @@ def create_server(description_mode: str = "legacy", *, profile: str = "full") ->
             "Recommendations are not analyst acceptance. Poll the exact saved run ID; "
             "a successful HTTP response does not mean a run completed successfully."
         )
+    # Optional OAuth resource-server mode (#59): an empty dict with MCP_OAUTH_ENABLED off,
+    # so the kwargs are byte-identical to today's.
+    options.update(server_auth_options(os.environ.get("SIMBA_API_URL", "http://localhost:5005")))
     instance = SimbaMCPServer(**options)
     for tool in selected:
         instance.add_tool(
