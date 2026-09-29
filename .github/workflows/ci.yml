@@ -8,6 +8,7 @@ on:
 
 jobs:
   test:
+    name: ${{ matrix.sdk == 'current' && format('test ({0})', matrix.python-version) || format('test ({0}, {1})', matrix.python-version, matrix.sdk) }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
