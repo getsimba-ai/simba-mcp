@@ -4,6 +4,7 @@ import argparse
 import asyncio
 import hashlib
 import json
+import math
 import os
 import random
 import secrets
@@ -28,15 +29,16 @@ from .anthropic import client, definitions, session
 from .budget import Budget
 from .models import GROK, MODEL, SONNET, model_configuration
 from .result_calibration import GRADER_VERSION, calibrate
-from .result_grading import fact_verdict, literal_fields, structured_answer_only
+from .result_grading import claims_in_scope, fact_verdict, literal_fields, structured_answer_only
 from .result_selection import (
     ResultSelectionDispatch,
+    ResultTask,
     development_tasks,
     result_tasks,
     validation_tasks,
 )
 from .roles import ROLE_CASES
-from .scenarios import SyntheticDispatch, answer, role_tasks, tasks
+from .scenarios import SyntheticDispatch, answer, rlc_tasks, role_tasks, tasks
 
 
 async def run(args):
@@ -62,6 +64,10 @@ async def run(args):
     role = getattr(args, "role_comparison", None)
     baseline_path = getattr(args, "results_baseline", None)
     robust = getattr(args, "results_robust", False)
+    rlc = getattr(args, "workflow_suite", None) == "rlc01"
+    session_timeout = getattr(args, "session_timeout_seconds", None)
+    if session_timeout is not None and (not math.isfinite(session_timeout) or session_timeout <= 0):
+        raise ValueError("Session timeout must be finite and positive")
     acceptance = getattr(args, "results_acceptance", False)
     selection_validation = getattr(args, "results_selection_validation", False)
     if selection_validation and not acceptance:
@@ -109,7 +115,13 @@ async def run(args):
         }
     if role is not None and args.mode != "eager":
         raise ValueError("Role comparison requires eager mode to isolate catalogue visibility")
-    suite = role_tasks() if role else tasks()
+    if rlc and (role or baseline_path or robust or acceptance or diagnostic or dataset_count):
+        raise ValueError(
+            "RLC01 development suite cannot be combined with historical comparison modes"
+        )
+    if rlc and (budget.model != GROK or args.mode != "eager"):
+        raise ValueError("RLC01 requires the explicit Grok eager route")
+    suite = rlc_tasks() if rlc else role_tasks() if role else tasks()
     if guidance_arms:
         if acceptance or diagnostic:
             if packet == "fresh":
@@ -199,7 +211,7 @@ async def run(args):
         "tasks": [
             {
                 "case": c.model_dump()
-                if not guidance_arms
+                if not isinstance(c, ResultTask)
                 else {
                     "id": c.id,
                     "required_sections": sorted(c.required_sections),
@@ -229,6 +241,18 @@ async def run(args):
             for c, p, e in selected
         ],
     }
+    if rlc:
+        report["configuration"]["workflow_suite"] = "rlc01"
+        report["guidance"] = {
+            "current": {
+                s: read_guidance("results", s)
+                for s in ("entrypoint", "interpretation", "tool-reference")
+            }
+        }
+    if session_timeout is not None or rlc:
+        report["configuration"]["session_timeout_seconds"] = (
+            session_timeout if session_timeout is not None else 180.0
+        )
     if guidance_arms:
         report["guidance"] = guidance_arms
     if order_seed is not None:
@@ -315,10 +339,12 @@ async def run(args):
             "source_transition": transition,
             "policy": "Preserve completed trials; restart incomplete trials as separately billed attempts",
         }
-    if robust:
+    if robust or rlc:
         report["calibration"] = calibrate()
         report["experiment_inputs"] = {
-            "purpose": "model_selection_validation"
+            "purpose": "development_smoke"
+            if rlc and args.samples == 1
+            else "model_selection_validation"
             if diagnostic or selection_validation
             else "candidate_acceptance"
             if acceptance
@@ -355,7 +381,7 @@ async def run(args):
         stop_file = getattr(args, "stop_file", None)
         if stop_file and stop_file.exists():
             raise RuntimeError("Operator requested stop; checkpoint and reservations retained")
-        if robust:
+        if robust or rlc:
             verify_experiment(report["frozen_experiment"], report["experiment_inputs"], calibrate())
         if (
             continue_from
@@ -384,6 +410,7 @@ async def run(args):
         async with host_client(os.environ[key_name]) as provider:
             for rep, repetition in enumerate(schedule):
                 for case, prompt, expected in repetition:
+                    result_case = isinstance(case, ResultTask)
                     modes = ["eager", "deferred"] if rep % 2 == 0 else ["deferred", "eager"]
                     if args.mode != "both":
                         modes = [args.mode]
@@ -413,8 +440,12 @@ async def run(args):
                             arm_server, case, allowed_tools=[t.name for t in visible]
                         )
                         context = ""
-                        if guidance_arms:
-                            guidance = guidance_arms[view]
+                        if result_case:
+                            guidance = (
+                                guidance_arms[view]
+                                if guidance_arms
+                                else report["guidance"]["current"]
+                            )
                             dispatch = ResultSelectionDispatch(arm_server, case, guidance=guidance)
                             context = "\n\n".join(
                                 guidance[s]["content"] for s in ("entrypoint", "interpretation")
@@ -435,7 +466,7 @@ async def run(args):
                             rep >= 3 or getattr(args, "results_prompt", "mixed") == "paraphrase"
                         )
                         session_prompt = (case.paraphrase or prompt) if paraphrased else prompt
-                        if guidance_arms:
+                        if guidance_arms or rlc:
                             row["prompt"] = session_prompt
                             row["prompt_variant"] = "paraphrase" if paraphrased else "original"
                             row["grader_version"] = GRADER_VERSION
@@ -452,7 +483,12 @@ async def run(args):
                             dispatch,
                             budget,
                             checkpoint,
-                            **({"system_context": context} if guidance_arms else {}),
+                            **({"system_context": context} if result_case else {}),
+                            **(
+                                {"session_timeout_seconds": session_timeout}
+                                if session_timeout is not None
+                                else {}
+                            ),
                         )
                         actual, strict = answer(result.get("final_text", ""))
                         if isinstance(actual, dict) and set(actual) == {"channel_summary"}:
@@ -470,11 +506,30 @@ async def run(args):
                         )
                         row["passed"] = (
                             actual == expected
-                            and (bool(guidance_arms) or dispatch.completed == len(case.steps))
+                            and (result_case or dispatch.completed == len(case.steps))
                             and dispatch.errors == 0
                             and dispatch.unintended_writes == 0
                         )
-                        if guidance_arms:
+                        if rlc and not result_case:
+                            contract = ResultTask(case.id, prompt, frozenset(), expected)
+                            row["fact_verdict"] = fact_verdict(contract, actual, set())
+                            row["claim_review_required"] = (
+                                not claims_in_scope(contract, actual)
+                                or not structured_answer_only(result.get("final_text", ""))
+                                or row["fact_verdict"] == "review"
+                            )
+                            row["trajectory"] = dispatch.calls
+                            row["execution_trials"] = [t.model_dump() for t in dispatch.trials]
+                            row["literal_fields_match"] = literal_fields(contract, actual)
+                            row["outcome"] = (
+                                "fail"
+                                if not row["passed"] or row["fact_verdict"] == "fail"
+                                else "review"
+                                if row["claim_review_required"]
+                                else "pass"
+                            )
+                            row["passed"] = row["outcome"] == "pass"
+                        if result_case:
                             row["noncontributing_result_calls"] = (
                                 dispatch.noncontributing_result_calls
                             )
@@ -489,7 +544,7 @@ async def run(args):
                             }
                             row["trajectory"] = dispatch.calls
                             row["assertions"] = dispatch.grade(actual)
-                            if robust:
+                            if robust or rlc:
                                 row["fact_verdict"] = fact_verdict(
                                     case, actual, dispatch.supported_sections
                                 )
@@ -506,7 +561,7 @@ async def run(args):
                                 dispatch.observed_sections - case.required_sections
                             )
                             row["execution_trials"] = [t.model_dump() for t in dispatch.trials]
-                            if robust:
+                            if robust or rlc:
                                 definite_failure = row["fact_verdict"] == "fail" or not all(
                                     row["assertions"][key]
                                     for key in (
@@ -525,8 +580,8 @@ async def run(args):
                                 )
                                 row["passed"] = row["outcome"] == "pass"
                         save()
-                        if guidance_arms and (
-                            dispatch.unauthorised_reads or dispatch.unintended_writes
+                        if (result_case or rlc) and (
+                            getattr(dispatch, "unauthorised_reads", 0) or dispatch.unintended_writes
                         ):
                             raise RuntimeError("Hard access safety failure; evidence retained")
                         print(
@@ -544,7 +599,17 @@ async def run(args):
         report["error_type"] = type(error).__name__
         raise
     finally:
-        if diagnostic:
+        if rlc:
+            report["assessment"] = {
+                "accepted": False,
+                "decision": "Single-arm development evidence; independent claim review required",
+                "limitations": [
+                    "Exposed synthetic cases",
+                    "Single arm",
+                    "No production latency evidence",
+                ],
+            }
+        elif diagnostic:
             report["assessment"] = {
                 "accepted": False,
                 "decision": "Model-selection validation only; independent claim review required",
@@ -577,6 +642,12 @@ def main():
     parser.add_argument("--cap-usd", type=float, required=True)
     parser.add_argument("--prior-usd", type=float, default=0)
     parser.add_argument("--samples", type=int, default=2)
+    parser.add_argument(
+        "--workflow-suite", choices=("rlc01",), help="Prospective 20-case development inventory"
+    )
+    parser.add_argument(
+        "--session-timeout-seconds", type=float, help="Explicit per-session monotonic deadline"
+    )
     parser.add_argument(
         "--case-order-seed", type=int, help="Freeze shuffled case order within each repetition"
     )
