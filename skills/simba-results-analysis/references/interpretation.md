@@ -2,7 +2,10 @@
 
 - Support every claim with returned evidence or supplied context. Honour explicit
   definitions; do not later call them unknown. Response omission proves neither
-  storage history nor unread contents. For unknown quantities, leave the value
+  storage history nor unread contents. Discuss uncertainty only when relevant to
+  the question, naming the exact quantity. Calculate it first when the supplied
+  evidence suffices; distinguish a computed difference from an explicitly saved
+  field. For unknown quantities, leave the value
   null and say "not established by these results". Do not assert or rule out a
   value, sign or equality. Avoid "is neither ... nor ..." and "is not zero":
   those exclude possibilities, whereas missing evidence does not.
