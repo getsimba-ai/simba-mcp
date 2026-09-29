@@ -10,10 +10,12 @@ from mcp.types import CallToolResult, TextContent
 from pydantic import ValidationError
 
 from . import runtime, telemetry
+from .api_client import CALLER_API_KEY
 from .auth import _bearer_token, _client, _local_files_allowed
 from .catalogue import description_for
 from .errors import api_error
 from .metadata import annotations_for
+from .profiles import select_tools
 from .runtime import (
     MAX_REQUEST_BODY_BYTES,
     MAX_UPLOAD_BYTES,
@@ -160,7 +162,28 @@ class SimbaMCPServer(MCPServer):
     The SDK validates arguments before a tool body runs and reports a failure as plain text;
     `_wire_errors` wraps tool bodies and so never sees it (simba-mcp#26)."""
 
+    _simba_http_mode = False
+
+    def streamable_http_app(self, **kwargs):
+        self._simba_http_mode = True
+        return super().streamable_http_app(**kwargs)
+
+    def sse_app(self, **kwargs):
+        self._simba_http_mode = True
+        return super().sse_app(**kwargs)
+
+    def run(self, transport="stdio", **kwargs):
+        self._simba_http_mode = transport != "stdio"
+        return super().run(transport=transport, **kwargs)
+
     async def call_tool(self, name, arguments, context=None):
+        token = CALLER_API_KEY.set(CALLER_API_KEY.get())
+        try:
+            return await self._observed_call(name, arguments, context)
+        finally:
+            CALLER_API_KEY.reset(token)
+
+    async def _observed_call(self, name, arguments, context):
         sink = telemetry.get_sink()
         if sink is None:
             return await self._call_tool(name, arguments, context)
@@ -316,12 +339,26 @@ def _wire_errors(tool):
     return wrapped
 
 
-def create_server(description_mode: str = "legacy") -> SimbaMCPServer:
+def create_server(description_mode: str = "legacy", *, profile: str = "full") -> SimbaMCPServer:
     """Build an immutable catalogue using the same contracts and execution wrappers."""
     if description_mode not in ("legacy", "compact"):
         raise ValueError("SIMBA_TOOL_DESCRIPTIONS must be legacy or compact")
-    instance = SimbaMCPServer(**_SERVER_OPTIONS)
-    for tool in TOOLS:
+    selected = select_tools(TOOLS, profile)
+    options = dict(_SERVER_OPTIONS)
+    if profile not in ("full", "data_scientist"):
+        options["instructions"] = (
+            f"This is the optional {profile} tool view. Use only listed tools. "
+            "For a task requiring an omitted tool, explain that the user can reconnect "
+            "to a full-profile server (SIMBA_TOOL_PROFILE=full or --profile full). "
+            "Do not invent missing tools or replay an uncertain write after switching. "
+            "Profiles do not grant backend permissions. Use get_workflow_guidance for "
+            "relevant guidance and selected result sections for existing evidence. "
+            "Missing evidence never passes. Fitted-window metrics are not holdout validation. "
+            "Recommendations are not analyst acceptance. Poll the exact saved run ID; "
+            "a successful HTTP response does not mean a run completed successfully."
+        )
+    instance = SimbaMCPServer(**options)
+    for tool in selected:
         instance.add_tool(
             _wire_errors(tool),
             title=tool.__name__.replace("_", " ").title(),
@@ -332,7 +369,8 @@ def create_server(description_mode: str = "legacy") -> SimbaMCPServer:
 
 
 TOOL_DESCRIPTION_MODE = os.environ.get("SIMBA_TOOL_DESCRIPTIONS", "legacy")
-mcp = create_server(TOOL_DESCRIPTION_MODE)
+TOOL_PROFILE = os.environ.get("SIMBA_TOOL_PROFILE", "full")
+mcp = create_server(TOOL_DESCRIPTION_MODE, profile=TOOL_PROFILE)
 
 
 def _create_app():

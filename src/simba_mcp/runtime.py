@@ -26,6 +26,8 @@ def set_http_mode(enabled: bool = True) -> None:
 @dataclass
 class AppContext:
     client: SimbaAPIClient
+    # None preserves direct-handler contexts used by older integrations.
+    serving_http: bool | None = None
 
 
 @asynccontextmanager
@@ -38,7 +40,8 @@ async def app_lifespan(server: MCPServer) -> AsyncIterator[AppContext]:
     # added to AppContext without revisiting this.
     base_url = os.environ.get("SIMBA_API_URL", "http://localhost:5005")
     api_key = os.environ.get("SIMBA_API_KEY", "")
-    if _serving_http:
+    serving_http = getattr(server, "_simba_http_mode", _serving_http)
+    if serving_http:
         # BYOK (#51): callers bring their own key; the env key is unused.
         logger.info(
             "HTTP mode: per-caller Authorization bearer tokens authenticate "
@@ -57,7 +60,7 @@ async def app_lifespan(server: MCPServer) -> AsyncIterator[AppContext]:
         )
     client = SimbaAPIClient(base_url, api_key)
     try:
-        yield AppContext(client=client)
+        yield AppContext(client=client, serving_http=serving_http)
     finally:
         await client.close()
 
@@ -76,7 +79,7 @@ def _own_version() -> str:
 
 def create_app(mcp: MCPServer):
     """Create the ASGI app for uvicorn/Streamable HTTP deployment."""
-    set_http_mode(True)
+    mcp._simba_http_mode = True
     # host="0.0.0.0" opts out of the SDK's auto-enabled DNS-rebinding
     # protection (it activates when host is localhost-ish): this app runs
     # behind a reverse proxy with a public Host header, which the localhost

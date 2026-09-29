@@ -55,7 +55,8 @@ def _call(monkeypatch, handle, tool, arguments):
 
     monkeypatch.setattr(runtime, "_serving_http", runtime._serving_http)
     monkeypatch.setattr(SimbaAPIClient, "_get_client", get_client)
-    with TestClient(server._create_app()) as client:
+    profile = "data_scientist" if tool == "create_model" else "marketer"
+    with TestClient(runtime.create_app(server.create_server(profile=profile))) as client:
         return client.post(
             "/",
             headers={

@@ -149,6 +149,11 @@ Tool descriptions default to the full legacy catalogue. Set
 descriptions for model creation, results and optimisation. Names, schemas and
 execution stay the same. See [configuration, rollback and comparison evidence](docs/compact-descriptions.md).
 
+Optional [tool profiles](docs/tool-profiles.md) provide marketer and reviewer views.
+Use `simba-mcp --profile marketer` or `SIMBA_TOOL_PROFILE=reviewer` at startup.
+`full` remains the default; `data_scientist` includes every tool and the entire Studies
+lifecycle. Profiles are starting views, not backend permissions.
+
 An experimental [native-discovery host example](docs/native-discovery.md) compares
 provider tool search against the compact eager catalogue using synthetic backends.
 It is a paid, explicitly invoked evaluation command and does not enable discovery

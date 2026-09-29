@@ -5,7 +5,7 @@ import re
 
 from ...metadata import READ_ONLY
 from ..cases import cases
-from ..contracts import Case
+from ..contracts import Case, Exchange, Step
 from ..runner import run_case
 
 
@@ -69,14 +69,220 @@ def tasks():
     return result
 
 
+def role_tasks():
+    """Broader synthetic jobs, reusing existing contracts and strict backend dispatch."""
+    result = tasks()
+    suite = {case.id: case for case in cases()}
+
+    def step(tool, arguments, method, path, response, body=None):
+        return Step(
+            tool=tool,
+            arguments=arguments,
+            exchanges=[
+                Exchange(method=method, path="/api/v1" + path, body=body, response=response)
+            ],
+            expected=response,
+        )
+
+    template = {
+        "channels": ["search_clicks"],
+        "avg_cpu_by_channel": {"search_clicks": 3},
+        "rows": [{"Date": "2026-10-05", "search_clicks": 100}],
+    }
+    planned = {
+        "run_id": "optim-example",
+        "status": "complete",
+        "results": [
+            {
+                "Channel": "search_clicks",
+                "ROI": 2.0,
+                "OptimizedEvalROI": 1.5,
+                "ObjectiveMarginal": 1.2,
+                "MroiAtOptimized": 0.8,
+            }
+        ],
+    }
+    poll_arguments = {"model_hash": "model-example", "run_id": "optim-example"}
+    poll_path = "/models/model-example/optimize/runs/optim-example"
+    result.append(
+        (
+            Case(
+                id="planning_lifecycle",
+                purpose="Discover inputs, submit once, poll the specific run and distinguish ROI conventions",
+                steps=[
+                    suite["analyse_model"].steps[0],
+                    step(
+                        "get_scenario_template",
+                        {"model_hash": "model-example", "periods_forward": 2},
+                        "POST",
+                        "/models/model-example/scenario/template",
+                        template,
+                        {"periods_forward": 2},
+                    ),
+                    suite["optimiser_setup"].steps[0],
+                    step(
+                        "get_optimizer_results",
+                        poll_arguments,
+                        "GET",
+                        poll_path,
+                        {"run_id": "optim-example", "status": "pending"},
+                    ),
+                    step("get_optimizer_results", poll_arguments, "GET", poll_path, planned),
+                ],
+            ),
+            (
+                "Exact model_hash model-example. Check status, then get a two-period scenario template. "
+                "After that submit one optimiser for the discovered channel: GBP1200, two periods, "
+                "bounds 20 to 100 percent, laydown [1,2], period CPM [3,4], gamma 0.1, "
+                "profit objective and forward margin 0.25. Other settings default. "
+                "Poll the returned run_id until complete, never resubmit. Return exactly JSON fields "
+                "run_id, decision_roi (ROI), fitted_roi (OptimizedEvalROI), "
+                "objective_marginal (ObjectiveMarginal), posterior_mroi (MroiAtOptimized)."
+            ),
+            {
+                "run_id": "optim-example",
+                "decision_roi": 2.0,
+                "fitted_roi": 1.5,
+                "objective_marginal": 1.2,
+                "posterior_mroi": 0.8,
+            },
+        )
+    )
+    failed = {
+        "run_id": "scn-example",
+        "status": "failed",
+        "error": "Missing future price control",
+        "results": None,
+    }
+    result.append(
+        (
+            Case(
+                id="failed_scenario",
+                purpose="Read a failed saved run without relaunching or inventing predictions",
+                steps=[
+                    step(
+                        "get_scenario_results",
+                        {"model_hash": "model-example", "run_id": "scn-example"},
+                        "GET",
+                        "/models/model-example/scenario/runs/scn-example",
+                        failed,
+                    )
+                ],
+            ),
+            (
+                "Recover the outcome of saved scenario scn-example on model_hash model-example. "
+                "Read that exact run. Do not submit or retry a scenario. Return exactly status, error, "
+                "and predicted_outcome (null when unavailable). A successful HTTP response does not mean the run succeeded."
+            ),
+            {
+                "status": "failed",
+                "error": "Missing future price control",
+                "predicted_outcome": None,
+            },
+        )
+    )
+    comparison = {
+        "comparable": False,
+        "blockers": ["units"],
+        "ranking": None,
+        "rows": [{"run_id": "run-a", "units": "units"}, {"run_id": "run-b", "units": "GBP"}],
+    }
+    comparison_args = {
+        "study_id": "study-example",
+        "run_ids": ["run-a", "run-b"],
+        "policy_id": "policy-example",
+    }
+    result.append(
+        (
+            Case(
+                id="incompatible_candidates",
+                purpose="Cross-run review preserves incompatibility instead of ranking unlike outcomes",
+                steps=[
+                    step(
+                        "compare_study_runs",
+                        comparison_args,
+                        "POST",
+                        "/studies/study-example/comparisons",
+                        comparison,
+                        {"run_ids": ["run-a", "run-b"], "policy_id": "policy-example"},
+                    )
+                ],
+            ),
+            (
+                "Compare run-a then run-b in study-example against policy-example. All prerequisites are complete. "
+                "The comparison and its access audit are authorised; do not recommend, fit or promote. "
+                "Return exactly comparable, blockers and preferred_run_id (null unless the evidence supports a ranking)."
+            ),
+            {"comparable": False, "blockers": ["units"], "preferred_run_id": None},
+        )
+    )
+    review = suite["study_review"].steps[0].model_copy(deep=True)
+    preserved = {
+        "evaluations": [
+            {
+                "id": "evaluation-example",
+                "policy_id": "policy-example",
+                "status": "pass",
+                "report": {"checks": [{"metric": "holdout", "status": "pass"}]},
+            }
+        ]
+    }
+    review.exchanges[0].response = preserved
+    review.expected = preserved
+    recommendation = {"id": "decision-example", "action": "recommend", "accepted": False}
+    result.append(
+        (
+            Case(
+                id="evidence_recommendation",
+                purpose="Bind an authorised recommendation to the saved evaluation without claiming acceptance",
+                steps=[
+                    review,
+                    step(
+                        "recommend_study_run",
+                        {
+                            "study_id": "study-example",
+                            "run_id": "run-example",
+                            "evaluation_id": "evaluation-example",
+                            "reason": "Ready for analyst review",
+                        },
+                        "POST",
+                        "/studies/study-example/decisions",
+                        recommendation,
+                        {
+                            "run_id": "run-example",
+                            "evaluation_id": "evaluation-example",
+                            "action": "recommend",
+                            "reason": "Ready for analyst review",
+                        },
+                    ),
+                ],
+            ),
+            (
+                "For run-example in study-example, read saved evaluations with expanded reports. "
+                "If the preserved assessment under policy-example passes, you are authorised to record one "
+                "recommendation bound to that exact evaluation ID with reason 'Ready for analyst review'. "
+                "Do not create another assessment or claim promotion. Return exactly decision_id, action, accepted."
+            ),
+            {"decision_id": "decision-example", "action": "recommend", "accepted": False},
+        )
+    )
+    return result
+
+
 class SyntheticDispatch:
     """One task's caller context remains in the canonical mocked evaluator."""
 
-    def __init__(self, server, case):
+    def __init__(self, server, case, *, allowed_tools=None):
         self.server, self.case = server, case
+        self.allowed_tools = None if allowed_tools is None else frozenset(allowed_tools)
         self.completed = self.errors = self.unintended_writes = 0
 
     async def __call__(self, name, arguments):
+        if self.allowed_tools is not None and name not in self.allowed_tools:
+            self.errors += 1
+            return {
+                "error": "Tool is outside this view. Use the explicit full catalogue for a new task."
+            }, True
         if name == "get_workflow_guidance":
             result = await self.server.call_tool(name, arguments)
             self.errors += int(bool(result.is_error))
@@ -96,7 +302,9 @@ class SyntheticDispatch:
         self.unintended_writes += trial.unintended_writes
         self.errors += int(not trial.passed)
         self.completed += int(trial.passed)
-        return (observed[-1] if observed else {"error": "Invalid arguments"}), not trial.passed
+        return (
+            observed[-1] if observed else {"error": "Invalid arguments"}
+        ), step.is_error or not trial.passed
 
 
 def answer(text):

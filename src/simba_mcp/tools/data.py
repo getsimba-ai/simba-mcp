@@ -76,7 +76,7 @@ async def upload_data(
             },
         )
     if csv_path:
-        denial = _local_files_denial_reason()
+        denial = _local_files_denial_reason(ctx)
         if denial:
             return api_error(403, {"error": denial})
         path = Path(csv_path).expanduser()

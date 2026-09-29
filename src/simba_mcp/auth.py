@@ -9,11 +9,19 @@ from . import runtime
 from .api_client import CALLER_API_KEY, SimbaAPIClient
 
 
-def _local_files_allowed() -> bool:
-    return _local_files_denial_reason() is None
+def _http_mode(ctx=None) -> bool:
+    if ctx is not None:
+        mode = getattr(ctx.request_context.lifespan_context, "serving_http", None)
+        if isinstance(mode, bool):
+            return mode
+    return runtime._serving_http
 
 
-def _local_files_denial_reason() -> str | None:
+def _local_files_allowed(ctx=None) -> bool:
+    return _local_files_denial_reason(ctx) is None
+
+
+def _local_files_denial_reason(ctx=None) -> str | None:
     """Return an error message if csv_path reads are disallowed, else None.
 
     Distinguishes an explicit SIMBA_MCP_ALLOW_LOCAL_FILES=0 from the default
@@ -28,7 +36,7 @@ def _local_files_denial_reason() -> str | None:
             f"to {env!r}. Pass csv_content instead, or set "
             "SIMBA_MCP_ALLOW_LOCAL_FILES=1 to allow local file reads."
         )
-    if runtime._serving_http:
+    if _http_mode(ctx):
         return (
             "csv_path is disabled on network transports (HTTP/SSE) because "
             "it reads the server host's filesystem, not yours. Pass "
@@ -63,7 +71,7 @@ def _page(limit=None, cursor=None, expand=None):
 
 
 def _client(ctx: Context[runtime.AppContext, Any]) -> SimbaAPIClient:
-    if runtime._serving_http:
+    if _http_mode(ctx):
         # Bring-your-own-key (#51): every hosted caller authenticates with
         # their OWN key from this request's Authorization header. Set
         # unconditionally — "" makes every backend call fail with guidance —
@@ -71,4 +79,6 @@ def _client(ctx: Context[runtime.AppContext, Any]) -> SimbaAPIClient:
         # fallback identity is exactly the hole this closes. The ContextVar
         # is task-local, so concurrent callers cannot mix keys.
         CALLER_API_KEY.set(_bearer_token(ctx))
+    elif getattr(ctx.request_context.lifespan_context, "serving_http", None) is False:
+        CALLER_API_KEY.set(None)
     return ctx.request_context.lifespan_context.client

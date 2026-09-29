@@ -1,0 +1,617 @@
+{
+  "baseline": "4f64166e789b558667199d1b9e0c86c2d3de3ae9",
+  "mode": "offline_candidate_filter_only",
+  "full": {
+    "tools": 81,
+    "bytes": 140593,
+    "estimated_tokens": 31716,
+    "sha256": "b339557413ea2598c7d8e8b447796b62848ec7c2f6579a1527c88fd4a59651df"
+  },
+  "profiles": {
+    "analysis": {
+      "surface": {
+        "tools": 8,
+        "bytes": 10652,
+        "estimated_tokens": 2381,
+        "sha256": "b117661f2107896ef15965cad5744c28d9a1dcff670980bf47a2e1bc36a0d8e1"
+      },
+      "names": [
+        "get_backend_capabilities",
+        "list_models",
+        "get_contribution_groups",
+        "list_projects",
+        "get_model",
+        "get_model_status",
+        "get_model_results",
+        "get_workflow_guidance"
+      ],
+      "fixture_availability": {
+        "analyse_model": {
+          "available": true,
+          "missing": []
+        },
+        "create_mmm": {
+          "available": false,
+          "missing": [
+            "create_model"
+          ]
+        },
+        "advanced_priors": {
+          "available": false,
+          "missing": [
+            "create_model"
+          ]
+        },
+        "optimiser_setup": {
+          "available": false,
+          "missing": [
+            "run_optimizer"
+          ]
+        },
+        "draft_edit": {
+          "available": false,
+          "missing": [
+            "create_recipe_draft",
+            "update_recipe_draft"
+          ]
+        },
+        "study_review": {
+          "available": false,
+          "missing": [
+            "list_study_evaluations"
+          ]
+        },
+        "stale_revision": {
+          "available": false,
+          "missing": [
+            "publish_recipe_draft"
+          ]
+        },
+        "wrong_channel": {
+          "available": false,
+          "missing": [
+            "run_optimizer"
+          ]
+        },
+        "rate_limit": {
+          "available": true,
+          "missing": []
+        },
+        "outage": {
+          "available": true,
+          "missing": []
+        },
+        "uncertain_launch": {
+          "available": false,
+          "missing": [
+            "launch_study_run"
+          ]
+        },
+        "cancellation": {
+          "available": true,
+          "missing": []
+        },
+        "invalid_arguments": {
+          "available": false,
+          "missing": [
+            "create_model"
+          ]
+        },
+        "missing_capability": {
+          "available": false,
+          "missing": [
+            "create_model"
+          ]
+        },
+        "cross_domain": {
+          "available": false,
+          "missing": [
+            "list_study_evaluations"
+          ]
+        }
+      }
+    },
+    "model-building": {
+      "surface": {
+        "tools": 33,
+        "bytes": 56790,
+        "estimated_tokens": 13225,
+        "sha256": "470f85e18b77bc760cfaccd8f1e58af3b4fbdbe1ee7d53b94f53ce2bf51cff37"
+      },
+      "names": [
+        "get_backend_capabilities",
+        "get_data_schema",
+        "get_data_report",
+        "upload_data",
+        "list_pipeline_versions",
+        "list_pipelines",
+        "run_pipeline",
+        "get_pipeline_run",
+        "set_pipeline_schedule",
+        "list_incrementality_tests",
+        "get_incrementality_test",
+        "create_incrementality_test",
+        "import_incrementality_tests",
+        "list_uploads",
+        "get_upload",
+        "list_models",
+        "create_model",
+        "create_var_model",
+        "link_var_model",
+        "unlink_var_model",
+        "set_contribution_groups",
+        "get_contribution_groups",
+        "rename_model",
+        "save_model",
+        "unsave_model",
+        "list_projects",
+        "create_project",
+        "rename_project",
+        "get_model",
+        "delete_model",
+        "get_model_status",
+        "get_model_results",
+        "get_workflow_guidance"
+      ],
+      "fixture_availability": {
+        "analyse_model": {
+          "available": true,
+          "missing": []
+        },
+        "create_mmm": {
+          "available": true,
+          "missing": []
+        },
+        "advanced_priors": {
+          "available": true,
+          "missing": []
+        },
+        "optimiser_setup": {
+          "available": false,
+          "missing": [
+            "run_optimizer"
+          ]
+        },
+        "draft_edit": {
+          "available": false,
+          "missing": [
+            "create_recipe_draft",
+            "update_recipe_draft"
+          ]
+        },
+        "study_review": {
+          "available": false,
+          "missing": [
+            "list_study_evaluations"
+          ]
+        },
+        "stale_revision": {
+          "available": false,
+          "missing": [
+            "publish_recipe_draft"
+          ]
+        },
+        "wrong_channel": {
+          "available": false,
+          "missing": [
+            "run_optimizer"
+          ]
+        },
+        "rate_limit": {
+          "available": true,
+          "missing": []
+        },
+        "outage": {
+          "available": true,
+          "missing": []
+        },
+        "uncertain_launch": {
+          "available": false,
+          "missing": [
+            "launch_study_run"
+          ]
+        },
+        "cancellation": {
+          "available": true,
+          "missing": []
+        },
+        "invalid_arguments": {
+          "available": true,
+          "missing": []
+        },
+        "missing_capability": {
+          "available": true,
+          "missing": []
+        },
+        "cross_domain": {
+          "available": false,
+          "missing": [
+            "list_study_evaluations"
+          ]
+        }
+      }
+    },
+    "optimisation": {
+      "surface": {
+        "tools": 16,
+        "bytes": 28506,
+        "estimated_tokens": 6569,
+        "sha256": "aa3d0425e86d7fbc9b365cd940a31c58975de6b52938afa529e73bd43df29984"
+      },
+      "names": [
+        "get_backend_capabilities",
+        "list_models",
+        "get_contribution_groups",
+        "list_projects",
+        "get_model",
+        "get_model_status",
+        "get_model_results",
+        "run_optimizer",
+        "get_optimizer_results",
+        "get_scenario_template",
+        "run_scenario",
+        "get_scenario_results",
+        "update_run",
+        "set_run_pinned",
+        "list_runs",
+        "get_workflow_guidance"
+      ],
+      "fixture_availability": {
+        "analyse_model": {
+          "available": true,
+          "missing": []
+        },
+        "create_mmm": {
+          "available": false,
+          "missing": [
+            "create_model"
+          ]
+        },
+        "advanced_priors": {
+          "available": false,
+          "missing": [
+            "create_model"
+          ]
+        },
+        "optimiser_setup": {
+          "available": true,
+          "missing": []
+        },
+        "draft_edit": {
+          "available": false,
+          "missing": [
+            "create_recipe_draft",
+            "update_recipe_draft"
+          ]
+        },
+        "study_review": {
+          "available": false,
+          "missing": [
+            "list_study_evaluations"
+          ]
+        },
+        "stale_revision": {
+          "available": false,
+          "missing": [
+            "publish_recipe_draft"
+          ]
+        },
+        "wrong_channel": {
+          "available": true,
+          "missing": []
+        },
+        "rate_limit": {
+          "available": true,
+          "missing": []
+        },
+        "outage": {
+          "available": true,
+          "missing": []
+        },
+        "uncertain_launch": {
+          "available": false,
+          "missing": [
+            "launch_study_run"
+          ]
+        },
+        "cancellation": {
+          "available": true,
+          "missing": []
+        },
+        "invalid_arguments": {
+          "available": false,
+          "missing": [
+            "create_model"
+          ]
+        },
+        "missing_capability": {
+          "available": false,
+          "missing": [
+            "create_model"
+          ]
+        },
+        "cross_domain": {
+          "available": false,
+          "missing": [
+            "list_study_evaluations"
+          ]
+        }
+      }
+    },
+    "study-authoring": {
+      "surface": {
+        "tools": 62,
+        "bytes": 100597,
+        "estimated_tokens": 22380,
+        "sha256": "8390aed3cbe7ad1ac5d419c7f95343ea05cdef9d71265a73d02fe1e053ec1dc4"
+      },
+      "names": [
+        "create_recipe_draft",
+        "get_recipe_draft",
+        "get_recipe_draft_template",
+        "publish_recipe_draft",
+        "get_recipe_revision_authoring",
+        "list_recipe_drafts",
+        "update_recipe_draft",
+        "get_backend_capabilities",
+        "get_data_schema",
+        "get_data_report",
+        "upload_data",
+        "list_pipeline_versions",
+        "list_pipelines",
+        "run_pipeline",
+        "get_pipeline_run",
+        "set_pipeline_schedule",
+        "list_incrementality_tests",
+        "get_incrementality_test",
+        "create_incrementality_test",
+        "import_incrementality_tests",
+        "list_uploads",
+        "get_upload",
+        "list_models",
+        "get_contribution_groups",
+        "list_projects",
+        "get_model",
+        "get_model_status",
+        "get_model_results",
+        "list_studies",
+        "create_study",
+        "get_study",
+        "get_launch_eligibility",
+        "get_study_overview",
+        "update_study",
+        "list_study_recipes",
+        "create_study_recipe",
+        "revise_study_recipe",
+        "get_recipe_revision",
+        "diff_recipe_revisions",
+        "refreeze_recipe_revision",
+        "validate_study_recipe",
+        "launch_study_run",
+        "list_study_runs",
+        "get_study_run",
+        "cancel_study_run",
+        "list_quality_policies",
+        "diff_quality_policies",
+        "get_quality_policy",
+        "create_quality_policy",
+        "retire_quality_policy",
+        "evaluate_study_run",
+        "list_study_evaluations",
+        "list_study_decisions",
+        "get_study_champion",
+        "get_study_prediction_access",
+        "get_study_validation_resolutions",
+        "declare_study_holdout_use",
+        "assess_study_validation_pair",
+        "recommend_study_run",
+        "adopt_model_into_study",
+        "compare_study_runs",
+        "get_workflow_guidance"
+      ],
+      "fixture_availability": {
+        "analyse_model": {
+          "available": true,
+          "missing": []
+        },
+        "create_mmm": {
+          "available": false,
+          "missing": [
+            "create_model"
+          ]
+        },
+        "advanced_priors": {
+          "available": false,
+          "missing": [
+            "create_model"
+          ]
+        },
+        "optimiser_setup": {
+          "available": false,
+          "missing": [
+            "run_optimizer"
+          ]
+        },
+        "draft_edit": {
+          "available": true,
+          "missing": []
+        },
+        "study_review": {
+          "available": true,
+          "missing": []
+        },
+        "stale_revision": {
+          "available": true,
+          "missing": []
+        },
+        "wrong_channel": {
+          "available": false,
+          "missing": [
+            "run_optimizer"
+          ]
+        },
+        "rate_limit": {
+          "available": true,
+          "missing": []
+        },
+        "outage": {
+          "available": true,
+          "missing": []
+        },
+        "uncertain_launch": {
+          "available": true,
+          "missing": []
+        },
+        "cancellation": {
+          "available": true,
+          "missing": []
+        },
+        "invalid_arguments": {
+          "available": false,
+          "missing": [
+            "create_model"
+          ]
+        },
+        "missing_capability": {
+          "available": false,
+          "missing": [
+            "create_model"
+          ]
+        },
+        "cross_domain": {
+          "available": true,
+          "missing": []
+        }
+      }
+    },
+    "study-review": {
+      "surface": {
+        "tools": 27,
+        "bytes": 32967,
+        "estimated_tokens": 7239,
+        "sha256": "fd4f928721aa63db83846f2f37f037153cbec7a25b496323e2a9f395f6e485e0"
+      },
+      "names": [
+        "get_backend_capabilities",
+        "list_models",
+        "get_contribution_groups",
+        "list_projects",
+        "get_model",
+        "get_model_status",
+        "get_model_results",
+        "list_studies",
+        "get_study",
+        "get_launch_eligibility",
+        "get_study_overview",
+        "list_study_recipes",
+        "get_recipe_revision",
+        "diff_recipe_revisions",
+        "validate_study_recipe",
+        "list_study_runs",
+        "get_study_run",
+        "list_quality_policies",
+        "diff_quality_policies",
+        "get_quality_policy",
+        "list_study_evaluations",
+        "list_study_decisions",
+        "get_study_champion",
+        "get_study_prediction_access",
+        "get_study_validation_resolutions",
+        "compare_study_runs",
+        "get_workflow_guidance"
+      ],
+      "fixture_availability": {
+        "analyse_model": {
+          "available": true,
+          "missing": []
+        },
+        "create_mmm": {
+          "available": false,
+          "missing": [
+            "create_model"
+          ]
+        },
+        "advanced_priors": {
+          "available": false,
+          "missing": [
+            "create_model"
+          ]
+        },
+        "optimiser_setup": {
+          "available": false,
+          "missing": [
+            "run_optimizer"
+          ]
+        },
+        "draft_edit": {
+          "available": false,
+          "missing": [
+            "create_recipe_draft",
+            "update_recipe_draft"
+          ]
+        },
+        "study_review": {
+          "available": true,
+          "missing": []
+        },
+        "stale_revision": {
+          "available": false,
+          "missing": [
+            "publish_recipe_draft"
+          ]
+        },
+        "wrong_channel": {
+          "available": false,
+          "missing": [
+            "run_optimizer"
+          ]
+        },
+        "rate_limit": {
+          "available": true,
+          "missing": []
+        },
+        "outage": {
+          "available": true,
+          "missing": []
+        },
+        "uncertain_launch": {
+          "available": false,
+          "missing": [
+            "launch_study_run"
+          ]
+        },
+        "cancellation": {
+          "available": true,
+          "missing": []
+        },
+        "invalid_arguments": {
+          "available": false,
+          "missing": [
+            "create_model"
+          ]
+        },
+        "missing_capability": {
+          "available": false,
+          "missing": [
+            "create_model"
+          ]
+        },
+        "cross_domain": {
+          "available": true,
+          "missing": []
+        }
+      }
+    }
+  },
+  "limitations": [
+    "not shipped profiles",
+    "name availability is necessary but not workflow completeness",
+    "no provider or client trial",
+    "no new numerical acceptance budget"
+  ],
+  "tokenizer": {
+    "encoding": "o200k_base",
+    "version": "0.14.0"
+  },
+  "measurement": "UTF-8 canonical compact JSON tools-list result; candidate filtering preserves registry order and tool objects"
+}

@@ -62,6 +62,11 @@ logging policy must not be reused with private/live data without redesign.
 
 ## Support matrix
 
+The same host also supports an experimental [role-view comparison](workflow-profile-evaluation.md)
+through `--role-comparison marketer` or `--role-comparison reviewer` in eager mode.
+The host now dispatches through the corresponding registered [server profile](tool-profiles.md);
+invoking the comparison does not change a running production server.
+
 | Surface | Native discovery | Eager fallback | MCP/Skills boundary |
 | --- | --- | --- | --- |
 | This Messages API host, fixed Haiku 4.5 model and BM25 tool above | API accepted, discovery observed, task limitations below | Tested on the same tasks | Actual local SDK dispatch with synthetic caller context; no native Skills installation |

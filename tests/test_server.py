@@ -10,7 +10,7 @@ import anyio
 import pytest
 
 from simba_mcp import runtime
-from simba_mcp.server import AppContext, app_lifespan, mcp
+from simba_mcp.server import AppContext, app_lifespan, create_server, mcp
 from simba_mcp.tools import data as data_tools
 
 
@@ -390,7 +390,7 @@ class TestLifespan:
         """The lifespan context manager yields an AppContext with a SimbaAPIClient."""
         env = {"SIMBA_API_URL": "http://test:9999", "SIMBA_API_KEY": "sk_test"}
         with patch.dict(os.environ, env):
-            async with app_lifespan(mcp) as ctx:
+            async with app_lifespan(create_server()) as ctx:
                 assert isinstance(ctx, AppContext)
                 assert ctx.client.base_url == "http://test:9999"
 
@@ -399,7 +399,7 @@ class TestLifespan:
         """The client is closed when the lifespan exits."""
         env = {"SIMBA_API_URL": "http://test:9999", "SIMBA_API_KEY": "sk_test"}
         with patch.dict(os.environ, env):
-            async with app_lifespan(mcp) as ctx:
+            async with app_lifespan(create_server()) as ctx:
                 client = ctx.client
             assert client._client is None or client._client.is_closed
 
@@ -409,7 +409,7 @@ class TestLifespan:
         env = {"SIMBA_API_URL": "http://test:9999", "SIMBA_API_KEY": ""}
         with patch.dict(os.environ, env, clear=False):
             os.environ.pop("SIMBA_API_KEY", None)
-            async with app_lifespan(mcp) as ctx:
+            async with app_lifespan(create_server()) as ctx:
                 assert ctx.client is not None
         warnings = [r.message for r in caplog.records if "SIMBA_API_KEY" in r.message]
         assert len(warnings) == 1

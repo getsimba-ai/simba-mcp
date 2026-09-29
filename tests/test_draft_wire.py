@@ -243,7 +243,8 @@ def test_authoring_snapshot_crosses_wire_without_losing_fields(monkeypatch, oper
 
     monkeypatch.setattr(runtime, "_serving_http", runtime._serving_http)
     monkeypatch.setattr(SimbaAPIClient, "_get_client", get_client)
-    with TestClient(server._create_app()) as client:
+    profile = "reviewer" if tool == "get_recipe_revision_authoring" else "data_scientist"
+    with TestClient(runtime.create_app(server.create_server(profile=profile))) as client:
         result = client.post(
             "/",
             headers={

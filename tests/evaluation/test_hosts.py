@@ -195,3 +195,162 @@ async def test_cli_zero_budget_stops_before_network_and_keeps_ledger(tmp_path, m
     assert "synthetic-test-key" not in output.read_text()
     with pytest.raises(ValueError, match="overwrite"):
         await run(args)
+
+
+@pytest.mark.anyio
+async def test_role_selections_are_independent_and_data_scientist_is_full():
+    from simba_mcp.profiles import PROFILES, select_tools
+    from simba_mcp.server import create_server
+
+    server = create_server("compact")
+    tools = await server.list_tools()
+    original = [tool.model_dump() for tool in tools]
+    assert select_tools(tools, "data_scientist") == tools
+    for role, names in PROFILES.items():
+        selected = select_tools(tools, role)
+        assert {tool.name for tool in selected} == names
+        assert selected == [tool for tool in tools if tool.name in names]
+        selected.clear()
+        assert [tool.model_dump() for tool in await server.list_tools()] == original
+    with pytest.raises(ValueError, match="Unknown"):
+        select_tools(tools, "administrator")
+    with pytest.raises(ValueError, match="missing tools"):
+        select_tools([], "marketer")
+    assert select_tools(tools, "full") == tools
+
+
+@pytest.mark.anyio
+async def test_all_role_jobs_execute_with_visible_tools_and_exact_mock_requests():
+    from simba_mcp.evaluation.hosts.roles import ROLE_CASES
+    from simba_mcp.evaluation.hosts.scenarios import SyntheticDispatch, role_tasks
+    from simba_mcp.profiles import select_tools
+    from simba_mcp.server import create_server
+
+    server = create_server("compact")
+    tools = await server.list_tools()
+    suite = {case.id: case for case, _, _ in role_tasks()}
+    for role, case_ids in ROLE_CASES.items():
+        visible = {tool.name for tool in select_tools(tools, role)}
+        for case_id in case_ids:
+            case = suite[case_id]
+            assert {step.tool for step in case.steps} <= visible
+            dispatch = SyntheticDispatch(server, case, allowed_tools=visible)
+            for step in case.steps:
+                _, error = await dispatch(step.tool, step.arguments)
+                assert error == step.is_error
+            assert dispatch.completed == len(case.steps)
+            assert dispatch.errors == dispatch.unintended_writes == 0
+
+
+@pytest.mark.anyio
+async def test_out_of_role_tool_needs_explicit_full_fallback_without_mutating_view():
+    from simba_mcp.evaluation.cases import cases
+    from simba_mcp.evaluation.hosts.scenarios import SyntheticDispatch
+    from simba_mcp.profiles import select_tools
+    from simba_mcp.server import create_server
+
+    server = create_server("compact")
+    tools = await server.list_tools()
+    case = next(case for case in cases() if case.id == "advanced_priors")
+    visible = {tool.name for tool in select_tools(tools, "marketer")}
+    restricted = SyntheticDispatch(server, case, allowed_tools=visible)
+    step = case.steps[0]
+    payload, error = await restricted(step.tool, step.arguments)
+    assert error and "full catalogue" in payload["error"]
+    assert restricted.completed == 0
+    fallback = SyntheticDispatch(
+        server, case, allowed_tools=[tool.name for tool in select_tools(tools, "full")]
+    )
+    _, error = await fallback(step.tool, step.arguments)
+    assert not error and fallback.completed == 1
+    assert step.tool not in visible
+    assert restricted.completed == 0
+
+
+@pytest.mark.anyio
+async def test_expected_backend_refusal_is_still_a_tool_error():
+    from simba_mcp.evaluation.cases import cases
+    from simba_mcp.evaluation.hosts.scenarios import SyntheticDispatch
+    from simba_mcp.server import create_server
+
+    case = next(case for case in cases() if case.id == "wrong_channel")
+    dispatch = SyntheticDispatch(create_server("compact"), case)
+    _, error = await dispatch(case.steps[0].tool, case.steps[0].arguments)
+    assert error
+    assert dispatch.completed == 1 and dispatch.errors == 0
+
+
+@pytest.mark.anyio
+async def test_role_cli_pairs_identical_tasks_and_alternates_order(tmp_path, monkeypatch):
+    from simba_mcp.evaluation.hosts import __main__ as command
+
+    requests = []
+
+    def transport(request):
+        body = json.loads(request.content)
+        requests.append(body)
+        if len(body["messages"]) == 1:
+            content = [
+                {
+                    "type": "tool_use",
+                    "id": "status",
+                    "name": "get_model_status",
+                    "input": {"model_hash": "model-example"},
+                },
+                {
+                    "type": "tool_use",
+                    "id": "results",
+                    "name": "get_model_results",
+                    "input": {"model_hash": "model-example", "sections": "channel_summary"},
+                },
+            ]
+            stop = "tool_use"
+        else:
+            content = [
+                {
+                    "type": "text",
+                    "text": json.dumps(
+                        {
+                            "channel": "search_clicks",
+                            "roi": 2.0,
+                            "contribution_share": 0.1,
+                            "unit": "units",
+                            "interval": [0.05, 0.15],
+                        }
+                    ),
+                }
+            ]
+            stop = "end_turn"
+        return httpx.Response(
+            200,
+            json={
+                "content": content,
+                "stop_reason": stop,
+                "usage": {"input_tokens": 10, "output_tokens": 5},
+            },
+        )
+
+    monkeypatch.setattr(
+        command, "client", lambda _: httpx.AsyncClient(transport=httpx.MockTransport(transport))
+    )
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "synthetic-test-key")
+    output = tmp_path / "paired.json"
+    await command.run(
+        SimpleNamespace(
+            output=output,
+            cap_usd=10,
+            prior_usd=7,
+            case="analyse_model",
+            mode="eager",
+            samples=2,
+            role_comparison="marketer",
+        )
+    )
+    report = json.loads(output.read_text())
+    assert [row["view"] for row in report["trials"]] == ["full", "marketer", "marketer", "full"]
+    assert all(row["passed"] for row in report["trials"])
+    assert len({json.dumps(r["messages"][0], sort_keys=True) for r in requests}) == 1
+    assert requests[0]["tools"] == requests[-1]["tools"]
+    assert len(requests[0]["tools"]) > len(requests[2]["tools"])
+    assert report["budget"]["prior"] == 7
+    assert report["budget"]["charged"] > 0 and report["budget"]["reserved"] == 0
