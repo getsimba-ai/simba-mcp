@@ -41,6 +41,9 @@ async def run(args):
     role = getattr(args, "role_comparison", None)
     baseline_path = getattr(args, "results_baseline", None)
     robust = getattr(args, "results_robust", False)
+    acceptance = getattr(args, "results_acceptance", False)
+    if acceptance and not robust:
+        raise ValueError("Acceptance candidate cases require a frozen robust comparison")
     dataset_count = getattr(args, "results_validation_datasets", 0)
     if dataset_count and (not robust or dataset_count not in (2, 3)):
         raise ValueError("Generated validation requires robust mode and two or three datasets")
@@ -65,11 +68,16 @@ async def run(args):
         raise ValueError("Role comparison requires eager mode to isolate catalogue visibility")
     suite = role_tasks() if role else tasks()
     if guidance_arms:
+        if acceptance:
+            from ..result_acceptance import acceptance_tasks
+
         validation_seed = secrets.randbits(63) if dataset_count else None
         suite = [
             (task, task.prompt, task.expected)
             for task in (
-                validation_tasks(validation_seed, dataset_count)
+                acceptance_tasks()
+                if acceptance
+                else validation_tasks(validation_seed, dataset_count)
                 if dataset_count
                 else development_tasks()
                 if robust
@@ -93,6 +101,7 @@ async def run(args):
             "results_comparison": bool(guidance_arms),
             "results_prompt": getattr(args, "results_prompt", "mixed"),
             "results_robust": robust,
+            "results_acceptance": acceptance,
             "model": MODEL,
             "validation_seed": validation_seed,
             "validation_datasets": dataset_count,
@@ -114,6 +123,9 @@ async def run(args):
                     "evidence_options": [sorted(s) for s in c.evidence_sets()],
                     "fixture": c.fixture,
                     "dataset": c.dataset,
+                    "evidence_window": c.evidence_window,
+                    "max_response_bytes": c.max_response_bytes,
+                    "allow_recovery_errors": c.allow_recovery_errors,
                 },
                 "prompt": p,
                 "expected": e,
@@ -126,7 +138,8 @@ async def run(args):
     if robust:
         report["calibration"] = calibrate()
         report["experiment_inputs"] = {
-            "purpose": "development",
+            "purpose": "candidate_acceptance" if acceptance else "development",
+            "case_review": getattr(args, "case_review", None),
             "samples": args.samples,
             "configuration": report["configuration"],
             "authorised_budget": {"cap_usd": args.cap_usd, "prior_usd": args.prior_usd},
@@ -254,6 +267,16 @@ async def run(args):
                             row["noncontributing_result_calls"] = (
                                 dispatch.noncontributing_result_calls
                             )
+                            row["read_authorisation"] = {
+                                key: getattr(dispatch, key)
+                                for key in (
+                                    "read_attempts",
+                                    "actual_reads",
+                                    "unauthorised_read_attempts",
+                                    "unauthorised_reads",
+                                )
+                            }
+                            row["trajectory"] = dispatch.calls
                             row["assertions"] = dispatch.grade(actual)
                             if robust:
                                 row["fact_verdict"] = fact_verdict(
@@ -291,6 +314,10 @@ async def run(args):
                                 )
                                 row["passed"] = row["outcome"] == "pass"
                         save()
+                        if guidance_arms and (
+                            dispatch.unauthorised_reads or dispatch.unintended_writes
+                        ):
+                            raise RuntimeError("Hard access safety failure; evidence retained")
                         print(
                             json.dumps(
                                 {
@@ -343,11 +370,19 @@ def main():
         "--stop-file", type=Path, help="Stop at the next provider checkpoint if this file exists"
     )
     parser.add_argument(
+        "--results-acceptance",
+        action="store_true",
+        help="Independently reviewed synthetic candidate cases; requires review manifest",
+    )
+    parser.add_argument("--case-review", type=Path)
+    parser.add_argument(
         "--results-robust",
         action="store_true",
         help="Frozen development comparison with calibration and paired intervals",
     )
     args = parser.parse_args()
+    if args.case_review:
+        args.case_review = json.loads(args.case_review.read_text(encoding="utf-8"))
     if args.samples < 1:
         parser.error("samples must be positive")
     asyncio.run(run(args))

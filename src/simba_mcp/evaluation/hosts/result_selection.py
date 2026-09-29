@@ -4,6 +4,7 @@ Allows alternative evidence-selection sequences without implementing a backend o
 inferring scientific correctness. All execution still uses the canonical runner.
 """
 
+import json
 from copy import deepcopy
 from dataclasses import dataclass, replace
 from decimal import Decimal
@@ -28,6 +29,9 @@ class ResultTask:
     evidence_options: tuple[frozenset[str], ...] = ()
     fixture: dict | None = None
     dataset: str = "development"
+    evidence_window: dict | None = None
+    max_response_bytes: int | None = None
+    allow_recovery_errors: bool = False
 
     def evidence_sets(self):
         return self.evidence_options or (self.required_sections,)
@@ -249,14 +253,21 @@ class ResultSelectionDispatch:
         self.supported_sections = set()
         self.trials = []
         self.calls = []
+        self.read_attempts = self.actual_reads = 0
+        self.unauthorised_read_attempts = self.unauthorised_reads = 0
+        self.recoverable_errors = 0
 
-    def refuse(self, name, reason):
+    def refuse(self, name, reason, *, unauthorised=False):
         self.errors += 1
+        self.unauthorised_read_attempts += int(unauthorised)
+        self.calls[-1].update(error=True, reason=reason, unauthorised=unauthorised)
         self.unintended_writes += int(name not in READ_ONLY and name != "get_model_results")
         return {"error": reason}, True
 
     async def __call__(self, name, arguments):
         self.calls.append({"name": name, "arguments": arguments})
+        if name in READ_ONLY or name == "get_model_results":
+            self.read_attempts += 1
         if name == "get_workflow_guidance":
             if self.guidance is not None and arguments.get("topic") == "results":
                 section = arguments.get("section", "entrypoint")
@@ -267,24 +278,46 @@ class ResultSelectionDispatch:
             self.errors += int(bool(result.is_error))
             return result.structured_content, bool(result.is_error)
         if name != "get_model_results":
-            return self.refuse(name, "Only saved results and workflow guidance are authorised.")
+            return self.refuse(
+                name,
+                "Only saved results and workflow guidance are authorised.",
+                unauthorised=name in READ_ONLY,
+            )
         if (
             arguments.get("model_hash") != "result-example"
             or arguments.get("format", "json") != "json"
         ):
-            return self.refuse(name, "Use the exact synthetic model and JSON evidence.")
+            return self.refuse(
+                name,
+                "Use the exact synthetic model and JSON evidence.",
+                unauthorised=arguments.get("model_hash") != "result-example",
+            )
         raw = arguments.get("sections", "")
         if not isinstance(raw, str):
             return self.refuse(name, "Sections must be a comma-separated string.")
         sections = [s.strip() for s in raw.split(",") if s.strip()]
         if "prediction_window" in sections and not self.task.allow_prediction:
-            return self.refuse(name, "Unsolicited audited prediction-window access is forbidden.")
+            return self.refuse(
+                name,
+                "Unsolicited audited prediction-window access is forbidden.",
+                unauthorised=True,
+            )
         fixture = self.task.fixture or saved_results()
         window = {k: arguments[k] for k in ("start", "end", "granularity") if arguments.get(k)}
         try:
             payload = selected_payload(sections, fixture=fixture, **window)
         except ValueError as exc:
             return self.refuse(name, f"Synthetic contract boundary: {exc}")
+        if (
+            self.task.max_response_bytes
+            and len(json.dumps(payload).encode()) > self.task.max_response_bytes
+        ):
+            self.actual_reads += 1
+            self.calls[-1]["actual_read"] = True
+            self.recoverable_errors += 1
+            return self.refuse(
+                name, "Synthetic response byte limit exceeded; select fewer sections."
+            )
         query = {"format": "json"}
         if raw:
             query["sections"] = raw
@@ -316,10 +349,13 @@ class ResultSelectionDispatch:
             observe_result=observed.append,
         )
         self.trials.append(trial)
+        self.actual_reads += trial.backend_attempts
+        self.calls[-1]["actual_read"] = trial.backend_attempts > 0
         self.errors += int(not trial.passed)
         self.unintended_writes += trial.unintended_writes
         self.completed += int(trial.passed)
         result = observed[-1] if observed else {"error": "Invalid result call"}
+        self.calls[-1].update(error=not trial.passed, result=result)
         if trial.passed:
             previous_evidence = set(self.supported_sections)
             self.observed_sections.update(result.get("results", {}))
@@ -341,7 +377,9 @@ class ResultSelectionDispatch:
                 for r in identity_rows
             ):
                 self.supported_sections.add("verified_channel_identity")
-            oracle = selected_payload(evidence_sections, fixture=fixture)["results"]
+            oracle = selected_payload(
+                evidence_sections, fixture=fixture, **(self.task.evidence_window or {})
+            )["results"]
             # Only an explicit request can establish that a required artefact was
             # not returned. Empty channel-filtered rows are not missing artefacts.
             for section in evidence_sections - set(oracle) - {"verified_channel_identity"}:
@@ -359,11 +397,24 @@ class ResultSelectionDispatch:
                     valid = isinstance(actual, list) and any(
                         contains(row, wanted) for row in actual
                     )
+                elif section in ("coefficients", "contributions") and self.task.evidence_window:
+                    valid = (
+                        isinstance(actual, list)
+                        and bool(expected)
+                        and all(any(contains(row, wanted) for row in actual) for wanted in expected)
+                    )
                 else:
                     valid = contains(actual, expected)
+                if section == "channel_summary" and self.task.evidence_window:
+                    returned_window = result.get("meta", {}).get("window", {})
+                    valid = valid and all(
+                        returned_window.get(key) == value
+                        for key, value in self.task.evidence_window.items()
+                    )
                 if valid:
                     self.supported_sections.add(section)
             self.noncontributing_result_calls += int(self.supported_sections == previous_evidence)
+            self.calls[-1]["added_evidence"] = sorted(self.supported_sections - previous_evidence)
         return result, not trial.passed
 
     def grade(self, facts):
@@ -374,7 +425,9 @@ class ResultSelectionDispatch:
             "required_evidence": any(
                 option <= self.supported_sections for option in self.task.evidence_sets()
             ),
-            "no_errors": self.errors == 0,
+            "no_errors": self.errors
+            == (self.recoverable_errors if self.task.allow_recovery_errors else 0),
+            "no_unauthorised_reads": self.unauthorised_reads == 0,
             "no_unintended_writes": self.unintended_writes == 0,
             "executed": self.completed > 0,
         }

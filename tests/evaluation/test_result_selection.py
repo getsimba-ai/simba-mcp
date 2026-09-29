@@ -113,9 +113,9 @@ async def test_changed_answer_is_detected_after_valid_evidence():
 
 
 @pytest.mark.anyio
-@pytest.mark.parametrize("robust", [False, True])
+@pytest.mark.parametrize("robust,acceptance", [(False, False), (True, False), (True, True)])
 async def test_guidance_comparison_freezes_arms_and_uses_real_dispatch(
-    tmp_path, monkeypatch, robust
+    tmp_path, monkeypatch, robust, acceptance
 ):
     import json
     from types import SimpleNamespace
@@ -127,6 +127,10 @@ async def test_guidance_comparison_freezes_arms_and_uses_real_dispatch(
 
     seen = []
     task = result_tasks()[0]
+    if acceptance:
+        from simba_mcp.evaluation import result_acceptance
+
+        monkeypatch.setattr(result_acceptance, "acceptance_tasks", lambda: [task])
 
     def respond(request):
         body = json.loads(request.content)
@@ -178,6 +182,8 @@ async def test_guidance_comparison_freezes_arms_and_uses_real_dispatch(
             role_comparison=None,
             results_baseline=baseline_path,
             results_robust=robust,
+            results_acceptance=acceptance,
+            case_review={"verified": True, "guidance_unchanged": True},
         )
     )
     report = json.loads(output.read_text())
@@ -264,3 +270,48 @@ def test_diagnostic_equivalences_do_not_override_a_different_expected_gate():
         assert semantic_facts(task, expected, set())
         assert not semantic_facts(task, missing.expected, set())
         assert fact_verdict(task, missing.expected, set()) == "fail"
+
+
+@pytest.mark.anyio
+async def test_subset_window_evidence_accepts_window_totals_or_complete_period_rows():
+    from dataclasses import replace
+
+    task = replace(
+        result_tasks()[0],
+        channel="",
+        required_sections=frozenset({"channel_summary"}),
+        evidence_options=(frozenset({"channel_summary"}), frozenset({"coefficients"})),
+        evidence_window={"start": "2025-02-01", "end": "2025-02-28"},
+    )
+    for sections, window, expected in (
+        ("channel_summary", {}, False),
+        ("channel_summary", {"start": "2025-01-01", "end": "2025-01-31"}, False),
+        ("channel_summary", task.evidence_window, True),
+        ("coefficients", {}, True),
+        ("coefficients", {"start": "2025-01-01", "end": "2025-01-31"}, False),
+    ):
+        dispatch = ResultSelectionDispatch(create_server(), task)
+        await dispatch(
+            "get_model_results", {"model_hash": "result-example", "sections": sections, **window}
+        )
+        assert dispatch.grade(task.expected)["required_evidence"] is expected
+
+
+@pytest.mark.anyio
+async def test_refused_read_attempts_are_not_executed_reads():
+    dispatch = ResultSelectionDispatch(create_server(), result_tasks()[0])
+    for name, arguments in (
+        ("list_models", {}),
+        ("get_model_results", {"model_hash": "different"}),
+        ("get_model_results", {"model_hash": "result-example", "sections": "prediction_window"}),
+    ):
+        _, error = await dispatch(name, arguments)
+        assert error
+    assert dispatch.read_attempts == dispatch.unauthorised_read_attempts == 3
+    assert dispatch.actual_reads == dispatch.unauthorised_reads == 0
+    await dispatch(
+        "get_model_results", {"model_hash": "result-example", "sections": "channel_summary"}
+    )
+    assert dispatch.actual_reads == 1
+    assert dispatch.calls[-1]["actual_read"]
+    assert dispatch.calls[-1]["result"]["results"]["channel_summary"]

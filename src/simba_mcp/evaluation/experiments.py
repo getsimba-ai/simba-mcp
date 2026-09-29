@@ -40,7 +40,11 @@ def freeze_experiment(inputs, calibration):
     """Call before opening a provider client; retain the full reviewed inputs."""
     if not calibration or not calibration.get("passed"):
         raise ValueError("Grader calibration must pass before provider execution")
-    if inputs.get("purpose") != "development":
+    if inputs.get("purpose") == "candidate_acceptance":
+        review = inputs.get("case_review") or {}
+        if not review.get("verified") or not review.get("guidance_unchanged"):
+            raise ValueError("Candidate acceptance requires verified cases and unchanged guidance")
+    elif inputs.get("purpose") != "development":
         raise ValueError("Independent acceptance is not supported by public development cases")
     if type(inputs.get("samples")) is not int or inputs["samples"] < 2:
         raise ValueError("A paired experiment requires at least two repetitions")
@@ -55,6 +59,95 @@ def freeze_experiment(inputs, calibration):
 def verify_experiment(frozen, inputs, calibration):
     if frozen != freeze_experiment(inputs, calibration):
         raise ValueError("Frozen experiment changed; stop without spending or regrading")
+
+
+def assess_reviewed_comparison(report, reviews):
+    """Apply agreed gates to hash-bound human/agent adjudication, without rescoring originals.
+
+    Reviewers must inspect all prose and calls. This validates coverage and combines
+    judgements; it does not independently establish that their labels are correct.
+    """
+    from copy import deepcopy
+
+    rows = deepcopy(report["trials"])
+    indexed = {(r["case"], r["view"], r["repetition"]): r for r in reviews}
+    keys = {(r["case"], r["view"], r["repetition"]) for r in rows}
+    if len(indexed) != len(reviews) or set(indexed) != keys or not rows:
+        raise ValueError("Review coverage must match every original trial exactly")
+    for row in rows:
+        review = indexed[row["case"], row["view"], row["repetition"]]
+        if (
+            review.get("answer_sha256")
+            != hashlib.sha256(row["session"].get("final_text", "").encode()).hexdigest()
+        ):
+            raise ValueError("Reviewed answer changed")
+        if review.get("trajectory_sha256") != fingerprint(row["trajectory"]):
+            raise ValueError("Reviewed trajectory changed")
+        if review.get("claims") not in ("supported", "unsupported", "inconclusive"):
+            raise ValueError("Every explanatory claim requires adjudication")
+        if type(review.get("supported_answer")) is not bool or not review.get("rationale"):
+            raise ValueError("Answer review requires a verdict and rationale")
+        calls = review.get("calls", [])
+        if len(calls) != len(row["trajectory"]) or any(
+            c.get("verdict") not in ("necessary", "unnecessary", "inconclusive")
+            or not c.get("rationale")
+            for c in calls
+        ):
+            raise ValueError("Every call requires trajectory adjudication")
+        row["claim_review_required"] = review["claims"] == "inconclusive"
+        row["passed"] = review["supported_answer"] and review["claims"] == "supported"
+        row["outcome"] = "pass" if row["passed"] else "fail"
+        row["reviewed_unnecessary_calls"] = sum(c["verdict"] == "unnecessary" for c in calls)
+    tasks = report["tasks"]
+    assessment = assess_comparison(
+        rows,
+        {t["case"]["id"]: t["case"]["family"] for t in tasks},
+        samples=report["configuration"]["samples"],
+        datasets={t["case"]["id"]: t["case"]["dataset"] for t in tasks},
+        thresholds=report["experiment_inputs"]["acceptance_thresholds"],
+    )
+    candidates = [r for r in rows if r["view"] == "candidate"]
+    baseline = [r for r in rows if r["view"] == "baseline"]
+    candidate_reviews = [r for r in reviews if r["view"] == "candidate"]
+    pending = any(r["claims"] == "inconclusive" for r in reviews) or any(
+        c["verdict"] == "inconclusive" for r in reviews for c in r["calls"]
+    )
+    call_delta = sum(r["reviewed_unnecessary_calls"] for r in candidates) - sum(
+        r["reviewed_unnecessary_calls"] for r in baseline
+    )
+    quality_ci = assessment["quality_delta_95_interval"]
+    cost_ci = assessment["cost_saving_95_interval"]
+    gates = {
+        "reviewed_candidate_cases": report["experiment_inputs"].get("purpose")
+        == "candidate_acceptance"
+        and bool((report["experiment_inputs"].get("case_review") or {}).get("verified")),
+        "complete_adjudication": not pending,
+        "zero_unsupported_claims": all(r["claims"] == "supported" for r in candidate_reviews),
+        "zero_unauthorised_reads": all(
+            r.get("read_authorisation", {}).get("unauthorised_reads") == 0 for r in candidates
+        ),
+        "supported_answers_at_least_95_percent": not pending
+        and mean(r["passed"] for r in candidates) >= 0.95,
+        "unnecessary_calls_not_increased": not pending and call_delta <= 0,
+        "lower_cost_established": cost_ci is not None and cost_ci[0] > 0,
+        "quality_nonregression_established": quality_ci is not None and quality_ci[0] >= 0,
+    }
+    return {
+        "status": "reviewed_synthetic_comparison",
+        "accepted": all(gates.values()),
+        "gates": gates,
+        "statistics": assessment,
+        "reviewed_unnecessary_call_delta": call_delta,
+        "unauthorised_read_attempts": {
+            arm: sum(
+                r["read_authorisation"]["unauthorised_read_attempts"]
+                for r in rows
+                if r["view"] == arm
+            )
+            for arm in ("baseline", "candidate")
+        },
+        "limitation": "Synthetic workflow assessment, not scientific validity, human approval or merge authority.",
+    }
 
 
 def assess_comparison(

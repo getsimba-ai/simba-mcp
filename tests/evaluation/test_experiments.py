@@ -300,3 +300,56 @@ async def test_generated_validation_cli_freezes_fixture_and_excludes_oracle_from
     assert all(t["case"]["fixture"] for t in report["tasks"])
     assert report["assessment"]["dataset_count"] == 2
     assert not report["assessment"]["accepted"]
+
+
+def test_reviewed_assessment_requires_complete_hash_bound_reviews():
+    from hashlib import sha256
+
+    rows = rows_for({"a": "one", "b": "two"})
+    for row in rows:
+        row["session"]["final_text"] = "{}"
+        row["trajectory"] = []
+        row["read_authorisation"] = {"unauthorised_reads": 0, "unauthorised_read_attempts": 0}
+    report = {
+        "trials": rows,
+        "tasks": [
+            {"case": {"id": case, "family": family, "dataset": "synthetic"}}
+            for case, family in {"a": "one", "b": "two"}.items()
+        ],
+        "configuration": {"samples": 2},
+        "experiment_inputs": {
+            "purpose": "candidate_acceptance",
+            "case_review": {"verified": True},
+            "acceptance_thresholds": {
+                "minimum_supported_answer_rate": 0.95,
+                "minimum_cost_saving": 0,
+                "quality_noninferiority_margin": 0,
+            },
+        },
+    }
+    reviews = [
+        {
+            **{k: r[k] for k in ("case", "view", "repetition")},
+            "answer_sha256": sha256(b"{}").hexdigest(),
+            "trajectory_sha256": experiments.fingerprint([]),
+            "claims": "supported",
+            "supported_answer": True,
+            "rationale": "Synthetic labelled test",
+            "calls": [],
+        }
+        for r in rows
+    ]
+    assert experiments.assess_reviewed_comparison(report, reviews)["accepted"]
+    assert all(r["passed"] for r in rows)
+    with pytest.raises(ValueError, match="coverage"):
+        experiments.assess_reviewed_comparison(report, reviews[:-1])
+    bad = deepcopy(reviews)
+    bad[0]["answer_sha256"] = "changed"
+    with pytest.raises(ValueError, match="answer changed"):
+        experiments.assess_reviewed_comparison(report, bad)
+    bad = deepcopy(reviews)
+    next(r for r in bad if r["view"] == "candidate")["claims"] = "unsupported"
+    assert not experiments.assess_reviewed_comparison(report, bad)["accepted"]
+    bad = deepcopy(reviews)
+    bad[0]["claims"] = "inconclusive"
+    assert not experiments.assess_reviewed_comparison(report, bad)["accepted"]
