@@ -1,6 +1,7 @@
 """Optional OAuth resource-server mode (#59): off by default and byte-identical to today; on,
 the SDK serves the protected-resource metadata and 401s without a verified bearer, and the
 verifier asks the backend's token-info route with the caller's own bearer."""
+
 import time
 
 import anyio
@@ -11,8 +12,14 @@ from simba_mcp import oauth, runtime
 from simba_mcp.oauth import BackendTokenVerifier, server_auth_options
 
 INIT = {
-    "jsonrpc": "2.0", "id": 1, "method": "initialize",
-    "params": {"protocolVersion": "2025-03-26", "capabilities": {}, "clientInfo": {"name": "t", "version": "0"}},
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "initialize",
+    "params": {
+        "protocolVersion": "2025-03-26",
+        "capabilities": {},
+        "clientInfo": {"name": "t", "version": "0"},
+    },
 }
 HEADERS = {"Accept": "application/json, text/event-stream", "Content-Type": "application/json"}
 
@@ -58,17 +65,23 @@ class TestFlagOn:
             init = client.post("/", json=INIT, headers=HEADERS)
             assert init.status_code == 401
             www = init.headers.get("www-authenticate", "")
-            assert "resource_metadata=" in www and "/.well-known/oauth-protected-resource/mcp" in www
+            assert (
+                "resource_metadata=" in www and "/.well-known/oauth-protected-resource/mcp" in www
+            )
             doc = client.get("/.well-known/oauth-protected-resource/mcp")
             assert doc.status_code == 200
             body = doc.json()
             assert body["resource"].rstrip("/") == "https://demo.example/mcp"
-            assert [u.rstrip("/") for u in body["authorization_servers"]] == ["https://demo.example"]
+            assert [u.rstrip("/") for u in body["authorization_servers"]] == [
+                "https://demo.example"
+            ]
 
 
 class TestVerifier:
     def _verifier(self, handler):
-        return BackendTokenVerifier("http://backend:5000", client=httpx.AsyncClient(transport=_transport(handler)))
+        return BackendTokenVerifier(
+            "http://backend:5000", client=httpx.AsyncClient(transport=_transport(handler))
+        )
 
     def test_a_live_oauth_token_maps_to_the_principal(self):
         seen = {}
@@ -76,22 +89,44 @@ class TestVerifier:
         def handler(request):
             seen["auth"] = request.headers.get("authorization")
             seen["path"] = request.url.path
-            return httpx.Response(200, json={
-                "kind": "oauth", "principal": {"user_id": 7, "email": "a@b"}, "client_id": "simba_client_x",
-                "scopes": ["read:models"], "expires_at": "2099-01-01T00:00:00", "resource": "https://demo.example"})
+            return httpx.Response(
+                200,
+                json={
+                    "kind": "oauth",
+                    "principal": {"user_id": 7, "email": "a@b"},
+                    "client_id": "simba_client_x",
+                    "scopes": ["read:models"],
+                    "expires_at": "2099-01-01T00:00:00",
+                    "resource": "https://demo.example",
+                },
+            )
 
         token = anyio.run(self._verifier(handler).verify_token, "simba_at_abc")
         assert seen == {"auth": "Bearer simba_at_abc", "path": "/api/v1/auth/token-info"}
         assert token.client_id == "simba_client_x" and token.scopes == ["read:models"]
-        assert token.subject == "7" and token.resource == "https://demo.example" and token.expires_at
+        assert (
+            token.subject == "7" and token.resource == "https://demo.example" and token.expires_at
+        )
 
     def test_an_api_key_also_verifies(self):
         def handler(request):
-            return httpx.Response(200, json={"kind": "api_key", "principal": {"user_id": 7, "email": "a@b"},
-                                             "key_prefix": "simba_sk_12345678", "scopes": ["ingest"], "expires_at": None})
+            return httpx.Response(
+                200,
+                json={
+                    "kind": "api_key",
+                    "principal": {"user_id": 7, "email": "a@b"},
+                    "key_prefix": "simba_sk_12345678",
+                    "scopes": ["ingest"],
+                    "expires_at": None,
+                },
+            )
 
         token = anyio.run(self._verifier(handler).verify_token, "simba_sk_12345678rest")
-        assert token is not None and token.client_id == "simba_sk_12345678" and token.scopes == ["ingest"]
+        assert (
+            token is not None
+            and token.client_id == "simba_sk_12345678"
+            and token.scopes == ["ingest"]
+        )
 
     def test_positive_answers_are_cached_and_negative_ones_are_not(self):
         calls = {"n": 0}
@@ -100,8 +135,16 @@ class TestVerifier:
             calls["n"] += 1
             if request.headers["authorization"].endswith("bad"):
                 return httpx.Response(401, json={"error": "invalid_token"})
-            return httpx.Response(200, json={"kind": "oauth", "principal": {"user_id": 1}, "client_id": "c",
-                                             "scopes": [], "expires_at": None})
+            return httpx.Response(
+                200,
+                json={
+                    "kind": "oauth",
+                    "principal": {"user_id": 1},
+                    "client_id": "c",
+                    "scopes": [],
+                    "expires_at": None,
+                },
+            )
 
         verifier = self._verifier(handler)
         assert anyio.run(verifier.verify_token, "simba_at_good") is not None
@@ -127,16 +170,26 @@ class TestVerifier:
         soon = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(time.time() + 5))
 
         def handler(request):
-            return httpx.Response(200, json={"kind": "oauth", "principal": {"user_id": 1}, "client_id": "c",
-                                             "scopes": [], "expires_at": soon + "+00:00"})
+            return httpx.Response(
+                200,
+                json={
+                    "kind": "oauth",
+                    "principal": {"user_id": 1},
+                    "client_id": "c",
+                    "scopes": [],
+                    "expires_at": soon + "+00:00",
+                },
+            )
 
         verifier = self._verifier(handler)
         anyio.run(verifier.verify_token, "simba_at_short")
-        (expires, _), = verifier._cache.values()
+        ((expires, _),) = verifier._cache.values()
         assert expires - time.monotonic() <= 5.5
 
 
-@pytest.mark.parametrize("value, expected", [("1", True), ("true", True), ("YES", True), ("0", False), ("", False)])
+@pytest.mark.parametrize(
+    "value, expected", [("1", True), ("true", True), ("YES", True), ("0", False), ("", False)]
+)
 def test_flag_parsing(monkeypatch, value, expected):
     monkeypatch.setenv("MCP_OAUTH_ENABLED", value)
     assert oauth.oauth_enabled() is expected

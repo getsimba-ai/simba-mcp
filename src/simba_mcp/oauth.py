@@ -10,6 +10,7 @@ resource with one audience.
 
 With the flag off (the default) nothing here is used.
 """
+
 import hashlib
 import logging
 import os
@@ -59,7 +60,9 @@ class BackendTokenVerifier:
     not cached. A backend timeout or 5xx is ``None`` (a 401 to the client), never an exception.
     """
 
-    def __init__(self, base_url: str, *, timeout: float = 5.0, client: httpx.AsyncClient | None = None):
+    def __init__(
+        self, base_url: str, *, timeout: float = 5.0, client: httpx.AsyncClient | None = None
+    ):
         self._base_url = base_url.rstrip("/")
         self._timeout = timeout
         self._client = client
@@ -77,10 +80,15 @@ class BackendTokenVerifier:
 
     async def _fetch(self, token: str) -> httpx.Response:
         if self._client is not None:
-            return await self._client.get(f"{self._base_url}{TOKEN_INFO_PATH}",
-                                          headers={"Authorization": f"Bearer {token}"}, timeout=self._timeout)
+            return await self._client.get(
+                f"{self._base_url}{TOKEN_INFO_PATH}",
+                headers={"Authorization": f"Bearer {token}"},
+                timeout=self._timeout,
+            )
         async with httpx.AsyncClient(timeout=self._timeout) as client:
-            return await client.get(f"{self._base_url}{TOKEN_INFO_PATH}", headers={"Authorization": f"Bearer {token}"})
+            return await client.get(
+                f"{self._base_url}{TOKEN_INFO_PATH}", headers={"Authorization": f"Bearer {token}"}
+            )
 
     async def verify_token(self, token: str) -> AccessToken | None:
         if not token:
@@ -103,7 +111,9 @@ class BackendTokenVerifier:
         principal = info.get("principal") or {}
         access = AccessToken(
             token=token,
-            client_id=str(info.get("client_id") or info.get("key_prefix") or info.get("kind") or "api_key"),
+            client_id=str(
+                info.get("client_id") or info.get("key_prefix") or info.get("kind") or "api_key"
+            ),
             scopes=list(info.get("scopes") or []),
             expires_at=_expires_at(info.get("expires_at")),
             resource=info.get("resource") or public_url(),
