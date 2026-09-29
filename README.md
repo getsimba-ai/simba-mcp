@@ -148,6 +148,11 @@ Tool descriptions default to the full legacy catalogue. Set
 `SIMBA_TOOL_DESCRIPTIONS=compact` before starting the server to opt into shorter
 descriptions for model creation, results and optimisation. Names, schemas and
 execution stay the same. See [configuration, rollback and comparison evidence](docs/compact-descriptions.md).
+
+An experimental [native-discovery host example](docs/native-discovery.md) compares
+provider tool search against the compact eager catalogue using synthetic backends.
+It is a paid, explicitly invoked evaluation command and does not enable discovery
+in your connected MCP client. Its evidence includes task failures and fallback limits.
 Existing-result questions can start with selected result sections directly; capability,
 schema and guidance discovery are conditional on the task. Backend validation and
 human approval remain authoritative.
