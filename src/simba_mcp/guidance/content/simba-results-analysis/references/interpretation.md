@@ -12,7 +12,8 @@
 - Overlap under log-link removal_lift reconciles the decomposition; it is not a
   channel. Its absence does not establish an additive model. Preserve controls
   and attribution convention. Never label KPI contributions as currency.
-- Trust sections_available and explicit available/reason fields. Older artefacts
+- sections_available is response metadata, never a section to request. Read it
+  from an ordinary results response. Trust explicit available/reason fields. Older artefacts
   can be unavailable. Retrieve supporting evidence or qualify the answer when
   units, uncertainty or provenance are absent.
 - Explicit channel/grid filters add _mcp_selection. Check changed sections, row

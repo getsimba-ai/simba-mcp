@@ -214,12 +214,14 @@ def test_semantic_grader_keeps_literal_and_evidence_constraints_separate():
         decomposition, {"overlap_is_channel": 0, "attribution": "removal_lift"}, set()
     )
     for facts in [
+        {"convergence": False, "reason": "Both diagnostic sections were not saved."},
         {"convergence": "unknown", "reason": "not_saved"},
         {"convergence_established": False, "reason": "The diagnostics are unavailable."},
         {"convergence_established": False, "reason": "Diagnostics were not saved."},
     ]:
         assert semantic_facts(diagnostics, facts, set())
     for facts in [
+        {"convergence": 0, "reason": "not_saved"},
         {"convergence": "pass", "reason": "not_saved"},
         {"convergence": "failed", "reason": "not_saved"},
         {"convergence_established": 0, "reason": "not_saved"},

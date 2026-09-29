@@ -132,13 +132,73 @@ This is a scoped engineering deferral, not proof that another tool could never h
 
 ## Verification and remaining acceptance
 
-Local regression: 449 tests passed, including independent result-selection and
+Local regression: 451 tests passed, including independent result-selection and
 paired-host mock tests. Lint, formatting, generated reference/Skill checks and
 package build passed. The scripted evaluation completed two repetitions without
 provider calls or real model fits. CI is tracked in the implementation PR. The
-separate live agent acceptance failed as shown above. Issue #45 remains open; no
+agent comparisons and remaining routing gap are described below. Issue #45 remains open; no
 deployment or scientific-model validation is claimed.
 
 ## Bounded shorter-guidance iteration
 
-The follow-up retains the tested result handler, shortens canonical guidance and makes the supplied-model path explicit. Both arms use the same revised semantic grader, with literal output fidelity reported separately. The original first-comparison record is immutable. Three repetitions use the original question and two use frozen paraphrases; neither question names the required sections. Provider comparison is in progress and remains inside the original cumulative US$10 cap. No acceptance claim is made before completion.
+The follow-up kept the result handler, shortened canonical guidance and made the
+supplied-model path explicit. Both arms used the same semantic grader, with literal
+field fidelity scored separately. Three repetitions used each original question;
+two used frozen paraphrases. No prompt named the required result sections.
+[Follow-up evidence](selective-results-followup-evidence.json) retains all 50
+sessions, the post-hoc audit and eight prospective targeted sessions.
+
+| Metric, full shorter-guidance comparison | Baseline | Shorter guidance |
+| --- | ---: | ---: |
+| Required evidence retrieved | 9/25 | 25/25 |
+| No out-of-task/error calls | 9/25 | 23/25 |
+| Frozen grader-v2 combined passes | 6/25 | 18/25 |
+| Post-hoc grader-v3 corrected passes | 6/25 | 23/25 |
+| Tool calls | 44 | 29 |
+| Input tokens | 2,030,628 | 1,989,145 |
+| Accounted cost | US$2.081273 | US$2.028165 |
+| Median session duration | 5.34 s | 4.24 s |
+
+Observed input-token reduction was about 2.0%, cost reduction about 2.6%. These are
+small-sample observations, not general performance guarantees. Both arms had zero
+unintended writes and zero bare-JSON passes. This experiment uses a different
+rubric from the first comparison, so its pass rates must not be compared directly
+with the first comparison's literal-field grades.
+
+### Grading correction and prospective check
+
+Five candidate diagnostic answers used `convergence: false` with an explicit
+missing-saved-diagnostics reason. For the question asking whether saved evidence
+establishes convergence, that is equivalent to unknown, not a claim the model
+failed convergence. Grader v2 incorrectly rejected this representation. Grader v3
+accepts the boolean only with a missing-evidence reason. Numeric zero, true,
+failed-convergence claims, missing reasons and unsupported evidence still fail.
+
+The original v2 scores are retained. The 23/25 figure is explicitly a post-hoc
+regrade, not the frozen primary score. A new prospective paraphrase test then
+passed both candidate diagnostic sessions. The grader evaluates bounded structured
+facts and source evidence; it is not a general judge of every explanatory sentence.
+Unrecognised nesting/wording can still fail, as shown by baseline old-artefact
+answers that put the correct facts in an unsupported nested shape.
+
+### Remaining routing gap and disposition
+
+The two remaining full-comparison candidate failures both tried to request
+`sections_available` as a section before recovering with `mroi_periods`. That name
+is envelope metadata. A concise clarification was added to guidance, but both
+prospective old-artefact candidate sessions repeated the invalid first request.
+They recovered and returned the correct unavailable-evidence answer. Therefore the
+clarification is documented, not claimed as a proven fix.
+
+Retain the tested selection/disclosure implementation and the shorter guidance as
+reviewable improvements. Retire the expanded guidance from the first comparison.
+Do not add a summary tool on these results. **Keep #45 open and the PR in draft
+until the legacy-artefact routing gap is fixed or explicitly accepted as a bounded
+recovery limitation, and the change is reviewed and merged.** Do not spend further
+on prompt tuning under this experiment.
+
+Across all 108 sessions, cumulative accounted provider spend was **US$9.524580**
+under the same US$10 cap, with no outstanding usage reservations. The first 50
+sessions remain in their original evidence file; the second 50 plus eight targeted
+sessions are in the follow-up file. Production backend behaviour, general host
+coverage and scientific-model validity remain outside this evidence.

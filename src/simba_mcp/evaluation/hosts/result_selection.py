@@ -222,7 +222,10 @@ def semantic_facts(task, facts, supported_sections):
     if task.id == "result_diagnostics":
         state = facts.get("convergence")
         established = facts.get("convergence_established")
-        if "convergence" in facts and state not in ("unknown", "unavailable", "not_established"):
+        if "convergence" in facts and not (
+            state is False
+            or (isinstance(state, str) and state in ("unknown", "unavailable", "not_established"))
+        ):
             return False
         if "convergence_established" in facts and established is not False:
             return False

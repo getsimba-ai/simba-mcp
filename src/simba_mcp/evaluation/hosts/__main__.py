@@ -59,6 +59,7 @@ async def run(args):
             "case": args.case,
             "role_comparison": role,
             "results_comparison": bool(guidance_arms),
+            "results_prompt": getattr(args, "results_prompt", "mixed"),
         },
         "trials": [],
         "catalogue": [t.model_dump(mode="json") for t in tools],
@@ -133,11 +134,14 @@ async def run(args):
                             ).hexdigest(),
                         }
                         report["trials"].append(row)
-                        session_prompt = case.paraphrase if guidance_arms and rep >= 3 else prompt
+                        paraphrased = bool(guidance_arms) and (
+                            rep >= 3 or getattr(args, "results_prompt", "mixed") == "paraphrase"
+                        )
+                        session_prompt = case.paraphrase if paraphrased else prompt
                         if guidance_arms:
                             row["prompt"] = session_prompt
-                            row["prompt_variant"] = "paraphrase" if rep >= 3 else "original"
-                            row["grader_version"] = 2
+                            row["prompt_variant"] = "paraphrase" if paraphrased else "original"
+                            row["grader_version"] = 3
 
                         def checkpoint(record, row=row):
                             row["session"] = record
@@ -215,6 +219,7 @@ def main():
     parser.add_argument(
         "--results-baseline", type=Path, help="Frozen guidance responses for paired results trials"
     )
+    parser.add_argument("--results-prompt", choices=("mixed", "paraphrase"), default="mixed")
     args = parser.parse_args()
     if args.samples < 1:
         parser.error("samples must be positive")
