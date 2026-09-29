@@ -11,7 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - With the flag off, nothing changes: bring-your-own-key per request, and `initialize` / `tools/list` answer without a bearer.
 
 ### Changed
-- The `mcp` SDK is pinned to 2.1.1, which is the resource-server implementation this mode relies on.
+- The `mcp` SDK requirement is `>=2.1.1,<2.2`: 2.1.1 is the resource-server implementation this mode relies on, and the CI floor job now installs it.
 - No tool changes; the generated reference is unchanged.
 
 ## 0.11.1 (2026-09-29)
