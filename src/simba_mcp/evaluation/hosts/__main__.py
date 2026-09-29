@@ -40,6 +40,7 @@ from .result_selection import (
 )
 from .roles import ROLE_CASES
 from .scenarios import SyntheticDispatch, answer, rlc_tasks, role_tasks, tasks
+from .workflow_packet import load_workflow_packet
 
 
 async def run(args):
@@ -125,7 +126,19 @@ async def run(args):
         )
     if rlc and (budget.model != GROK or args.mode != "eager"):
         raise ValueError("RLC01 requires the explicit Grok eager route")
-    suite = rlc_tasks() if rlc else role_tasks() if role else tasks()
+    workflow_packet_path = getattr(args, "workflow_packet", None)
+    if workflow_packet_path and not rlc:
+        raise ValueError("Workflow packets require the prospective RLC workflow suite")
+    workflow_packet = load_workflow_packet(workflow_packet_path) if workflow_packet_path else None
+    suite = (
+        workflow_packet.triples()
+        if workflow_packet
+        else rlc_tasks()
+        if rlc
+        else role_tasks()
+        if role
+        else tasks()
+    )
     if guidance_arms:
         if acceptance or diagnostic:
             if packet == "fresh":
@@ -262,6 +275,8 @@ async def run(args):
                 for s in ("entrypoint", "interpretation", "tool-reference")
             }
         }
+    if workflow_packet is not None:
+        report["configuration"]["workflow_packet"] = workflow_packet.freeze()
     if session_timeout is not None or rlc:
         report["configuration"]["session_timeout_seconds"] = (
             session_timeout if session_timeout is not None else 180.0
@@ -391,6 +406,8 @@ async def run(args):
         )
 
     def verify():
+        if workflow_packet is not None:
+            workflow_packet.verify()
         stop_file = getattr(args, "stop_file", None)
         if stop_file and stop_file.exists():
             raise RuntimeError("Operator requested stop; checkpoint and reservations retained")
@@ -615,9 +632,15 @@ async def run(args):
         if rlc:
             report["assessment"] = {
                 "accepted": False,
-                "decision": "Single-arm development evidence; independent claim review required",
+                "decision": (
+                    "Packet evidence only; external protocol and independent review required"
+                    if workflow_packet is not None
+                    else "Single-arm development evidence; independent claim review required"
+                ),
                 "limitations": [
-                    "Exposed synthetic cases",
+                    "Packet independence requires external review"
+                    if workflow_packet is not None
+                    else "Exposed synthetic cases",
                     "Single arm",
                     "No production latency evidence",
                 ],
@@ -656,6 +679,11 @@ def main():
     parser.add_argument("--prior-usd", type=float, default=0)
     parser.add_argument("--samples", type=int, default=2)
     parser.add_argument("--tool-profile", choices=PROFILE_NAMES, default="full")
+    parser.add_argument(
+        "--workflow-packet",
+        type=Path,
+        help="Reviewed synthetic JSON packet for prospective RLC; does not grant acceptance",
+    )
     parser.add_argument(
         "--workflow-suite", choices=("rlc01",), help="Prospective 20-case development inventory"
     )
