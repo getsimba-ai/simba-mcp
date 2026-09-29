@@ -1,13 +1,12 @@
 # Optional role views: scope and paired evaluation
 
-Status: paired role evaluation complete. Revised recommendation: pursue optional
-marketer and reviewer presets, retaining full as the default and the data scientist
-view. This supersedes the earlier proposal to defer based on workflow subsets.
-Those subsets were too narrow for jobs that span workflows. Owner acceptance and
-production implementation remain open; this PR does not close #44.
+Status: paired role evaluation complete; the owner chose implementation following
+these results. Optional [server profiles](tool-profiles.md) are now implemented on
+this PR, retaining full as the default and data scientist view. This supersedes the
+earlier workflow-only deferral. Merge and production rollout remain separate.
 
-This evaluates optional starting views for issue #44. The production server still
-exposes its full catalogue. A job title neither grants backend permissions nor
+This records the evaluation for issue #44. The default server still exposes its
+full catalogue; narrower profiles are explicitly selected at startup. A job title neither grants backend permissions nor
 prevents someone choosing the full view for a broader task.
 
 ## Roles are jobs across workflows
@@ -106,11 +105,10 @@ synced folder before restarting. New known usage totals US$7.275874. Cumulative
 accounting is US$14.686062 against the authorised US$50 cap, including the earlier
 US$1 unknown-usage reserve. No outstanding reservation remains in these two runs.
 
-The results support investing in optional role presets and overturn the earlier
-blanket deferral recommendation. They meet the proposed exploratory cost/correctness
-gate on these jobs. They do not approve a production release: remaining scope
-coverage, real client selection/fallback and the implementation gates below remain
-explicit, together with owner agreement on roles and numerical release thresholds.
+The results support optional role presets and overturn the earlier blanket deferral.
+The owner subsequently chose to implement them. They meet the proposed exploratory
+cost/correctness gate on these jobs, without establishing universal performance
+thresholds. Implementation acceptance and broader rollout evidence are distinct.
 
 ## Fallback and coverage boundaries
 
@@ -121,15 +119,15 @@ An explicit new full-view task then executes the same synthetic model-creation
 operation. There is no runtime enable-tools action and no automatic replay or
 catalogue mutation. Real uncertain writes must be reconciled before a new task.
 
-This tests host-side selection and dispatch, not a production profile endpoint.
-Production startup selection, multi-caller credential isolation, stdio/HTTP profile
-configuration and a user-facing fallback remain implementation gates. Claude
-Desktop, Claude Code and other clients have not been certified by this test.
+The original provider experiment tested host-side selection. Follow-on implementation
+tests now verify actual profile registration, startup configuration, multi-caller
+credential isolation, real SDK stdio sessions, HTTP wire calls and explicit full
+reconnection. Claude Desktop, Claude Code and live deployments remain unverified.
 
-The paired jobs do not cover every included operation. Incrementality creation and
-import, scenario submission, saved-run curation, data/provenance inspection,
-assessment/pair assessment and holdout-use declaration need further representative
-coverage before claiming complete role support. Nor do these prompts test open-ended
+The paired agent jobs do not cover every included operation. Follow-on mocked
+contract/wire tests exercise incrementality creation/import, scenario submission and
+curation, data and recipe provenance, assessments, validation pairs and holdout-use
+declarations through their registered roles. Agent-level breadth remains narrower. Nor do these prompts test open-ended
 business-question discovery, long conversations or realistic datasets. The current
 full catalogue remains available throughout.
 
@@ -147,19 +145,22 @@ examples do not authorise spend. Provider errors stop the run without replay. St
 raw evidence privately because it includes the full catalogue text; the public
 record replaces it with names and definition hashes and uses synthetic tasks only.
 
-Following the [engineering objective](engineering.md), `evaluation.hosts.roles`
-owns experimental membership, `scenarios` owns job fixtures and `__main__` owns
-comparison orchestration/evidence. They reuse `anthropic` for the provider and
+Following the [engineering objective](engineering.md), production `profiles.py` now
+owns the canonical membership and selector extracted from the evaluation.
+`evaluation.hosts.roles` retains only task assignments, `scenarios` owns job fixtures
+and `__main__` owns comparison orchestration/evidence. They reuse `anthropic` for the provider and
 budget, `evaluation.runner` for strict mock dispatch, and canonical contracts/tools.
-Production modules do not import role selection. New tools automatically remain in
-full/data scientist; additions to narrower views require an explicit job-scope review. No second provider runner, schema
-registry, dependency or production configuration was added.
+The server factory and host comparison share this implementation; production does
+not import evaluation modules. New tools remain in full/data scientist automatically.
+No second provider runner, schema registry or dependency was introduced.
 
 The [earlier offline workflow measurements](workflow-profile-evidence.json) remain
 historical evidence only. Their missing mixed-domain operation explains why those
 particular candidates were inadequate; it does not justify rejecting role views.
-Keep #44 open until its owner decision and applicable implementation gates are met.
+Keep #44 open until the implementation and its required review have landed.
 
-Verification: 355 tests passed; repository Ruff checks and formatting passed; source
-distribution and wheel built successfully. Public evidence was checked for raw
+Implementation verification: the full 392-test suite passed, followed by 38 profile
+tests including an additional stale-assessment recovery case (393 distinct tests
+verified). Repository Ruff checks and formatting passed; source distribution and
+wheel built successfully. Public evidence was checked for raw
 catalogue text, credentials and private identifiers before publication.

@@ -11,7 +11,7 @@ from pathlib import Path
 from ...measurements import provenance
 from ...server import create_server
 from .anthropic import Budget, client, definitions, session
-from .roles import ROLE_CASES, select_tools
+from .roles import ROLE_CASES
 from .scenarios import SyntheticDispatch, answer, role_tasks, tasks
 
 
@@ -66,9 +66,12 @@ async def run(args):
                         if rep % 2:
                             arms.reverse()
                     for mode, view in arms:
-                        visible = select_tools(tools, view)
+                        arm_server = (
+                            server if view == "full" else create_server("compact", profile=view)
+                        )
+                        visible = await arm_server.list_tools()
                         dispatch = SyntheticDispatch(
-                            server, case, allowed_tools=[t.name for t in visible]
+                            arm_server, case, allowed_tools=[t.name for t in visible]
                         )
                         definitions_sent = definitions(visible, mode)
                         row = {

@@ -64,7 +64,8 @@ logging policy must not be reused with private/live data without redesign.
 
 The same host also supports an experimental [role-view comparison](workflow-profile-evaluation.md)
 through `--role-comparison marketer` or `--role-comparison reviewer` in eager mode.
-That experiment changes visible definitions only; it does not configure server profiles.
+The host now dispatches through the corresponding registered [server profile](tool-profiles.md);
+invoking the comparison does not change a running production server.
 
 | Surface | Native discovery | Eager fallback | MCP/Skills boundary |
 | --- | --- | --- | --- |

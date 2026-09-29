@@ -199,7 +199,7 @@ async def test_cli_zero_budget_stops_before_network_and_keeps_ledger(tmp_path, m
 
 @pytest.mark.anyio
 async def test_role_selections_are_independent_and_data_scientist_is_full():
-    from simba_mcp.evaluation.hosts.roles import PROFILES, select_tools
+    from simba_mcp.profiles import PROFILES, select_tools
     from simba_mcp.server import create_server
 
     server = create_server("compact")
@@ -221,8 +221,9 @@ async def test_role_selections_are_independent_and_data_scientist_is_full():
 
 @pytest.mark.anyio
 async def test_all_role_jobs_execute_with_visible_tools_and_exact_mock_requests():
-    from simba_mcp.evaluation.hosts.roles import ROLE_CASES, select_tools
+    from simba_mcp.evaluation.hosts.roles import ROLE_CASES
     from simba_mcp.evaluation.hosts.scenarios import SyntheticDispatch, role_tasks
+    from simba_mcp.profiles import select_tools
     from simba_mcp.server import create_server
 
     server = create_server("compact")
@@ -244,8 +245,8 @@ async def test_all_role_jobs_execute_with_visible_tools_and_exact_mock_requests(
 @pytest.mark.anyio
 async def test_out_of_role_tool_needs_explicit_full_fallback_without_mutating_view():
     from simba_mcp.evaluation.cases import cases
-    from simba_mcp.evaluation.hosts.roles import select_tools
     from simba_mcp.evaluation.hosts.scenarios import SyntheticDispatch
+    from simba_mcp.profiles import select_tools
     from simba_mcp.server import create_server
 
     server = create_server("compact")
