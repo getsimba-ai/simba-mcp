@@ -43,6 +43,24 @@ started. All 607 local tests and all four CI jobs passed at the frozen source.
 The original protocol follows. Any later tuning informed by these outcomes makes
 these cases validation material, requiring new independent final acceptance cases.
 
+## Subsequent validation decision
+
+The owner subsequently authorised **US$90 total**, carrying all US$66.961418
+forward. Version 14 uses these findings to test complete, concise requested
+outputs and precise use of the existing window and diagnostic contracts. This
+packet is now validation-only; its original failed acceptance result is unchanged.
+
+The bounded validation reuses the three failure families (combined KPI totals,
+historical mROI scope and diagnostic scope), with two repetitions per arm against
+version 13, four sessions per family. The stage ceiling is US$70.961418 cumulative,
+within the US$90 overall cap. Review each family before starting the next and stop
+on a candidate readiness failure. Require all six candidate answers supported,
+no unsupported claims or actual unauthorised reads/writes, and no increase in
+independently reviewed unnecessary calls. Cost is observed, not acceptance proof.
+The model configuration and grader remain unchanged. A separate author prepares
+new private cases without this packet, outcomes or candidate guidance; release
+requires readiness and another candidate freeze. No merge is authorised.
+
 ## Frozen protocol
 
 Following targeted version 13 validation, the candidate guidance was frozen at

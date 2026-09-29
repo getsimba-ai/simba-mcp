@@ -2,7 +2,7 @@
 name: simba-results-analysis
 description: Read saved Simba results, ROI and diagnostics.
 metadata:
-  version: "13"
+  version: "14"
 ---
 
 # Analyse saved results
@@ -21,9 +21,11 @@ Choose sufficient sections:
 - Add channel_map for unverified identity or media classification.
 
 Use requested dates, never guessed bounds/year. Inspect dated rows when needed.
-Answer with the requested values and a brief explanation of each requested
-distinction. Stop once answered: no unsolicited methodology, tool-use or safety
-footer. Before sending, check every explanatory clause against a returned field,
+Before answering, identify every requested output, including combined totals as well
+as individual values. Supply each once; check none is missing. Keep the requested
+explanation within 100 words unless more detail is requested or needed for coverage.
+Stop once answered: no unsolicited methodology, tool-use or safety footer.
+Before sending, check every explanatory clause against a returned field,
 a shown calculation or the documented contract. Remove plausible but unestablished
 interpretations. If actions are explicitly requested, check the actual call record,
 including refused attempts; never reconstruct motives.

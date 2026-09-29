@@ -8,7 +8,9 @@
   those exclude possibilities, whereas missing evidence does not.
 - Preserve units: contributions are KPI, coefficients revenue. Window ROI is
   summed revenue / summed spend, not an unweighted average of period ROI.
-  Respect meta.aggregation and meta.not_windowed. Do not sum mROI or HDI bounds.
+  Respect meta.aggregation and meta.not_windowed. Date filters do not select or
+  aggregate mroi_periods rows: inspect the returned dates and select requested
+  rows yourself. Do not sum mROI or HDI bounds.
 - Headline mROI uses its declared evaluation point. Mean active-period spend is
   not latest spend. Historical mROI averages are valid under their declared
   convention and separate from headline mROI. Preserve mean/median,
@@ -16,7 +18,10 @@
   equal-tailed quantiles, even when field names contain percentile numbers.
   Do not invent missing bands. Differences between summary statistics alone do
   not establish distribution shape, tail behaviour or causes.
-- Apply the requested diagnostic rule. Missing diagnostics prove neither
+- Apply the requested diagnostic rule. The r_hat section covers all posterior
+  variables by contract, including transforms; coefficient-only summaries do not.
+  Use that declared scope without inventing missing variables. Missing diagnostics
+  prove neither
   convergence nor failure; completion is not scientific acceptance.
 - Overlap reconciles log-link removal_lift, can have either sign and is not media.
   Absence does not prove additivity. Retain controls; signed effects do not reveal
