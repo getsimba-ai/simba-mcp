@@ -220,14 +220,21 @@ class Attempt:
         status = response.status_code // 100
         self.event["status_class"] = f"{status}xx" if status in range(1, 6) else "other"
         self.event["outcome"] = "http_error" if response.status_code >= 400 else "ok"
-        try:
-            decoded = len(response.content)
-            downloaded = response.num_bytes_downloaded
-            self.event["decoded_body_bytes"] = decoded
-            # MockTransport prebuffered bodies can report zero downloaded bytes despite content.
-            self.event["downloaded_body_bytes"] = downloaded if downloaded or not decoded else None
-        except (httpx.ResponseNotRead, AttributeError):
-            pass
+        # Do not inspect response.content here. The API client reads every
+        # response through a bounded stream and reports bytes as they arrive.
+        self.event["decoded_body_bytes"] = 0
+        self.event["downloaded_body_bytes"] = 0
+
+    def body_bytes(self, *, downloaded: int = 0, decoded: int = 0) -> None:
+        """Accumulate bytes consumed by the bounded streaming response reader."""
+        self.event["downloaded_body_bytes"] = (
+            self.event["downloaded_body_bytes"] or 0
+        ) + downloaded
+        self.event["decoded_body_bytes"] = (self.event["decoded_body_bytes"] or 0) + decoded
+
+    def refused(self) -> None:
+        """Mark a received HTTP response rejected during bounded body reading."""
+        self.event["outcome"] = "refused"
 
 
 @contextmanager
