@@ -2,7 +2,7 @@
 name: simba-results-analysis
 description: Read saved Simba results, ROI and diagnostics.
 metadata:
-  version: "10"
+  version: "11"
 ---
 
 # Analyse saved results
@@ -13,7 +13,8 @@ only if missing or rejected. No repeated startup preflights.
 Choose sufficient sections:
 - Revenue/ROI: channel_summary; coefficients for individual periods.
 - Diagnostics: model_stats,r_hat as required by the question.
-- Decomposition: contributions, plus model_config for attribution.
+- Decomposition: contributions, model_config and channel_map. Verify which
+  components are media before classifying them; names alone are insufficient.
 - Current/historical marginal ROI: mroi_summary/mroi_periods respectively.
 - Add channel_map for unverified identity or media classification.
 
