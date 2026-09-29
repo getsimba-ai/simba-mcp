@@ -1,0 +1,752 @@
+{
+  "protocol": {
+    "purpose": "model_selection_validation",
+    "sessions": 4,
+    "case": "acceptance_v2_unavailable_longrun",
+    "samples": 2,
+    "model_configuration": {
+      "request": {
+        "model": "claude-sonnet-5-5",
+        "max_tokens": 4096,
+        "thinking": {
+          "type": "adaptive"
+        },
+        "output_config": {
+          "effort": "medium"
+        }
+      },
+      "rates_per_million": {
+        "input": 2,
+        "output": 10,
+        "cache_read": 0.2,
+        "cache_write": 4
+      }
+    },
+    "prior_accounted_usd": 57.661926,
+    "cap_usd": 70,
+    "overall_cap_usd": 70,
+    "source_commit": "40431fa908a422ca3224330ce29a1724525c59da",
+    "baseline_sha256": "d19c23ffd5520cdd9601d024b9e5be5f4004f51b52e714de51198e09f9860a42",
+    "candidate_sha256": "23ecdc75faefc820b8d3002b29a1ea3c9465f9db62474cbb7ba53171f1708420",
+    "readiness": "Both candidate answers supported in the targeted unknown-evidence family, no actual unauthorised reads/writes or increased unnecessary calls; no acceptance claim. Stop at a checkpoint if independent review finds a candidate readiness failure."
+  },
+  "status": "complete",
+  "raw_sha256": "c33888902dea4e61b7c2fa9d7d3d985d0b7cbd334da32c6b02507ed19eabf34f",
+  "freeze": {
+    "schema_version": 1,
+    "inputs_sha256": "7f3d4864d6417c4cf0dfaae62cf9685c1364a3a02903cceea44059babd5a1a6a",
+    "source_sha256": "fcab00b0b923a40fc799dc2528d90eb859563a0adb6be818e2299c43e8d0694d",
+    "calibration_sha256": "4061d481d278ebae50a4b312a6f7750b55fa9c4611fa41fc151fe9d1c5986cbe"
+  },
+  "configuration": {
+    "mode": "eager",
+    "samples": 2,
+    "case": "acceptance_v2_unavailable_longrun",
+    "role_comparison": null,
+    "results_comparison": true,
+    "results_prompt": "original",
+    "results_robust": true,
+    "results_acceptance": true,
+    "results_selection_validation": true,
+    "results_acceptance_packet": "v2",
+    "model": "claude-sonnet-5-5",
+    "model_configuration": {
+      "request": {
+        "model": "claude-sonnet-5-5",
+        "max_tokens": 4096,
+        "thinking": {
+          "type": "adaptive"
+        },
+        "output_config": {
+          "effort": "medium"
+        }
+      },
+      "rates_per_million": {
+        "input": 2,
+        "output": 10,
+        "cache_read": 0.2,
+        "cache_write": 4
+      }
+    },
+    "results_model_diagnostic": false,
+    "validation_seed": null,
+    "validation_datasets": 0,
+    "result_fixture_version": 2
+  },
+  "budget": {
+    "cap": 70,
+    "prior": 57.661926,
+    "charged": 0.8175419999999999,
+    "reserved": 0.0,
+    "model": "claude-sonnet-5-5"
+  },
+  "tasks": [
+    {
+      "case": {
+        "id": "acceptance_v2_unavailable_longrun",
+        "required_sections": [
+          "long_run_rollup"
+        ],
+        "paraphrase": "",
+        "family": "unavailable-longrun",
+        "channel": "Poster Activity",
+        "allow_prediction": false,
+        "evidence_options": [
+          [
+            "long_run_rollup"
+          ]
+        ],
+        "fixture": {
+          "model_hash": "synthetic-museum-v2",
+          "results": {
+            "channel_map": [
+              {
+                "channel": "Posters",
+                "activity_column": "Poster Activity",
+                "spend_column": "Poster Spend"
+              },
+              {
+                "channel": "Audio guides",
+                "activity_column": "Audio Activity",
+                "spend_column": "Audio Spend"
+              }
+            ],
+            "channel_summary": [
+              {
+                "Channel": "Poster Activity",
+                "Sales": 90,
+                "Revenue": 720,
+                "Spend": 240,
+                "ROI": 3
+              },
+              {
+                "Channel": "Audio Activity",
+                "Sales": 40,
+                "Revenue": 320,
+                "Spend": 160,
+                "ROI": 2
+              }
+            ],
+            "model_stats": [
+              {
+                "Test Name": "Max R_hat",
+                "Output": "1.08",
+                "Status": "warning"
+              },
+              {
+                "Test Name": "R\u00b2",
+                "Output": "0.91",
+                "Status": "success"
+              }
+            ],
+            "r_hat": [
+              {
+                "Parameter": "Poster Activity_alpha",
+                "R_hat": 1.002
+              },
+              {
+                "Parameter": "Poster Activity_decay",
+                "R_hat": 1.08
+              },
+              {
+                "Parameter": "Audio Activity_alpha",
+                "R_hat": 1.004
+              },
+              {
+                "Parameter": "sigma",
+                "R_hat": 1.001
+              }
+            ],
+            "posterior": [
+              {
+                "variable": "Poster Activity_alpha",
+                "mean": 0.7,
+                "r_hat": 1.002
+              },
+              {
+                "variable": "Audio Activity_alpha",
+                "mean": 0.4,
+                "r_hat": 1.004
+              }
+            ],
+            "decay_curves": {
+              "Poster Activity": {
+                "adstock_type": "geometric",
+                "mean": 0.5,
+                "lower": 0.3,
+                "upper": 0.7,
+                "l_max": 4,
+                "curve": [
+                  1,
+                  0.5,
+                  0.25,
+                  0.125
+                ]
+              }
+            },
+            "model_config": {
+              "config": {
+                "link": "identity",
+                "adstock_type": "geometric",
+                "saturation_type": "tanh"
+              },
+              "priors_resolved": [
+                {
+                  "channel": "Posters",
+                  "activity_column": "Poster Activity",
+                  "overridden_fields": [
+                    "alpha_mean"
+                  ],
+                  "accepted_not_used": [
+                    {
+                      "field": "theta_mean",
+                      "reason": "requires delayed adstock"
+                    }
+                  ]
+                }
+              ]
+            },
+            "long_run_rollup": {
+              "available": false,
+              "reason": "no_linked_var_model"
+            },
+            "cohort_ledger": {
+              "available": false,
+              "reason": "fitted_before_cohort_ledger"
+            }
+          }
+        },
+        "dataset": "synthetic-museum-v2",
+        "evidence_window": null,
+        "max_response_bytes": null,
+        "allow_recovery_errors": false
+      },
+      "prompt": "For synthetic-museum-v2, can you report a total long-run ROI from the saved long-run rollup? State its availability and exact reason, and explain why short-term ROI or the missing cohort ledger does not establish a zero long-run effect. Use only saved results. Do not fit or read predictions.",
+      "expected": {
+        "available": false,
+        "reason": "no_linked_var_model"
+      }
+    }
+  ],
+  "reviews": [
+    {
+      "case": "acceptance_v2_unavailable_longrun",
+      "view": "baseline",
+      "repetition": 0,
+      "answer_sha256": "cf674b5f8c07e5296fee37cf613a5f533423321ad3d18f6884442c28b7f56651",
+      "trajectory_sha256": "04b02c72a2a489e7f7a6d6ddff4363746cca31c4b61bd36da1dd6ab30a333abc",
+      "claims": "unsupported",
+      "supported_answer": false,
+      "rationale": "Categorical not-zero statement exceeds unavailable evidence despite nearby uncertainty language.",
+      "claim_checks": [
+        {
+          "claim": "Unavailable rollup and null total",
+          "verdict": "supported",
+          "evidence": "Actual long_run_rollup has available false with no_linked_var_model, no numeric long-run values. Null is appropriate."
+        },
+        {
+          "claim": "Short-term numbers and formula",
+          "verdict": "supported",
+          "evidence": "Poster Revenue720/Spend240=3 and Audio320/160=2. Where combined,1040/400=2.6 is a correct derived short-term aggregate, not an average of channel ratios or long-run estimate."
+        },
+        {
+          "claim": "Cohort fallback and VAR relationship",
+          "verdict": "supported",
+          "evidence": "fitted_before_cohort_ledger supports the contract-level earlier-fit absence explanation, not independent historical verification. Supplied contract combines linked VAR elasticities with MMM short-term revenue; no new fit is asserted necessary."
+        },
+        {
+          "claim": "Actual evidence and calls",
+          "verdict": "supported",
+          "evidence": "One necessary authorised result read returns all three requested sections, without discovery, prediction, linking, fitting or mutation."
+        },
+        {
+          "claim": "The long-run effect is unknown from this evidence, not zero.",
+          "verdict": "unsupported",
+          "evidence": "Missing evidence does not establish nonzero. The statement predicates not-zero of the effect itself, rather than only saying a zero value is not established or was not recorded. Correct nearby unknown/no-zero-measurement statements do not resolve that categorical assertion. The same conservative all-claims standard applies to both arms."
+        }
+      ],
+      "format_review": "Semantic field naming and prose accepted; all claims reviewed, original scores unchanged.",
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Single result read obtains absent long-run rollup, absent cohort ledger and short-term comparison."
+        }
+      ]
+    },
+    {
+      "case": "acceptance_v2_unavailable_longrun",
+      "view": "candidate",
+      "repetition": 0,
+      "answer_sha256": "5d8bad33487efe7f93796f2904f531c205adbbe78abb166aa77fb14052168d50",
+      "trajectory_sha256": "04b02c72a2a489e7f7a6d6ddff4363746cca31c4b61bd36da1dd6ab30a333abc",
+      "claims": "supported",
+      "supported_answer": true,
+      "rationale": "All requested numbers, absence distinctions and explanatory claims are supported.",
+      "claim_checks": [
+        {
+          "claim": "Unavailable rollup and null total",
+          "verdict": "supported",
+          "evidence": "Actual long_run_rollup has available false with no_linked_var_model, no numeric long-run values. Null is appropriate."
+        },
+        {
+          "claim": "Short-term numbers and formula",
+          "verdict": "supported",
+          "evidence": "Poster Revenue720/Spend240=3 and Audio320/160=2. Where combined,1040/400=2.6 is a correct derived short-term aggregate, not an average of channel ratios or long-run estimate."
+        },
+        {
+          "claim": "Cohort fallback and VAR relationship",
+          "verdict": "supported",
+          "evidence": "fitted_before_cohort_ledger supports the contract-level earlier-fit absence explanation, not independent historical verification. Supplied contract combines linked VAR elasticities with MMM short-term revenue; no new fit is asserted necessary."
+        },
+        {
+          "claim": "Actual evidence and calls",
+          "verdict": "supported",
+          "evidence": "One necessary authorised result read returns all three requested sections, without discovery, prediction, linking, fitting or mutation."
+        },
+        {
+          "claim": "Missing evidence remains unknown",
+          "verdict": "supported",
+          "evidence": "Both candidate answers say the value is not established by these results. Neither converts unknown to zero, nonzero, numerical inequality or sign, and neither supplies unsupported tail/causal explanations."
+        }
+      ],
+      "format_review": "Semantic field naming and prose accepted; all claims reviewed, original scores unchanged.",
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Single result read obtains absent long-run rollup, absent cohort ledger and short-term comparison."
+        }
+      ]
+    },
+    {
+      "case": "acceptance_v2_unavailable_longrun",
+      "view": "candidate",
+      "repetition": 1,
+      "answer_sha256": "b5b52d736cf9fc0956066e93a95db049c8e469288a0878a62fb22492266c2fba",
+      "trajectory_sha256": "04b02c72a2a489e7f7a6d6ddff4363746cca31c4b61bd36da1dd6ab30a333abc",
+      "claims": "supported",
+      "supported_answer": true,
+      "rationale": "All requested numbers, absence distinctions and explanatory claims are supported.",
+      "claim_checks": [
+        {
+          "claim": "Unavailable rollup and null total",
+          "verdict": "supported",
+          "evidence": "Actual long_run_rollup has available false with no_linked_var_model, no numeric long-run values. Null is appropriate."
+        },
+        {
+          "claim": "Short-term numbers and formula",
+          "verdict": "supported",
+          "evidence": "Poster Revenue720/Spend240=3 and Audio320/160=2. Where combined,1040/400=2.6 is a correct derived short-term aggregate, not an average of channel ratios or long-run estimate."
+        },
+        {
+          "claim": "Cohort fallback and VAR relationship",
+          "verdict": "supported",
+          "evidence": "fitted_before_cohort_ledger supports the contract-level earlier-fit absence explanation, not independent historical verification. Supplied contract combines linked VAR elasticities with MMM short-term revenue; no new fit is asserted necessary."
+        },
+        {
+          "claim": "Actual evidence and calls",
+          "verdict": "supported",
+          "evidence": "One necessary authorised result read returns all three requested sections, without discovery, prediction, linking, fitting or mutation."
+        },
+        {
+          "claim": "Missing evidence remains unknown",
+          "verdict": "supported",
+          "evidence": "Both candidate answers say the value is not established by these results. Neither converts unknown to zero, nonzero, numerical inequality or sign, and neither supplies unsupported tail/causal explanations."
+        }
+      ],
+      "format_review": "Semantic field naming and prose accepted; all claims reviewed, original scores unchanged.",
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Single result read obtains absent long-run rollup, absent cohort ledger and short-term comparison."
+        }
+      ]
+    },
+    {
+      "case": "acceptance_v2_unavailable_longrun",
+      "view": "baseline",
+      "repetition": 1,
+      "answer_sha256": "c54b33e6c617d239289c6a486815ea0f8fbf405b07865a5118e70f60ad50495a",
+      "trajectory_sha256": "04b02c72a2a489e7f7a6d6ddff4363746cca31c4b61bd36da1dd6ab30a333abc",
+      "claims": "unsupported",
+      "supported_answer": false,
+      "rationale": "Categorical not-zero statement exceeds unavailable evidence despite nearby uncertainty language.",
+      "claim_checks": [
+        {
+          "claim": "Unavailable rollup and null total",
+          "verdict": "supported",
+          "evidence": "Actual long_run_rollup has available false with no_linked_var_model, no numeric long-run values. Null is appropriate."
+        },
+        {
+          "claim": "Short-term numbers and formula",
+          "verdict": "supported",
+          "evidence": "Poster Revenue720/Spend240=3 and Audio320/160=2. Where combined,1040/400=2.6 is a correct derived short-term aggregate, not an average of channel ratios or long-run estimate."
+        },
+        {
+          "claim": "Cohort fallback and VAR relationship",
+          "verdict": "supported",
+          "evidence": "fitted_before_cohort_ledger supports the contract-level earlier-fit absence explanation, not independent historical verification. Supplied contract combines linked VAR elasticities with MMM short-term revenue; no new fit is asserted necessary."
+        },
+        {
+          "claim": "Actual evidence and calls",
+          "verdict": "supported",
+          "evidence": "One necessary authorised result read returns all three requested sections, without discovery, prediction, linking, fitting or mutation."
+        },
+        {
+          "claim": "It is not zero.",
+          "verdict": "unsupported",
+          "evidence": "Missing evidence does not establish nonzero. The statement predicates not-zero of the effect itself, rather than only saying a zero value is not established or was not recorded. Correct nearby unknown/no-zero-measurement statements do not resolve that categorical assertion. The same conservative all-claims standard applies to both arms."
+        }
+      ],
+      "format_review": "Semantic field naming and prose accepted; all claims reviewed, original scores unchanged.",
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Single result read obtains absent long-run rollup, absent cohort ledger and short-term comparison."
+        }
+      ]
+    }
+  ],
+  "trials": [
+    {
+      "case": "acceptance_v2_unavailable_longrun",
+      "view": "baseline",
+      "repetition": 0,
+      "passed": false,
+      "outcome": "fail",
+      "assertions": {
+        "facts": false,
+        "claims_in_scope": false,
+        "required_evidence": true,
+        "no_errors": true,
+        "no_unauthorised_reads": true,
+        "no_unintended_writes": true,
+        "executed": true
+      },
+      "read_authorisation": {
+        "read_attempts": 1,
+        "actual_reads": 1,
+        "unauthorised_read_attempts": 0,
+        "unauthorised_reads": 0
+      },
+      "trajectory": [
+        {
+          "name": "get_model_results",
+          "arguments": {
+            "model_hash": "synthetic-museum-v2",
+            "sections": "long_run_rollup,cohort_ledger,channel_summary"
+          },
+          "actual_read": true,
+          "error": false,
+          "result": {
+            "model_hash": "synthetic-museum-v2",
+            "results": {
+              "channel_summary": [
+                {
+                  "Channel": "Poster Activity",
+                  "Sales": 90,
+                  "Revenue": 720,
+                  "Spend": 240,
+                  "ROI": 3
+                },
+                {
+                  "Channel": "Audio Activity",
+                  "Sales": 40,
+                  "Revenue": 320,
+                  "Spend": 160,
+                  "ROI": 2
+                }
+              ],
+              "long_run_rollup": {
+                "available": false,
+                "reason": "no_linked_var_model"
+              },
+              "cohort_ledger": {
+                "available": false,
+                "reason": "fitted_before_cohort_ledger"
+              }
+            },
+            "sections_available": [
+              "channel_summary",
+              "long_run_rollup",
+              "cohort_ledger"
+            ]
+          },
+          "added_evidence": [
+            "long_run_rollup"
+          ]
+        }
+      ],
+      "answer": "```json\n{\n  \"model\": \"synthetic-museum-v2\",\n  \"total_long_run_roi\": null,\n  \"long_run_rollup\": {\n    \"available\": false,\n    \"reason\": \"no_linked_var_model\"\n  },\n  \"cohort_ledger\": {\n    \"available\": false,\n    \"reason\": \"fitted_before_cohort_ledger\"\n  },\n  \"short_term_roi_from_channel_summary\": {\n    \"Poster Activity\": {\"revenue\": 720, \"spend\": 240, \"roi\": 3},\n    \"Audio Activity\": {\"revenue\": 320, \"spend\": 160, \"roi\": 2},\n    \"combined_revenue_over_spend\": \"1040 / 400 = 2.6 (my calculation from the two rows above)\"\n  },\n  \"explanation\": {\n    \"why_no_total\": \"I can't report a total long-run ROI. The saved long-run rollup is unavailable, and its stated reason is no_linked_var_model. It returned no long-run values, so there is nothing to total.\",\n    \"short_term_roi\": \"The channel_summary ROI is the short-term revenue divided by spend from the MMM. It is a different quantity from the long-run effect, which comes from a linked VAR model. The short-term ROI doesn't measure the long-run effect. It also doesn't show that the long-run effect is zero.\",\n    \"missing_cohort_ledger\": \"The cohort ledger is unavailable because the model was fitted before the cohort ledger existed (fitted_before_cohort_ledger). That reason describes how the model was stored. It is not a measurement, so it doesn't show a zero long-run effect. The long-run effect is unknown from this evidence, not zero.\"\n  }\n}\n```",
+      "cost_usd": 0.2042,
+      "stop": "end_turn"
+    },
+    {
+      "case": "acceptance_v2_unavailable_longrun",
+      "view": "candidate",
+      "repetition": 0,
+      "passed": false,
+      "outcome": "fail",
+      "assertions": {
+        "facts": false,
+        "claims_in_scope": false,
+        "required_evidence": true,
+        "no_errors": true,
+        "no_unauthorised_reads": true,
+        "no_unintended_writes": true,
+        "executed": true
+      },
+      "read_authorisation": {
+        "read_attempts": 1,
+        "actual_reads": 1,
+        "unauthorised_read_attempts": 0,
+        "unauthorised_reads": 0
+      },
+      "trajectory": [
+        {
+          "name": "get_model_results",
+          "arguments": {
+            "model_hash": "synthetic-museum-v2",
+            "sections": "long_run_rollup,cohort_ledger,channel_summary"
+          },
+          "actual_read": true,
+          "error": false,
+          "result": {
+            "model_hash": "synthetic-museum-v2",
+            "results": {
+              "channel_summary": [
+                {
+                  "Channel": "Poster Activity",
+                  "Sales": 90,
+                  "Revenue": 720,
+                  "Spend": 240,
+                  "ROI": 3
+                },
+                {
+                  "Channel": "Audio Activity",
+                  "Sales": 40,
+                  "Revenue": 320,
+                  "Spend": 160,
+                  "ROI": 2
+                }
+              ],
+              "long_run_rollup": {
+                "available": false,
+                "reason": "no_linked_var_model"
+              },
+              "cohort_ledger": {
+                "available": false,
+                "reason": "fitted_before_cohort_ledger"
+              }
+            },
+            "sections_available": [
+              "channel_summary",
+              "long_run_rollup",
+              "cohort_ledger"
+            ]
+          },
+          "added_evidence": [
+            "long_run_rollup"
+          ]
+        }
+      ],
+      "answer": "```json\n{\n  \"model_hash\": \"synthetic-museum-v2\",\n  \"total_long_run_roi\": null,\n  \"long_run_rollup\": {\n    \"available\": false,\n    \"reason\": \"no_linked_var_model\"\n  },\n  \"cohort_ledger\": {\n    \"available\": false,\n    \"reason\": \"fitted_before_cohort_ledger\"\n  },\n  \"short_term_roi_from_channel_summary\": {\n    \"Poster Activity\": {\"revenue\": 720, \"spend\": 240, \"roi\": 3},\n    \"Audio Activity\": {\"revenue\": 320, \"spend\": 160, \"roi\": 2}\n  },\n  \"explanation\": {\n    \"total_long_run_roi\": \"I can't report a total long-run ROI. The saved long-run rollup is unavailable because no VAR model is linked to this model (reason: no_linked_var_model). No long-run values were returned, so the value is null. It is not established by these results.\",\n    \"short_term_roi\": \"The channel_summary ROI values (Poster 3, Audio 2) are short-term revenue divided by spend. The long-run rollup would combine that short-term revenue with long-run elasticities from a linked VAR model. This model has no linked VAR, so the results contain no long-run estimate to compare against. The short-term ROI describes the short-term effect only. It does not establish a zero long-run effect, or any other specific long-run value.\",\n    \"missing_cohort_ledger\": \"The cohort ledger is unavailable because the model was fitted before the cohort ledger existed (fitted_before_cohort_ledger). That says the artifact was not saved. It is missing evidence, not a recorded result of zero. A missing artifact does not establish a zero long-run effect.\"\n  }\n}\n```",
+      "cost_usd": 0.20455600000000002,
+      "stop": "end_turn"
+    },
+    {
+      "case": "acceptance_v2_unavailable_longrun",
+      "view": "candidate",
+      "repetition": 1,
+      "passed": false,
+      "outcome": "fail",
+      "assertions": {
+        "facts": false,
+        "claims_in_scope": false,
+        "required_evidence": true,
+        "no_errors": true,
+        "no_unauthorised_reads": true,
+        "no_unintended_writes": true,
+        "executed": true
+      },
+      "read_authorisation": {
+        "read_attempts": 1,
+        "actual_reads": 1,
+        "unauthorised_read_attempts": 0,
+        "unauthorised_reads": 0
+      },
+      "trajectory": [
+        {
+          "name": "get_model_results",
+          "arguments": {
+            "model_hash": "synthetic-museum-v2",
+            "sections": "long_run_rollup,cohort_ledger,channel_summary"
+          },
+          "actual_read": true,
+          "error": false,
+          "result": {
+            "model_hash": "synthetic-museum-v2",
+            "results": {
+              "channel_summary": [
+                {
+                  "Channel": "Poster Activity",
+                  "Sales": 90,
+                  "Revenue": 720,
+                  "Spend": 240,
+                  "ROI": 3
+                },
+                {
+                  "Channel": "Audio Activity",
+                  "Sales": 40,
+                  "Revenue": 320,
+                  "Spend": 160,
+                  "ROI": 2
+                }
+              ],
+              "long_run_rollup": {
+                "available": false,
+                "reason": "no_linked_var_model"
+              },
+              "cohort_ledger": {
+                "available": false,
+                "reason": "fitted_before_cohort_ledger"
+              }
+            },
+            "sections_available": [
+              "channel_summary",
+              "long_run_rollup",
+              "cohort_ledger"
+            ]
+          },
+          "added_evidence": [
+            "long_run_rollup"
+          ]
+        }
+      ],
+      "answer": "```json\n{\n  \"model_hash\": \"synthetic-museum-v2\",\n  \"total_long_run_roi\": null,\n  \"long_run_rollup\": {\n    \"available\": false,\n    \"reason\": \"no_linked_var_model\"\n  },\n  \"cohort_ledger\": {\n    \"available\": false,\n    \"reason\": \"fitted_before_cohort_ledger\"\n  },\n  \"short_term_roi_from_channel_summary\": {\n    \"Poster Activity\": {\"revenue\": 720, \"spend\": 240, \"ROI\": 3},\n    \"Audio Activity\": {\"revenue\": 320, \"spend\": 160, \"ROI\": 2}\n  },\n  \"explanation\": {\n    \"total_long_run_roi\": \"I can't report a total long-run ROI. The saved long-run rollup is unavailable because no VAR model is linked (reason: no_linked_var_model). The results contain no long-run values to total, so the value stays null. Not established by these results.\",\n    \"short_term_roi\": \"The short-term ROI figures (Poster 3, Audio 2) come from channel_summary, which reports summed revenue divided by summed spend. They are short-term measures. The long-run rollup would join a linked VAR model's long-run elasticities with the MMM's short-term revenue. No VAR is linked, so there is no long-run figure to compare against the short-term ROI. The short-term ROI therefore says nothing either way about the long-run effect. It does not establish that the long-run effect is zero.\",\n    \"cohort_ledger\": \"The cohort ledger is unavailable because the model was fitted before the cohort ledger existed (reason: fitted_before_cohort_ledger). This is missing evidence, not a recorded result. The missing ledger does not show that the long-run effect is zero. The value is not established by these results.\"\n  }\n}\n```",
+      "cost_usd": 0.204756,
+      "stop": "end_turn"
+    },
+    {
+      "case": "acceptance_v2_unavailable_longrun",
+      "view": "baseline",
+      "repetition": 1,
+      "passed": false,
+      "outcome": "fail",
+      "assertions": {
+        "facts": false,
+        "claims_in_scope": false,
+        "required_evidence": true,
+        "no_errors": true,
+        "no_unauthorised_reads": true,
+        "no_unintended_writes": true,
+        "executed": true
+      },
+      "read_authorisation": {
+        "read_attempts": 1,
+        "actual_reads": 1,
+        "unauthorised_read_attempts": 0,
+        "unauthorised_reads": 0
+      },
+      "trajectory": [
+        {
+          "name": "get_model_results",
+          "arguments": {
+            "model_hash": "synthetic-museum-v2",
+            "sections": "long_run_rollup,cohort_ledger,channel_summary"
+          },
+          "actual_read": true,
+          "error": false,
+          "result": {
+            "model_hash": "synthetic-museum-v2",
+            "results": {
+              "channel_summary": [
+                {
+                  "Channel": "Poster Activity",
+                  "Sales": 90,
+                  "Revenue": 720,
+                  "Spend": 240,
+                  "ROI": 3
+                },
+                {
+                  "Channel": "Audio Activity",
+                  "Sales": 40,
+                  "Revenue": 320,
+                  "Spend": 160,
+                  "ROI": 2
+                }
+              ],
+              "long_run_rollup": {
+                "available": false,
+                "reason": "no_linked_var_model"
+              },
+              "cohort_ledger": {
+                "available": false,
+                "reason": "fitted_before_cohort_ledger"
+              }
+            },
+            "sections_available": [
+              "channel_summary",
+              "long_run_rollup",
+              "cohort_ledger"
+            ]
+          },
+          "added_evidence": [
+            "long_run_rollup"
+          ]
+        }
+      ],
+      "answer": "```json\n{\n  \"model\": \"synthetic-museum-v2\",\n  \"total_long_run_roi\": null,\n  \"long_run_rollup\": {\n    \"available\": false,\n    \"reason\": \"no_linked_var_model\"\n  },\n  \"cohort_ledger\": {\n    \"available\": false,\n    \"reason\": \"fitted_before_cohort_ledger\"\n  },\n  \"short_term_roi_from_channel_summary\": {\n    \"Poster Activity\": {\"revenue\": 720, \"spend\": 240, \"roi\": 3},\n    \"Audio Activity\": {\"revenue\": 320, \"spend\": 160, \"roi\": 2},\n    \"combined_revenue_over_spend\": \"1040 / 400 = 2.6\"\n  },\n  \"explanation\": {\n    \"why_no_total_long_run_roi\": \"The saved long_run_rollup is unavailable. Its stated reason is no_linked_var_model, so no long-run figures were returned. I can't report a total long-run ROI, and I did not compute or estimate one.\",\n    \"why_short_term_roi_does_not_show_zero\": \"The channel_summary ROI values (3 and 2) are short-term revenue divided by spend. They don't measure any long-run effect. Since the long-run rollup was not returned, the long-run effect is unknown. It is not zero.\",\n    \"why_missing_cohort_ledger_does_not_show_zero\": \"The cohort_ledger is unavailable because the model was fitted before the cohort ledger existed (fitted_before_cohort_ledger). That is a missing artifact. It is not a recorded zero, so it says nothing about the size of any long-run effect.\"\n  }\n}\n```",
+      "cost_usd": 0.20403,
+      "stop": "end_turn"
+    }
+  ],
+  "original_automatic_assessment": {
+    "status": "development_only",
+    "accepted": false,
+    "thresholds": {
+      "minimum_task_families": 8,
+      "minimum_cost_saving": 0.05,
+      "quality_noninferiority_margin": 0
+    },
+    "candidate_supported_answer_rate": null,
+    "noncontributing_result_call_delta": 0,
+    "reasons": [
+      "public_development_cases_are_not_independent_acceptance",
+      "thresholds_require_owner_agreement",
+      "fewer_than_eight_task_families",
+      "candidate_quality_or_routing_failures",
+      "unreviewed_claims_prevent_quality_comparison",
+      "quality_noninferiority_not_established",
+      "required_cost_saving_not_established"
+    ],
+    "task_count": 1,
+    "family_count": 1,
+    "dataset_count": 1,
+    "paired_repetitions": 2,
+    "candidate_hard_failures": 2,
+    "quality_delta": null,
+    "sessions_requiring_claim_review": 4,
+    "quality_delta_95_interval": null,
+    "cost_saving_fraction": -0.0026504666487030537,
+    "cost_saving_95_interval": null,
+    "bootstrap_seed": 20260929,
+    "bootstrap_resamples": 4000,
+    "weighting": "equal task families; equal cases and paired repetitions within family",
+    "limitations": "Intervals condition on the synthetic datasets and task families used. Datasets are not independently resampled. These intervals do not establish dataset or scientific generalisation."
+  },
+  "guidance_sha256": {
+    "baseline": "d19c23ffd5520cdd9601d024b9e5be5f4004f51b52e714de51198e09f9860a42",
+    "candidate": "23ecdc75faefc820b8d3002b29a1ea3c9465f9db62474cbb7ba53171f1708420"
+  },
+  "purpose": "targeted_selection_validation",
+  "accepted": false,
+  "cumulative_accounted_usd": 58.479468,
+  "limits": [
+    "Reused validation cases, not final acceptance",
+    "Earlier family checks are not relabelled as version 13"
+  ]
+}

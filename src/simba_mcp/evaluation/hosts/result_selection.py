@@ -7,13 +7,31 @@ inferring scientific correctness. All execution still uses the canonical runner.
 import json
 from copy import deepcopy
 from dataclasses import dataclass, replace
+from datetime import UTC, datetime
 from decimal import Decimal
+from math import isfinite
 
 from ...metadata import READ_ONLY
 from ..contracts import Case, Exchange, Step
 from ..result_cases import saved_results, selected_payload, varied_results
 from ..runner import contains, run_case
 from .result_grading import claims_in_scope, semantic_facts
+
+
+def _row_matches(actual, expected):
+    """Match saved row facts, allowing JSON integer/float parity but not booleans."""
+    return isinstance(actual, dict) and all(
+        key in actual
+        and (
+            type(actual[key]) in (int, float)
+            and isfinite(actual[key])
+            and isfinite(value)
+            and actual[key] == value
+            if type(value) in (int, float)
+            else contains(actual[key], value)
+        )
+        for key, value in expected.items()
+    )
 
 
 @dataclass(frozen=True)
@@ -32,6 +50,7 @@ class ResultTask:
     evidence_window: dict | None = None
     max_response_bytes: int | None = None
     allow_recovery_errors: bool = False
+    allowed_result_sections: frozenset[str] | None = None
 
     def evidence_sets(self):
         return self.evidence_options or (self.required_sections,)
@@ -257,6 +276,10 @@ class ResultSelectionDispatch:
         self.read_attempts = self.actual_reads = 0
         self.unauthorised_read_attempts = self.unauthorised_reads = 0
         self.recoverable_errors = 0
+        self.result_rows = {"coefficients": [], "contributions": []}
+        self.period_summary_rows = []
+        self.summary_rows = {}
+        self.media_identities = set()
 
     def refuse(self, name, reason, *, unauthorised=False):
         self.errors += 1
@@ -297,6 +320,14 @@ class ResultSelectionDispatch:
         if not isinstance(raw, str):
             return self.refuse(name, "Sections must be a comma-separated string.")
         sections = [s.strip() for s in raw.split(",") if s.strip()]
+        if self.task.allowed_result_sections is not None and (
+            not sections or not set(sections) <= self.task.allowed_result_sections
+        ):
+            return self.refuse(
+                name,
+                "Only the task's explicitly authorised result sections may be read.",
+                unauthorised=True,
+            )
         if "prediction_window" in sections and not self.task.allow_prediction:
             return self.refuse(
                 name,
@@ -378,12 +409,84 @@ class ResultSelectionDispatch:
                 for r in identity_rows
             ):
                 self.supported_sections.add("verified_channel_identity")
+            virtual_sections = {
+                "verified_channel_identity",
+                "verified_media_identity",
+                "period_revenue_rows",
+            }
+            oracle_sections = evidence_sections - virtual_sections
+            if "period_revenue_rows" in evidence_sections:
+                oracle_sections = oracle_sections | {"coefficients"}
             oracle = selected_payload(
-                evidence_sections, fixture=fixture, **(self.task.evidence_window or {})
+                oracle_sections, fixture=fixture, **(self.task.evidence_window or {})
             )["results"]
+            returned = result.get("results", {})
+            returned_window = result.get("meta", {}).get("window", {})
+            summary_context = tuple(
+                returned_window.get(key) or ("native" if key == "granularity" else None)
+                for key in ("start", "end", "granularity")
+            )
+            self.summary_rows.setdefault(summary_context, []).extend(
+                deepcopy(row)
+                for row in returned.get("channel_summary", [])
+                if isinstance(row, dict)
+            )
+            for section, rows in self.result_rows.items():
+                actual_rows = returned.get(section, [])
+                if isinstance(actual_rows, list):
+                    rows.extend(deepcopy(row) for row in actual_rows if isinstance(row, dict))
+            for section, key in (
+                ("channel_map", "activity_column"),
+                ("channel_summary", "Channel"),
+                ("coefficients", "Channel"),
+            ):
+                self.media_identities.update(
+                    row[key]
+                    for row in returned.get(section, [])
+                    if isinstance(row, dict) and isinstance(row.get(key), str)
+                )
+            required_media = {
+                row["activity_column"]
+                for row in fixture["results"].get("channel_map", [])
+                if not self.task.channel or row["activity_column"] == self.task.channel
+            }
+            if (
+                "verified_media_identity" in evidence_sections
+                and required_media
+                and required_media <= self.media_identities
+            ):
+                self.supported_sections.add("verified_media_identity")
+            if "period_revenue_rows" in evidence_sections:
+                wanted_rows = [
+                    {
+                        key: row[key]
+                        for key in ("Date", "Channel", "Sales", "Revenue", "Spend", "ROI")
+                        if key in row
+                    }
+                    for row in oracle.get("coefficients", [])
+                    if not self.task.channel or row.get("Channel") == self.task.channel
+                ]
+                returned_window = result.get("meta", {}).get("window", {})
+                start, end = returned_window.get("start"), returned_window.get("end")
+                if start and start == end:
+                    for wanted in wanted_rows:
+                        date = datetime.fromtimestamp(wanted["Date"] / 1000, UTC).date().isoformat()
+                        if date != start:
+                            continue
+                        expected_summary = {k: v for k, v in wanted.items() if k != "Date"}
+                        for row in returned.get("channel_summary", []):
+                            if _row_matches(row, expected_summary):
+                                self.period_summary_rows.append(
+                                    {**deepcopy(row), "Date": wanted["Date"]}
+                                )
+                period_rows = self.result_rows["coefficients"] + self.period_summary_rows
+                if wanted_rows and all(
+                    any(_row_matches(row, wanted) for row in period_rows) for wanted in wanted_rows
+                ):
+                    self.supported_sections.add("period_revenue_rows")
             # Only an explicit request can establish that a required artefact was
             # not returned. Empty channel-filtered rows are not missing artefacts.
-            for section in evidence_sections - set(oracle) - {"verified_channel_identity"}:
+            for section in evidence_sections - set(oracle) - virtual_sections:
                 if (
                     section in sections
                     and section not in result.get("results", {})
@@ -392,6 +495,15 @@ class ResultSelectionDispatch:
                     self.supported_sections.add(section)
             for section, expected in oracle.items():
                 actual = result.get("results", {}).get(section)
+                if section == "channel_summary":
+                    expected_window = self.task.evidence_window or {}
+                    expected_context = tuple(
+                        expected_window.get(key) or ("native" if key == "granularity" else None)
+                        for key in ("start", "end", "granularity")
+                    )
+                    actual = self.summary_rows.get(expected_context, [])
+                if section in self.result_rows:
+                    actual = self.result_rows[section]
                 if section == "coefficients" and self.task.channel:
                     expected = [row for row in expected if row.get("Channel") == self.task.channel]
                 if section in ("channel_summary", "channel_map") and self.task.channel:
@@ -400,22 +512,16 @@ class ResultSelectionDispatch:
                     valid = isinstance(actual, list) and any(
                         contains(row, wanted) for row in actual
                     )
-                elif (
-                    section in ("coefficients", "contributions") and self.task.evidence_window
-                ) or (section == "coefficients" and self.task.channel):
+                elif section in self.result_rows or section == "channel_summary":
                     valid = (
                         isinstance(actual, list)
                         and bool(expected)
-                        and all(any(contains(row, wanted) for row in actual) for wanted in expected)
+                        and all(
+                            any(_row_matches(row, wanted) for row in actual) for wanted in expected
+                        )
                     )
                 else:
                     valid = contains(actual, expected)
-                if section == "channel_summary" and self.task.evidence_window:
-                    returned_window = result.get("meta", {}).get("window", {})
-                    valid = valid and all(
-                        returned_window.get(key) == value
-                        for key, value in self.task.evidence_window.items()
-                    )
                 if valid:
                     self.supported_sections.add(section)
             self.noncontributing_result_calls += int(self.supported_sections == previous_evidence)

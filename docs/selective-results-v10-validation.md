@@ -86,3 +86,17 @@ Version 13 narrowly clarifies the expression of unknown values: use null and
 signs. A four-session targeted check compares it with version 12, requiring both
 candidate answers supported and no increase in unnecessary calls. Earlier checks
 are not relabelled as version 13 runs. The fresh third packet remains unopened.
+
+## Version 13 result and fresh packet release
+
+Both candidate answers passed the targeted independent claim review, with one
+necessary saved-result read each. Both control answers failed for explicitly
+asserting that an unknown effect was not zero. Actual unauthorised reads and
+writes, refused attempts and unnecessary calls were zero in both arms.
+[All four answers and original scores are preserved](selective-results-v13-validation-evidence.json).
+This is reused-case validation only; earlier family checks remain version-specific.
+
+Cost US$0.817542 brings cumulative accounted spend to **US$58.479468 of US$70**,
+reserved zero. The candidate guidance was frozen before the third independent
+packet was released for fixture and evidence-grader verification. No guidance
+tuning is permitted against that packet while it serves as acceptance evidence.
