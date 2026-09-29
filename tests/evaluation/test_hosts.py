@@ -123,6 +123,85 @@ def test_budget_carries_prior_and_unknown_usage():
     assert budget.reserved == reserved
 
 
+def test_sonnet_pricing_and_model_bound_reservation():
+    from simba_mcp.evaluation.hosts.anthropic import MODEL, SONNET, model_configuration
+
+    request = model_configuration(SONNET)["request"]
+    assert "temperature" not in request
+    budget = Budget(3, model=SONNET)
+    reserved = budget.reserve(request)
+    cost = budget.settle(
+        {
+            "input_tokens": 1000,
+            "output_tokens": 2000,
+            "cache_read_input_tokens": 100,
+            "cache_creation_input_tokens": 100,
+        },
+        reserved,
+    )
+    assert cost == pytest.approx(0.02242)
+    assert budget.reserved == 0
+    with pytest.raises(ValueError, match="pricing"):
+        budget.reserve({**request, "model": MODEL})
+    with pytest.raises(RuntimeError, match="exhausted"):
+        Budget(25.382478, prior=25.372478, model=SONNET).reserve(request)
+    with pytest.raises(ValueError, match="Unsupported"):
+        Budget(3, model="unknown")
+
+
+@pytest.mark.anyio
+async def test_single_arm_model_diagnostic_freezes_ten_reused_cases(tmp_path, monkeypatch):
+    from simba_mcp.evaluation.hosts import __main__ as command
+    from simba_mcp.evaluation.hosts.anthropic import SONNET
+
+    requests = []
+
+    def respond(request):
+        requests.append(json.loads(request.content))
+        return httpx.Response(
+            200,
+            json={
+                "usage": {"input_tokens": 20, "output_tokens": 10},
+                "content": [{"type": "text", "text": "{}"}],
+                "stop_reason": "end_turn",
+            },
+        )
+
+    monkeypatch.setattr(
+        command, "client", lambda _: httpx.AsyncClient(transport=httpx.MockTransport(respond))
+    )
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "synthetic-key")
+    output = tmp_path / "diagnostic.json"
+    await command.run(
+        SimpleNamespace(
+            output=output,
+            cap_usd=3,
+            prior_usd=0,
+            samples=2,
+            mode="eager",
+            case=None,
+            results_robust=True,
+            results_model_diagnostic=True,
+            model=SONNET,
+        )
+    )
+    report = json.loads(output.read_text())
+    assert report["status"] == "complete"
+    assert len(report["trials"]) == len(requests) == 10
+    assert {r["case"] for r in report["trials"]} == {
+        "acceptance_a",
+        "acceptance_d",
+        "acceptance_e",
+        "acceptance_f",
+        "acceptance_h",
+    }
+    assert {r["view"] for r in report["trials"]} == {"candidate"}
+    assert all(r["thinking"] == {"type": "adaptive"} and "temperature" not in r for r in requests)
+    assert report["experiment_inputs"]["purpose"] == "model_selection_validation"
+    assert not report["assessment"]["accepted"]
+    assert report["budget"]["charged"] == pytest.approx(0.0014)
+
+
 def test_format_failure_is_separate_from_correct_facts():
     assert answer('Here it is: ```json\n{"status":"pending"}\n```') == (
         {"status": "pending"},

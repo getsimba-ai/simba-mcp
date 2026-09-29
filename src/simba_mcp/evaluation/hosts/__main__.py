@@ -19,7 +19,7 @@ from ..experiments import (
     verify_experiment,
 )
 from ..result_cases import FIXTURE_VERSION
-from .anthropic import MODEL, Budget, client, definitions, session
+from .anthropic import MODEL, SONNET, Budget, client, definitions, model_configuration, session
 from .result_calibration import GRADER_VERSION, calibrate
 from .result_grading import fact_verdict, literal_fields, structured_answer_only
 from .result_selection import (
@@ -35,22 +35,32 @@ from .scenarios import SyntheticDispatch, answer, role_tasks, tasks
 async def run(args):
     if args.output.exists():
         raise ValueError("Refusing to overwrite evidence; carry prior spend into a new run")
-    budget = Budget(args.cap_usd, args.prior_usd)
+    budget = Budget(args.cap_usd, args.prior_usd, model=getattr(args, "model", MODEL))
     server = create_server("compact")
     tools = await server.list_tools()
     role = getattr(args, "role_comparison", None)
     baseline_path = getattr(args, "results_baseline", None)
     robust = getattr(args, "results_robust", False)
     acceptance = getattr(args, "results_acceptance", False)
+    diagnostic = getattr(args, "results_model_diagnostic", False)
+    if diagnostic and (not robust or acceptance or baseline_path or role or args.mode != "eager"):
+        raise ValueError("Model diagnostic requires robust eager mode without other comparisons")
     if acceptance and not robust:
         raise ValueError("Acceptance candidate cases require a frozen robust comparison")
     dataset_count = getattr(args, "results_validation_datasets", 0)
     if dataset_count and (not robust or dataset_count not in (2, 3)):
         raise ValueError("Generated validation requires robust mode and two or three datasets")
     validation_seed = None
-    if robust and not baseline_path:
+    if robust and not (baseline_path or diagnostic):
         raise ValueError("Robust results assessment requires a paired guidance comparison")
     guidance_arms = None
+    if diagnostic:
+        guidance_arms = {
+            "candidate": {
+                s: read_guidance("results", s)
+                for s in ("entrypoint", "interpretation", "tool-reference")
+            }
+        }
     if baseline_path:
         if role or args.mode != "eager":
             raise ValueError("Results comparison requires eager mode and no role comparison")
@@ -68,7 +78,7 @@ async def run(args):
         raise ValueError("Role comparison requires eager mode to isolate catalogue visibility")
     suite = role_tasks() if role else tasks()
     if guidance_arms:
-        if acceptance:
+        if acceptance or diagnostic:
             from ..result_acceptance import acceptance_tasks
 
         validation_seed = secrets.randbits(63) if dataset_count else None
@@ -76,7 +86,7 @@ async def run(args):
             (task, task.prompt, task.expected)
             for task in (
                 acceptance_tasks()
-                if acceptance
+                if acceptance or diagnostic
                 else validation_tasks(validation_seed, dataset_count)
                 if dataset_count
                 else development_tasks()
@@ -85,6 +95,15 @@ async def run(args):
             )
         ]
     selected = [task for task in suite if args.case is None or task[0].id == args.case]
+    if diagnostic:
+        if args.case is not None or args.samples != 2 or dataset_count:
+            raise ValueError("Model diagnostic fixes five cases and two repetitions")
+        selected = [
+            task
+            for task in selected
+            if task[0].id
+            in {"acceptance_a", "acceptance_d", "acceptance_e", "acceptance_f", "acceptance_h"}
+        ]
     if role:
         selected = [task for task in selected if task[0].id in ROLE_CASES[role]]
     if not selected:
@@ -102,7 +121,9 @@ async def run(args):
             "results_prompt": getattr(args, "results_prompt", "mixed"),
             "results_robust": robust,
             "results_acceptance": acceptance,
-            "model": MODEL,
+            "model": budget.model,
+            "model_configuration": model_configuration(budget.model),
+            "results_model_diagnostic": diagnostic,
             "validation_seed": validation_seed,
             "validation_datasets": dataset_count,
             "result_fixture_version": FIXTURE_VERSION if guidance_arms else None,
@@ -138,7 +159,11 @@ async def run(args):
     if robust:
         report["calibration"] = calibrate()
         report["experiment_inputs"] = {
-            "purpose": "candidate_acceptance" if acceptance else "development",
+            "purpose": "model_selection_validation"
+            if diagnostic
+            else "candidate_acceptance"
+            if acceptance
+            else "development",
             "case_review": getattr(args, "case_review", None),
             "samples": args.samples,
             "configuration": report["configuration"],
@@ -188,7 +213,7 @@ async def run(args):
                         if rep % 2:
                             arms.reverse()
                     if guidance_arms:
-                        arms = [("eager", "baseline"), ("eager", "candidate")]
+                        arms = [("eager", view) for view in guidance_arms]
                         if rep % 2:
                             arms.reverse()
                     for mode, view in arms:
@@ -333,7 +358,13 @@ async def run(args):
         report["error_type"] = type(error).__name__
         raise
     finally:
-        if robust:
+        if diagnostic:
+            report["assessment"] = {
+                "accepted": False,
+                "decision": "Model-selection validation only; independent claim review required",
+                "limitations": ["Reused cases", "Single arm", "Model configuration differs"],
+            }
+        elif robust:
             report["assessment"] = assess_comparison(
                 report["trials"],
                 {c.id: c.family for c, _, _ in selected},
@@ -350,6 +381,12 @@ def main():
     parser.add_argument("--cap-usd", type=float, required=True)
     parser.add_argument("--prior-usd", type=float, default=0)
     parser.add_argument("--samples", type=int, default=2)
+    parser.add_argument("--model", choices=(MODEL, SONNET), default=MODEL)
+    parser.add_argument(
+        "--results-model-diagnostic",
+        action="store_true",
+        help="Frozen single-arm validation on five reused cases, two repetitions",
+    )
     parser.add_argument("--mode", choices=("eager", "deferred", "both"), default="eager")
     parser.add_argument(
         "--case",

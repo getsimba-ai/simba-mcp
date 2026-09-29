@@ -44,7 +44,7 @@ def freeze_experiment(inputs, calibration):
         review = inputs.get("case_review") or {}
         if not review.get("verified") or not review.get("guidance_unchanged"):
             raise ValueError("Candidate acceptance requires verified cases and unchanged guidance")
-    elif inputs.get("purpose") != "development":
+    elif inputs.get("purpose") not in ("development", "model_selection_validation"):
         raise ValueError("Independent acceptance is not supported by public development cases")
     if type(inputs.get("samples")) is not int or inputs["samples"] < 2:
         raise ValueError("A paired experiment requires at least two repetitions")

@@ -9,7 +9,32 @@ from time import perf_counter
 import httpx
 
 MODEL = "claude-haiku-4-5-20251001"
+SONNET = "claude-sonnet-5-5"
 SEARCH = {"type": "tool_search_tool_bm25_20251119", "name": "tool_search_tool_bm25"}
+
+
+def model_configuration(model=MODEL):
+    """Explicit request and accounting settings, frozen with each experiment.
+
+    Preserve historical Haiku cache overestimates. Sonnet uses a conservative
+    one-hour cache-write rate; these synthetic requests do not enable caching.
+    """
+    if model == MODEL:
+        return {
+            "request": {"model": model, "max_tokens": 1200, "temperature": 0},
+            "rates_per_million": {"input": 1, "output": 5, "cache_read": 1, "cache_write": 2},
+        }
+    if model == SONNET:
+        return {
+            "request": {
+                "model": model,
+                "max_tokens": 4096,
+                "thinking": {"type": "adaptive"},
+                "output_config": {"effort": "medium"},
+            },
+            "rates_per_million": {"input": 2, "output": 10, "cache_read": 0.2, "cache_write": 4},
+        }
+    raise ValueError("Unsupported evaluation model")
 
 
 def definitions(tools, mode):
@@ -37,14 +62,22 @@ class Budget:
     prior: float = 0.0
     charged: float = 0.0
     reserved: float = 0.0
+    model: str = MODEL
 
     def __post_init__(self):
-        if any(not math.isfinite(x) or x < 0 for x in vars(self).values()):
+        model_configuration(self.model)
+        if any(
+            not math.isfinite(x) or x < 0
+            for x in (self.cap, self.prior, self.charged, self.reserved)
+        ):
             raise ValueError("Budget amounts must be finite and nonnegative")
 
     def reserve(self, request):
-        bound = (2 * len(json.dumps(request).encode()) + 20000) / 1e6
-        bound += request["max_tokens"] * 5 / 1e6
+        if request.get("model", self.model) != self.model:
+            raise ValueError("Request model does not match budget pricing")
+        rates = model_configuration(self.model)["rates_per_million"]
+        bound = (2 * len(json.dumps(request).encode()) + 20000) * rates["input"] / 1e6
+        bound += request["max_tokens"] * rates["output"] / 1e6
         if self.prior + self.charged + self.reserved + bound > self.cap:
             raise RuntimeError("Provider budget exhausted")
         self.reserved += bound
@@ -59,7 +92,13 @@ class Budget:
         ]
         if any(type(n) is not int or n < 0 for n in cache):
             raise ValueError("Invalid cache usage; reservation retained")
-        cost = (usage["input_tokens"] + cache[0] + 2 * cache[1] + 5 * usage["output_tokens"]) / 1e6
+        rates = model_configuration(self.model)["rates_per_million"]
+        cost = (
+            usage["input_tokens"] * rates["input"]
+            + cache[0] * rates["cache_read"]
+            + cache[1] * rates["cache_write"]
+            + usage["output_tokens"] * rates["output"]
+        ) / 1e6
         self.charged += cost
         self.reserved -= reservation
         if cost > reservation:
@@ -81,9 +120,7 @@ async def session(
     started = perf_counter()
     for _ in range(max_turns):
         request = {
-            "model": MODEL,
-            "max_tokens": 1200,
-            "temperature": 0,
+            **model_configuration(budget.model)["request"],
             "system": "Complete only the authorised synthetic task. Preserve exact settings. "
             "Do not repeat already completed preflights. Missing evidence is not a pass. "
             "Never repeat an uncertain write. Return the requested facts as JSON."
