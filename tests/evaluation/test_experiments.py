@@ -353,3 +353,7 @@ def test_reviewed_assessment_requires_complete_hash_bound_reviews():
     bad = deepcopy(reviews)
     bad[0]["claims"] = "inconclusive"
     assert not experiments.assess_reviewed_comparison(report, bad)["accepted"]
+    for key in ("executed", "required_evidence", "no_unintended_writes"):
+        unsafe = deepcopy(report)
+        next(r for r in unsafe["trials"] if r["view"] == "candidate")["assertions"][key] = False
+        assert not experiments.assess_reviewed_comparison(unsafe, reviews)["accepted"]

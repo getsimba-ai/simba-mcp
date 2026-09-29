@@ -41,3 +41,24 @@ explicit contract-coverage limits. No real model fit is authorised.
 New authorised cumulative cap: USD40. Prior accounted USD21.497384, including the
 retained USD0.289594 interrupted allowance. New comparison ceiling is the same
 cumulative cap, not a fresh USD40 allowance. No automatic retries or tuning.
+
+## Historical development adjudication
+
+The separate retrospective [review record](selective-results-development-adjudication.json)
+covers all 88 completed answers and their calls without changing the original
+scores. The engineering review finds supported answers in 15/44 candidate and
+12/44 baseline sessions under the combined fact/evidence/explanation boundary.
+Answers with unsupported claims: candidate29, baseline31. These are reviewed
+synthetic observations, not independently approved population rates.
+
+Beyond the former proxy, trajectory adjudication counts eight unnecessary calls
+for candidate and 64 for baseline. Refused unauthorised read attempts are 1 and43
+respectively; executed unauthorised reads are zero in the bounded dispatcher.
+Historical read counts are reconstructed from retained call outcomes, not backend
+audit logs. Synthetic unsupported bucketing is not a live API failure.
+
+Failures include incorrect aggregate division, false rounding statements, wrong
+years, KPI contributions labelled GBP, HDI endpoints labelled percentiles,
+unsupported synergy/additive-model inference, and storage/version history inferred
+from projected availability or a literal fallback reason. The original cost
+interval remains inconclusive. These findings do not trigger guidance tuning.

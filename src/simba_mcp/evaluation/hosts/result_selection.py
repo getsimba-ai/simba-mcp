@@ -266,7 +266,7 @@ class ResultSelectionDispatch:
 
     async def __call__(self, name, arguments):
         self.calls.append({"name": name, "arguments": arguments})
-        if name in READ_ONLY or name == "get_model_results":
+        if name != "get_workflow_guidance" and (name in READ_ONLY or name == "get_model_results"):
             self.read_attempts += 1
         if name == "get_workflow_guidance":
             if self.guidance is not None and arguments.get("topic") == "results":
