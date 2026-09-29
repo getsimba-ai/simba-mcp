@@ -7,9 +7,10 @@ Original provider evidence is never overwritten or silently rescored.
 from dataclasses import asdict
 
 from .result_grading import claims_in_scope, fact_verdict, semantic_facts
+from .result_rlc_tasks import rlc_tasks
 from .result_selection import result_tasks
 
-GRADER_VERSION = 15
+GRADER_VERSION = 16
 
 
 def calibration_cases():
@@ -125,6 +126,179 @@ def calibration_cases():
         ),
         ("missing_reason", diagnostic, {"convergence": False}, set(), False, True),
     ]
+    attribution, unknown = rlc_tasks()
+    expected = attribution.expected
+    cases.extend(
+        [
+            ("rlc_exact", attribution, expected, set(), True, True),
+            ("rlc_nested", attribution, {"answer": expected}, set(), True, True),
+            (
+                "rlc_aliases",
+                attribution,
+                {
+                    "configuration": {
+                        "link_function": "log",
+                        "attribution_method": "Aumann-Shapley",
+                        "additive": False,
+                        "interactions_allocated": True,
+                    },
+                    "first_week": {"modelled_visits": 55},
+                },
+                set(),
+                True,
+                True,
+            ),
+            (
+                "rlc_paraphrase",
+                attribution,
+                {**expected, "attribution": "Aumann Shapley"},
+                set(),
+                True,
+                True,
+            ),
+            (
+                "rlc_wrong_total",
+                attribution,
+                {**expected, "first_week_visits": 56},
+                set(),
+                False,
+                True,
+            ),
+            (
+                "rlc_missing_allocation",
+                attribution,
+                {
+                    k: v
+                    for k, v in expected.items()
+                    if k != "interaction_allocated_across_components"
+                },
+                set(),
+                False,
+                True,
+            ),
+            (
+                "rlc_false_allocation",
+                attribution,
+                {**expected, "interaction_allocated_across_components": False},
+                set(),
+                False,
+                True,
+            ),
+            (
+                "rlc_absence_proves_additive",
+                attribution,
+                {**expected, "is_additive": True},
+                set(),
+                False,
+                True,
+            ),
+            (
+                "rlc_contradictory_alias",
+                attribution,
+                {**expected, "additive": True},
+                set(),
+                False,
+                False,
+            ),
+            (
+                "rlc_contradictory_nested",
+                attribution,
+                {**expected, "first_week": {"modelled_visits": 56}},
+                set(),
+                False,
+                False,
+            ),
+            (
+                "rlc_duplicate_equivalent",
+                attribution,
+                {**expected, "first_week": {"modelled_visits": 55.0}},
+                set(),
+                True,
+                True,
+            ),
+            (
+                "rlc_boolean_number",
+                attribution,
+                {**expected, "first_week_visits": True},
+                set(),
+                False,
+                True,
+            ),
+            (
+                "rlc_integer_boolean",
+                attribution,
+                {**expected, "is_additive": 0},
+                set(),
+                False,
+                True,
+            ),
+            (
+                "rlc_unknown_explanation",
+                attribution,
+                {**expected, "explanation": "This proves causal identification"},
+                set(),
+                True,
+                False,
+            ),
+            (
+                "rlc_hidden_extra",
+                attribution,
+                {"answer": {**expected, "causal": True}},
+                set(),
+                True,
+                False,
+            ),
+            (
+                "rlc_null_is_unknown",
+                unknown,
+                {"convergence": None, "reason": "not_returned"},
+                set(),
+                True,
+                True,
+            ),
+            (
+                "rlc_nested_unknown",
+                unknown,
+                {"result": {"convergence_status": None, "reason": "not_returned"}},
+                set(),
+                True,
+                True,
+            ),
+            ("rlc_omitted_not_unknown", unknown, {"reason": "not_returned"}, set(), False, True),
+            (
+                "rlc_error_not_unknown",
+                unknown,
+                {"convergence": "request_failed", "reason": "not_returned"},
+                set(),
+                False,
+                True,
+            ),
+            (
+                "rlc_null_not_number",
+                attribution,
+                {**expected, "first_week_visits": None},
+                set(),
+                False,
+                True,
+            ),
+            (
+                "rlc_refusal_incomplete",
+                attribution,
+                {"error": "Cannot answer"},
+                set(),
+                False,
+                False,
+            ),
+            (
+                "rlc_false_method",
+                attribution,
+                {**expected, "attribution": "removal_lift"},
+                set(),
+                False,
+                True,
+            ),
+        ]
+    )
     return [
         {
             "id": name,
@@ -139,7 +313,7 @@ def calibration_cases():
 
 
 def calibrate():
-    tasks = {t.id: t for t in result_tasks()}
+    tasks = {t.id: t for t in [*result_tasks(), *rlc_tasks()]}
     rows = []
     for case in calibration_cases():
         task = tasks[case["task"]["id"]]
