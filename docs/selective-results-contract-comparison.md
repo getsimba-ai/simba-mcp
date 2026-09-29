@@ -94,3 +94,12 @@ Remaining harness readiness work is concrete: subset-window tasks need task-spec
 evidence validation, unauthorised read attempts and actual reads need distinct
 reporting, and the unnecessary-call proxy needs trajectory adjudication. The current
 bounded development rubric must not be presented as a general acceptance grader.
+
+## Subsequent reviewed comparison
+
+The completed development answers have now received separate retrospective
+adjudication; original grader-8 scores above remain unchanged. A new frozen
+40-session comparison uses ten separately reviewed specifications and grader 10.
+See the [acceptance decision](selective-results-acceptance-run.md) and its linked
+evidence: lower synthetic cost is established, but unsupported claims and a 70%
+candidate supported-answer rate fail acceptance. No merge is approved.

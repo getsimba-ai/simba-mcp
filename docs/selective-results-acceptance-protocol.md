@@ -71,3 +71,12 @@ model and provider as the previous comparison. Both arms used the corrected
 fixture/grader, with source and guidance frozen throughout. See the
 [comparison report](selective-results-contract-comparison.md): required-evidence
 retrieval improved, but reviewed quality and lower cost are not established.
+
+## Executed candidate-case packet
+
+The ten specifications are now executable and independently verified by a separate
+agent, with qualified independence rather than complete blindness. The frozen
+40-session comparison is complete. Its [reviewed decision](selective-results-acceptance-run.md)
+fails the zero-unsupported-claims and 95%-supported-answer gates. Original automatic
+scores and full reviewed synthetic evidence remain separate. No further provider
+run is scheduled. The PR stays draft and issue #45 stays open.
