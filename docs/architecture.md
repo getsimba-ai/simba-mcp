@@ -47,6 +47,13 @@ makes launch idempotent; a new key means a new intentional attempt. Other uncert
 writes require reconciliation before repetition. Poll shared run state after
 cancellation: a request to stop is distinct from confirmed completion.
 
+## Authentication modes
+
+The server never issues credentials. It authenticates each HTTP request with the caller's own bearer and forwards that bearer to the backend unchanged.
+
+- **Bring-your-own-key (default).** `Authorization: Bearer simba_sk_…` per request; no server-side shared key; `initialize` and `tools/list` answer without a bearer.
+- **OAuth resource-server mode (`MCP_OAUTH_ENABLED=1`, from 0.12.0).** The SDK's resource-server mode (`mcp` 2.1.1, the MCP authorization specification it implements): the server serves `/.well-known/oauth-protected-resource/mcp` naming the backend as the authorization server, and answers 401 with `WWW-Authenticate: Bearer resource_metadata=…` to any request without a verified bearer, including `initialize` and `tools/list`. Each bearer is verified by `GET {SIMBA_API_URL}/api/v1/auth/token-info` **with that same bearer**; the server holds no secret. OAuth access tokens and API keys both verify. A positive answer is cached for at most 60 seconds under a SHA-256 of the token, never the token; a negative answer is not cached; a backend timeout or 5xx is a 401, never a crash. Scopes are not enforced at this boundary; the backend enforces them per route, as it does for keys. The MCP and the API are one protected resource with one audience, so forwarding is passthrough to the same resource. `SIMBA_PUBLIC_URL` names the issuer and the resource.
+
 ## Compatibility
 
 All 50 previous tool names, required parameters and default payloads remain.
