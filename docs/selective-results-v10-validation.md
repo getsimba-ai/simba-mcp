@@ -70,3 +70,19 @@ The same three validation families will be checked prospectively with two
 repetitions per arm, reviewing each group before starting the next. All six
 candidate answers and the aggregate no-increase call gate must pass. Version 11
 scores remain unchanged; the third acceptance packet remains private.
+
+## Version 12 result and version 13 targeted check
+
+All twelve version 12 sessions completed. Candidate support is **5/6**, versus
+**6/6** for the baseline. Unnecessary calls fell to **1 versus 2**, with zero
+actual unauthorised reads or writes. One candidate answer correctly calls an
+effect unknown, then categorically says it is neither zero nor positive. The
+second statement excludes possibilities without evidence and fails readiness.
+[All original answers and reviews remain preserved](selective-results-v12-validation-evidence.json).
+
+Cost US$2.759612 takes cumulative spend to **US$57.661926 of US$70**, reserved zero.
+Version 13 narrowly clarifies the expression of unknown values: use null and
+"not established by these results", without categorically excluding values or
+signs. A four-session targeted check compares it with version 12, requiring both
+candidate answers supported and no increase in unnecessary calls. Earlier checks
+are not relabelled as version 13 runs. The fresh third packet remains unopened.
