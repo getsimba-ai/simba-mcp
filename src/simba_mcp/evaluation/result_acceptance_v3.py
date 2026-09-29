@@ -379,7 +379,17 @@ case(
 def acceptance_v3_tasks():
     from simba_mcp.evaluation.hosts.result_selection import ResultTask
 
-    return tuple(ResultTask(**deepcopy(spec)) for spec in SPECS)
+    specs = deepcopy(SPECS)
+    for spec in specs:
+        if spec["id"] == "v3_kpi_revenue_basis":
+            # Prospective validation clarification only. Preserve the original
+            # ambiguous prompt and every historical score in frozen reports.
+            spec["paraphrase"] = spec["prompt"].replace(
+                "give summed Sales and Revenue and the implied Revenue/Sales factor for each date",
+                "give combined Sales and combined Revenue across both dates, plus the implied "
+                "Revenue/Sales factor separately for each date",
+            )
+    return tuple(ResultTask(**spec) for spec in specs)
 
 
 def independent_oracles():

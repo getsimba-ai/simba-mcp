@@ -19,7 +19,9 @@ from ..experiments import (
     verify_experiment,
 )
 from ..result_cases import FIXTURE_VERSION
-from .anthropic import MODEL, SONNET, Budget, client, definitions, model_configuration, session
+from .anthropic import client, definitions, session
+from .budget import Budget
+from .models import GROK, MODEL, SONNET, model_configuration
 from .result_calibration import GRADER_VERSION, calibrate
 from .result_grading import fact_verdict, literal_fields, structured_answer_only
 from .result_selection import (
@@ -36,6 +38,15 @@ async def run(args):
     if args.output.exists():
         raise ValueError("Refusing to overwrite evidence; carry prior spend into a new run")
     budget = Budget(args.cap_usd, args.prior_usd, model=getattr(args, "model", MODEL))
+    host_client, host_definitions, host_session = client, definitions, session
+    key_name = "ANTHROPIC_API_KEY"
+    if budget.model == GROK:
+        from . import xai
+
+        if args.mode != "eager":
+            raise ValueError("xAI evaluation supports eager tools only")
+        host_client, host_definitions, host_session = xai.client, xai.definitions, xai.session
+        key_name = "XAI_API_KEY"
     server = create_server("compact")
     tools = await server.list_tools()
     role = getattr(args, "role_comparison", None)
@@ -51,7 +62,9 @@ async def run(args):
     if packet not in ("original", "fresh", "v2", "v3") or (packet != "original" and not acceptance):
         raise ValueError("Fresh acceptance packet requires acceptance mode")
     diagnostic = getattr(args, "results_model_diagnostic", False)
-    if diagnostic and (not robust or acceptance or role or args.mode != "eager"):
+    if diagnostic and (
+        not robust or (acceptance and not selection_validation) or role or args.mode != "eager"
+    ):
         raise ValueError("Model diagnostic requires robust eager mode without other comparisons")
     if acceptance and not robust:
         raise ValueError("Acceptance candidate cases require a frozen robust comparison")
@@ -110,9 +123,9 @@ async def run(args):
             )
         ]
     selected = [task for task in suite if args.case is None or task[0].id == args.case]
-    if diagnostic:
-        if args.samples != 2 or dataset_count:
-            raise ValueError("Model diagnostic requires two repetitions on the fixed case set")
+    if diagnostic and (args.samples != 2 or dataset_count):
+        raise ValueError("Model diagnostic requires two repetitions on the fixed case set")
+    if diagnostic and packet == "original":
         selected = [
             task
             for task in selected
@@ -221,7 +234,7 @@ async def run(args):
     save()
     try:
         verify()
-        async with client(os.environ["ANTHROPIC_API_KEY"]) as provider:
+        async with host_client(os.environ[key_name]) as provider:
             for rep in range(args.samples):
                 for case, prompt, expected in selected:
                     modes = ["eager", "deferred"] if rep % 2 == 0 else ["deferred", "eager"]
@@ -255,7 +268,7 @@ async def run(args):
                             context = "\n\n".join(
                                 guidance[s]["content"] for s in ("entrypoint", "interpretation")
                             )
-                        definitions_sent = definitions(visible, mode)
+                        definitions_sent = host_definitions(visible, mode)
                         row = {
                             "case": case.id,
                             "mode": mode,
@@ -281,7 +294,7 @@ async def run(args):
                             save()
                             verify()
 
-                        result = await session(
+                        result = await host_session(
                             provider,
                             definitions_sent,
                             session_prompt,
@@ -403,7 +416,7 @@ def main():
     parser.add_argument("--cap-usd", type=float, required=True)
     parser.add_argument("--prior-usd", type=float, default=0)
     parser.add_argument("--samples", type=int, default=2)
-    parser.add_argument("--model", choices=(MODEL, SONNET), default=MODEL)
+    parser.add_argument("--model", choices=(MODEL, SONNET, GROK), default=MODEL)
     parser.add_argument(
         "--results-model-diagnostic",
         action="store_true",
@@ -411,8 +424,7 @@ def main():
     )
     parser.add_argument("--mode", choices=("eager", "deferred", "both"), default="eager")
     parser.add_argument(
-        "--case",
-        choices=[case.id for case, _, _ in role_tasks()] + [t.id for t in development_tasks()],
+        "--case", help="Exact case ID in the selected packet; unknown IDs are rejected"
     )
     parser.add_argument("--role-comparison", choices=tuple(ROLE_CASES))
     parser.add_argument(

@@ -9,7 +9,7 @@ reviewed against the frozen packet and supplied contracts. The
 [evidence record](selective-results-acceptance-v3-evidence.json) preserves original
 mechanical scores, synthetic answers, trajectories and hash-bound reviews.
 
-| Measure | Baseline | Candidate |
+| Original reviewed measure | Baseline | Candidate |
 | --- | ---: | ---: |
 | Supported answers | 11/20 | 16/20 |
 | Answers containing unsupported claims | 8 | 2 |
@@ -26,6 +26,13 @@ One diagnostic answer says all-variable coverage cannot be established, contrary
 to the supplied full r_hat contract. The reviewer distinguishes these explicit
 contradictions from merely noting that payload metadata was not independently
 checked. These four failures remain in the result.
+
+**Subsequent audit correction:** the KPI request is linguistically ambiguous:
+"for each date" can reasonably scope Sales and Revenue too. The original
+missing-combined-total labels above are therefore not conclusive agent failures.
+The [separate ambiguity audit](selective-results-kpi-ambiguity-audit.md) records
+the review mistake without overwriting any original scores. The two genuine
+contract contradictions and inconclusive cost evidence still prevent acceptance.
 
 Candidate support is 80%, below the required 95%. The zero-unsupported-claims
 gate also fails. Estimated cost saving is **2.35%**, with a family-clustered 95%
@@ -60,6 +67,18 @@ independently reviewed unnecessary calls. Cost is observed, not acceptance proof
 The model configuration and grader remain unchanged. A separate author prepares
 new private cases without this packet, outcomes or candidate guidance; release
 requires readiness and another candidate freeze. No merge is authorised.
+
+Version 14's first four-session group cost US$0.820278, taking cumulative spend
+to **US$67.781696**, reserved zero. Its original review found one candidate
+complete versus zero baseline, then stopped the other eight planned sessions.
+The ambiguity audit challenges these completeness labels too. The
+[original four responses and reviews](selective-results-v14-validation-evidence.json)
+remain preserved. A prospective paraphrase explicitly requests combined totals
+across both dates and separate per-date factors; it is validation only.
+
+The owner then authorised Grok testing and **US$500 total**, including all prior
+spend. Provider adapters share the existing execution and budget infrastructure.
+No change to model or provider can turn these exposed cases into final acceptance.
 
 ## Frozen protocol
 
