@@ -3,6 +3,7 @@
 The commands below inspect the local installed server and use synthetic data.
 They do not call the Simba backend, fit a model or call a model provider.
 The [design and evaluation handover](performance-design.md) defines the boundaries.
+The [initial baseline](performance-baseline.md) records verified measurements and their limits.
 
 ## Tool definitions
 

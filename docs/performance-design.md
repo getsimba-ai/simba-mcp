@@ -159,6 +159,7 @@ dates. Inspect installed source and test the SDK floor when docs differ.
 - [HTTPX download accounting](https://www.python-httpx.org/advanced/clients/#monitoring-download-progress): raw downloaded body bytes differ from decoded content when compressed.
 - [tiktoken source](https://github.com/openai/tiktoken): named encodings and `get_encoding`; use only as an optional representation counter, not provider billing.
 
-Pending: empirical numbers, SDK-floor validation and PERF-02 host selection and
-budget approval. A successful local report establishes neither host support for
-deferred discovery nor production performance.
+Observed results and SDK-floor verification are recorded in the
+[initial baseline](performance-baseline.md). PERF-02 host selection, model trials
+and budget approval remain pending. A successful local report establishes neither
+host support for deferred discovery nor production performance.
