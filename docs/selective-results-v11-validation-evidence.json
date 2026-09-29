@@ -1,0 +1,2418 @@
+{
+  "schema_version": 1,
+  "purpose": "model_selection_validation",
+  "accepted": false,
+  "readiness_passed": false,
+  "candidate_supported": 6,
+  "baseline_supported": 5,
+  "answers_per_arm": 6,
+  "candidate_unnecessary_calls": 3,
+  "baseline_unnecessary_calls": 2,
+  "cumulative_accounted_usd": 54.902314,
+  "overall_cap_usd": 70,
+  "failure": "Unnecessary calls increased by one.",
+  "runs": [
+    {
+      "protocol": {
+        "purpose": "model_selection_validation",
+        "sessions": 4,
+        "case": "acceptance_v2_signed_reconciliation",
+        "samples": 2,
+        "model_configuration": {
+          "request": {
+            "model": "claude-sonnet-5-5",
+            "max_tokens": 4096,
+            "thinking": {
+              "type": "adaptive"
+            },
+            "output_config": {
+              "effort": "medium"
+            }
+          },
+          "rates_per_million": {
+            "input": 2,
+            "output": 10,
+            "cache_read": 0.2,
+            "cache_write": 4
+          }
+        },
+        "prior_accounted_usd": 51.947126,
+        "cap_usd": 55,
+        "overall_cap_usd": 55,
+        "source_commit": "3961a289839fd6565432c879f95acd70044aeb58",
+        "baseline_sha256": "fe4d6fdb80b66088456dbea980844629e839b43438eb374121012e803628ba4e",
+        "candidate_sha256": "75cd8ac464d327af7e9915cdab4c53950003e42a921e2cbc5adda036ea9c9794",
+        "readiness": "All6candidateanswers supported across3families, no actual unauthorised reads/writes or increased unnecessary calls; no acceptance claim. Stop at a checkpoint if independent review finds a candidate readiness failure."
+      },
+      "status": "complete",
+      "raw_sha256": "d6f5781ddf0fb437e80de98b2fb932d6c07ab5069ae22a94e373e99658c17428",
+      "freeze": {
+        "schema_version": 1,
+        "inputs_sha256": "1de82eae187fe230df01ada04de695a7d0aaa613d40b70834ba62afc209e6432",
+        "source_sha256": "f5f7827488501180f296bfaee8387e89d81f16ef9296d1c2ac035bfeb8adf441",
+        "calibration_sha256": "4061d481d278ebae50a4b312a6f7750b55fa9c4611fa41fc151fe9d1c5986cbe"
+      },
+      "configuration": {
+        "mode": "eager",
+        "samples": 2,
+        "case": "acceptance_v2_signed_reconciliation",
+        "role_comparison": null,
+        "results_comparison": true,
+        "results_prompt": "original",
+        "results_robust": true,
+        "results_acceptance": true,
+        "results_selection_validation": true,
+        "results_acceptance_packet": "v2",
+        "model": "claude-sonnet-5-5",
+        "model_configuration": {
+          "request": {
+            "model": "claude-sonnet-5-5",
+            "max_tokens": 4096,
+            "thinking": {
+              "type": "adaptive"
+            },
+            "output_config": {
+              "effort": "medium"
+            }
+          },
+          "rates_per_million": {
+            "input": 2,
+            "output": 10,
+            "cache_read": 0.2,
+            "cache_write": 4
+          }
+        },
+        "results_model_diagnostic": false,
+        "validation_seed": null,
+        "validation_datasets": 0,
+        "result_fixture_version": 2
+      },
+      "budget": {
+        "cap": 55,
+        "prior": 51.947126,
+        "charged": 0.930492,
+        "reserved": 0.0,
+        "model": "claude-sonnet-5-5"
+      },
+      "tasks": [
+        {
+          "case": {
+            "id": "acceptance_v2_signed_reconciliation",
+            "required_sections": [
+              "contributions",
+              "model_config"
+            ],
+            "paraphrase": "",
+            "family": "signed-reconciliation",
+            "channel": "Leaf Activity",
+            "allow_prediction": false,
+            "evidence_options": [
+              [
+                "contributions",
+                "model_config"
+              ]
+            ],
+            "fixture": {
+              "model_hash": "synthetic-garden-v2",
+              "results": {
+                "channel_map": [
+                  {
+                    "channel": "Leaflets",
+                    "activity_column": "Leaf Activity",
+                    "spend_column": "Leaf Spend"
+                  },
+                  {
+                    "channel": "Seed fairs",
+                    "activity_column": "Seed Activity",
+                    "spend_column": "Seed Spend"
+                  }
+                ],
+                "coefficients": [
+                  {
+                    "Date": 1743984000000,
+                    "Channel": "Leaf Activity",
+                    "Spend": 60,
+                    "Revenue": 180,
+                    "Sales": 36,
+                    "ROI": 3.0
+                  },
+                  {
+                    "Date": 1744588800000,
+                    "Channel": "Leaf Activity",
+                    "Spend": 180,
+                    "Revenue": 270,
+                    "Sales": 54,
+                    "ROI": 1.5
+                  },
+                  {
+                    "Date": 1745193600000,
+                    "Channel": "Leaf Activity",
+                    "Spend": 60,
+                    "Revenue": 150,
+                    "Sales": 30,
+                    "ROI": 2.5
+                  },
+                  {
+                    "Date": 1743984000000,
+                    "Channel": "Seed Activity",
+                    "Spend": 90,
+                    "Revenue": 180,
+                    "Sales": 36,
+                    "ROI": 2.0
+                  },
+                  {
+                    "Date": 1744588800000,
+                    "Channel": "Seed Activity",
+                    "Spend": 30,
+                    "Revenue": 120,
+                    "Sales": 24,
+                    "ROI": 4.0
+                  },
+                  {
+                    "Date": 1745193600000,
+                    "Channel": "Seed Activity",
+                    "Spend": 180,
+                    "Revenue": 270,
+                    "Sales": 54,
+                    "ROI": 1.5
+                  }
+                ],
+                "channel_summary": [
+                  {
+                    "Channel": "Leaf Activity",
+                    "Spend": 300,
+                    "Revenue": 600,
+                    "Sales": 120,
+                    "ROI": 2
+                  },
+                  {
+                    "Channel": "Seed Activity",
+                    "Spend": 300,
+                    "Revenue": 570,
+                    "Sales": 114,
+                    "ROI": 1.9
+                  }
+                ],
+                "mroi_summary": {
+                  "hdi_prob": 0.94,
+                  "channels": [
+                    {
+                      "channel": "Leaflets",
+                      "activity_column": "Leaf Activity",
+                      "current_spend": 100,
+                      "mroi_mean": 1.7,
+                      "mroi_median": 1.3,
+                      "mroi_hdi_3": 0.6,
+                      "mroi_hdi_97": 2.4
+                    }
+                  ]
+                },
+                "mroi_periods": {
+                  "available": true,
+                  "hdi_prob": 0.94,
+                  "evaluation_point": "historical_period_spend",
+                  "rows": [
+                    {
+                      "channel": "Leaflets",
+                      "activity_column": "Leaf Activity",
+                      "date": "2025-04-07",
+                      "spend": 60,
+                      "mroi_median": 1.9,
+                      "mroi_hdi_3": 1.1,
+                      "mroi_hdi_97": 2.7
+                    },
+                    {
+                      "channel": "Leaflets",
+                      "activity_column": "Leaf Activity",
+                      "date": "2025-04-14",
+                      "spend": 180,
+                      "mroi_median": 0.8,
+                      "mroi_hdi_3": 0.2,
+                      "mroi_hdi_97": 1.4
+                    },
+                    {
+                      "channel": "Leaflets",
+                      "activity_column": "Leaf Activity",
+                      "date": "2025-04-21",
+                      "spend": 60,
+                      "mroi_median": 1.6,
+                      "mroi_hdi_3": 0.9,
+                      "mroi_hdi_97": 2.3
+                    }
+                  ]
+                },
+                "contributions": [
+                  {
+                    "Date": 1743984000000,
+                    "Base": 80,
+                    "Leaf Activity": 36,
+                    "Seed Activity": 36,
+                    "Weather": -7,
+                    "Overlap": -5,
+                    "Model": 140
+                  }
+                ],
+                "model_config": {
+                  "config": {
+                    "link": "log",
+                    "attribution": "removal_lift",
+                    "multiplier": 5
+                  },
+                  "control_references": {
+                    "Weather": {
+                      "resolved": "mean",
+                      "q_ref": 12
+                    }
+                  }
+                },
+                "posterior": [
+                  {
+                    "variable": "Leaf Activity_alpha",
+                    "mean": 0.42,
+                    "sd": 0.12,
+                    "hdi_3%": 0.19,
+                    "hdi_97%": 0.63,
+                    "r_hat": 1.003
+                  }
+                ]
+              }
+            },
+            "dataset": "synthetic-garden-v2",
+            "evidence_window": null,
+            "max_response_bytes": null,
+            "allow_recovery_errors": false
+          },
+          "prompt": "For synthetic-garden-v2 on 7 April 2025, reconcile the contribution components to Model and quantify the residual before Overlap. Explain whether negative Overlap is a media channel loss and how Weather's reference affects interpretation. Use only saved results. Do not fit or read predictions.",
+          "expected": {
+            "before_overlap": 145,
+            "overlap": -5,
+            "model": 140,
+            "weather": -7,
+            "weather_reference": "mean"
+          }
+        }
+      ],
+      "reviews": [
+        {
+          "case": "acceptance_v2_signed_reconciliation",
+          "view": "baseline",
+          "repetition": 0,
+          "answer_sha256": "893c13678e0abdf1ce62d770e740b2b5359df4781679d33ec09c1afa865c0747",
+          "trajectory_sha256": "b9dca3d188966e5ed463bf1be34904083fd6e17f30765f0ba7868a810c3b6796",
+          "claims": "unsupported",
+          "supported_answer": false,
+          "rationale": "Complete answer, numerical facts, explanatory support and actual calls reviewed independently. Call-efficiency gate is separate from answer support.",
+          "claim_checks": [
+            {
+              "claim": "Complete numerical reconciliation and signed residual",
+              "verdict": "supported",
+              "evidence": "Saved row Base80, Leaf36, Seed36, Weather-7 gives subtotal145; Model140 differs by5 and Overlap-5 closes it. Model-minus-subtotal=-5 and excess+5 are both correctly explained. Date7April2025 and KPI units are correct."
+            },
+            {
+              "claim": "Overlap and Weather interpretation",
+              "verdict": "supported",
+              "evidence": "Returned config log/removal_lift defines balancing residual, not a media loss. Weather reference is mean at q_ref12; negative attributed effect does not establish raw input direction or unique cause. No unsupported tail, cause or reference-counterfactual claim is added."
+            },
+            {
+              "claim": "Media identity statements",
+              "verdict": "unsupported",
+              "evidence": "Both candidates read channel_map, establishing Leaflets/Leaf Activity and Seed fairs/Seed Activity as media. Baseline repetition0 instead calls them both channels without that classification evidence; this is the same missing-map problem as V10. Baseline repetition1 refers only to named component values without asserting their media classification, so does not require an unrequested map."
+            },
+            {
+              "claim": "Action and uncertainty scope",
+              "verdict": "supported",
+              "evidence": "No fit or prediction occurs. Raw Weather/coefficient not read; uncertainty is appropriate. Candidate repetition1 has a refused listing attempt, separately counted below and not converted into an actual read."
+            }
+          ],
+          "format_review": "Residual sign conventions and prose/table formatting accepted semantically; no literal-key false failures. Original scores unchanged.",
+          "calls": [
+            {
+              "index": 0,
+              "verdict": "necessary",
+              "rationale": "Single relevant saved-result read; candidate map is necessary for its added media classification."
+            }
+          ]
+        },
+        {
+          "case": "acceptance_v2_signed_reconciliation",
+          "view": "candidate",
+          "repetition": 0,
+          "answer_sha256": "f29dfa553f4243ae061601948b845b0e12707397180eb80f7a7531c2536b7880",
+          "trajectory_sha256": "8608d3c7eb8acb6be0e9d11c8eea2e0e8027765a2619f82426430443bb572236",
+          "claims": "supported",
+          "supported_answer": true,
+          "rationale": "Complete answer, numerical facts, explanatory support and actual calls reviewed independently. Call-efficiency gate is separate from answer support.",
+          "claim_checks": [
+            {
+              "claim": "Complete numerical reconciliation and signed residual",
+              "verdict": "supported",
+              "evidence": "Saved row Base80, Leaf36, Seed36, Weather-7 gives subtotal145; Model140 differs by5 and Overlap-5 closes it. Model-minus-subtotal=-5 and excess+5 are both correctly explained. Date7April2025 and KPI units are correct."
+            },
+            {
+              "claim": "Overlap and Weather interpretation",
+              "verdict": "supported",
+              "evidence": "Returned config log/removal_lift defines balancing residual, not a media loss. Weather reference is mean at q_ref12; negative attributed effect does not establish raw input direction or unique cause. No unsupported tail, cause or reference-counterfactual claim is added."
+            },
+            {
+              "claim": "Media identity statements",
+              "verdict": "supported",
+              "evidence": "Both candidates read channel_map, establishing Leaflets/Leaf Activity and Seed fairs/Seed Activity as media. Baseline repetition0 instead calls them both channels without that classification evidence; this is the same missing-map problem as V10. Baseline repetition1 refers only to named component values without asserting their media classification, so does not require an unrequested map."
+            },
+            {
+              "claim": "Action and uncertainty scope",
+              "verdict": "supported",
+              "evidence": "No fit or prediction occurs. Raw Weather/coefficient not read; uncertainty is appropriate. Candidate repetition1 has a refused listing attempt, separately counted below and not converted into an actual read."
+            }
+          ],
+          "format_review": "Residual sign conventions and prose/table formatting accepted semantically; no literal-key false failures. Original scores unchanged.",
+          "calls": [
+            {
+              "index": 0,
+              "verdict": "necessary",
+              "rationale": "Single relevant saved-result read; candidate map is necessary for its added media classification."
+            }
+          ]
+        },
+        {
+          "case": "acceptance_v2_signed_reconciliation",
+          "view": "candidate",
+          "repetition": 1,
+          "answer_sha256": "d4a7614bfab27d7a832ed3cf770fb3f4bf1f2f73644f88ffec3b405e4b077345",
+          "trajectory_sha256": "c9dfe7e473721f7a50070a7f367abbdc0ea318cb8251c311db12a52bcc061a92",
+          "claims": "supported",
+          "supported_answer": true,
+          "rationale": "Complete answer, numerical facts, explanatory support and actual calls reviewed independently. Call-efficiency gate is separate from answer support.",
+          "claim_checks": [
+            {
+              "claim": "Complete numerical reconciliation and signed residual",
+              "verdict": "supported",
+              "evidence": "Saved row Base80, Leaf36, Seed36, Weather-7 gives subtotal145; Model140 differs by5 and Overlap-5 closes it. Model-minus-subtotal=-5 and excess+5 are both correctly explained. Date7April2025 and KPI units are correct."
+            },
+            {
+              "claim": "Overlap and Weather interpretation",
+              "verdict": "supported",
+              "evidence": "Returned config log/removal_lift defines balancing residual, not a media loss. Weather reference is mean at q_ref12; negative attributed effect does not establish raw input direction or unique cause. No unsupported tail, cause or reference-counterfactual claim is added."
+            },
+            {
+              "claim": "Media identity statements",
+              "verdict": "supported",
+              "evidence": "Both candidates read channel_map, establishing Leaflets/Leaf Activity and Seed fairs/Seed Activity as media. Baseline repetition0 instead calls them both channels without that classification evidence; this is the same missing-map problem as V10. Baseline repetition1 refers only to named component values without asserting their media classification, so does not require an unrequested map."
+            },
+            {
+              "claim": "Action and uncertainty scope",
+              "verdict": "supported",
+              "evidence": "No fit or prediction occurs. Raw Weather/coefficient not read; uncertainty is appropriate. Candidate repetition1 has a refused listing attempt, separately counted below and not converted into an actual read."
+            }
+          ],
+          "format_review": "Residual sign conventions and prose/table formatting accepted semantically; no literal-key false failures. Original scores unchanged.",
+          "calls": [
+            {
+              "index": 0,
+              "verdict": "unnecessary",
+              "rationale": "Refused model discovery despite exact supplied identifier; unnecessary unauthorised attempt, zero actual listing read."
+            },
+            {
+              "index": 1,
+              "verdict": "necessary",
+              "rationale": "Single relevant saved-result read; candidate map is necessary for its added media classification."
+            }
+          ]
+        },
+        {
+          "case": "acceptance_v2_signed_reconciliation",
+          "view": "baseline",
+          "repetition": 1,
+          "answer_sha256": "4aca4e1c808eaca21877d97742efdf8fd68d7ebaebdf3e54cfa14a659dec18ae",
+          "trajectory_sha256": "b9dca3d188966e5ed463bf1be34904083fd6e17f30765f0ba7868a810c3b6796",
+          "claims": "supported",
+          "supported_answer": true,
+          "rationale": "Complete answer, numerical facts, explanatory support and actual calls reviewed independently. Call-efficiency gate is separate from answer support.",
+          "claim_checks": [
+            {
+              "claim": "Complete numerical reconciliation and signed residual",
+              "verdict": "supported",
+              "evidence": "Saved row Base80, Leaf36, Seed36, Weather-7 gives subtotal145; Model140 differs by5 and Overlap-5 closes it. Model-minus-subtotal=-5 and excess+5 are both correctly explained. Date7April2025 and KPI units are correct."
+            },
+            {
+              "claim": "Overlap and Weather interpretation",
+              "verdict": "supported",
+              "evidence": "Returned config log/removal_lift defines balancing residual, not a media loss. Weather reference is mean at q_ref12; negative attributed effect does not establish raw input direction or unique cause. No unsupported tail, cause or reference-counterfactual claim is added."
+            },
+            {
+              "claim": "Media identity statements",
+              "verdict": "supported",
+              "evidence": "Both candidates read channel_map, establishing Leaflets/Leaf Activity and Seed fairs/Seed Activity as media. Baseline repetition0 instead calls them both channels without that classification evidence; this is the same missing-map problem as V10. Baseline repetition1 refers only to named component values without asserting their media classification, so does not require an unrequested map."
+            },
+            {
+              "claim": "Action and uncertainty scope",
+              "verdict": "supported",
+              "evidence": "No fit or prediction occurs. Raw Weather/coefficient not read; uncertainty is appropriate. Candidate repetition1 has a refused listing attempt, separately counted below and not converted into an actual read."
+            }
+          ],
+          "format_review": "Residual sign conventions and prose/table formatting accepted semantically; no literal-key false failures. Original scores unchanged.",
+          "calls": [
+            {
+              "index": 0,
+              "verdict": "necessary",
+              "rationale": "Single relevant saved-result read; candidate map is necessary for its added media classification."
+            }
+          ]
+        }
+      ],
+      "trials": [
+        {
+          "case": "acceptance_v2_signed_reconciliation",
+          "view": "baseline",
+          "repetition": 0,
+          "passed": false,
+          "outcome": "fail",
+          "assertions": {
+            "facts": false,
+            "claims_in_scope": false,
+            "required_evidence": true,
+            "no_errors": true,
+            "no_unauthorised_reads": true,
+            "no_unintended_writes": true,
+            "executed": true
+          },
+          "read_authorisation": {
+            "read_attempts": 1,
+            "actual_reads": 1,
+            "unauthorised_read_attempts": 0,
+            "unauthorised_reads": 0
+          },
+          "trajectory": [
+            {
+              "name": "get_model_results",
+              "arguments": {
+                "model_hash": "synthetic-garden-v2",
+                "sections": "contributions,model_config",
+                "start": "2025-04-07",
+                "end": "2025-04-07"
+              },
+              "actual_read": true,
+              "error": false,
+              "result": {
+                "model_hash": "synthetic-garden-v2",
+                "results": {
+                  "contributions": [
+                    {
+                      "Date": 1743984000000,
+                      "Base": 80,
+                      "Leaf Activity": 36,
+                      "Seed Activity": 36,
+                      "Weather": -7,
+                      "Overlap": -5,
+                      "Model": 140
+                    }
+                  ],
+                  "model_config": {
+                    "config": {
+                      "link": "log",
+                      "attribution": "removal_lift",
+                      "multiplier": 5
+                    },
+                    "control_references": {
+                      "Weather": {
+                        "resolved": "mean",
+                        "q_ref": 12
+                      }
+                    }
+                  }
+                },
+                "sections_available": [
+                  "contributions",
+                  "model_config",
+                  "mroi_periods"
+                ],
+                "meta": {
+                  "window": {
+                    "start": "2025-04-07",
+                    "end": "2025-04-07",
+                    "granularity": "native"
+                  },
+                  "aggregation": {
+                    "channel_summary": "ROI = sum(Revenue) / sum(Spend); 0 without spend"
+                  },
+                  "not_windowed": {
+                    "model_config": "not a per-period section"
+                  }
+                }
+              },
+              "added_evidence": [
+                "contributions",
+                "model_config"
+              ]
+            }
+          ],
+          "answer": "On 7 April 2025 the components reconcile exactly to Model, with a residual of \u22125 before Overlap.\n\n| Component | Contribution (KPI units) |\n|---|---|\n| Base | 80 |\n| Leaf Activity | 36 |\n| Seed Activity | 36 |\n| Weather | \u22127 |\n| **Sum before Overlap** | **145** |\n| Overlap | \u22125 |\n| **Model (reported)** | **140** |\n\n- **Residual:** 145 (the components before Overlap) minus 140 (Model) is +5. Model is 5 below that sum, and that gap is the \u22125 Overlap. Adding Overlap gives 145 \u2212 5 = 140, which matches Model.\n- **Overlap is not a media channel loss:** The model uses a log link with removal_lift attribution. Under that setup, Overlap is a reconciliation term. It makes the separately attributed pieces add up to the Model total. It is not a channel, so it should not be ranked or optimised, and it does not mean Leaf or Seed lost 5. Both channels still show +36. The returned results don't say what causes the \u22125, so I can't attribute it further.\n- **Weather's reference:** Weather is a control. It is measured against a reference of `mean`, which resolved to q_ref = 12. Its \u22127 is the effect relative to that reference level, not an absolute effect of weather. The saved results don't give the raw Weather input for this date or a coefficient. So they don't show whether the input was above or below 12, or which direction it moved. I can't infer a raw-input direction from the sign alone.",
+          "cost_usd": 0.20711600000000002,
+          "stop": "end_turn"
+        },
+        {
+          "case": "acceptance_v2_signed_reconciliation",
+          "view": "candidate",
+          "repetition": 0,
+          "passed": false,
+          "outcome": "fail",
+          "assertions": {
+            "facts": false,
+            "claims_in_scope": false,
+            "required_evidence": true,
+            "no_errors": true,
+            "no_unauthorised_reads": true,
+            "no_unintended_writes": true,
+            "executed": true
+          },
+          "read_authorisation": {
+            "read_attempts": 1,
+            "actual_reads": 1,
+            "unauthorised_read_attempts": 0,
+            "unauthorised_reads": 0
+          },
+          "trajectory": [
+            {
+              "name": "get_model_results",
+              "arguments": {
+                "model_hash": "synthetic-garden-v2",
+                "sections": "contributions,model_config,channel_map",
+                "start": "2025-04-07",
+                "end": "2025-04-07"
+              },
+              "actual_read": true,
+              "error": false,
+              "result": {
+                "model_hash": "synthetic-garden-v2",
+                "results": {
+                  "channel_map": [
+                    {
+                      "channel": "Leaflets",
+                      "activity_column": "Leaf Activity",
+                      "spend_column": "Leaf Spend"
+                    },
+                    {
+                      "channel": "Seed fairs",
+                      "activity_column": "Seed Activity",
+                      "spend_column": "Seed Spend"
+                    }
+                  ],
+                  "contributions": [
+                    {
+                      "Date": 1743984000000,
+                      "Base": 80,
+                      "Leaf Activity": 36,
+                      "Seed Activity": 36,
+                      "Weather": -7,
+                      "Overlap": -5,
+                      "Model": 140
+                    }
+                  ],
+                  "model_config": {
+                    "config": {
+                      "link": "log",
+                      "attribution": "removal_lift",
+                      "multiplier": 5
+                    },
+                    "control_references": {
+                      "Weather": {
+                        "resolved": "mean",
+                        "q_ref": 12
+                      }
+                    }
+                  }
+                },
+                "sections_available": [
+                  "channel_map",
+                  "contributions",
+                  "model_config",
+                  "mroi_periods"
+                ],
+                "meta": {
+                  "window": {
+                    "start": "2025-04-07",
+                    "end": "2025-04-07",
+                    "granularity": "native"
+                  },
+                  "aggregation": {
+                    "channel_summary": "ROI = sum(Revenue) / sum(Spend); 0 without spend"
+                  },
+                  "not_windowed": {
+                    "channel_map": "not a per-period section",
+                    "model_config": "not a per-period section"
+                  }
+                }
+              },
+              "added_evidence": [
+                "contributions",
+                "model_config"
+              ]
+            }
+          ],
+          "answer": "On 7 April 2025 the components add up to Model, and the gap before Overlap is exactly Overlap. All figures are contributions in KPI units.\n\n**Reconciliation**\n- Base 80 + Leaf Activity 36 + Seed Activity 36 + Weather (\u22127) = **145** before Overlap.\n- Model is **140**, so the residual before Overlap is 140 \u2212 145 = **\u22125**.\n- That residual equals the reported Overlap of \u22125, so 145 + (\u22125) = 140 and everything reconciles.\n\n**Is negative Overlap a media channel loss?**\nNo. The channel map lists only two media channels: Leaflets (Leaf Activity) and Seed fairs (Seed Activity). Both contribute +36.\n\nThe model uses a log link with removal_lift attribution. Under that setup Overlap is a reconciliation term. It can be positive or negative and is not a channel. Its \u22125 is not a loss attributable to Leaflets or Seed fairs, and it shouldn't be ranked, shared out or optimised as a channel.\n\n**How Weather's reference affects interpretation**\nWeather is a control, not media. Its reference resolved to **mean**, with q_ref = 12. Its \u22127 is therefore the effect relative to that reference level, not relative to zero weather.\n\nThe sign alone doesn't show what the raw weather input was that day, and it doesn't identify a unique cause. I didn't check the raw weather value, so I can't say whether it was above or below 12.",
+          "cost_usd": 0.207148,
+          "stop": "end_turn"
+        },
+        {
+          "case": "acceptance_v2_signed_reconciliation",
+          "view": "candidate",
+          "repetition": 1,
+          "passed": false,
+          "outcome": "fail",
+          "assertions": {
+            "facts": false,
+            "claims_in_scope": false,
+            "required_evidence": true,
+            "no_errors": false,
+            "no_unauthorised_reads": true,
+            "no_unintended_writes": true,
+            "executed": true
+          },
+          "read_authorisation": {
+            "read_attempts": 2,
+            "actual_reads": 1,
+            "unauthorised_read_attempts": 1,
+            "unauthorised_reads": 0
+          },
+          "trajectory": [
+            {
+              "name": "list_models",
+              "arguments": {
+                "include_unsaved": true,
+                "limit": 500
+              },
+              "error": true,
+              "reason": "Only saved results and workflow guidance are authorised.",
+              "unauthorised": true
+            },
+            {
+              "name": "get_model_results",
+              "arguments": {
+                "model_hash": "synthetic-garden-v2",
+                "sections": "contributions,model_config,channel_map",
+                "start": "2025-04-07",
+                "end": "2025-04-07"
+              },
+              "actual_read": true,
+              "error": false,
+              "result": {
+                "model_hash": "synthetic-garden-v2",
+                "results": {
+                  "channel_map": [
+                    {
+                      "channel": "Leaflets",
+                      "activity_column": "Leaf Activity",
+                      "spend_column": "Leaf Spend"
+                    },
+                    {
+                      "channel": "Seed fairs",
+                      "activity_column": "Seed Activity",
+                      "spend_column": "Seed Spend"
+                    }
+                  ],
+                  "contributions": [
+                    {
+                      "Date": 1743984000000,
+                      "Base": 80,
+                      "Leaf Activity": 36,
+                      "Seed Activity": 36,
+                      "Weather": -7,
+                      "Overlap": -5,
+                      "Model": 140
+                    }
+                  ],
+                  "model_config": {
+                    "config": {
+                      "link": "log",
+                      "attribution": "removal_lift",
+                      "multiplier": 5
+                    },
+                    "control_references": {
+                      "Weather": {
+                        "resolved": "mean",
+                        "q_ref": 12
+                      }
+                    }
+                  }
+                },
+                "sections_available": [
+                  "channel_map",
+                  "contributions",
+                  "model_config",
+                  "mroi_periods"
+                ],
+                "meta": {
+                  "window": {
+                    "start": "2025-04-07",
+                    "end": "2025-04-07",
+                    "granularity": "native"
+                  },
+                  "aggregation": {
+                    "channel_summary": "ROI = sum(Revenue) / sum(Spend); 0 without spend"
+                  },
+                  "not_windowed": {
+                    "channel_map": "not a per-period section",
+                    "model_config": "not a per-period section"
+                  }
+                }
+              },
+              "added_evidence": [
+                "contributions",
+                "model_config"
+              ]
+            }
+          ],
+          "answer": "On 7 April 2025 (`synthetic-garden-v2`), the components reconcile to Model once Overlap is included, and Overlap is exactly the residual of \u22125.\n\n**Reconciliation (KPI units, saved contributions row for 2025-04-07):**\n\n| Component | Value |\n|---|---|\n| Base | 80 |\n| Leaf Activity (Leaflets) | 36 |\n| Seed Activity (Seed fairs) | 36 |\n| Weather | \u22127 |\n| Subtotal before Overlap | 145 |\n| Overlap | \u22125 |\n| Model | 140 |\n\n- **Residual before Overlap:** Model minus the subtotal is 140 \u2212 145 = **\u22125 KPI units**. That is exactly the Overlap value, so the components sum to Model with no unexplained remainder.\n- **Is negative Overlap a media channel loss?** No. `channel_map` lists only Leaflets and Seed fairs as media channels, and Overlap is not one of them. The model config shows `link: log` with `attribution: removal_lift`. Under that setup, Overlap is the term that reconciles the removal-lift attributions with the fitted Model total. It can be positive or negative. The \u22125 does not mean Leaflets or Seed fairs lost anything, and it should not be ranked, shared out or optimised as a channel. The two media contributions are +36 each.\n- **Weather's reference:** Weather is a control, not media. Its `control_references` entry resolves to the mean, with `q_ref` = 12. Its \u22127 is therefore the effect measured against that reference level, not against zero weather. I did not read Weather's raw input value or its coefficient for this date. So the \u22127 does not tell us whether the day's weather was above or below 12, and it does not identify a single cause. The saved results support only this: Weather lowered Model by 7 relative to its reference.",
+          "cost_usd": 0.308892,
+          "stop": "end_turn"
+        },
+        {
+          "case": "acceptance_v2_signed_reconciliation",
+          "view": "baseline",
+          "repetition": 1,
+          "passed": false,
+          "outcome": "fail",
+          "assertions": {
+            "facts": false,
+            "claims_in_scope": false,
+            "required_evidence": true,
+            "no_errors": true,
+            "no_unauthorised_reads": true,
+            "no_unintended_writes": true,
+            "executed": true
+          },
+          "read_authorisation": {
+            "read_attempts": 1,
+            "actual_reads": 1,
+            "unauthorised_read_attempts": 0,
+            "unauthorised_reads": 0
+          },
+          "trajectory": [
+            {
+              "name": "get_model_results",
+              "arguments": {
+                "model_hash": "synthetic-garden-v2",
+                "sections": "contributions,model_config",
+                "start": "2025-04-07",
+                "end": "2025-04-07"
+              },
+              "actual_read": true,
+              "error": false,
+              "result": {
+                "model_hash": "synthetic-garden-v2",
+                "results": {
+                  "contributions": [
+                    {
+                      "Date": 1743984000000,
+                      "Base": 80,
+                      "Leaf Activity": 36,
+                      "Seed Activity": 36,
+                      "Weather": -7,
+                      "Overlap": -5,
+                      "Model": 140
+                    }
+                  ],
+                  "model_config": {
+                    "config": {
+                      "link": "log",
+                      "attribution": "removal_lift",
+                      "multiplier": 5
+                    },
+                    "control_references": {
+                      "Weather": {
+                        "resolved": "mean",
+                        "q_ref": 12
+                      }
+                    }
+                  }
+                },
+                "sections_available": [
+                  "contributions",
+                  "model_config",
+                  "mroi_periods"
+                ],
+                "meta": {
+                  "window": {
+                    "start": "2025-04-07",
+                    "end": "2025-04-07",
+                    "granularity": "native"
+                  },
+                  "aggregation": {
+                    "channel_summary": "ROI = sum(Revenue) / sum(Spend); 0 without spend"
+                  },
+                  "not_windowed": {
+                    "model_config": "not a per-period section"
+                  }
+                }
+              },
+              "added_evidence": [
+                "contributions",
+                "model_config"
+              ]
+            }
+          ],
+          "answer": "On 7 April 2025 the components add up to Model once Overlap is included. Before Overlap they are 5 units above Model. All figures are in KPI units, from saved `contributions` for synthetic-garden-v2.\n\n| Component | Value |\n|---|---|\n| Base | 80 |\n| Leaf Activity | 36 |\n| Seed Activity | 36 |\n| Weather | \u22127 |\n| **Sum before Overlap** | **145** |\n| Overlap | \u22125 |\n| **Model** | **140** |\n\nThe residual before Overlap is 140 \u2212 145 = \u22125, which equals the Overlap value.\n\n**Is negative Overlap a media channel loss?** No. The model uses a log link with `removal_lift` attribution. Under that setup, Overlap is a reconciliation term. It makes the separately attributed components add up to Model. It is not a channel, and it is not a loss for Leaf or Seed. Leaf and Seed each stay at +36. Don't rank, share out or optimise Overlap as media. The saved result doesn't say what caused the \u22125. Overlap can have either sign, so the negative sign alone doesn't tell you anything about media.\n\n**How does Weather's reference affect interpretation?** Weather's reference is `mean`, resolved to a `q_ref` of 12. Its \u22127 is therefore a signed effect relative to that reference level, not the effect of weather in absolute terms. This is the interpretation I would support. The saved output doesn't include Weather's raw value or its coefficient. So the \u22127 doesn't show whether the raw weather input was above or below 12, and I wouldn't infer a direction from the sign. Weather is a control and should stay in the model. It is not media, and it is separate from Overlap.",
+          "cost_usd": 0.20733600000000002,
+          "stop": "end_turn"
+        }
+      ],
+      "original_automatic_assessment": {
+        "status": "development_only",
+        "accepted": false,
+        "thresholds": {
+          "minimum_task_families": 8,
+          "minimum_cost_saving": 0.05,
+          "quality_noninferiority_margin": 0
+        },
+        "candidate_supported_answer_rate": null,
+        "noncontributing_result_call_delta": 0,
+        "reasons": [
+          "public_development_cases_are_not_independent_acceptance",
+          "thresholds_require_owner_agreement",
+          "fewer_than_eight_task_families",
+          "candidate_quality_or_routing_failures",
+          "unreviewed_claims_prevent_quality_comparison",
+          "quality_noninferiority_not_established",
+          "required_cost_saving_not_established"
+        ],
+        "task_count": 1,
+        "family_count": 1,
+        "dataset_count": 1,
+        "paired_repetitions": 2,
+        "candidate_hard_failures": 2,
+        "quality_delta": null,
+        "sessions_requiring_claim_review": 4,
+        "quality_delta_95_interval": null,
+        "cost_saving_fraction": -0.245114030092749,
+        "cost_saving_95_interval": null,
+        "bootstrap_seed": 20260929,
+        "bootstrap_resamples": 4000,
+        "weighting": "equal task families; equal cases and paired repetitions within family",
+        "limitations": "Intervals condition on the synthetic datasets and task families used. Datasets are not independently resampled. These intervals do not establish dataset or scientific generalisation."
+      },
+      "guidance_sha256": {
+        "baseline": "fe4d6fdb80b66088456dbea980844629e839b43438eb374121012e803628ba4e",
+        "candidate": "75cd8ac464d327af7e9915cdab4c53950003e42a921e2cbc5adda036ea9c9794"
+      }
+    },
+    {
+      "protocol": {
+        "purpose": "model_selection_validation",
+        "sessions": 4,
+        "case": "acceptance_v2_inert_prior",
+        "samples": 2,
+        "model_configuration": {
+          "request": {
+            "model": "claude-sonnet-5-5",
+            "max_tokens": 4096,
+            "thinking": {
+              "type": "adaptive"
+            },
+            "output_config": {
+              "effort": "medium"
+            }
+          },
+          "rates_per_million": {
+            "input": 2,
+            "output": 10,
+            "cache_read": 0.2,
+            "cache_write": 4
+          }
+        },
+        "prior_accounted_usd": 52.877618,
+        "cap_usd": 55,
+        "overall_cap_usd": 55,
+        "source_commit": "3961a289839fd6565432c879f95acd70044aeb58",
+        "baseline_sha256": "fe4d6fdb80b66088456dbea980844629e839b43438eb374121012e803628ba4e",
+        "candidate_sha256": "75cd8ac464d327af7e9915cdab4c53950003e42a921e2cbc5adda036ea9c9794",
+        "readiness": "All6candidateanswers supported across3families, no actual unauthorised reads/writes or increased unnecessary calls; no acceptance claim. Stop at a checkpoint if independent review finds a candidate readiness failure."
+      },
+      "status": "complete",
+      "raw_sha256": "b37bad7d0aa0755fc913eb8c8ff395e8254ca100509c0fd5bec71b4e2b4ddc1d",
+      "freeze": {
+        "schema_version": 1,
+        "inputs_sha256": "9e2c3dcd6204f06b2d48b86f6a3b8f377a8f8229992d6686a177009cc0a05564",
+        "source_sha256": "f5f7827488501180f296bfaee8387e89d81f16ef9296d1c2ac035bfeb8adf441",
+        "calibration_sha256": "4061d481d278ebae50a4b312a6f7750b55fa9c4611fa41fc151fe9d1c5986cbe"
+      },
+      "configuration": {
+        "mode": "eager",
+        "samples": 2,
+        "case": "acceptance_v2_inert_prior",
+        "role_comparison": null,
+        "results_comparison": true,
+        "results_prompt": "original",
+        "results_robust": true,
+        "results_acceptance": true,
+        "results_selection_validation": true,
+        "results_acceptance_packet": "v2",
+        "model": "claude-sonnet-5-5",
+        "model_configuration": {
+          "request": {
+            "model": "claude-sonnet-5-5",
+            "max_tokens": 4096,
+            "thinking": {
+              "type": "adaptive"
+            },
+            "output_config": {
+              "effort": "medium"
+            }
+          },
+          "rates_per_million": {
+            "input": 2,
+            "output": 10,
+            "cache_read": 0.2,
+            "cache_write": 4
+          }
+        },
+        "results_model_diagnostic": false,
+        "validation_seed": null,
+        "validation_datasets": 0,
+        "result_fixture_version": 2
+      },
+      "budget": {
+        "cap": 55,
+        "prior": 52.877618,
+        "charged": 1.207554,
+        "reserved": 0.0,
+        "model": "claude-sonnet-5-5"
+      },
+      "tasks": [
+        {
+          "case": {
+            "id": "acceptance_v2_inert_prior",
+            "required_sections": [
+              "model_config"
+            ],
+            "paraphrase": "",
+            "family": "inert-prior",
+            "channel": "Poster Activity",
+            "allow_prediction": false,
+            "evidence_options": [
+              [
+                "model_config"
+              ]
+            ],
+            "fixture": {
+              "model_hash": "synthetic-museum-v2",
+              "results": {
+                "channel_map": [
+                  {
+                    "channel": "Posters",
+                    "activity_column": "Poster Activity",
+                    "spend_column": "Poster Spend"
+                  },
+                  {
+                    "channel": "Audio guides",
+                    "activity_column": "Audio Activity",
+                    "spend_column": "Audio Spend"
+                  }
+                ],
+                "channel_summary": [
+                  {
+                    "Channel": "Poster Activity",
+                    "Sales": 90,
+                    "Revenue": 720,
+                    "Spend": 240,
+                    "ROI": 3
+                  },
+                  {
+                    "Channel": "Audio Activity",
+                    "Sales": 40,
+                    "Revenue": 320,
+                    "Spend": 160,
+                    "ROI": 2
+                  }
+                ],
+                "model_stats": [
+                  {
+                    "Test Name": "Max R_hat",
+                    "Output": "1.08",
+                    "Status": "warning"
+                  },
+                  {
+                    "Test Name": "R\u00b2",
+                    "Output": "0.91",
+                    "Status": "success"
+                  }
+                ],
+                "r_hat": [
+                  {
+                    "Parameter": "Poster Activity_alpha",
+                    "R_hat": 1.002
+                  },
+                  {
+                    "Parameter": "Poster Activity_decay",
+                    "R_hat": 1.08
+                  },
+                  {
+                    "Parameter": "Audio Activity_alpha",
+                    "R_hat": 1.004
+                  },
+                  {
+                    "Parameter": "sigma",
+                    "R_hat": 1.001
+                  }
+                ],
+                "posterior": [
+                  {
+                    "variable": "Poster Activity_alpha",
+                    "mean": 0.7,
+                    "r_hat": 1.002
+                  },
+                  {
+                    "variable": "Audio Activity_alpha",
+                    "mean": 0.4,
+                    "r_hat": 1.004
+                  }
+                ],
+                "decay_curves": {
+                  "Poster Activity": {
+                    "adstock_type": "geometric",
+                    "mean": 0.5,
+                    "lower": 0.3,
+                    "upper": 0.7,
+                    "l_max": 4,
+                    "curve": [
+                      1,
+                      0.5,
+                      0.25,
+                      0.125
+                    ]
+                  }
+                },
+                "model_config": {
+                  "config": {
+                    "link": "identity",
+                    "adstock_type": "geometric",
+                    "saturation_type": "tanh"
+                  },
+                  "priors_resolved": [
+                    {
+                      "channel": "Posters",
+                      "activity_column": "Poster Activity",
+                      "overridden_fields": [
+                        "alpha_mean"
+                      ],
+                      "accepted_not_used": [
+                        {
+                          "field": "theta_mean",
+                          "reason": "requires delayed adstock"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "long_run_rollup": {
+                  "available": false,
+                  "reason": "no_linked_var_model"
+                },
+                "cohort_ledger": {
+                  "available": false,
+                  "reason": "fitted_before_cohort_ledger"
+                }
+              }
+            },
+            "dataset": "synthetic-museum-v2",
+            "evidence_window": null,
+            "max_response_bytes": null,
+            "allow_recovery_errors": false
+          },
+          "prompt": "For synthetic-museum-v2 Posters, was theta_mean consumed by the fitted model? Identify the active adstock family and explain the saved reason. Also name the prior field recorded as taking effect. Use only saved results. Do not fit or read predictions.",
+          "expected": {
+            "consumed": false,
+            "adstock_type": "geometric",
+            "reason": "requires delayed adstock",
+            "effective_field": "alpha_mean"
+          }
+        }
+      ],
+      "reviews": [
+        {
+          "case": "acceptance_v2_inert_prior",
+          "view": "baseline",
+          "repetition": 0,
+          "answer_sha256": "c467c9a8eb1a1ba9d138d975e49ca188c8690bbdc86523bb2b697dab502f08fc",
+          "trajectory_sha256": "ac041c92d1490defe48b478cf2a9baa8a746dcd4668135026b954aa62b3ecc37",
+          "claims": "supported",
+          "supported_answer": true,
+          "rationale": "All requested and extra claims are supported by actual returned config, metadata and supplied public contract. Call-efficiency is assessed separately.",
+          "claim_checks": [
+            {
+              "claim": "Requested prior consumption, active family, reason and effective field",
+              "verdict": "supported",
+              "evidence": "Actual model_config.config gives geometric adstock; priors_resolved for Posters/Poster Activity lists theta_mean under accepted_not_used with requires delayed adstock, and alpha_mean as the only overridden field. The supplied contract defines overridden fields as having taken effect. All four answers preserve that meaning."
+            },
+            {
+              "claim": "Extra configuration, source and action statements",
+              "verdict": "supported",
+              "evidence": "Where quoted, tanh saturation and identity link match config. Nested source paths are accurate. Only model_config was actually read; preceding listing attempts were refused, so no actual model-list data was read. No fitting or predictions occur."
+            },
+            {
+              "claim": "Channel filtering caveat where stated",
+              "verdict": "supported",
+              "evidence": "Candidate repetition1 accurately quotes the unmatched posters alias while noting the desired prior entry still returned. Selection metadata marks model_config unchanged; this is not treated as successful row filtering or missing prior evidence."
+            }
+          ],
+          "format_review": "Different JSON keys and accompanying prose accepted semantically; original automatic assertions preserved.",
+          "calls": [
+            {
+              "index": 0,
+              "verdict": "unnecessary",
+              "rationale": "Unnecessary refused discovery despite exact supplied model identifier; unauthorised attempt, no actual listing read."
+            },
+            {
+              "index": 1,
+              "verdict": "necessary",
+              "rationale": "Necessary saved configuration read directly establishes every requested fact."
+            }
+          ]
+        },
+        {
+          "case": "acceptance_v2_inert_prior",
+          "view": "candidate",
+          "repetition": 0,
+          "answer_sha256": "c6eaf50c34d1d69d3794a6ba25ecfccc9686dd490067ae3f4afd881e3129bd1c",
+          "trajectory_sha256": "ac041c92d1490defe48b478cf2a9baa8a746dcd4668135026b954aa62b3ecc37",
+          "claims": "supported",
+          "supported_answer": true,
+          "rationale": "All requested and extra claims are supported by actual returned config, metadata and supplied public contract. Call-efficiency is assessed separately.",
+          "claim_checks": [
+            {
+              "claim": "Requested prior consumption, active family, reason and effective field",
+              "verdict": "supported",
+              "evidence": "Actual model_config.config gives geometric adstock; priors_resolved for Posters/Poster Activity lists theta_mean under accepted_not_used with requires delayed adstock, and alpha_mean as the only overridden field. The supplied contract defines overridden fields as having taken effect. All four answers preserve that meaning."
+            },
+            {
+              "claim": "Extra configuration, source and action statements",
+              "verdict": "supported",
+              "evidence": "Where quoted, tanh saturation and identity link match config. Nested source paths are accurate. Only model_config was actually read; preceding listing attempts were refused, so no actual model-list data was read. No fitting or predictions occur."
+            },
+            {
+              "claim": "Channel filtering caveat where stated",
+              "verdict": "supported",
+              "evidence": "Candidate repetition1 accurately quotes the unmatched posters alias while noting the desired prior entry still returned. Selection metadata marks model_config unchanged; this is not treated as successful row filtering or missing prior evidence."
+            }
+          ],
+          "format_review": "Different JSON keys and accompanying prose accepted semantically; original automatic assertions preserved.",
+          "calls": [
+            {
+              "index": 0,
+              "verdict": "unnecessary",
+              "rationale": "Unnecessary refused discovery despite exact supplied model identifier; unauthorised attempt, no actual listing read."
+            },
+            {
+              "index": 1,
+              "verdict": "necessary",
+              "rationale": "Necessary saved configuration read directly establishes every requested fact."
+            }
+          ]
+        },
+        {
+          "case": "acceptance_v2_inert_prior",
+          "view": "candidate",
+          "repetition": 1,
+          "answer_sha256": "23b5331ee0994567c8cba5bc44b5330a2b583d8cec2ce50f7debab67b15dfbe7",
+          "trajectory_sha256": "be4e8c34f93271994ea3cd3ea4bae991e4544ddfe7de116e4ec05dae6088ce5b",
+          "claims": "supported",
+          "supported_answer": true,
+          "rationale": "All requested and extra claims are supported by actual returned config, metadata and supplied public contract. Call-efficiency is assessed separately.",
+          "claim_checks": [
+            {
+              "claim": "Requested prior consumption, active family, reason and effective field",
+              "verdict": "supported",
+              "evidence": "Actual model_config.config gives geometric adstock; priors_resolved for Posters/Poster Activity lists theta_mean under accepted_not_used with requires delayed adstock, and alpha_mean as the only overridden field. The supplied contract defines overridden fields as having taken effect. All four answers preserve that meaning."
+            },
+            {
+              "claim": "Extra configuration, source and action statements",
+              "verdict": "supported",
+              "evidence": "Where quoted, tanh saturation and identity link match config. Nested source paths are accurate. Only model_config was actually read; preceding listing attempts were refused, so no actual model-list data was read. No fitting or predictions occur."
+            },
+            {
+              "claim": "Channel filtering caveat where stated",
+              "verdict": "supported",
+              "evidence": "Candidate repetition1 accurately quotes the unmatched posters alias while noting the desired prior entry still returned. Selection metadata marks model_config unchanged; this is not treated as successful row filtering or missing prior evidence."
+            }
+          ],
+          "format_review": "Different JSON keys and accompanying prose accepted semantically; original automatic assertions preserved.",
+          "calls": [
+            {
+              "index": 0,
+              "verdict": "unnecessary",
+              "rationale": "Unnecessary refused discovery despite exact supplied model identifier; unauthorised attempt, no actual listing read."
+            },
+            {
+              "index": 1,
+              "verdict": "necessary",
+              "rationale": "Necessary saved configuration read directly establishes every requested fact."
+            }
+          ]
+        },
+        {
+          "case": "acceptance_v2_inert_prior",
+          "view": "baseline",
+          "repetition": 1,
+          "answer_sha256": "31da5f119f000c3b736dd459208f2ec9fe4894f510efae06614f855af15e2ef4",
+          "trajectory_sha256": "be4e8c34f93271994ea3cd3ea4bae991e4544ddfe7de116e4ec05dae6088ce5b",
+          "claims": "supported",
+          "supported_answer": true,
+          "rationale": "All requested and extra claims are supported by actual returned config, metadata and supplied public contract. Call-efficiency is assessed separately.",
+          "claim_checks": [
+            {
+              "claim": "Requested prior consumption, active family, reason and effective field",
+              "verdict": "supported",
+              "evidence": "Actual model_config.config gives geometric adstock; priors_resolved for Posters/Poster Activity lists theta_mean under accepted_not_used with requires delayed adstock, and alpha_mean as the only overridden field. The supplied contract defines overridden fields as having taken effect. All four answers preserve that meaning."
+            },
+            {
+              "claim": "Extra configuration, source and action statements",
+              "verdict": "supported",
+              "evidence": "Where quoted, tanh saturation and identity link match config. Nested source paths are accurate. Only model_config was actually read; preceding listing attempts were refused, so no actual model-list data was read. No fitting or predictions occur."
+            },
+            {
+              "claim": "Channel filtering caveat where stated",
+              "verdict": "supported",
+              "evidence": "Candidate repetition1 accurately quotes the unmatched posters alias while noting the desired prior entry still returned. Selection metadata marks model_config unchanged; this is not treated as successful row filtering or missing prior evidence."
+            }
+          ],
+          "format_review": "Different JSON keys and accompanying prose accepted semantically; original automatic assertions preserved.",
+          "calls": [
+            {
+              "index": 0,
+              "verdict": "unnecessary",
+              "rationale": "Unnecessary refused discovery despite exact supplied model identifier; unauthorised attempt, no actual listing read."
+            },
+            {
+              "index": 1,
+              "verdict": "necessary",
+              "rationale": "Necessary saved configuration read directly establishes every requested fact."
+            }
+          ]
+        }
+      ],
+      "trials": [
+        {
+          "case": "acceptance_v2_inert_prior",
+          "view": "baseline",
+          "repetition": 0,
+          "passed": false,
+          "outcome": "fail",
+          "assertions": {
+            "facts": false,
+            "claims_in_scope": false,
+            "required_evidence": true,
+            "no_errors": false,
+            "no_unauthorised_reads": true,
+            "no_unintended_writes": true,
+            "executed": true
+          },
+          "read_authorisation": {
+            "read_attempts": 2,
+            "actual_reads": 1,
+            "unauthorised_read_attempts": 1,
+            "unauthorised_reads": 0
+          },
+          "trajectory": [
+            {
+              "name": "list_models",
+              "arguments": {
+                "include_unsaved": true,
+                "limit": 500
+              },
+              "error": true,
+              "reason": "Only saved results and workflow guidance are authorised.",
+              "unauthorised": true
+            },
+            {
+              "name": "get_model_results",
+              "arguments": {
+                "model_hash": "synthetic-museum-v2",
+                "sections": "model_config"
+              },
+              "actual_read": true,
+              "error": false,
+              "result": {
+                "model_hash": "synthetic-museum-v2",
+                "results": {
+                  "model_config": {
+                    "config": {
+                      "link": "identity",
+                      "adstock_type": "geometric",
+                      "saturation_type": "tanh"
+                    },
+                    "priors_resolved": [
+                      {
+                        "channel": "Posters",
+                        "activity_column": "Poster Activity",
+                        "overridden_fields": [
+                          "alpha_mean"
+                        ],
+                        "accepted_not_used": [
+                          {
+                            "field": "theta_mean",
+                            "reason": "requires delayed adstock"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "sections_available": [
+                  "model_config"
+                ]
+              },
+              "added_evidence": [
+                "model_config"
+              ]
+            }
+          ],
+          "answer": "For synthetic-museum-v2, Posters, the saved results show that `theta_mean` was not consumed by the fitted model.\n\n- **Active adstock family:** The saved config gives `adstock_type` as `geometric`. The saturation type is `tanh` and the link is `identity`.\n- **Saved reason:** `theta_mean` is listed under `accepted_not_used` for Posters (activity column \"Poster Activity\"). The recorded reason is \"requires delayed adstock\". The model uses geometric adstock, not delayed, so the field was accepted but inert.\n- **Prior field that took effect:** `alpha_mean`. It is the only entry in `overridden_fields` for Posters.\n\nI used only the saved `model_config` section. I did not fit anything or read predictions.",
+          "cost_usd": 0.30124,
+          "stop": "end_turn"
+        },
+        {
+          "case": "acceptance_v2_inert_prior",
+          "view": "candidate",
+          "repetition": 0,
+          "passed": false,
+          "outcome": "fail",
+          "assertions": {
+            "facts": false,
+            "claims_in_scope": false,
+            "required_evidence": true,
+            "no_errors": false,
+            "no_unauthorised_reads": true,
+            "no_unintended_writes": true,
+            "executed": true
+          },
+          "read_authorisation": {
+            "read_attempts": 2,
+            "actual_reads": 1,
+            "unauthorised_read_attempts": 1,
+            "unauthorised_reads": 0
+          },
+          "trajectory": [
+            {
+              "name": "list_models",
+              "arguments": {
+                "include_unsaved": true,
+                "limit": 500
+              },
+              "error": true,
+              "reason": "Only saved results and workflow guidance are authorised.",
+              "unauthorised": true
+            },
+            {
+              "name": "get_model_results",
+              "arguments": {
+                "model_hash": "synthetic-museum-v2",
+                "sections": "model_config"
+              },
+              "actual_read": true,
+              "error": false,
+              "result": {
+                "model_hash": "synthetic-museum-v2",
+                "results": {
+                  "model_config": {
+                    "config": {
+                      "link": "identity",
+                      "adstock_type": "geometric",
+                      "saturation_type": "tanh"
+                    },
+                    "priors_resolved": [
+                      {
+                        "channel": "Posters",
+                        "activity_column": "Poster Activity",
+                        "overridden_fields": [
+                          "alpha_mean"
+                        ],
+                        "accepted_not_used": [
+                          {
+                            "field": "theta_mean",
+                            "reason": "requires delayed adstock"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "sections_available": [
+                  "model_config"
+                ]
+              },
+              "added_evidence": [
+                "model_config"
+              ]
+            }
+          ],
+          "answer": "```json\n{\n  \"model\": \"synthetic-museum-v2\",\n  \"channel\": \"Posters\",\n  \"activity_column\": \"Poster Activity\",\n  \"theta_mean_consumed_by_fitted_model\": false,\n  \"active_adstock_family\": \"geometric\",\n  \"saved_reason\": \"theta_mean is listed under accepted_not_used with the reason \\\"requires delayed adstock\\\". It was accepted but is inert, because the model's adstock_type is geometric and not delayed.\",\n  \"prior_field_recorded_as_taking_effect\": \"alpha_mean\"\n}\n```\n\nThe prior field that took effect comes from `overridden_fields` for Posters in `priors_resolved`, which lists only `alpha_mean`. I read only the saved `model_config` section. I did not fit a model or read predictions.",
+          "cost_usd": 0.301442,
+          "stop": "end_turn"
+        },
+        {
+          "case": "acceptance_v2_inert_prior",
+          "view": "candidate",
+          "repetition": 1,
+          "passed": false,
+          "outcome": "fail",
+          "assertions": {
+            "facts": false,
+            "claims_in_scope": false,
+            "required_evidence": true,
+            "no_errors": false,
+            "no_unauthorised_reads": true,
+            "no_unintended_writes": true,
+            "executed": true
+          },
+          "read_authorisation": {
+            "read_attempts": 2,
+            "actual_reads": 1,
+            "unauthorised_read_attempts": 1,
+            "unauthorised_reads": 0
+          },
+          "trajectory": [
+            {
+              "name": "list_models",
+              "arguments": {
+                "include_unsaved": true,
+                "limit": 500
+              },
+              "error": true,
+              "reason": "Only saved results and workflow guidance are authorised.",
+              "unauthorised": true
+            },
+            {
+              "name": "get_model_results",
+              "arguments": {
+                "model_hash": "synthetic-museum-v2",
+                "sections": "model_config",
+                "channels": [
+                  "Posters"
+                ]
+              },
+              "actual_read": true,
+              "error": false,
+              "result": {
+                "model_hash": "synthetic-museum-v2",
+                "results": {
+                  "model_config": {
+                    "config": {
+                      "link": "identity",
+                      "adstock_type": "geometric",
+                      "saturation_type": "tanh"
+                    },
+                    "priors_resolved": [
+                      {
+                        "channel": "Posters",
+                        "activity_column": "Poster Activity",
+                        "overridden_fields": [
+                          "alpha_mean"
+                        ],
+                        "accepted_not_used": [
+                          {
+                            "field": "theta_mean",
+                            "reason": "requires delayed adstock"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "sections_available": [
+                  "model_config"
+                ],
+                "_mcp_selection": {
+                  "channels_requested": [
+                    "Posters"
+                  ],
+                  "max_grid_points_requested": null,
+                  "grid_sampling_applied": false,
+                  "sections": {
+                    "model_config": {
+                      "changed": false
+                    }
+                  },
+                  "ambiguous_channel_aliases": {},
+                  "unmatched_channel_aliases": [
+                    "posters"
+                  ],
+                  "channel_match_scope": "filterable_sections_only",
+                  "backend_download_bounded": false,
+                  "warnings": []
+                }
+              },
+              "added_evidence": [
+                "model_config"
+              ]
+            }
+          ],
+          "answer": "```json\n{\n  \"model\": \"synthetic-museum-v2\",\n  \"channel\": \"Posters\",\n  \"activity_column\": \"Poster Activity\",\n  \"theta_mean_consumed_by_fitted_model\": false,\n  \"active_adstock_family\": \"geometric\",\n  \"saved_reason\": \"theta_mean is listed under accepted_not_used with the reason \\\"requires delayed adstock\\\". It was accepted but inert, because the model's adstock type is geometric, not delayed.\",\n  \"prior_field_recorded_as_taking_effect\": \"alpha_mean\",\n  \"source\": \"model_config.priors_resolved (overridden_fields and accepted_not_used) and model_config.config.adstock_type\"\n}\n```\n\nThe saved config lists `alpha_mean` under `overridden_fields`, which is the field recorded as taking effect.\n\nI used the `model_config` section only. The `channels` filter did not match \"Posters\" (the response flagged `posters` as an unmatched alias). The returned prior entry was for Posters anyway.",
+          "cost_usd": 0.302896,
+          "stop": "end_turn"
+        },
+        {
+          "case": "acceptance_v2_inert_prior",
+          "view": "baseline",
+          "repetition": 1,
+          "passed": false,
+          "outcome": "fail",
+          "assertions": {
+            "facts": false,
+            "claims_in_scope": false,
+            "required_evidence": true,
+            "no_errors": false,
+            "no_unauthorised_reads": true,
+            "no_unintended_writes": true,
+            "executed": true
+          },
+          "read_authorisation": {
+            "read_attempts": 2,
+            "actual_reads": 1,
+            "unauthorised_read_attempts": 1,
+            "unauthorised_reads": 0
+          },
+          "trajectory": [
+            {
+              "name": "list_models",
+              "arguments": {
+                "include_unsaved": true,
+                "limit": 500
+              },
+              "error": true,
+              "reason": "Only saved results and workflow guidance are authorised.",
+              "unauthorised": true
+            },
+            {
+              "name": "get_model_results",
+              "arguments": {
+                "model_hash": "synthetic-museum-v2",
+                "sections": "model_config",
+                "channels": [
+                  "Posters"
+                ]
+              },
+              "actual_read": true,
+              "error": false,
+              "result": {
+                "model_hash": "synthetic-museum-v2",
+                "results": {
+                  "model_config": {
+                    "config": {
+                      "link": "identity",
+                      "adstock_type": "geometric",
+                      "saturation_type": "tanh"
+                    },
+                    "priors_resolved": [
+                      {
+                        "channel": "Posters",
+                        "activity_column": "Poster Activity",
+                        "overridden_fields": [
+                          "alpha_mean"
+                        ],
+                        "accepted_not_used": [
+                          {
+                            "field": "theta_mean",
+                            "reason": "requires delayed adstock"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "sections_available": [
+                  "model_config"
+                ],
+                "_mcp_selection": {
+                  "channels_requested": [
+                    "Posters"
+                  ],
+                  "max_grid_points_requested": null,
+                  "grid_sampling_applied": false,
+                  "sections": {
+                    "model_config": {
+                      "changed": false
+                    }
+                  },
+                  "ambiguous_channel_aliases": {},
+                  "unmatched_channel_aliases": [
+                    "posters"
+                  ],
+                  "channel_match_scope": "filterable_sections_only",
+                  "backend_download_bounded": false,
+                  "warnings": []
+                }
+              },
+              "added_evidence": [
+                "model_config"
+              ]
+            }
+          ],
+          "answer": "```json\n{\n  \"model\": \"synthetic-museum-v2\",\n  \"channel\": \"Posters\",\n  \"activity_column\": \"Poster Activity\",\n  \"theta_mean_consumed_by_fitted_model\": false,\n  \"active_adstock_family\": \"geometric\",\n  \"saved_reason\": \"theta_mean is listed under accepted_not_used with the reason \\\"requires delayed adstock\\\". The active adstock type is geometric, so the field was accepted but had no effect.\",\n  \"prior_field_recorded_as_taking_effect\": \"alpha_mean\"\n}\n```\n\nThe saved `model_config` marks `alpha_mean` as the only entry in `overridden_fields` for Posters. That is the field recorded as taking effect.",
+          "cost_usd": 0.301976,
+          "stop": "end_turn"
+        }
+      ],
+      "original_automatic_assessment": {
+        "status": "development_only",
+        "accepted": false,
+        "thresholds": {
+          "minimum_task_families": 8,
+          "minimum_cost_saving": 0.05,
+          "quality_noninferiority_margin": 0
+        },
+        "candidate_supported_answer_rate": null,
+        "noncontributing_result_call_delta": 0,
+        "reasons": [
+          "public_development_cases_are_not_independent_acceptance",
+          "thresholds_require_owner_agreement",
+          "fewer_than_eight_task_families",
+          "candidate_quality_or_routing_failures",
+          "unreviewed_claims_prevent_quality_comparison",
+          "quality_noninferiority_not_established",
+          "required_cost_saving_not_established"
+        ],
+        "task_count": 1,
+        "family_count": 1,
+        "dataset_count": 1,
+        "paired_repetitions": 2,
+        "candidate_hard_failures": 2,
+        "quality_delta": null,
+        "sessions_requiring_claim_review": 4,
+        "quality_delta_95_interval": null,
+        "cost_saving_fraction": -0.0018600302379248035,
+        "cost_saving_95_interval": null,
+        "bootstrap_seed": 20260929,
+        "bootstrap_resamples": 4000,
+        "weighting": "equal task families; equal cases and paired repetitions within family",
+        "limitations": "Intervals condition on the synthetic datasets and task families used. Datasets are not independently resampled. These intervals do not establish dataset or scientific generalisation."
+      },
+      "guidance_sha256": {
+        "baseline": "fe4d6fdb80b66088456dbea980844629e839b43438eb374121012e803628ba4e",
+        "candidate": "75cd8ac464d327af7e9915cdab4c53950003e42a921e2cbc5adda036ea9c9794"
+      }
+    },
+    {
+      "protocol": {
+        "purpose": "model_selection_validation",
+        "sessions": 4,
+        "case": "acceptance_v2_unavailable_longrun",
+        "samples": 2,
+        "model_configuration": {
+          "request": {
+            "model": "claude-sonnet-5-5",
+            "max_tokens": 4096,
+            "thinking": {
+              "type": "adaptive"
+            },
+            "output_config": {
+              "effort": "medium"
+            }
+          },
+          "rates_per_million": {
+            "input": 2,
+            "output": 10,
+            "cache_read": 0.2,
+            "cache_write": 4
+          }
+        },
+        "prior_accounted_usd": 54.085172,
+        "cap_usd": 70,
+        "overall_cap_usd": 70,
+        "source_commit": "3ca4c1c2b3601c19fc989cf083bc79a9cdc82f7f",
+        "baseline_sha256": "fe4d6fdb80b66088456dbea980844629e839b43438eb374121012e803628ba4e",
+        "candidate_sha256": "75cd8ac464d327af7e9915cdab4c53950003e42a921e2cbc5adda036ea9c9794",
+        "readiness": "All6candidateanswers supported across3families, no actual unauthorised reads/writes or increased unnecessary calls; no acceptance claim. Stop at a checkpoint if independent review finds a candidate readiness failure."
+      },
+      "status": "complete",
+      "raw_sha256": "eff9de3271f8b8e1b5115158351498eca68e462d5b1076e95bc7c75c5e505d05",
+      "freeze": {
+        "schema_version": 1,
+        "inputs_sha256": "1b6190d4d235fd9383cb3a9df33964b40157c8d9ab7c9fd2edc63630afb436d0",
+        "source_sha256": "f5f7827488501180f296bfaee8387e89d81f16ef9296d1c2ac035bfeb8adf441",
+        "calibration_sha256": "4061d481d278ebae50a4b312a6f7750b55fa9c4611fa41fc151fe9d1c5986cbe"
+      },
+      "configuration": {
+        "mode": "eager",
+        "samples": 2,
+        "case": "acceptance_v2_unavailable_longrun",
+        "role_comparison": null,
+        "results_comparison": true,
+        "results_prompt": "original",
+        "results_robust": true,
+        "results_acceptance": true,
+        "results_selection_validation": true,
+        "results_acceptance_packet": "v2",
+        "model": "claude-sonnet-5-5",
+        "model_configuration": {
+          "request": {
+            "model": "claude-sonnet-5-5",
+            "max_tokens": 4096,
+            "thinking": {
+              "type": "adaptive"
+            },
+            "output_config": {
+              "effort": "medium"
+            }
+          },
+          "rates_per_million": {
+            "input": 2,
+            "output": 10,
+            "cache_read": 0.2,
+            "cache_write": 4
+          }
+        },
+        "results_model_diagnostic": false,
+        "validation_seed": null,
+        "validation_datasets": 0,
+        "result_fixture_version": 2
+      },
+      "budget": {
+        "cap": 70,
+        "prior": 54.085172,
+        "charged": 0.8171419999999999,
+        "reserved": 0.0,
+        "model": "claude-sonnet-5-5"
+      },
+      "tasks": [
+        {
+          "case": {
+            "id": "acceptance_v2_unavailable_longrun",
+            "required_sections": [
+              "long_run_rollup"
+            ],
+            "paraphrase": "",
+            "family": "unavailable-longrun",
+            "channel": "Poster Activity",
+            "allow_prediction": false,
+            "evidence_options": [
+              [
+                "long_run_rollup"
+              ]
+            ],
+            "fixture": {
+              "model_hash": "synthetic-museum-v2",
+              "results": {
+                "channel_map": [
+                  {
+                    "channel": "Posters",
+                    "activity_column": "Poster Activity",
+                    "spend_column": "Poster Spend"
+                  },
+                  {
+                    "channel": "Audio guides",
+                    "activity_column": "Audio Activity",
+                    "spend_column": "Audio Spend"
+                  }
+                ],
+                "channel_summary": [
+                  {
+                    "Channel": "Poster Activity",
+                    "Sales": 90,
+                    "Revenue": 720,
+                    "Spend": 240,
+                    "ROI": 3
+                  },
+                  {
+                    "Channel": "Audio Activity",
+                    "Sales": 40,
+                    "Revenue": 320,
+                    "Spend": 160,
+                    "ROI": 2
+                  }
+                ],
+                "model_stats": [
+                  {
+                    "Test Name": "Max R_hat",
+                    "Output": "1.08",
+                    "Status": "warning"
+                  },
+                  {
+                    "Test Name": "R\u00b2",
+                    "Output": "0.91",
+                    "Status": "success"
+                  }
+                ],
+                "r_hat": [
+                  {
+                    "Parameter": "Poster Activity_alpha",
+                    "R_hat": 1.002
+                  },
+                  {
+                    "Parameter": "Poster Activity_decay",
+                    "R_hat": 1.08
+                  },
+                  {
+                    "Parameter": "Audio Activity_alpha",
+                    "R_hat": 1.004
+                  },
+                  {
+                    "Parameter": "sigma",
+                    "R_hat": 1.001
+                  }
+                ],
+                "posterior": [
+                  {
+                    "variable": "Poster Activity_alpha",
+                    "mean": 0.7,
+                    "r_hat": 1.002
+                  },
+                  {
+                    "variable": "Audio Activity_alpha",
+                    "mean": 0.4,
+                    "r_hat": 1.004
+                  }
+                ],
+                "decay_curves": {
+                  "Poster Activity": {
+                    "adstock_type": "geometric",
+                    "mean": 0.5,
+                    "lower": 0.3,
+                    "upper": 0.7,
+                    "l_max": 4,
+                    "curve": [
+                      1,
+                      0.5,
+                      0.25,
+                      0.125
+                    ]
+                  }
+                },
+                "model_config": {
+                  "config": {
+                    "link": "identity",
+                    "adstock_type": "geometric",
+                    "saturation_type": "tanh"
+                  },
+                  "priors_resolved": [
+                    {
+                      "channel": "Posters",
+                      "activity_column": "Poster Activity",
+                      "overridden_fields": [
+                        "alpha_mean"
+                      ],
+                      "accepted_not_used": [
+                        {
+                          "field": "theta_mean",
+                          "reason": "requires delayed adstock"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "long_run_rollup": {
+                  "available": false,
+                  "reason": "no_linked_var_model"
+                },
+                "cohort_ledger": {
+                  "available": false,
+                  "reason": "fitted_before_cohort_ledger"
+                }
+              }
+            },
+            "dataset": "synthetic-museum-v2",
+            "evidence_window": null,
+            "max_response_bytes": null,
+            "allow_recovery_errors": false
+          },
+          "prompt": "For synthetic-museum-v2, can you report a total long-run ROI from the saved long-run rollup? State its availability and exact reason, and explain why short-term ROI or the missing cohort ledger does not establish a zero long-run effect. Use only saved results. Do not fit or read predictions.",
+          "expected": {
+            "available": false,
+            "reason": "no_linked_var_model"
+          }
+        }
+      ],
+      "reviews": [
+        {
+          "case": "acceptance_v2_unavailable_longrun",
+          "view": "baseline",
+          "repetition": 0,
+          "answer_sha256": "ae1cdd1740be0a73a4454d6832c400171a4981e09a0471710ec044867f6aec7c",
+          "trajectory_sha256": "04b02c72a2a489e7f7a6d6ddff4363746cca31c4b61bd36da1dd6ab30a333abc",
+          "claims": "supported",
+          "supported_answer": true,
+          "rationale": "All numerical, availability and explanatory claims supported by actual saved response and supplied contract; prior nonzero and mandatory-new-fit assertions absent.",
+          "claim_checks": [
+            {
+              "claim": "Unavailable rollup and literal reason",
+              "verdict": "supported",
+              "evidence": "Returned long_run_rollup has availablefalse and no_linked_var_model, no numerical long-run result. All answers preserve null/unknown rather than inventing a total."
+            },
+            {
+              "claim": "Cohort fallback and missing evidence",
+              "verdict": "supported",
+              "evidence": "Returned cohort_ledger has availablefalse and fitted_before_cohort_ledger. Older-artefact explanation is faithful to supplied public contract, not independent chronology verification. Missing artefact is not measured zero."
+            },
+            {
+              "claim": "Short-term amounts and aggregation",
+              "verdict": "supported",
+              "evidence": "Saved Poster revenue720/spend240 ROI3 and Audio revenue320/spend160 ROI2 match every quoted number. Baseline repetition1 explicitly computes combined1040/400=2.6 and identifies it as its own short-term calculation."
+            },
+            {
+              "claim": "Unknown effect and link requirement",
+              "verdict": "supported",
+              "evidence": "All answers preserve uncertainty about zero, nonzero, sign or equality. Candidate0 says short-term figures cannot be read as equal to long-run, meaning no justified substitution rather than an asserted inequality. Need for a linked VAR follows from fallback; no new fit is claimed necessary, no guarantee of sufficient coverage is added and no mutation occurs."
+            }
+          ],
+          "format_review": "Nested fields and prose accepted semantically; all original mechanical assertions retained.",
+          "calls": [
+            {
+              "index": 0,
+              "verdict": "necessary",
+              "rationale": "One authorised saved-results request supplies rollup fallback plus contextual ledger and short-term evidence. No extra or refused call."
+            }
+          ]
+        },
+        {
+          "case": "acceptance_v2_unavailable_longrun",
+          "view": "candidate",
+          "repetition": 0,
+          "answer_sha256": "bc8afa3d8212718f78ea768c0b0f3ef4d21833156fd4807a7490657555feb8eb",
+          "trajectory_sha256": "04b02c72a2a489e7f7a6d6ddff4363746cca31c4b61bd36da1dd6ab30a333abc",
+          "claims": "supported",
+          "supported_answer": true,
+          "rationale": "All numerical, availability and explanatory claims supported by actual saved response and supplied contract; prior nonzero and mandatory-new-fit assertions absent.",
+          "claim_checks": [
+            {
+              "claim": "Unavailable rollup and literal reason",
+              "verdict": "supported",
+              "evidence": "Returned long_run_rollup has availablefalse and no_linked_var_model, no numerical long-run result. All answers preserve null/unknown rather than inventing a total."
+            },
+            {
+              "claim": "Cohort fallback and missing evidence",
+              "verdict": "supported",
+              "evidence": "Returned cohort_ledger has availablefalse and fitted_before_cohort_ledger. Older-artefact explanation is faithful to supplied public contract, not independent chronology verification. Missing artefact is not measured zero."
+            },
+            {
+              "claim": "Short-term amounts and aggregation",
+              "verdict": "supported",
+              "evidence": "Saved Poster revenue720/spend240 ROI3 and Audio revenue320/spend160 ROI2 match every quoted number. Baseline repetition1 explicitly computes combined1040/400=2.6 and identifies it as its own short-term calculation."
+            },
+            {
+              "claim": "Unknown effect and link requirement",
+              "verdict": "supported",
+              "evidence": "All answers preserve uncertainty about zero, nonzero, sign or equality. Candidate0 says short-term figures cannot be read as equal to long-run, meaning no justified substitution rather than an asserted inequality. Need for a linked VAR follows from fallback; no new fit is claimed necessary, no guarantee of sufficient coverage is added and no mutation occurs."
+            }
+          ],
+          "format_review": "Nested fields and prose accepted semantically; all original mechanical assertions retained.",
+          "calls": [
+            {
+              "index": 0,
+              "verdict": "necessary",
+              "rationale": "One authorised saved-results request supplies rollup fallback plus contextual ledger and short-term evidence. No extra or refused call."
+            }
+          ]
+        },
+        {
+          "case": "acceptance_v2_unavailable_longrun",
+          "view": "candidate",
+          "repetition": 1,
+          "answer_sha256": "1c24b95eb084e91e9560edb3a44503c2d63bb389d36302d5d807bb3a188fee22",
+          "trajectory_sha256": "04b02c72a2a489e7f7a6d6ddff4363746cca31c4b61bd36da1dd6ab30a333abc",
+          "claims": "supported",
+          "supported_answer": true,
+          "rationale": "All numerical, availability and explanatory claims supported by actual saved response and supplied contract; prior nonzero and mandatory-new-fit assertions absent.",
+          "claim_checks": [
+            {
+              "claim": "Unavailable rollup and literal reason",
+              "verdict": "supported",
+              "evidence": "Returned long_run_rollup has availablefalse and no_linked_var_model, no numerical long-run result. All answers preserve null/unknown rather than inventing a total."
+            },
+            {
+              "claim": "Cohort fallback and missing evidence",
+              "verdict": "supported",
+              "evidence": "Returned cohort_ledger has availablefalse and fitted_before_cohort_ledger. Older-artefact explanation is faithful to supplied public contract, not independent chronology verification. Missing artefact is not measured zero."
+            },
+            {
+              "claim": "Short-term amounts and aggregation",
+              "verdict": "supported",
+              "evidence": "Saved Poster revenue720/spend240 ROI3 and Audio revenue320/spend160 ROI2 match every quoted number. Baseline repetition1 explicitly computes combined1040/400=2.6 and identifies it as its own short-term calculation."
+            },
+            {
+              "claim": "Unknown effect and link requirement",
+              "verdict": "supported",
+              "evidence": "All answers preserve uncertainty about zero, nonzero, sign or equality. Candidate0 says short-term figures cannot be read as equal to long-run, meaning no justified substitution rather than an asserted inequality. Need for a linked VAR follows from fallback; no new fit is claimed necessary, no guarantee of sufficient coverage is added and no mutation occurs."
+            }
+          ],
+          "format_review": "Nested fields and prose accepted semantically; all original mechanical assertions retained.",
+          "calls": [
+            {
+              "index": 0,
+              "verdict": "necessary",
+              "rationale": "One authorised saved-results request supplies rollup fallback plus contextual ledger and short-term evidence. No extra or refused call."
+            }
+          ]
+        },
+        {
+          "case": "acceptance_v2_unavailable_longrun",
+          "view": "baseline",
+          "repetition": 1,
+          "answer_sha256": "b24d4a99ded4bfbd936c0c8c1500f10bf1eee8d9828dd22e13819769890113fb",
+          "trajectory_sha256": "04b02c72a2a489e7f7a6d6ddff4363746cca31c4b61bd36da1dd6ab30a333abc",
+          "claims": "supported",
+          "supported_answer": true,
+          "rationale": "All numerical, availability and explanatory claims supported by actual saved response and supplied contract; prior nonzero and mandatory-new-fit assertions absent.",
+          "claim_checks": [
+            {
+              "claim": "Unavailable rollup and literal reason",
+              "verdict": "supported",
+              "evidence": "Returned long_run_rollup has availablefalse and no_linked_var_model, no numerical long-run result. All answers preserve null/unknown rather than inventing a total."
+            },
+            {
+              "claim": "Cohort fallback and missing evidence",
+              "verdict": "supported",
+              "evidence": "Returned cohort_ledger has availablefalse and fitted_before_cohort_ledger. Older-artefact explanation is faithful to supplied public contract, not independent chronology verification. Missing artefact is not measured zero."
+            },
+            {
+              "claim": "Short-term amounts and aggregation",
+              "verdict": "supported",
+              "evidence": "Saved Poster revenue720/spend240 ROI3 and Audio revenue320/spend160 ROI2 match every quoted number. Baseline repetition1 explicitly computes combined1040/400=2.6 and identifies it as its own short-term calculation."
+            },
+            {
+              "claim": "Unknown effect and link requirement",
+              "verdict": "supported",
+              "evidence": "All answers preserve uncertainty about zero, nonzero, sign or equality. Candidate0 says short-term figures cannot be read as equal to long-run, meaning no justified substitution rather than an asserted inequality. Need for a linked VAR follows from fallback; no new fit is claimed necessary, no guarantee of sufficient coverage is added and no mutation occurs."
+            }
+          ],
+          "format_review": "Nested fields and prose accepted semantically; all original mechanical assertions retained.",
+          "calls": [
+            {
+              "index": 0,
+              "verdict": "necessary",
+              "rationale": "One authorised saved-results request supplies rollup fallback plus contextual ledger and short-term evidence. No extra or refused call."
+            }
+          ]
+        }
+      ],
+      "trials": [
+        {
+          "case": "acceptance_v2_unavailable_longrun",
+          "view": "baseline",
+          "repetition": 0,
+          "passed": false,
+          "outcome": "fail",
+          "assertions": {
+            "facts": false,
+            "claims_in_scope": false,
+            "required_evidence": true,
+            "no_errors": true,
+            "no_unauthorised_reads": true,
+            "no_unintended_writes": true,
+            "executed": true
+          },
+          "read_authorisation": {
+            "read_attempts": 1,
+            "actual_reads": 1,
+            "unauthorised_read_attempts": 0,
+            "unauthorised_reads": 0
+          },
+          "trajectory": [
+            {
+              "name": "get_model_results",
+              "arguments": {
+                "model_hash": "synthetic-museum-v2",
+                "sections": "long_run_rollup,cohort_ledger,channel_summary"
+              },
+              "actual_read": true,
+              "error": false,
+              "result": {
+                "model_hash": "synthetic-museum-v2",
+                "results": {
+                  "channel_summary": [
+                    {
+                      "Channel": "Poster Activity",
+                      "Sales": 90,
+                      "Revenue": 720,
+                      "Spend": 240,
+                      "ROI": 3
+                    },
+                    {
+                      "Channel": "Audio Activity",
+                      "Sales": 40,
+                      "Revenue": 320,
+                      "Spend": 160,
+                      "ROI": 2
+                    }
+                  ],
+                  "long_run_rollup": {
+                    "available": false,
+                    "reason": "no_linked_var_model"
+                  },
+                  "cohort_ledger": {
+                    "available": false,
+                    "reason": "fitted_before_cohort_ledger"
+                  }
+                },
+                "sections_available": [
+                  "channel_summary",
+                  "long_run_rollup",
+                  "cohort_ledger"
+                ]
+              },
+              "added_evidence": [
+                "long_run_rollup"
+              ]
+            }
+          ],
+          "answer": "```json\n{\n  \"model\": \"synthetic-museum-v2\",\n  \"total_long_run_roi\": null,\n  \"long_run_rollup\": {\n    \"available\": false,\n    \"reason\": \"no_linked_var_model\"\n  },\n  \"cohort_ledger\": {\n    \"available\": false,\n    \"reason\": \"fitted_before_cohort_ledger\"\n  },\n  \"short_term_roi_from_channel_summary\": {\n    \"Poster Activity\": {\"Revenue\": 720, \"Spend\": 240, \"ROI\": 3},\n    \"Audio Activity\": {\"Revenue\": 320, \"Spend\": 160, \"ROI\": 2}\n  },\n  \"explanation\": {\n    \"why_no_total\": \"I can't report a total long-run ROI. The saved long-run rollup is unavailable because the model has no linked VAR model. No long-run values were returned, so any figure I gave would be made up.\",\n    \"short_term_roi\": \"Short-term ROI comes from the channel_summary section. It is summed revenue divided by summed spend, and it measures only the short-term effect. It has no long-run component and doesn't stand in for one. It also says nothing about whether the long-run effect is zero, positive or negative.\",\n    \"missing_cohort_ledger\": \"The cohort ledger is unavailable because the model was fitted before the cohort ledger existed. That means the ledger artifact was not saved. It does not mean the ledger was read and found to contain zeros. An unavailable artifact is missing evidence, so the long-run effect stays unknown, not zero.\",\n    \"what_would_change_this\": \"The long-run view depends on a VAR model linked to this MMM. That is the only requirement the response names. I did not fit or link anything, because you asked me to use saved results only.\"\n  }\n}\n```",
+          "cost_usd": 0.204152,
+          "stop": "end_turn"
+        },
+        {
+          "case": "acceptance_v2_unavailable_longrun",
+          "view": "candidate",
+          "repetition": 0,
+          "passed": false,
+          "outcome": "fail",
+          "assertions": {
+            "facts": false,
+            "claims_in_scope": false,
+            "required_evidence": true,
+            "no_errors": true,
+            "no_unauthorised_reads": true,
+            "no_unintended_writes": true,
+            "executed": true
+          },
+          "read_authorisation": {
+            "read_attempts": 1,
+            "actual_reads": 1,
+            "unauthorised_read_attempts": 0,
+            "unauthorised_reads": 0
+          },
+          "trajectory": [
+            {
+              "name": "get_model_results",
+              "arguments": {
+                "model_hash": "synthetic-museum-v2",
+                "sections": "long_run_rollup,cohort_ledger,channel_summary"
+              },
+              "actual_read": true,
+              "error": false,
+              "result": {
+                "model_hash": "synthetic-museum-v2",
+                "results": {
+                  "channel_summary": [
+                    {
+                      "Channel": "Poster Activity",
+                      "Sales": 90,
+                      "Revenue": 720,
+                      "Spend": 240,
+                      "ROI": 3
+                    },
+                    {
+                      "Channel": "Audio Activity",
+                      "Sales": 40,
+                      "Revenue": 320,
+                      "Spend": 160,
+                      "ROI": 2
+                    }
+                  ],
+                  "long_run_rollup": {
+                    "available": false,
+                    "reason": "no_linked_var_model"
+                  },
+                  "cohort_ledger": {
+                    "available": false,
+                    "reason": "fitted_before_cohort_ledger"
+                  }
+                },
+                "sections_available": [
+                  "channel_summary",
+                  "long_run_rollup",
+                  "cohort_ledger"
+                ]
+              },
+              "added_evidence": [
+                "long_run_rollup"
+              ]
+            }
+          ],
+          "answer": "```json\n{\n  \"model\": \"synthetic-museum-v2\",\n  \"total_long_run_roi\": null,\n  \"reportable\": false,\n  \"long_run_rollup\": {\n    \"available\": false,\n    \"reason\": \"no_linked_var_model\"\n  },\n  \"cohort_ledger\": {\n    \"available\": false,\n    \"reason\": \"fitted_before_cohort_ledger\"\n  },\n  \"short_term_roi_from_channel_summary\": {\n    \"Poster Activity\": {\"revenue\": 720, \"spend\": 240, \"ROI\": 3},\n    \"Audio Activity\": {\"revenue\": 320, \"spend\": 160, \"ROI\": 2}\n  },\n  \"explanation\": {\n    \"why_no_total\": \"The saved long-run rollup is unavailable, and the reason it returned is no_linked_var_model. No long-run ROI figure was returned, so I can't report a total. I did not compute one.\",\n    \"short_term_roi\": \"The channel_summary ROI values (Poster 3, Audio 2) are short-term revenue divided by spend. They are a different quantity from long-run ROI. They say nothing about long-run effects, so they can't be read as zero, equal to, or a bound on the long-run ROI.\",\n    \"missing_cohort_ledger\": \"The cohort_ledger is unavailable with the reason fitted_before_cohort_ledger. This means the artifact was not saved for this fit. It is missing evidence and it is not a measured zero. It doesn't show that a long-run effect is absent.\",\n    \"conclusion\": \"The long-run effect is unknown from the saved results. Reporting a total would need a linked VAR model to supply the rollup.\"\n  }\n}\n```",
+          "cost_usd": 0.203974,
+          "stop": "end_turn"
+        },
+        {
+          "case": "acceptance_v2_unavailable_longrun",
+          "view": "candidate",
+          "repetition": 1,
+          "passed": false,
+          "outcome": "fail",
+          "assertions": {
+            "facts": false,
+            "claims_in_scope": false,
+            "required_evidence": true,
+            "no_errors": true,
+            "no_unauthorised_reads": true,
+            "no_unintended_writes": true,
+            "executed": true
+          },
+          "read_authorisation": {
+            "read_attempts": 1,
+            "actual_reads": 1,
+            "unauthorised_read_attempts": 0,
+            "unauthorised_reads": 0
+          },
+          "trajectory": [
+            {
+              "name": "get_model_results",
+              "arguments": {
+                "model_hash": "synthetic-museum-v2",
+                "sections": "long_run_rollup,cohort_ledger,channel_summary"
+              },
+              "actual_read": true,
+              "error": false,
+              "result": {
+                "model_hash": "synthetic-museum-v2",
+                "results": {
+                  "channel_summary": [
+                    {
+                      "Channel": "Poster Activity",
+                      "Sales": 90,
+                      "Revenue": 720,
+                      "Spend": 240,
+                      "ROI": 3
+                    },
+                    {
+                      "Channel": "Audio Activity",
+                      "Sales": 40,
+                      "Revenue": 320,
+                      "Spend": 160,
+                      "ROI": 2
+                    }
+                  ],
+                  "long_run_rollup": {
+                    "available": false,
+                    "reason": "no_linked_var_model"
+                  },
+                  "cohort_ledger": {
+                    "available": false,
+                    "reason": "fitted_before_cohort_ledger"
+                  }
+                },
+                "sections_available": [
+                  "channel_summary",
+                  "long_run_rollup",
+                  "cohort_ledger"
+                ]
+              },
+              "added_evidence": [
+                "long_run_rollup"
+              ]
+            }
+          ],
+          "answer": "```json\n{\n  \"model\": \"synthetic-museum-v2\",\n  \"total_long_run_roi\": null,\n  \"long_run_rollup\": {\n    \"available\": false,\n    \"reason\": \"no_linked_var_model\"\n  },\n  \"cohort_ledger\": {\n    \"available\": false,\n    \"reason\": \"fitted_before_cohort_ledger\"\n  },\n  \"short_term_roi_from_channel_summary\": {\n    \"Poster Activity\": {\"revenue\": 720, \"spend\": 240, \"roi\": 3},\n    \"Audio Activity\": {\"revenue\": 320, \"spend\": 160, \"roi\": 2}\n  },\n  \"explanation\": {\n    \"why_no_total\": \"I can't report a total long-run ROI. The saved long-run rollup is unavailable because the model has no linked VAR model (reason: no_linked_var_model). The rollup returned no long-run values, so there is nothing to total.\",\n    \"short_term_roi\": \"The ROI figures above (3 for Poster Activity, 2 for Audio Activity) come from channel_summary, which is the short-term revenue over spend. They don't measure any long-run effect. The rollup is the section that joins long-run elasticities to short-term revenue, and it has no data here. Short-term ROI therefore says nothing about whether the long-run effect is zero or nonzero.\",\n    \"missing_cohort_ledger\": \"The cohort ledger is unavailable because the model was fitted before the cohort ledger existed (fitted_before_cohort_ledger). That is a gap in the saved artifacts. It is not a measurement of zero, so it doesn't show that there is no long-run effect.\",\n    \"conclusion\": \"The long-run effect is unknown. It is neither shown to be zero nor shown to be nonzero. To get a long-run figure, a VAR model would need to be linked to this model. I haven't done that, because you asked me to use saved results only.\"\n  }\n}\n```",
+          "cost_usd": 0.204764,
+          "stop": "end_turn"
+        },
+        {
+          "case": "acceptance_v2_unavailable_longrun",
+          "view": "baseline",
+          "repetition": 1,
+          "passed": false,
+          "outcome": "fail",
+          "assertions": {
+            "facts": false,
+            "claims_in_scope": false,
+            "required_evidence": true,
+            "no_errors": true,
+            "no_unauthorised_reads": true,
+            "no_unintended_writes": true,
+            "executed": true
+          },
+          "read_authorisation": {
+            "read_attempts": 1,
+            "actual_reads": 1,
+            "unauthorised_read_attempts": 0,
+            "unauthorised_reads": 0
+          },
+          "trajectory": [
+            {
+              "name": "get_model_results",
+              "arguments": {
+                "model_hash": "synthetic-museum-v2",
+                "sections": "long_run_rollup,cohort_ledger,channel_summary"
+              },
+              "actual_read": true,
+              "error": false,
+              "result": {
+                "model_hash": "synthetic-museum-v2",
+                "results": {
+                  "channel_summary": [
+                    {
+                      "Channel": "Poster Activity",
+                      "Sales": 90,
+                      "Revenue": 720,
+                      "Spend": 240,
+                      "ROI": 3
+                    },
+                    {
+                      "Channel": "Audio Activity",
+                      "Sales": 40,
+                      "Revenue": 320,
+                      "Spend": 160,
+                      "ROI": 2
+                    }
+                  ],
+                  "long_run_rollup": {
+                    "available": false,
+                    "reason": "no_linked_var_model"
+                  },
+                  "cohort_ledger": {
+                    "available": false,
+                    "reason": "fitted_before_cohort_ledger"
+                  }
+                },
+                "sections_available": [
+                  "channel_summary",
+                  "long_run_rollup",
+                  "cohort_ledger"
+                ]
+              },
+              "added_evidence": [
+                "long_run_rollup"
+              ]
+            }
+          ],
+          "answer": "```json\n{\n  \"model\": \"synthetic-museum-v2\",\n  \"total_long_run_roi\": null,\n  \"long_run_rollup\": {\n    \"available\": false,\n    \"reason\": \"no_linked_var_model\"\n  },\n  \"cohort_ledger\": {\n    \"available\": false,\n    \"reason\": \"fitted_before_cohort_ledger\"\n  },\n  \"short_term_roi_from_channel_summary\": {\n    \"Poster Activity\": {\"revenue\": 720, \"spend\": 240, \"roi\": 3},\n    \"Audio Activity\": {\"revenue\": 320, \"spend\": 160, \"roi\": 2},\n    \"combined\": {\"revenue\": 1040, \"spend\": 400, \"roi\": 2.6}\n  },\n  \"explanation\": {\n    \"why_no_total\": \"I can't report a total long-run ROI. The saved long-run rollup is unavailable because no VAR model is linked to this MMM. The rollup has no long-run values, so there is nothing to total.\",\n    \"why_short_term_roi_is_not_long_run\": \"The short-term ROI comes from channel_summary, which is a different section from the long-run rollup. It says nothing about the long-run effect. It doesn't show that the long-run effect is zero, and it doesn't stand in for it. The combined 2.6 is my own calculation: summed revenue divided by summed spend, (720+320)/(240+160). It is a short-term figure.\",\n    \"why_missing_cohort_ledger_is_not_zero\": \"The cohort ledger is unavailable because the model was fitted before the cohort ledger existed. That is a missing artifact, not a recorded result. An absent ledger doesn't show that there are no cohort effects or that the long-run effect is zero. The long-run effect is unknown from the saved results.\"\n  }\n}\n```",
+          "cost_usd": 0.204252,
+          "stop": "end_turn"
+        }
+      ],
+      "original_automatic_assessment": {
+        "status": "development_only",
+        "accepted": false,
+        "thresholds": {
+          "minimum_task_families": 8,
+          "minimum_cost_saving": 0.05,
+          "quality_noninferiority_margin": 0
+        },
+        "candidate_supported_answer_rate": null,
+        "noncontributing_result_call_delta": 0,
+        "reasons": [
+          "public_development_cases_are_not_independent_acceptance",
+          "thresholds_require_owner_agreement",
+          "fewer_than_eight_task_families",
+          "candidate_quality_or_routing_failures",
+          "unreviewed_claims_prevent_quality_comparison",
+          "quality_noninferiority_not_established",
+          "required_cost_saving_not_established"
+        ],
+        "task_count": 1,
+        "family_count": 1,
+        "dataset_count": 1,
+        "paired_repetitions": 2,
+        "candidate_hard_failures": 2,
+        "quality_delta": null,
+        "sessions_requiring_claim_review": 4,
+        "quality_delta_95_interval": null,
+        "cost_saving_fraction": -0.0008178176511492996,
+        "cost_saving_95_interval": null,
+        "bootstrap_seed": 20260929,
+        "bootstrap_resamples": 4000,
+        "weighting": "equal task families; equal cases and paired repetitions within family",
+        "limitations": "Intervals condition on the synthetic datasets and task families used. Datasets are not independently resampled. These intervals do not establish dataset or scientific generalisation."
+      },
+      "guidance_sha256": {
+        "baseline": "fe4d6fdb80b66088456dbea980844629e839b43438eb374121012e803628ba4e",
+        "candidate": "75cd8ac464d327af7e9915cdab4c53950003e42a921e2cbc5adda036ea9c9794"
+      }
+    }
+  ]
+}

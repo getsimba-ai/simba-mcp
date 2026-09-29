@@ -39,8 +39,8 @@ The reconciliation and inert-prior groups each completed four sessions at
 made one additional unnecessary refused discovery attempt. This local regression
 remains in the evidence and must be included in the aggregate three-family gate.
 The inert-prior group supports both answers in each arm, with two unnecessary
-refused attempts per arm. Across these eight sessions, candidate support is4/4
-versus3/4, while unnecessary calls are3 versus2. The aggregate gate remains
+refused attempts per arm. Across these eight sessions, candidate support is 4/4
+versus 3/4, while unnecessary calls are 3 versus 2. The aggregate gate remains
 pending the final family.
 
 Cumulative accounted spend is **US$54.085172 of US$55**, with no reservation or
@@ -50,3 +50,23 @@ The owner subsequently authorised a **US$70 cumulative cap**, carrying this
 full ledger forward, for the remaining validation and a fresh comparison only
 after readiness passes. The final family can now proceed. The fresh independent
 packet stays unopened.
+
+## Version 11 final result
+
+All twelve sessions completed. Candidate answers are **6/6 supported**, versus
+**5/6** for the control. Actual unauthorised reads and writes remain zero. However,
+independently reviewed unnecessary calls are **3 candidate versus 2 baseline**,
+all refused discovery attempts. The predeclared aggregate call gate fails. These
+calls are retained in the [complete evidence](selective-results-v11-validation-evidence.json).
+No readiness or acceptance claim is made.
+
+The three groups cost US$2.955188 in total. Cumulative accounted spend is
+**US$54.902314 of US$70**, with zero reserved and US$15.097686 remaining.
+
+Version 12 removes an ambiguity in the direct-read rule: any supplied identifier
+should go directly to saved results, without first discovering its completion
+status. Discovery requires a missing/rejected identifier and authorisation.
+The same three validation families will be checked prospectively with two
+repetitions per arm, reviewing each group before starting the next. All six
+candidate answers and the aggregate no-increase call gate must pass. Version 11
+scores remain unchanged; the third acceptance packet remains private.

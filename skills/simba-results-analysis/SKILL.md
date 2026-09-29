@@ -2,13 +2,15 @@
 name: simba-results-analysis
 description: Read saved Simba results, ROI and diagnostics.
 metadata:
-  version: "11"
+  version: "12"
 ---
 
 # Analyse saved results
 
-Use a supplied completed model identifier directly in get_model_results; discover
-only if missing or rejected. No repeated startup preflights.
+Use any supplied model identifier directly in get_model_results. Do not call
+list_models or another discovery/status tool first: the result read checks the
+identifier. Discover only if no identifier was supplied or that read rejects it,
+and only when discovery is authorised.
 
 Choose sufficient sections:
 - Revenue/ROI: channel_summary; coefficients for individual periods.
