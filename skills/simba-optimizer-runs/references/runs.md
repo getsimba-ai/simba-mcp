@@ -25,8 +25,8 @@
 
 ## Poll and read
 
-- `run_optimiser` returns 202 + a `run_id` ("opt_..."). Poll
-  `get_optimiser_results(model_hash, run_id=...)`; the model-level form
+- `run_optimizer` returns 202 + a `run_id` ("opt_..."). Poll
+  `get_optimizer_results(model_hash, run_id=...)`; the model-level form
   reflects only the LATEST run and a newer run overwrites it.
 - Column conventions must not be mixed in one summary:
   - `Revenue`/`ROI` = the solver's decision math (removal-lift
@@ -39,7 +39,7 @@
 
 ## Run history and curation
 
-- `list_runs(artifact="optimiser"|"scenario", ...)`: pinned-first then
+- `list_runs(artifact="optimizer"|"scenario", ...)`: pinned-first then
   newest-first. `count` is the PAGE length, not the total; page until a
   short page. The objective is NOT in summaries: fetch the run's `inputs`
   (profit runs carry `objective: "profit"`; revenue runs omit the key).

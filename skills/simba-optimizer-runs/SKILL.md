@@ -1,5 +1,5 @@
 ---
-name: simba-optimiser-runs
+name: simba-optimizer-runs
 description: Set up Simba budget optimisation and inspect saved optimiser or scenario runs. Use for channel bounds, laydown, margins and decision-versus-comparison interpretation.
 metadata:
   version: "1"

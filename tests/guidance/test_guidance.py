@@ -96,6 +96,20 @@ def test_shared_prior_reference_has_one_canonical_owner():
     assert topics["mmm"]["sections"]["priors"] == topics["priors"]["sections"]["conventions"]
 
 
+def test_referenced_tools_resolve_in_current_catalogue():
+    from simba_mcp.server import TOOLS
+
+    known = {tool.__name__ for tool in TOOLS}
+    pattern = (
+        r"`((?:get|list|run|create|update|publish|launch|cancel|upload|save|rename|delete|"
+        r"adopt|refreeze|revise|validate|diff|evaluate|set|import|link|unlink)_[a-z_]+)(?:`|\()"
+    )
+    for entry in guidance.MANIFEST["topics"].values():
+        for path in entry["sections"].values():
+            content = guidance.CONTENT.joinpath(path).read_text(encoding="utf-8")
+            assert set(re.findall(pattern, content)) - {"run_id"} <= known, path
+
+
 def test_existing_results_need_no_startup_discovery():
     from simba_mcp.evaluation.cases import cases
 
