@@ -308,7 +308,10 @@ class TestAPIClientErrorHandling:
         client, _ = client_with_error
         result = await client.create_model({"data_source": {"uploaded_file_id": 1}})
         assert result["_help"] == AUTH_HELP
-        assert "calendly.com" in result["_help"]
+        # Self-serve first (#938): the sign-up link comes before the demo link.
+        assert result["_help"].index("demo.simba-mmm.com/signup") < result["_help"].index(
+            "calendly.com"
+        )
 
     @pytest.mark.anyio
     async def test_401_includes_help(self):
@@ -337,7 +340,10 @@ class TestAPIClientErrorHandling:
         assert result["_status_code"] == 401
         assert "SIMBA_API_KEY is not set" in result["error"]
         assert result["_help"] == AUTH_HELP
-        assert "calendly.com" in result["_help"]
+        # Self-serve first (#938): the sign-up link comes before the demo link.
+        assert result["_help"].index("demo.simba-mmm.com/signup") < result["_help"].index(
+            "calendly.com"
+        )
 
 
 class TestAPIClientRetry:

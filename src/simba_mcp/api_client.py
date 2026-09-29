@@ -24,9 +24,9 @@ RETRIABLE_STATUS_CODES = frozenset({429, 500, 502, 503, 504})
 
 AUTH_HELP = (
     "This MCP server requires a Simba account. "
-    "If you're already a customer, create an API key at Profile > API Keys in the Simba UI. "
-    "Not a customer yet? Book a call to get started: "
-    "https://calendly.com/niall-oulton"
+    "Start free at https://demo.simba-mmm.com/signup, then create an API key at "
+    "Profile > API Keys in the Simba UI. "
+    "Prefer a walkthrough? Book a demo: https://calendly.com/niall-oulton"
 )
 
 HTTP_AUTH_HELP = (
