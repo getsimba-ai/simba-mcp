@@ -9,7 +9,7 @@ from dataclasses import asdict
 from .result_grading import claims_in_scope, fact_verdict, semantic_facts
 from .result_selection import result_tasks
 
-GRADER_VERSION = 14
+GRADER_VERSION = 15
 
 
 def calibration_cases():
@@ -155,6 +155,9 @@ def calibrate():
         )
         case["task"]["required_sections"] = sorted(case["task"]["required_sections"])
         case["task"]["evidence_options"] = [sorted(s) for s in case["task"]["evidence_options"]]
+        case["task"]["forbidden_result_sections"] = sorted(
+            case["task"]["forbidden_result_sections"]
+        )
         rows.append(
             {
                 **case,

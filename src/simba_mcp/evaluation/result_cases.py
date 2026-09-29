@@ -1,12 +1,13 @@
 """Publishable saved-result fixtures with independently stated expected facts."""
 
+from calendar import monthrange
 from copy import deepcopy
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from random import Random
 
 from .contracts import Case, Exchange, Step
 
-FIXTURE_VERSION = 2
+FIXTURE_VERSION = 3
 NATIVE_WINDOW = {"start": "2025-01-01", "end": "2025-02-28"}
 
 
@@ -117,14 +118,17 @@ def saved_results():
 
 
 def selected_payload(sections, *, fixture=None, start="", end="", granularity=""):
-    """Synthetic native-window contract; no fits, bucketing or audit-store emulation.
+    """Synthetic native windows and calendar-bucket totals; no fits or audit writes.
 
     Unknown and absent sections are omitted, as observed in live responses. This
-    supports native windows only; unsupported fixture capabilities raise locally.
+    supports native and week/month/quarter additive totals. Week anchors are a
+    declared Monday-Sunday synthetic assumption, not a verified backend convention.
     """
     payload = deepcopy(fixture) if fixture is not None else saved_results()
-    if granularity not in ("", "native"):
-        raise ValueError("Synthetic fixture only supports native granularity")
+    if granularity not in ("", "native", "week", "month", "quarter"):
+        raise ValueError(
+            "Synthetic fixture only supports native, week, month or quarter granularity"
+        )
     rows = payload["results"]
     if start or end or granularity:
         lower = (
@@ -139,7 +143,7 @@ def selected_payload(sections, *, fixture=None, start="", end="", granularity=""
         )
         if lower > upper:
             raise ValueError("start must not be after end")
-        for section in ("coefficients", "contributions"):
+        for section in ("coefficients", "contributions", "actual_vs_model"):
             if section in rows:
                 rows[section] = [r for r in rows[section] if lower <= r["Date"] <= upper]
         totals = {}
@@ -153,6 +157,66 @@ def selected_payload(sections, *, fixture=None, start="", end="", granularity=""
         for total in totals.values():
             total["ROI"] = total["Revenue"] / total["Spend"] if total["Spend"] else 0.0
         rows["channel_summary"] = list(totals.values())
+    if granularity in ("week", "month", "quarter"):
+        for section in ("coefficients", "contributions", "actual_vs_model"):
+            if section not in rows:
+                continue
+            buckets = {}
+            for row in rows[section]:
+                day = datetime.fromtimestamp(row["Date"] / 1000, UTC).date()
+                if granularity == "week":
+                    # Synthetic calendar assumption: Monday through Sunday.
+                    # The public tool names week granularity but does not specify its anchor.
+                    period_start = day - timedelta(days=day.weekday())
+                    period_end = period_start + timedelta(days=6)
+                elif granularity == "quarter":
+                    first_month = ((day.month - 1) // 3) * 3 + 1
+                    last_month = first_month + 2
+                    period_start = day.replace(month=first_month, day=1)
+                    period_end = day.replace(
+                        month=last_month, day=monthrange(day.year, last_month)[1]
+                    )
+                else:
+                    period_start = day.replace(day=1)
+                    period_end = day.replace(day=monthrange(day.year, day.month)[1])
+                key = (
+                    (period_start, row["Channel"]) if section == "coefficients" else (period_start,)
+                )
+                bucket = buckets.setdefault(
+                    key,
+                    {
+                        "period_start": period_start.isoformat(),
+                        "period_end": period_end.isoformat(),
+                    },
+                )
+                if section == "coefficients":
+                    bucket["Channel"] = row["Channel"]
+                    additive = ("Sales", "Revenue", "Spend", "Media Units")
+                elif section == "actual_vs_model":
+                    # Predictive interval endpoints are not additive.
+                    additive = ("Actual", "Model")
+                else:
+                    additive = tuple(
+                        k for k, v in row.items() if k != "Date" and type(v) in (int, float)
+                    )
+                for field in additive:
+                    if field in row:
+                        bucket[field] = bucket.get(field, 0) + row[field]
+            if section == "coefficients":
+                for bucket in buckets.values():
+                    bucket["ROI"] = bucket["Revenue"] / bucket["Spend"] if bucket["Spend"] else 0.0
+                    if "Media Units" in bucket:
+                        for label, numerator in (
+                            ("Cost", "Spend"),
+                            ("Revenue", "Revenue"),
+                            ("Sales", "Sales"),
+                        ):
+                            bucket[f"{label} per Media Unit"] = (
+                                bucket[numerator] / bucket["Media Units"]
+                                if bucket["Media Units"]
+                                else 0.0
+                            )
+            rows[section] = [buckets[key] for key in sorted(buckets)]
     selected = set(sections) if sections else set(rows) - {"mroi_periods", "prediction_window"}
     payload["results"] = {k: v for k, v in rows.items() if k in selected}
     if "mroi_periods" in sections:
@@ -173,14 +237,18 @@ def selected_payload(sections, *, fixture=None, start="", end="", granularity=""
             payload["sections_available"].append(optional)
     if start or end or granularity:
         payload["meta"] = {
-            "window": {"start": start or None, "end": end or None, "granularity": "native"},
+            "window": {
+                "start": start or None,
+                "end": end or None,
+                "granularity": granularity or "native",
+            },
             "aggregation": {"channel_summary": "ROI = sum(Revenue) / sum(Spend); 0 without spend"},
             "not_windowed": {
                 k: "mROI is not re-aggregated; rows returned as fitted"
                 if k == "mroi_periods"
                 else "not a per-period section"
                 for k in payload["results"]
-                if k not in ("coefficients", "contributions", "channel_summary")
+                if k not in ("coefficients", "contributions", "channel_summary", "actual_vs_model")
             },
         }
     return payload

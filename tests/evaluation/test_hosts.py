@@ -243,8 +243,9 @@ def test_format_failure_is_separate_from_correct_facts():
 @pytest.mark.anyio
 @pytest.mark.parametrize("selection_validation", [False, True])
 @pytest.mark.parametrize("packet", ["fresh", "v2", "v3"])
+@pytest.mark.parametrize("order_seed", [None, 20260929])
 async def test_fresh_packet_runs_only_frozen_paired_fresh_cases(
-    tmp_path, monkeypatch, selection_validation, packet
+    tmp_path, monkeypatch, selection_validation, packet, order_seed
 ):
     from simba_mcp.evaluation.hosts import __main__ as command
     from simba_mcp.evaluation.result_acceptance_fresh import fresh_acceptance_tasks
@@ -281,6 +282,7 @@ async def test_fresh_packet_runs_only_frozen_paired_fresh_cases(
             results_selection_validation=selection_validation,
             results_baseline=baseline,
             case_review={"verified": True, "guidance_unchanged": True},
+            case_order_seed=order_seed,
         )
     )
     report = json.loads(output.read_text())
@@ -294,6 +296,24 @@ async def test_fresh_packet_runs_only_frozen_paired_fresh_cases(
         "model_selection_validation" if selection_validation else "candidate_acceptance"
     )
     assert not report["assessment"]["accepted"]
+    if order_seed is not None:
+        import random
+
+        rng = random.Random(order_seed)
+        expected_order = []
+        for rep in range(2):
+            case_ids = [t.id for t in tasks]
+            rng.shuffle(case_ids)
+            expected_order.append(case_ids)
+            actual = [r for r in report["trials"] if r["repetition"] == rep]
+            assert [r["case"] for r in actual[::2]] == case_ids
+            assert [r["view"] for r in actual[:2]] == (
+                ["baseline", "candidate"] if rep == 0 else ["candidate", "baseline"]
+            )
+        assert report["configuration"]["case_order"] == expected_order
+        assert expected_order[0] != [t.id for t in tasks]
+    else:
+        assert "case_order" not in report["configuration"]
 
 
 @pytest.mark.anyio

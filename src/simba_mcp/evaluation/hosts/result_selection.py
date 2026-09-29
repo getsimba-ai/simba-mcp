@@ -7,7 +7,7 @@ inferring scientific correctness. All execution still uses the canonical runner.
 import json
 from copy import deepcopy
 from dataclasses import dataclass, replace
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 from math import isfinite
 
@@ -20,6 +20,18 @@ from .result_grading import claims_in_scope, semantic_facts
 
 def _row_matches(actual, expected):
     """Match saved row facts, allowing JSON integer/float parity but not booleans."""
+    if isinstance(actual, dict) and "Date" in expected and "Date" not in actual:
+        try:
+            day = datetime.fromtimestamp(expected["Date"] / 1000, UTC).date()
+            first = datetime.fromisoformat(actual["period_start"]).date()
+            last = datetime.fromisoformat(actual["period_end"]).date()
+        except (KeyError, TypeError, ValueError):
+            return False
+        # A native weekly observation can be represented by its matching week.
+        # Never treat a merged month or quarter as an individual native period.
+        if first != day or last != day + timedelta(days=6) or day.weekday() != 0:
+            return False
+        actual = {**actual, "Date": expected["Date"]}
     return isinstance(actual, dict) and all(
         key in actual
         and (
@@ -48,9 +60,11 @@ class ResultTask:
     fixture: dict | None = None
     dataset: str = "development"
     evidence_window: dict | None = None
+    section_windows: dict | None = None
     max_response_bytes: int | None = None
     allow_recovery_errors: bool = False
     allowed_result_sections: frozenset[str] | None = None
+    forbidden_result_sections: frozenset[str] = frozenset()
 
     def evidence_sets(self):
         return self.evidence_options or (self.required_sections,)
@@ -276,7 +290,7 @@ class ResultSelectionDispatch:
         self.read_attempts = self.actual_reads = 0
         self.unauthorised_read_attempts = self.unauthorised_reads = 0
         self.recoverable_errors = 0
-        self.result_rows = {"coefficients": [], "contributions": []}
+        self.result_rows = {"coefficients": [], "contributions": [], "channel_map": []}
         self.period_summary_rows = []
         self.summary_rows = {}
         self.media_identities = set()
@@ -320,6 +334,16 @@ class ResultSelectionDispatch:
         if not isinstance(raw, str):
             return self.refuse(name, "Sections must be a comma-separated string.")
         sections = [s.strip() for s in raw.split(",") if s.strip()]
+        fixture = self.task.fixture or saved_results()
+        resolved_sections = (
+            set(sections)
+            if sections
+            else set(fixture["results"]) - {"mroi_periods", "prediction_window"}
+        )
+        if resolved_sections & self.task.forbidden_result_sections:
+            return self.refuse(
+                name, "The task forbids access to these result sections.", unauthorised=True
+            )
         if self.task.allowed_result_sections is not None and (
             not sections or not set(sections) <= self.task.allowed_result_sections
         ):
@@ -334,7 +358,6 @@ class ResultSelectionDispatch:
                 "Unsolicited audited prediction-window access is forbidden.",
                 unauthorised=True,
             )
-        fixture = self.task.fixture or saved_results()
         window = {k: arguments[k] for k in ("start", "end", "granularity") if arguments.get(k)}
         try:
             payload = selected_payload(sections, fixture=fixture, **window)
@@ -420,8 +443,27 @@ class ResultSelectionDispatch:
             oracle = selected_payload(
                 oracle_sections, fixture=fixture, **(self.task.evidence_window or {})
             )["results"]
+            for section, window in (self.task.section_windows or {}).items():
+                if section in oracle_sections:
+                    scoped = selected_payload({section}, fixture=fixture, **window)["results"]
+                    if section in scoped:
+                        oracle[section] = scoped[section]
             returned = result.get("results", {})
             returned_window = result.get("meta", {}).get("window", {})
+            bucket = returned_window.get("granularity")
+            if (
+                "coefficients" in oracle
+                and "period_revenue_rows" not in evidence_sections
+                and bucket in ("week", "month", "quarter")
+            ):
+                # Aggregate questions can use coefficient buckets as well as
+                # native rows. Rebuild only the requested task window, never the
+                # caller's potentially incorrect window, for comparison.
+                oracle["coefficients"] = selected_payload(
+                    {"coefficients"},
+                    fixture=fixture,
+                    **{**(self.task.evidence_window or {}), "granularity": bucket},
+                )["results"]["coefficients"]
             summary_context = tuple(
                 returned_window.get(key) or ("native" if key == "granularity" else None)
                 for key in ("start", "end", "granularity")
@@ -495,6 +537,37 @@ class ResultSelectionDispatch:
                     self.supported_sections.add(section)
             for section, expected in oracle.items():
                 actual = result.get("results", {}).get(section)
+                if section in ("mroi_summary", "mroi_periods") and self.task.channel:
+                    row_key = "channels" if section == "mroi_summary" else "rows"
+                    if isinstance(expected, dict) and isinstance(expected.get(row_key), list):
+                        expected = {
+                            **expected,
+                            row_key: [
+                                row
+                                for row in expected[row_key]
+                                if row.get("activity_column") == self.task.channel
+                                or row.get("channel") == self.task.channel
+                                or (
+                                    expected_display is not None
+                                    and row.get("channel") == expected_display
+                                )
+                            ],
+                        }
+                        if not expected[row_key]:
+                            continue
+                        metadata = {k: v for k, v in expected.items() if k != row_key}
+                        valid = (
+                            isinstance(actual, dict)
+                            and contains(actual, metadata)
+                            and isinstance(actual.get(row_key), list)
+                            and all(
+                                any(_row_matches(row, wanted) for row in actual[row_key])
+                                for wanted in expected[row_key]
+                            )
+                        )
+                        if valid:
+                            self.supported_sections.add(section)
+                        continue
                 if section == "channel_summary":
                     expected_window = self.task.evidence_window or {}
                     expected_context = tuple(

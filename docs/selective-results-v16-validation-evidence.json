@@ -1,0 +1,2648 @@
+{
+  "purpose": "selection_validation",
+  "accepted": false,
+  "readiness": {
+    "status": "prospective_validation_readiness_passed",
+    "purpose": "model_selection_validation",
+    "source": "61cdf375f3f6f578c15f687705e40a8c095f7b20",
+    "completed_sessions": 12,
+    "candidate_supported": 6,
+    "baseline_supported": 6,
+    "candidate_unsupported_claims": 0,
+    "baseline_unsupported_claims": 0,
+    "unnecessary_calls": {
+      "candidate": 0,
+      "baseline": 1
+    },
+    "unauthorised_attempts": 0,
+    "unauthorised_reads": 0,
+    "unintended_writes": 0,
+    "review_hashes": {
+      "v16-channel_comparison-adjudication.json": "be94abd517f822754ae09b334731b93d4a48f60f502610281aa8137d691691a7",
+      "v16-headline_estimands-adjudication.json": "7f446763506a14cb6d108878d46131f9c75c6ae134ec46a9de5eb1cdbd108bdb",
+      "v16-window_aggregate-adjudication.json": "f41d035bb02be33e7a8680ed5e7c9fdc98e6a9825a307e1e006281952b0bfb5a"
+    },
+    "raw_hashes": {
+      "channel_comparison": "1a31d07ae2e3d4704ca14e54d1b57996dd68a78d6370a0306a130d8d2bc4e1cd",
+      "headline_estimands": "9072b7e7abc69d800aba2b855412d2cf03d494832ed3927b429c9c27f7ca0732",
+      "window_aggregate": "3d2bbf20527f8fba37009f13951b756ad510d98c45dbeffdb4469cb45ac04581"
+    },
+    "run_cost_usd": 0.88924,
+    "cumulative_usd": 79.39660599999999,
+    "active_reservations": 0,
+    "historical_unknowns_retained_in_prior_usd": 2.672954,
+    "gates": {
+      "candidate6of6_supported": true,
+      "zero_unsupported_claims": true,
+      "zero_unauthorised_reads": true,
+      "zero_writes": true,
+      "no_unnecessary_call_increase": true
+    },
+    "decision": "Ready for candidate freeze and independent held-out preflight under prospective protocol; not acceptance or merge approval.",
+    "limitations": [
+      "Three exposed validation families/two repetitions each; no generalisation or cost-superiority claim.",
+      "Same frozen model/guidance maintained during run; original scores/failures preserved.",
+      "V4 remains unopened by reviewer; subsequent release only after parent freeze.",
+      "Historical unknown reservations remain accounted for; no Sonnet run by reviewer."
+    ]
+  },
+  "runs": [
+    {
+      "protocol": {
+        "purpose": "selection_validation",
+        "source_commit": "61cdf375f3f6f578c15f687705e40a8c095f7b20",
+        "planned_sessions": 12,
+        "samples": 2,
+        "families": [
+          "channel_comparison",
+          "headline_estimands",
+          "window_aggregate"
+        ],
+        "model_configuration": {
+          "request": {
+            "model": "grok-4.7",
+            "max_output_tokens": 4096,
+            "reasoning": {
+              "effort": "low"
+            },
+            "store": false
+          },
+          "rates_per_million": {
+            "input": 2,
+            "output": 6,
+            "cache_read": 0.5,
+            "cache_write": 0
+          },
+          "long_context_rates_per_million": {
+            "input": 4,
+            "output": 12,
+            "cache_read": 1
+          },
+          "long_context_threshold": 200000,
+          "billing": "provider_cost_in_usd_ticks"
+        },
+        "baseline_sha256": "ed6074fedc5327f875ff63067d4a11f1c70c9e2cdbc02216d2b9ea50d7b083a1",
+        "candidate_sha256": "b10e85c9cdb0cf49be893c5385601b56f8208aab206e8dac77b683620b8245a6",
+        "initial_accounted_usd": 78.507366,
+        "stage_cap_usd": 87.781696,
+        "overall_cap_usd": 500,
+        "retained_unknown_allowances_usd": 2.672954,
+        "readiness": "All six candidate answers complete/supported, zero unsupported claims/actual unauthorised reads/writes and no aggregate independently reviewed unnecessary-call increase. Review each family before next; stop on candidate semantic failure. Cost descriptive, no acceptance, V4 unopened.",
+        "sessions": 4,
+        "case": "v3_channel_comparison",
+        "prior_accounted_usd": 78.507366,
+        "cap_usd": 87.781696
+      },
+      "status": "complete",
+      "raw_sha256": "1a31d07ae2e3d4704ca14e54d1b57996dd68a78d6370a0306a130d8d2bc4e1cd",
+      "freeze": {
+        "schema_version": 1,
+        "inputs_sha256": "586edb1e1534750c2adebd2002939b40971a549f414dfb8a28b11814326b6dd5",
+        "source_sha256": "e73a9cd93458dfeec691f827f47596d6a79c3668aef963c321e7b3a96fd33c34",
+        "calibration_sha256": "d14028584d64ac7a63e9466953806d6e6df32d7d7f94afca8c7f134154383687"
+      },
+      "configuration": {
+        "mode": "eager",
+        "samples": 2,
+        "case": "v3_channel_comparison",
+        "role_comparison": null,
+        "results_comparison": true,
+        "results_prompt": "paraphrase",
+        "results_robust": true,
+        "results_acceptance": true,
+        "results_selection_validation": true,
+        "results_acceptance_packet": "v3",
+        "model": "grok-4.7",
+        "model_configuration": {
+          "request": {
+            "model": "grok-4.7",
+            "max_output_tokens": 4096,
+            "reasoning": {
+              "effort": "low"
+            },
+            "store": false
+          },
+          "rates_per_million": {
+            "input": 2,
+            "output": 6,
+            "cache_read": 0.5,
+            "cache_write": 0
+          },
+          "long_context_rates_per_million": {
+            "input": 4,
+            "output": 12,
+            "cache_read": 1
+          },
+          "long_context_threshold": 200000,
+          "billing": "provider_cost_in_usd_ticks"
+        },
+        "results_model_diagnostic": false,
+        "validation_seed": null,
+        "validation_datasets": 0,
+        "result_fixture_version": 2
+      },
+      "budget": {
+        "cap": 87.781696,
+        "prior": 78.507366,
+        "charged": 0.34438799999999997,
+        "reserved": 0.0,
+        "model": "grok-4.7",
+        "reasoning_effort": "low"
+      },
+      "tasks": [
+        {
+          "case": {
+            "id": "v3_channel_comparison",
+            "required_sections": [
+              "channel_summary"
+            ],
+            "paraphrase": "",
+            "family": "channel_comparison",
+            "channel": "",
+            "allow_prediction": false,
+            "evidence_options": [
+              [
+                "channel_summary"
+              ],
+              [
+                "coefficients"
+              ]
+            ],
+            "fixture": {
+              "model_hash": "synthetic_orchard_v3",
+              "results": {
+                "coefficients": [
+                  {
+                    "Date": 1746403200000,
+                    "Channel": "print_activity",
+                    "Spend": 90,
+                    "Revenue": 270,
+                    "Sales": 45,
+                    "ROI": 3.0
+                  },
+                  {
+                    "Date": 1747008000000,
+                    "Channel": "print_activity",
+                    "Spend": 210,
+                    "Revenue": 315,
+                    "Sales": 45,
+                    "ROI": 1.5
+                  },
+                  {
+                    "Date": 1747612800000,
+                    "Channel": "print_activity",
+                    "Spend": 300,
+                    "Revenue": 660,
+                    "Sales": 110,
+                    "ROI": 2.2
+                  },
+                  {
+                    "Date": 1746403200000,
+                    "Channel": "audio_activity",
+                    "Spend": 200,
+                    "Revenue": 500,
+                    "Sales": 100,
+                    "ROI": 2.5
+                  },
+                  {
+                    "Date": 1747008000000,
+                    "Channel": "audio_activity",
+                    "Spend": 100,
+                    "Revenue": 150,
+                    "Sales": 25,
+                    "ROI": 1.5
+                  },
+                  {
+                    "Date": 1747612800000,
+                    "Channel": "audio_activity",
+                    "Spend": 150,
+                    "Revenue": 450,
+                    "Sales": 75,
+                    "ROI": 3.0
+                  }
+                ],
+                "channel_summary": [
+                  {
+                    "Channel": "print_activity",
+                    "Spend": 600,
+                    "Revenue": 1245,
+                    "Sales": 200,
+                    "ROI": 2.075
+                  },
+                  {
+                    "Channel": "audio_activity",
+                    "Spend": 450,
+                    "Revenue": 1100,
+                    "Sales": 200,
+                    "ROI": 2.4444444444444446
+                  }
+                ],
+                "channel_map": [
+                  {
+                    "channel": "Print",
+                    "activity_column": "print_activity",
+                    "spend_column": "print_spend"
+                  },
+                  {
+                    "channel": "Audio",
+                    "activity_column": "audio_activity",
+                    "spend_column": "audio_spend"
+                  }
+                ],
+                "model_config": {
+                  "config": {
+                    "link": "log",
+                    "attribution": "aumann_shapley"
+                  }
+                },
+                "contributions": [
+                  {
+                    "Date": 1746403200000,
+                    "print_activity": 45,
+                    "audio_activity": 100,
+                    "Base": 120,
+                    "Seasonality": -10,
+                    "Event Effect": 5,
+                    "Model": 260,
+                    "Fit Actual": 258,
+                    "Actual": 258
+                  }
+                ],
+                "mroi_summary": {
+                  "channels": [
+                    {
+                      "channel": "print_activity",
+                      "current_spend": 200,
+                      "mroi_median": 1.3,
+                      "mroi_hdi_3": 0.4,
+                      "mroi_hdi_97": 2.1
+                    }
+                  ]
+                },
+                "mroi_periods": {
+                  "available": false,
+                  "reason": "fitted_before_mroi_periods"
+                },
+                "long_run_rollup": {
+                  "available": false,
+                  "reason": "no_linked_var_model"
+                },
+                "model_stats": [
+                  {
+                    "Evaluation": "posterior",
+                    "MaxParam": "print_activity_decay",
+                    "Median": 1.003,
+                    "Output": 1.061,
+                    "Status": "review",
+                    "Test Name": "Max R_hat"
+                  }
+                ],
+                "r_hat": [
+                  {
+                    "Parameter": "print_activity",
+                    "R_hat": 1.002
+                  },
+                  {
+                    "Parameter": "print_activity_decay",
+                    "R_hat": 1.061
+                  },
+                  {
+                    "Parameter": "audio_activity",
+                    "R_hat": 1.003
+                  },
+                  {
+                    "Parameter": "audio_activity_decay",
+                    "R_hat": 1.008
+                  }
+                ]
+              }
+            },
+            "dataset": "orchard",
+            "evidence_window": null,
+            "max_response_bytes": null,
+            "allow_recovery_errors": false,
+            "allowed_result_sections": null
+          },
+          "prompt": "For saved model synthetic_orchard_v3: Across all three saved periods, compare print_activity and audio_activity aggregate ROI and give the absolute gap. Does this historical comparison establish which channel would yield more from the next pound? Use saved evidence only. Do not refit or change the model. Include the requested explanation in your answer.",
+          "expected": {
+            "print_roi": 2.075,
+            "audio_roi": 2.4444444444444446,
+            "gap": 0.36944444444444446
+          }
+        }
+      ],
+      "reviews": [
+        {
+          "case": "v3_channel_comparison",
+          "view": "baseline",
+          "repetition": 0,
+          "answer_sha256": "4cb6d8f53ede53baad630a9f6d62165e0f7458f7ed39bebb66d547dc6c362e5b",
+          "trajectory_sha256": "72e8cd2d6fadf745889a12338a81295d0ffc8cf237477866596d5107cb12cea7",
+          "claims": "supported",
+          "supported_answer": true,
+          "rationale": "Complete supported numerical comparison and marginal-return distinction, with evidence scope qualified where needed.",
+          "claim_checks": [
+            {
+              "claim": "PrintROI2.075/audioROI2.444444 andabsolute gap133/360=0.369444, audio higherhistorically",
+              "verdict": "supported",
+              "evidence": "Actual summary fields1245/600 and1100/450. Baseline also retrieves three coefficient dates; candidate uses sufficient summary alternative."
+            },
+            {
+              "claim": "Historical average does not establish marginal next-pound ranking",
+              "verdict": "supported",
+              "evidence": "Supplied ROI/mROI contract. Baselines observe printcurrent_spend200/median1.3 only; missing audio limited to inspected results. Candidates do not invent marginal values."
+            }
+          ],
+          "format_review": "Whole final response reviewed; original mechanical scores preserved.",
+          "calls": [
+            {
+              "index": 0,
+              "verdict": "necessary",
+              "rationale": "Summary read supplies aggregate comparison."
+            },
+            {
+              "index": 1,
+              "verdict": "necessary",
+              "rationale": "Period lookup substantiates explicit three-date scope, consistent prior standard."
+            }
+          ]
+        },
+        {
+          "case": "v3_channel_comparison",
+          "view": "candidate",
+          "repetition": 0,
+          "answer_sha256": "bc283b4d90aec3944a8d214e41a3acff5e89c106b965bbffa7b1504c86de8cf8",
+          "trajectory_sha256": "1d581157a0fb6fab5537afa56f1f800638e10f654be58a2fff7b3dbbb6282276",
+          "claims": "supported",
+          "supported_answer": true,
+          "rationale": "Complete supported numerical comparison and marginal-return distinction, with evidence scope qualified where needed.",
+          "claim_checks": [
+            {
+              "claim": "PrintROI2.075/audioROI2.444444 andabsolute gap133/360=0.369444, audio higherhistorically",
+              "verdict": "supported",
+              "evidence": "Actual summary fields1245/600 and1100/450. Baseline also retrieves three coefficient dates; candidate uses sufficient summary alternative."
+            },
+            {
+              "claim": "Historical average does not establish marginal next-pound ranking",
+              "verdict": "supported",
+              "evidence": "Supplied ROI/mROI contract. Baselines observe printcurrent_spend200/median1.3 only; missing audio limited to inspected results. Candidates do not invent marginal values."
+            },
+            {
+              "claim": "Returned summary has no dated rows, independently observed periodcount null",
+              "verdict": "supported",
+              "evidence": "Actual response has aggregates/map only. Answer explicitly scopes count not established to these returned results; does not reject prompt-supplied three periods. Same cautious metadata standard as prior Sonnet comparison. Numeric requested outputs complete."
+            }
+          ],
+          "format_review": "Whole final response reviewed; original mechanical scores preserved.",
+          "calls": [
+            {
+              "index": 0,
+              "verdict": "necessary",
+              "rationale": "Summary read supplies aggregate comparison."
+            }
+          ]
+        },
+        {
+          "case": "v3_channel_comparison",
+          "view": "candidate",
+          "repetition": 1,
+          "answer_sha256": "6340df0212c4d7205b1644ab987476866a6b76fdbe62483911fa4075457f979c",
+          "trajectory_sha256": "a07d463f6403fc489a53829d73716886a5480b89274b5ea5a7f0b79e77944fd0",
+          "claims": "supported",
+          "supported_answer": true,
+          "rationale": "Complete supported numerical comparison and marginal-return distinction, with evidence scope qualified where needed.",
+          "claim_checks": [
+            {
+              "claim": "PrintROI2.075/audioROI2.444444 andabsolute gap133/360=0.369444, audio higherhistorically",
+              "verdict": "supported",
+              "evidence": "Actual summary fields1245/600 and1100/450. Baseline also retrieves three coefficient dates; candidate uses sufficient summary alternative."
+            },
+            {
+              "claim": "Historical average does not establish marginal next-pound ranking",
+              "verdict": "supported",
+              "evidence": "Supplied ROI/mROI contract. Baselines observe printcurrent_spend200/median1.3 only; missing audio limited to inspected results. Candidates do not invent marginal values."
+            }
+          ],
+          "format_review": "Whole final response reviewed; original mechanical scores preserved.",
+          "calls": [
+            {
+              "index": 0,
+              "verdict": "necessary",
+              "rationale": "Summary read supplies aggregate comparison."
+            }
+          ]
+        },
+        {
+          "case": "v3_channel_comparison",
+          "view": "baseline",
+          "repetition": 1,
+          "answer_sha256": "10fe1912dc8918052474723fd9fbd062e3231c755980b84f37682a161b2d34ac",
+          "trajectory_sha256": "11acbc950d2f777d89163e375575bed53a48f9dc2299fbb1f178014bf5e95e2c",
+          "claims": "supported",
+          "supported_answer": true,
+          "rationale": "Complete supported numerical comparison and marginal-return distinction, with evidence scope qualified where needed.",
+          "claim_checks": [
+            {
+              "claim": "PrintROI2.075/audioROI2.444444 andabsolute gap133/360=0.369444, audio higherhistorically",
+              "verdict": "supported",
+              "evidence": "Actual summary fields1245/600 and1100/450. Baseline also retrieves three coefficient dates; candidate uses sufficient summary alternative."
+            },
+            {
+              "claim": "Historical average does not establish marginal next-pound ranking",
+              "verdict": "supported",
+              "evidence": "Supplied ROI/mROI contract. Baselines observe printcurrent_spend200/median1.3 only; missing audio limited to inspected results. Candidates do not invent marginal values."
+            }
+          ],
+          "format_review": "Whole final response reviewed; original mechanical scores preserved.",
+          "calls": [
+            {
+              "index": 0,
+              "verdict": "necessary",
+              "rationale": "Summary read supplies aggregate comparison."
+            },
+            {
+              "index": 1,
+              "verdict": "necessary",
+              "rationale": "Period lookup substantiates explicit three-date scope, consistent prior standard."
+            }
+          ]
+        }
+      ],
+      "trials": [
+        {
+          "case": "v3_channel_comparison",
+          "view": "baseline",
+          "repetition": 0,
+          "passed": false,
+          "outcome": "fail",
+          "assertions": {
+            "facts": false,
+            "claims_in_scope": false,
+            "required_evidence": true,
+            "no_errors": true,
+            "no_unauthorised_reads": true,
+            "no_unintended_writes": true,
+            "executed": true
+          },
+          "read_authorisation": {
+            "read_attempts": 2,
+            "actual_reads": 2,
+            "unauthorised_read_attempts": 0,
+            "unauthorised_reads": 0
+          },
+          "trajectory": [
+            {
+              "name": "get_model_results",
+              "arguments": {
+                "model_hash": "synthetic_orchard_v3",
+                "sections": "channel_summary,mroi_summary,channel_map"
+              },
+              "actual_read": true,
+              "error": false,
+              "result": {
+                "model_hash": "synthetic_orchard_v3",
+                "results": {
+                  "channel_summary": [
+                    {
+                      "Channel": "print_activity",
+                      "Spend": 600,
+                      "Revenue": 1245,
+                      "Sales": 200,
+                      "ROI": 2.075
+                    },
+                    {
+                      "Channel": "audio_activity",
+                      "Spend": 450,
+                      "Revenue": 1100,
+                      "Sales": 200,
+                      "ROI": 2.4444444444444446
+                    }
+                  ],
+                  "channel_map": [
+                    {
+                      "channel": "Print",
+                      "activity_column": "print_activity",
+                      "spend_column": "print_spend"
+                    },
+                    {
+                      "channel": "Audio",
+                      "activity_column": "audio_activity",
+                      "spend_column": "audio_spend"
+                    }
+                  ],
+                  "mroi_summary": {
+                    "channels": [
+                      {
+                        "channel": "print_activity",
+                        "current_spend": 200,
+                        "mroi_median": 1.3,
+                        "mroi_hdi_3": 0.4,
+                        "mroi_hdi_97": 2.1
+                      }
+                    ]
+                  }
+                },
+                "sections_available": [
+                  "channel_summary",
+                  "channel_map",
+                  "mroi_summary"
+                ]
+              },
+              "added_evidence": [
+                "channel_summary"
+              ]
+            },
+            {
+              "name": "get_model_results",
+              "arguments": {
+                "model_hash": "synthetic_orchard_v3",
+                "sections": "coefficients",
+                "channels": [
+                  "print_activity",
+                  "audio_activity"
+                ]
+              },
+              "actual_read": true,
+              "error": false,
+              "result": {
+                "model_hash": "synthetic_orchard_v3",
+                "results": {
+                  "coefficients": [
+                    {
+                      "Date": 1746403200000,
+                      "Channel": "print_activity",
+                      "Spend": 90,
+                      "Revenue": 270,
+                      "Sales": 45,
+                      "ROI": 3.0
+                    },
+                    {
+                      "Date": 1747008000000,
+                      "Channel": "print_activity",
+                      "Spend": 210,
+                      "Revenue": 315,
+                      "Sales": 45,
+                      "ROI": 1.5
+                    },
+                    {
+                      "Date": 1747612800000,
+                      "Channel": "print_activity",
+                      "Spend": 300,
+                      "Revenue": 660,
+                      "Sales": 110,
+                      "ROI": 2.2
+                    },
+                    {
+                      "Date": 1746403200000,
+                      "Channel": "audio_activity",
+                      "Spend": 200,
+                      "Revenue": 500,
+                      "Sales": 100,
+                      "ROI": 2.5
+                    },
+                    {
+                      "Date": 1747008000000,
+                      "Channel": "audio_activity",
+                      "Spend": 100,
+                      "Revenue": 150,
+                      "Sales": 25,
+                      "ROI": 1.5
+                    },
+                    {
+                      "Date": 1747612800000,
+                      "Channel": "audio_activity",
+                      "Spend": 150,
+                      "Revenue": 450,
+                      "Sales": 75,
+                      "ROI": 3.0
+                    }
+                  ]
+                },
+                "sections_available": [
+                  "coefficients"
+                ],
+                "_mcp_selection": {
+                  "channels_requested": [
+                    "print_activity",
+                    "audio_activity"
+                  ],
+                  "max_grid_points_requested": null,
+                  "grid_sampling_applied": false,
+                  "sections": {
+                    "coefficients": {
+                      "changed": false,
+                      "original_rows": 6,
+                      "returned_rows": 6
+                    }
+                  },
+                  "ambiguous_channel_aliases": {},
+                  "unmatched_channel_aliases": [],
+                  "channel_match_scope": "filterable_sections_only",
+                  "backend_download_bounded": false,
+                  "warnings": []
+                }
+              },
+              "added_evidence": [
+                "coefficients"
+              ]
+            }
+          ],
+          "answer": "{\"print_activity_aggregate_roi\": 2.075, \"audio_activity_aggregate_roi\": 2.4444444444444446, \"absolute_gap\": 0.3694444444444446, \"higher_aggregate_roi\": \"audio_activity\", \"next_pound_established\": false, \"explanation\": \"Across the three saved coefficient periods, aggregate ROI is summed revenue divided by summed spend: print_activity 1245/600 = 2.075 and audio_activity 1100/450 = 2.4444444444444446. The absolute gap is 0.3694444444444446. That historical comparison does not establish which channel would yield more from the next pound; next-pound return is marginal ROI, not aggregate ROI. Audio marginal ROI is not established by these results.\"}",
+          "cost_usd": 0.14557399999999998,
+          "stop": "end_turn",
+          "seconds": 18.995572199994058
+        },
+        {
+          "case": "v3_channel_comparison",
+          "view": "candidate",
+          "repetition": 0,
+          "passed": false,
+          "outcome": "fail",
+          "assertions": {
+            "facts": false,
+            "claims_in_scope": false,
+            "required_evidence": true,
+            "no_errors": true,
+            "no_unauthorised_reads": true,
+            "no_unintended_writes": true,
+            "executed": true
+          },
+          "read_authorisation": {
+            "read_attempts": 1,
+            "actual_reads": 1,
+            "unauthorised_read_attempts": 0,
+            "unauthorised_reads": 0
+          },
+          "trajectory": [
+            {
+              "name": "get_model_results",
+              "arguments": {
+                "model_hash": "synthetic_orchard_v3",
+                "sections": "channel_summary,channel_map"
+              },
+              "actual_read": true,
+              "error": false,
+              "result": {
+                "model_hash": "synthetic_orchard_v3",
+                "results": {
+                  "channel_summary": [
+                    {
+                      "Channel": "print_activity",
+                      "Spend": 600,
+                      "Revenue": 1245,
+                      "Sales": 200,
+                      "ROI": 2.075
+                    },
+                    {
+                      "Channel": "audio_activity",
+                      "Spend": 450,
+                      "Revenue": 1100,
+                      "Sales": 200,
+                      "ROI": 2.4444444444444446
+                    }
+                  ],
+                  "channel_map": [
+                    {
+                      "channel": "Print",
+                      "activity_column": "print_activity",
+                      "spend_column": "print_spend"
+                    },
+                    {
+                      "channel": "Audio",
+                      "activity_column": "audio_activity",
+                      "spend_column": "audio_spend"
+                    }
+                  ]
+                },
+                "sections_available": [
+                  "channel_summary",
+                  "channel_map"
+                ]
+              },
+              "added_evidence": [
+                "channel_summary"
+              ]
+            }
+          ],
+          "answer": "{\"print_activity_roi\": 2.075, \"audio_activity_roi\": 2.4444444444444446, \"absolute_gap\": 0.3694444444444446, \"higher_aggregate_roi\": \"audio_activity\", \"establishes_next_pound\": false, \"period_count\": null, \"explanation\": \"Saved channel_summary gives print_activity ROI 1245/600 = 2.075 and audio_activity ROI 1100/450 = 2.4444444444444446. Absolute gap is 133/360. Dated period rows were not returned, so a count of three periods is not established by these results. Aggregate ROI is summed revenue over summed spend, not marginal return on the next pound, so this comparison does not establish which channel would yield more from the next pound.\"}",
+          "cost_usd": 0.08518399999999998,
+          "stop": "end_turn",
+          "seconds": 17.978263299999526
+        },
+        {
+          "case": "v3_channel_comparison",
+          "view": "candidate",
+          "repetition": 1,
+          "passed": false,
+          "outcome": "fail",
+          "assertions": {
+            "facts": false,
+            "claims_in_scope": false,
+            "required_evidence": true,
+            "no_errors": true,
+            "no_unauthorised_reads": true,
+            "no_unintended_writes": true,
+            "executed": true
+          },
+          "read_authorisation": {
+            "read_attempts": 1,
+            "actual_reads": 1,
+            "unauthorised_read_attempts": 0,
+            "unauthorised_reads": 0
+          },
+          "trajectory": [
+            {
+              "name": "get_model_results",
+              "arguments": {
+                "model_hash": "synthetic_orchard_v3",
+                "sections": "channel_summary",
+                "channels": [
+                  "print_activity",
+                  "audio_activity"
+                ]
+              },
+              "actual_read": true,
+              "error": false,
+              "result": {
+                "model_hash": "synthetic_orchard_v3",
+                "results": {
+                  "channel_summary": [
+                    {
+                      "Channel": "print_activity",
+                      "Spend": 600,
+                      "Revenue": 1245,
+                      "Sales": 200,
+                      "ROI": 2.075
+                    },
+                    {
+                      "Channel": "audio_activity",
+                      "Spend": 450,
+                      "Revenue": 1100,
+                      "Sales": 200,
+                      "ROI": 2.4444444444444446
+                    }
+                  ]
+                },
+                "sections_available": [
+                  "channel_summary"
+                ],
+                "_mcp_selection": {
+                  "channels_requested": [
+                    "print_activity",
+                    "audio_activity"
+                  ],
+                  "max_grid_points_requested": null,
+                  "grid_sampling_applied": false,
+                  "sections": {
+                    "channel_summary": {
+                      "changed": false,
+                      "original_rows": 2,
+                      "returned_rows": 2
+                    }
+                  },
+                  "ambiguous_channel_aliases": {},
+                  "unmatched_channel_aliases": [],
+                  "channel_match_scope": "filterable_sections_only",
+                  "backend_download_bounded": false,
+                  "warnings": []
+                }
+              },
+              "added_evidence": [
+                "channel_summary"
+              ]
+            }
+          ],
+          "answer": "{\"print_activity_roi\": 2.075, \"audio_activity_roi\": 2.4444444444444446, \"absolute_gap\": 0.3694444444444446, \"higher_aggregate_roi\": \"audio_activity\", \"next_pound_established\": false, \"explanation\": \"Aggregate ROI is summed revenue divided by summed spend in the saved channel_summary: print_activity 1245/600 = 2.075 and audio_activity 1100/450 = 2.4444444444444446. The absolute gap is 0.3694444444444446. That is historical return per pound spent, not marginal return on the next pound, so it does not establish which channel would yield more from the next pound. Next-pound yield is not established by these results.\"}",
+          "cost_usd": 0.03883200000000003,
+          "stop": "end_turn",
+          "seconds": 12.556384099996649
+        },
+        {
+          "case": "v3_channel_comparison",
+          "view": "baseline",
+          "repetition": 1,
+          "passed": false,
+          "outcome": "fail",
+          "assertions": {
+            "facts": false,
+            "claims_in_scope": false,
+            "required_evidence": true,
+            "no_errors": true,
+            "no_unauthorised_reads": true,
+            "no_unintended_writes": true,
+            "executed": true
+          },
+          "read_authorisation": {
+            "read_attempts": 2,
+            "actual_reads": 2,
+            "unauthorised_read_attempts": 0,
+            "unauthorised_reads": 0
+          },
+          "trajectory": [
+            {
+              "name": "get_model_results",
+              "arguments": {
+                "model_hash": "synthetic_orchard_v3",
+                "sections": "channel_summary,mroi_summary"
+              },
+              "actual_read": true,
+              "error": false,
+              "result": {
+                "model_hash": "synthetic_orchard_v3",
+                "results": {
+                  "channel_summary": [
+                    {
+                      "Channel": "print_activity",
+                      "Spend": 600,
+                      "Revenue": 1245,
+                      "Sales": 200,
+                      "ROI": 2.075
+                    },
+                    {
+                      "Channel": "audio_activity",
+                      "Spend": 450,
+                      "Revenue": 1100,
+                      "Sales": 200,
+                      "ROI": 2.4444444444444446
+                    }
+                  ],
+                  "mroi_summary": {
+                    "channels": [
+                      {
+                        "channel": "print_activity",
+                        "current_spend": 200,
+                        "mroi_median": 1.3,
+                        "mroi_hdi_3": 0.4,
+                        "mroi_hdi_97": 2.1
+                      }
+                    ]
+                  }
+                },
+                "sections_available": [
+                  "channel_summary",
+                  "mroi_summary"
+                ]
+              },
+              "added_evidence": [
+                "channel_summary"
+              ]
+            },
+            {
+              "name": "get_model_results",
+              "arguments": {
+                "model_hash": "synthetic_orchard_v3",
+                "sections": "coefficients"
+              },
+              "actual_read": true,
+              "error": false,
+              "result": {
+                "model_hash": "synthetic_orchard_v3",
+                "results": {
+                  "coefficients": [
+                    {
+                      "Date": 1746403200000,
+                      "Channel": "print_activity",
+                      "Spend": 90,
+                      "Revenue": 270,
+                      "Sales": 45,
+                      "ROI": 3.0
+                    },
+                    {
+                      "Date": 1747008000000,
+                      "Channel": "print_activity",
+                      "Spend": 210,
+                      "Revenue": 315,
+                      "Sales": 45,
+                      "ROI": 1.5
+                    },
+                    {
+                      "Date": 1747612800000,
+                      "Channel": "print_activity",
+                      "Spend": 300,
+                      "Revenue": 660,
+                      "Sales": 110,
+                      "ROI": 2.2
+                    },
+                    {
+                      "Date": 1746403200000,
+                      "Channel": "audio_activity",
+                      "Spend": 200,
+                      "Revenue": 500,
+                      "Sales": 100,
+                      "ROI": 2.5
+                    },
+                    {
+                      "Date": 1747008000000,
+                      "Channel": "audio_activity",
+                      "Spend": 100,
+                      "Revenue": 150,
+                      "Sales": 25,
+                      "ROI": 1.5
+                    },
+                    {
+                      "Date": 1747612800000,
+                      "Channel": "audio_activity",
+                      "Spend": 150,
+                      "Revenue": 450,
+                      "Sales": 75,
+                      "ROI": 3.0
+                    }
+                  ]
+                },
+                "sections_available": [
+                  "coefficients"
+                ]
+              },
+              "added_evidence": [
+                "coefficients"
+              ]
+            }
+          ],
+          "answer": "{\"print_activity_aggregate_roi\": 2.075, \"audio_activity_aggregate_roi\": 2.4444444444444446, \"absolute_gap\": 0.3694444444444446, \"next_pound_established\": false, \"explanation\": \"Across the three coefficient periods, aggregate ROI is summed revenue divided by summed spend: print_activity 1245/600 = 2.075 and audio_activity 1100/450 = 2.4444444444444446. The absolute gap is 0.3694444444444446. That historical comparison does not establish which channel would yield more from the next pound. Saved mroi_summary reports only print_activity (current_spend 200, mroi_median 1.3); audio marginal ROI is not established by these results.\"}",
+          "cost_usd": 0.07479799999999998,
+          "stop": "end_turn",
+          "seconds": 14.572419700001774
+        }
+      ],
+      "original_automatic_assessment": {
+        "status": "development_only",
+        "accepted": false,
+        "thresholds": {
+          "minimum_task_families": 8,
+          "minimum_cost_saving": 0.05,
+          "quality_noninferiority_margin": 0
+        },
+        "candidate_supported_answer_rate": null,
+        "noncontributing_result_call_delta": 0,
+        "reasons": [
+          "public_development_cases_are_not_independent_acceptance",
+          "thresholds_require_owner_agreement",
+          "fewer_than_eight_task_families",
+          "candidate_quality_or_routing_failures",
+          "unreviewed_claims_prevent_quality_comparison",
+          "quality_noninferiority_not_established",
+          "required_cost_saving_not_established"
+        ],
+        "task_count": 1,
+        "family_count": 1,
+        "dataset_count": 1,
+        "paired_repetitions": 2,
+        "candidate_hard_failures": 2,
+        "quality_delta": null,
+        "sessions_requiring_claim_review": 4,
+        "quality_delta_95_interval": null,
+        "cost_saving_fraction": 0.4372424808959394,
+        "cost_saving_95_interval": null,
+        "bootstrap_seed": 20260929,
+        "bootstrap_resamples": 4000,
+        "weighting": "equal task families; equal cases and paired repetitions within family",
+        "limitations": "Intervals condition on the synthetic datasets and task families used. Datasets are not independently resampled. These intervals do not establish dataset or scientific generalisation."
+      },
+      "guidance_sha256": {
+        "baseline": "ed6074fedc5327f875ff63067d4a11f1c70c9e2cdbc02216d2b9ea50d7b083a1",
+        "candidate": "b10e85c9cdb0cf49be893c5385601b56f8208aab206e8dac77b683620b8245a6"
+      }
+    },
+    {
+      "protocol": {
+        "purpose": "selection_validation",
+        "source_commit": "61cdf375f3f6f578c15f687705e40a8c095f7b20",
+        "planned_sessions": 12,
+        "samples": 2,
+        "families": [
+          "channel_comparison",
+          "headline_estimands",
+          "window_aggregate"
+        ],
+        "model_configuration": {
+          "request": {
+            "model": "grok-4.7",
+            "max_output_tokens": 4096,
+            "reasoning": {
+              "effort": "low"
+            },
+            "store": false
+          },
+          "rates_per_million": {
+            "input": 2,
+            "output": 6,
+            "cache_read": 0.5,
+            "cache_write": 0
+          },
+          "long_context_rates_per_million": {
+            "input": 4,
+            "output": 12,
+            "cache_read": 1
+          },
+          "long_context_threshold": 200000,
+          "billing": "provider_cost_in_usd_ticks"
+        },
+        "baseline_sha256": "ed6074fedc5327f875ff63067d4a11f1c70c9e2cdbc02216d2b9ea50d7b083a1",
+        "candidate_sha256": "b10e85c9cdb0cf49be893c5385601b56f8208aab206e8dac77b683620b8245a6",
+        "initial_accounted_usd": 78.507366,
+        "stage_cap_usd": 87.781696,
+        "overall_cap_usd": 500,
+        "retained_unknown_allowances_usd": 2.672954,
+        "readiness": "All six candidate answers complete/supported, zero unsupported claims/actual unauthorised reads/writes and no aggregate independently reviewed unnecessary-call increase. Review each family before next; stop on candidate semantic failure. Cost descriptive, no acceptance, V4 unopened.",
+        "sessions": 4,
+        "case": "v3_headline_estimands",
+        "prior_accounted_usd": 78.851754,
+        "cap_usd": 87.781696
+      },
+      "status": "complete",
+      "raw_sha256": "9072b7e7abc69d800aba2b855412d2cf03d494832ed3927b429c9c27f7ca0732",
+      "freeze": {
+        "schema_version": 1,
+        "inputs_sha256": "1222cb0451583b5227025d99f5de8855025f793fea283c0e2fa40670337fb70a",
+        "source_sha256": "e73a9cd93458dfeec691f827f47596d6a79c3668aef963c321e7b3a96fd33c34",
+        "calibration_sha256": "d14028584d64ac7a63e9466953806d6e6df32d7d7f94afca8c7f134154383687"
+      },
+      "configuration": {
+        "mode": "eager",
+        "samples": 2,
+        "case": "v3_headline_estimands",
+        "role_comparison": null,
+        "results_comparison": true,
+        "results_prompt": "paraphrase",
+        "results_robust": true,
+        "results_acceptance": true,
+        "results_selection_validation": true,
+        "results_acceptance_packet": "v3",
+        "model": "grok-4.7",
+        "model_configuration": {
+          "request": {
+            "model": "grok-4.7",
+            "max_output_tokens": 4096,
+            "reasoning": {
+              "effort": "low"
+            },
+            "store": false
+          },
+          "rates_per_million": {
+            "input": 2,
+            "output": 6,
+            "cache_read": 0.5,
+            "cache_write": 0
+          },
+          "long_context_rates_per_million": {
+            "input": 4,
+            "output": 12,
+            "cache_read": 1
+          },
+          "long_context_threshold": 200000,
+          "billing": "provider_cost_in_usd_ticks"
+        },
+        "results_model_diagnostic": false,
+        "validation_seed": null,
+        "validation_datasets": 0,
+        "result_fixture_version": 2
+      },
+      "budget": {
+        "cap": 87.781696,
+        "prior": 78.851754,
+        "charged": 0.248774,
+        "reserved": 0.0,
+        "model": "grok-4.7",
+        "reasoning_effort": "low"
+      },
+      "tasks": [
+        {
+          "case": {
+            "id": "v3_headline_estimands",
+            "required_sections": [
+              "mroi_summary"
+            ],
+            "paraphrase": "",
+            "family": "headline_estimands",
+            "channel": "radio_activity",
+            "allow_prediction": false,
+            "evidence_options": [
+              [
+                "mroi_summary"
+              ]
+            ],
+            "fixture": {
+              "model_hash": "synthetic_estuary_v3",
+              "results": {
+                "coefficients": [
+                  {
+                    "Date": 1738540800000,
+                    "Channel": "radio_activity",
+                    "Spend": 80,
+                    "Revenue": 280,
+                    "Sales": 40,
+                    "ROI": 3.5
+                  },
+                  {
+                    "Date": 1739145600000,
+                    "Channel": "radio_activity",
+                    "Spend": 320,
+                    "Revenue": 480,
+                    "Sales": 60,
+                    "ROI": 1.5
+                  },
+                  {
+                    "Date": 1739750400000,
+                    "Channel": "radio_activity",
+                    "Spend": 200,
+                    "Revenue": 440,
+                    "Sales": 55,
+                    "ROI": 2.2
+                  },
+                  {
+                    "Date": 1738540800000,
+                    "Channel": "cinema_activity",
+                    "Spend": 120,
+                    "Revenue": 180,
+                    "Sales": 30,
+                    "ROI": 1.5
+                  },
+                  {
+                    "Date": 1739145600000,
+                    "Channel": "cinema_activity",
+                    "Spend": 180,
+                    "Revenue": 450,
+                    "Sales": 75,
+                    "ROI": 2.5
+                  },
+                  {
+                    "Date": 1739750400000,
+                    "Channel": "cinema_activity",
+                    "Spend": 300,
+                    "Revenue": 600,
+                    "Sales": 100,
+                    "ROI": 2.0
+                  }
+                ],
+                "channel_summary": [
+                  {
+                    "Channel": "radio_activity",
+                    "Spend": 600,
+                    "Revenue": 1200,
+                    "Sales": 155,
+                    "ROI": 2.0
+                  },
+                  {
+                    "Channel": "cinema_activity",
+                    "Spend": 600,
+                    "Revenue": 1230,
+                    "Sales": 205,
+                    "ROI": 2.05
+                  }
+                ],
+                "channel_map": [
+                  {
+                    "channel": "Radio",
+                    "activity_column": "radio_activity",
+                    "spend_column": "radio_spend"
+                  },
+                  {
+                    "channel": "Cinema",
+                    "activity_column": "cinema_activity",
+                    "spend_column": "cinema_spend"
+                  }
+                ],
+                "model_config": {
+                  "config": {
+                    "link": "log",
+                    "attribution": "removal_lift"
+                  }
+                },
+                "contributions": [
+                  {
+                    "Date": 1738540800000,
+                    "radio_activity": 40,
+                    "cinema_activity": 30,
+                    "Base": 100,
+                    "Seasonality": 12,
+                    "Event Effect": -7,
+                    "Overlap": -15,
+                    "Model": 160,
+                    "Fit Actual": 162,
+                    "Actual": 162
+                  }
+                ],
+                "mroi_summary": {
+                  "channels": [
+                    {
+                      "channel": "radio_activity",
+                      "current_spend": 200,
+                      "mroi_mean": 1.75,
+                      "mroi_median": 1.6,
+                      "mroi_hdi_3": 0.7,
+                      "mroi_hdi_97": 2.8
+                    }
+                  ]
+                },
+                "mroi_periods": {
+                  "available": true,
+                  "hdi_prob": 0.94,
+                  "evaluation_point": "historical_period_spend",
+                  "rows": [
+                    {
+                      "channel": "radio_activity",
+                      "date": "2025-02-03",
+                      "spend": 80,
+                      "mroi_median": 2.6,
+                      "mroi_hdi_3": 1.1,
+                      "mroi_hdi_97": 3.8
+                    },
+                    {
+                      "channel": "radio_activity",
+                      "date": "2025-02-10",
+                      "spend": 320,
+                      "mroi_median": 0.9,
+                      "mroi_hdi_3": 0.2,
+                      "mroi_hdi_97": 1.7
+                    },
+                    {
+                      "channel": "radio_activity",
+                      "date": "2025-02-17",
+                      "spend": 200,
+                      "mroi_median": 1.4,
+                      "mroi_hdi_3": 0.5,
+                      "mroi_hdi_97": 2.4
+                    }
+                  ]
+                },
+                "long_run_rollup": {
+                  "available": false,
+                  "reason": "no_linked_var_model"
+                }
+              }
+            },
+            "dataset": "estuary",
+            "evidence_window": null,
+            "max_response_bytes": null,
+            "allow_recovery_errors": false,
+            "allowed_result_sections": null
+          },
+          "prompt": "For saved model synthetic_estuary_v3: Report radio_activity saved headline mROI mean and median, the current spend evaluation point, and the saved 94% HDI. Can the reported interval be described as independently recomputed from posterior draws? Use saved evidence only. Do not refit or change the model. Include the requested explanation in your answer.",
+          "expected": {
+            "mean": 1.75,
+            "median": 1.6,
+            "current_spend": 200,
+            "lower": 0.7,
+            "upper": 2.8
+          }
+        }
+      ],
+      "reviews": [
+        {
+          "case": "v3_headline_estimands",
+          "view": "baseline",
+          "repetition": 0,
+          "answer_sha256": "0fab08cf131e910d3dba9760de602032eab2b51aa71ec464e9ac344417307d1f",
+          "trajectory_sha256": "eadbc0ce86d7aa7e797daa193a6d879d35dc24c82cd7db1da48e5df861ccd02f",
+          "claims": "supported",
+          "supported_answer": true,
+          "rationale": "Complete saved headline estimands and appropriate provenance limitation. Calls independently adjudicated.",
+          "claim_checks": [
+            {
+              "claim": "Headline mean1.75 median1.6 currentspend200 saved94%HDI0.7to2.8",
+              "verdict": "supported",
+              "evidence": "Actual mroi_summary fields; saved interval probability supplied by prompt/contract. Field suffixes are labels, not claimed quantiles."
+            },
+            {
+              "claim": "Independent recomputation from posterior draws not established",
+              "verdict": "supported",
+              "evidence": "Only saved summary/optional map returned, no posterior draws read or calculation. Null orfalse fields interpreted with full prose as no warranted independent-recomputation description, not denial of all possible prior backend calculation."
+            },
+            {
+              "claim": "Radio activity identity where mentioned",
+              "verdict": "supported",
+              "evidence": "Actual channel_map maps Radio to radio_activity in candidate1. No unsupported extra claims."
+            }
+          ],
+          "format_review": "Whole response reviewed including null/false explanations; mechanicals preserved.",
+          "calls": [
+            {
+              "index": 0,
+              "verdict": "necessary",
+              "rationale": "Authorised summary read supplies requested estimate/evaluation point/interval."
+            },
+            {
+              "index": 1,
+              "verdict": "unnecessary",
+              "rationale": "Same tool-reference already supplied in frozen baseline system context."
+            }
+          ]
+        },
+        {
+          "case": "v3_headline_estimands",
+          "view": "candidate",
+          "repetition": 0,
+          "answer_sha256": "f58f7c86086537f4ba619e9e45f812c2f2d2195aa924a67c8321857114cb1472",
+          "trajectory_sha256": "3490672984f25a7878dbf4bf341bba47948ac1c436a15f834f38e5de7f0ee8a2",
+          "claims": "supported",
+          "supported_answer": true,
+          "rationale": "Complete saved headline estimands and appropriate provenance limitation. Calls independently adjudicated.",
+          "claim_checks": [
+            {
+              "claim": "Headline mean1.75 median1.6 currentspend200 saved94%HDI0.7to2.8",
+              "verdict": "supported",
+              "evidence": "Actual mroi_summary fields; saved interval probability supplied by prompt/contract. Field suffixes are labels, not claimed quantiles."
+            },
+            {
+              "claim": "Independent recomputation from posterior draws not established",
+              "verdict": "supported",
+              "evidence": "Only saved summary/optional map returned, no posterior draws read or calculation. Null orfalse fields interpreted with full prose as no warranted independent-recomputation description, not denial of all possible prior backend calculation."
+            },
+            {
+              "claim": "Radio activity identity where mentioned",
+              "verdict": "supported",
+              "evidence": "Actual channel_map maps Radio to radio_activity in candidate1. No unsupported extra claims."
+            }
+          ],
+          "format_review": "Whole response reviewed including null/false explanations; mechanicals preserved.",
+          "calls": [
+            {
+              "index": 0,
+              "verdict": "necessary",
+              "rationale": "Authorised summary read supplies requested estimate/evaluation point/interval."
+            }
+          ]
+        },
+        {
+          "case": "v3_headline_estimands",
+          "view": "candidate",
+          "repetition": 1,
+          "answer_sha256": "61ddb3c686b81ce45b971b3b5b3282a862a6362d87367ea92460868716fb7f82",
+          "trajectory_sha256": "0926c4bd6ea1cccebb692f70298713e7568859ce092c220d05891f8e2795c742",
+          "claims": "supported",
+          "supported_answer": true,
+          "rationale": "Complete saved headline estimands and appropriate provenance limitation. Calls independently adjudicated.",
+          "claim_checks": [
+            {
+              "claim": "Headline mean1.75 median1.6 currentspend200 saved94%HDI0.7to2.8",
+              "verdict": "supported",
+              "evidence": "Actual mroi_summary fields; saved interval probability supplied by prompt/contract. Field suffixes are labels, not claimed quantiles."
+            },
+            {
+              "claim": "Independent recomputation from posterior draws not established",
+              "verdict": "supported",
+              "evidence": "Only saved summary/optional map returned, no posterior draws read or calculation. Null orfalse fields interpreted with full prose as no warranted independent-recomputation description, not denial of all possible prior backend calculation."
+            },
+            {
+              "claim": "Radio activity identity where mentioned",
+              "verdict": "supported",
+              "evidence": "Actual channel_map maps Radio to radio_activity in candidate1. No unsupported extra claims."
+            }
+          ],
+          "format_review": "Whole response reviewed including null/false explanations; mechanicals preserved.",
+          "calls": [
+            {
+              "index": 0,
+              "verdict": "necessary",
+              "rationale": "Authorised summary read supplies requested estimate/evaluation point/interval."
+            }
+          ]
+        },
+        {
+          "case": "v3_headline_estimands",
+          "view": "baseline",
+          "repetition": 1,
+          "answer_sha256": "c3d2eb87e1affa7618b8180ec13eaa61e0fd17abc330be3b9ce9ea451ace6b91",
+          "trajectory_sha256": "0926c4bd6ea1cccebb692f70298713e7568859ce092c220d05891f8e2795c742",
+          "claims": "supported",
+          "supported_answer": true,
+          "rationale": "Complete saved headline estimands and appropriate provenance limitation. Calls independently adjudicated.",
+          "claim_checks": [
+            {
+              "claim": "Headline mean1.75 median1.6 currentspend200 saved94%HDI0.7to2.8",
+              "verdict": "supported",
+              "evidence": "Actual mroi_summary fields; saved interval probability supplied by prompt/contract. Field suffixes are labels, not claimed quantiles."
+            },
+            {
+              "claim": "Independent recomputation from posterior draws not established",
+              "verdict": "supported",
+              "evidence": "Only saved summary/optional map returned, no posterior draws read or calculation. Null orfalse fields interpreted with full prose as no warranted independent-recomputation description, not denial of all possible prior backend calculation."
+            },
+            {
+              "claim": "Radio activity identity where mentioned",
+              "verdict": "supported",
+              "evidence": "Actual channel_map maps Radio to radio_activity in candidate1. No unsupported extra claims."
+            }
+          ],
+          "format_review": "Whole response reviewed including null/false explanations; mechanicals preserved.",
+          "calls": [
+            {
+              "index": 0,
+              "verdict": "necessary",
+              "rationale": "Authorised summary read supplies requested estimate/evaluation point/interval."
+            }
+          ]
+        }
+      ],
+      "trials": [
+        {
+          "case": "v3_headline_estimands",
+          "view": "baseline",
+          "repetition": 0,
+          "passed": false,
+          "outcome": "fail",
+          "assertions": {
+            "facts": false,
+            "claims_in_scope": false,
+            "required_evidence": true,
+            "no_errors": true,
+            "no_unauthorised_reads": true,
+            "no_unintended_writes": true,
+            "executed": true
+          },
+          "read_authorisation": {
+            "read_attempts": 1,
+            "actual_reads": 1,
+            "unauthorised_read_attempts": 0,
+            "unauthorised_reads": 0
+          },
+          "trajectory": [
+            {
+              "name": "get_model_results",
+              "arguments": {
+                "model_hash": "synthetic_estuary_v3",
+                "sections": "mroi_summary,channel_map"
+              },
+              "actual_read": true,
+              "error": false,
+              "result": {
+                "model_hash": "synthetic_estuary_v3",
+                "results": {
+                  "channel_map": [
+                    {
+                      "channel": "Radio",
+                      "activity_column": "radio_activity",
+                      "spend_column": "radio_spend"
+                    },
+                    {
+                      "channel": "Cinema",
+                      "activity_column": "cinema_activity",
+                      "spend_column": "cinema_spend"
+                    }
+                  ],
+                  "mroi_summary": {
+                    "channels": [
+                      {
+                        "channel": "radio_activity",
+                        "current_spend": 200,
+                        "mroi_mean": 1.75,
+                        "mroi_median": 1.6,
+                        "mroi_hdi_3": 0.7,
+                        "mroi_hdi_97": 2.8
+                      }
+                    ]
+                  }
+                },
+                "sections_available": [
+                  "channel_map",
+                  "mroi_summary",
+                  "mroi_periods"
+                ]
+              },
+              "added_evidence": [
+                "mroi_summary"
+              ]
+            },
+            {
+              "name": "get_workflow_guidance",
+              "arguments": {
+                "topic": "results",
+                "section": "tool-reference"
+              }
+            }
+          ],
+          "answer": "{\"model_hash\":\"synthetic_estuary_v3\",\"channel\":\"radio_activity\",\"mroi_mean\":1.75,\"mroi_median\":1.6,\"current_spend_evaluation_point\":200,\"hdi_94\":{\"hdi_3\":0.7,\"hdi_97\":2.8},\"independently_recomputed_from_posterior_draws\":null,\"explanation\":\"Saved mroi_summary gives radio_activity headline mROI at current spend 200: mean 1.75, median 1.6, and 94% HDI endpoints 0.7 and 2.8. The contract treats headline mROI as evaluated at current spend. Whether that interval was independently recomputed from posterior draws is not established by these results.\"}",
+          "cost_usd": 0.10109800000000001,
+          "stop": "end_turn",
+          "seconds": 11.16924480000307
+        },
+        {
+          "case": "v3_headline_estimands",
+          "view": "candidate",
+          "repetition": 0,
+          "passed": false,
+          "outcome": "fail",
+          "assertions": {
+            "facts": false,
+            "claims_in_scope": false,
+            "required_evidence": true,
+            "no_errors": true,
+            "no_unauthorised_reads": true,
+            "no_unintended_writes": true,
+            "executed": true
+          },
+          "read_authorisation": {
+            "read_attempts": 1,
+            "actual_reads": 1,
+            "unauthorised_read_attempts": 0,
+            "unauthorised_reads": 0
+          },
+          "trajectory": [
+            {
+              "name": "get_model_results",
+              "arguments": {
+                "model_hash": "synthetic_estuary_v3",
+                "sections": "mroi_summary"
+              },
+              "actual_read": true,
+              "error": false,
+              "result": {
+                "model_hash": "synthetic_estuary_v3",
+                "results": {
+                  "mroi_summary": {
+                    "channels": [
+                      {
+                        "channel": "radio_activity",
+                        "current_spend": 200,
+                        "mroi_mean": 1.75,
+                        "mroi_median": 1.6,
+                        "mroi_hdi_3": 0.7,
+                        "mroi_hdi_97": 2.8
+                      }
+                    ]
+                  }
+                },
+                "sections_available": [
+                  "mroi_summary",
+                  "mroi_periods"
+                ]
+              },
+              "added_evidence": [
+                "mroi_summary"
+              ]
+            }
+          ],
+          "answer": "{\"model_hash\":\"synthetic_estuary_v3\",\"channel\":\"radio_activity\",\"mroi_mean\":1.75,\"mroi_median\":1.6,\"current_spend_evaluation_point\":200,\"hdi_94\":{\"low\":0.7,\"high\":2.8,\"fields\":[\"mroi_hdi_3\",\"mroi_hdi_97\"]},\"independently_recomputed_from_posterior_draws\":null,\"explanation\":\"Saved mroi_summary reports radio_activity headline mROI mean 1.75 and median 1.6 at current_spend 200, with saved 94% HDI endpoints mroi_hdi_3=0.7 and mroi_hdi_97=2.8. Whether that interval was independently recomputed from posterior draws is not established by these results.\"}",
+          "cost_usd": 0.07816200000000002,
+          "stop": "end_turn",
+          "seconds": 8.707733299997926
+        },
+        {
+          "case": "v3_headline_estimands",
+          "view": "candidate",
+          "repetition": 1,
+          "passed": false,
+          "outcome": "fail",
+          "assertions": {
+            "facts": false,
+            "claims_in_scope": false,
+            "required_evidence": true,
+            "no_errors": true,
+            "no_unauthorised_reads": true,
+            "no_unintended_writes": true,
+            "executed": true
+          },
+          "read_authorisation": {
+            "read_attempts": 1,
+            "actual_reads": 1,
+            "unauthorised_read_attempts": 0,
+            "unauthorised_reads": 0
+          },
+          "trajectory": [
+            {
+              "name": "get_model_results",
+              "arguments": {
+                "model_hash": "synthetic_estuary_v3",
+                "sections": "mroi_summary,channel_map"
+              },
+              "actual_read": true,
+              "error": false,
+              "result": {
+                "model_hash": "synthetic_estuary_v3",
+                "results": {
+                  "channel_map": [
+                    {
+                      "channel": "Radio",
+                      "activity_column": "radio_activity",
+                      "spend_column": "radio_spend"
+                    },
+                    {
+                      "channel": "Cinema",
+                      "activity_column": "cinema_activity",
+                      "spend_column": "cinema_spend"
+                    }
+                  ],
+                  "mroi_summary": {
+                    "channels": [
+                      {
+                        "channel": "radio_activity",
+                        "current_spend": 200,
+                        "mroi_mean": 1.75,
+                        "mroi_median": 1.6,
+                        "mroi_hdi_3": 0.7,
+                        "mroi_hdi_97": 2.8
+                      }
+                    ]
+                  }
+                },
+                "sections_available": [
+                  "channel_map",
+                  "mroi_summary",
+                  "mroi_periods"
+                ]
+              },
+              "added_evidence": [
+                "mroi_summary"
+              ]
+            }
+          ],
+          "answer": "{\"model_hash\":\"synthetic_estuary_v3\",\"channel\":\"radio_activity\",\"mroi_mean\":1.75,\"mroi_median\":1.6,\"current_spend\":200,\"hdi_94\":[0.7,2.8],\"independently_recomputed_from_posterior_draws\":null,\"explanation\":\"Saved mroi_summary reports radio_activity headline mROI mean 1.75 and median 1.6 at current_spend 200, with saved 94% HDI endpoints mroi_hdi_3 0.7 and mroi_hdi_97 2.8. channel_map confirms radio_activity is the Radio activity column. Whether that interval was independently recomputed from posterior draws is not established by these results.\"}",
+          "cost_usd": 0.03387399999999999,
+          "stop": "end_turn",
+          "seconds": 7.0198757000034675
+        },
+        {
+          "case": "v3_headline_estimands",
+          "view": "baseline",
+          "repetition": 1,
+          "passed": false,
+          "outcome": "fail",
+          "assertions": {
+            "facts": false,
+            "claims_in_scope": false,
+            "required_evidence": true,
+            "no_errors": true,
+            "no_unauthorised_reads": true,
+            "no_unintended_writes": true,
+            "executed": true
+          },
+          "read_authorisation": {
+            "read_attempts": 1,
+            "actual_reads": 1,
+            "unauthorised_read_attempts": 0,
+            "unauthorised_reads": 0
+          },
+          "trajectory": [
+            {
+              "name": "get_model_results",
+              "arguments": {
+                "model_hash": "synthetic_estuary_v3",
+                "sections": "mroi_summary,channel_map"
+              },
+              "actual_read": true,
+              "error": false,
+              "result": {
+                "model_hash": "synthetic_estuary_v3",
+                "results": {
+                  "channel_map": [
+                    {
+                      "channel": "Radio",
+                      "activity_column": "radio_activity",
+                      "spend_column": "radio_spend"
+                    },
+                    {
+                      "channel": "Cinema",
+                      "activity_column": "cinema_activity",
+                      "spend_column": "cinema_spend"
+                    }
+                  ],
+                  "mroi_summary": {
+                    "channels": [
+                      {
+                        "channel": "radio_activity",
+                        "current_spend": 200,
+                        "mroi_mean": 1.75,
+                        "mroi_median": 1.6,
+                        "mroi_hdi_3": 0.7,
+                        "mroi_hdi_97": 2.8
+                      }
+                    ]
+                  }
+                },
+                "sections_available": [
+                  "channel_map",
+                  "mroi_summary",
+                  "mroi_periods"
+                ]
+              },
+              "added_evidence": [
+                "mroi_summary"
+              ]
+            }
+          ],
+          "answer": "{\"model_hash\":\"synthetic_estuary_v3\",\"channel\":\"radio_activity\",\"mroi_mean\":1.75,\"mroi_median\":1.6,\"current_spend\":200,\"hdi_94\":{\"low\":0.7,\"high\":2.8,\"fields\":[\"mroi_hdi_3\",\"mroi_hdi_97\"]},\"independently_recomputed_from_posterior_draws\":false,\"explanation\":\"Saved mroi_summary reports radio_activity headline mROI mean 1.75 and median 1.6 at current_spend 200, with saved 94% HDI endpoints 0.7 and 2.8. These are stored summary fields only. No posterior draws were returned, so the interval cannot be described as independently recomputed from draws. That recomputation is not established by these results.\"}",
+          "cost_usd": 0.03563999999999998,
+          "stop": "end_turn",
+          "seconds": 21.796875599997293
+        }
+      ],
+      "original_automatic_assessment": {
+        "status": "development_only",
+        "accepted": false,
+        "thresholds": {
+          "minimum_task_families": 8,
+          "minimum_cost_saving": 0.05,
+          "quality_noninferiority_margin": 0
+        },
+        "candidate_supported_answer_rate": null,
+        "noncontributing_result_call_delta": 0,
+        "reasons": [
+          "public_development_cases_are_not_independent_acceptance",
+          "thresholds_require_owner_agreement",
+          "fewer_than_eight_task_families",
+          "candidate_quality_or_routing_failures",
+          "unreviewed_claims_prevent_quality_comparison",
+          "quality_noninferiority_not_established",
+          "required_cost_saving_not_established"
+        ],
+        "task_count": 1,
+        "family_count": 1,
+        "dataset_count": 1,
+        "paired_repetitions": 2,
+        "candidate_hard_failures": 2,
+        "quality_delta": null,
+        "sessions_requiring_claim_review": 4,
+        "quality_delta_95_interval": null,
+        "cost_saving_fraction": 0.18065204990565875,
+        "cost_saving_95_interval": null,
+        "bootstrap_seed": 20260929,
+        "bootstrap_resamples": 4000,
+        "weighting": "equal task families; equal cases and paired repetitions within family",
+        "limitations": "Intervals condition on the synthetic datasets and task families used. Datasets are not independently resampled. These intervals do not establish dataset or scientific generalisation."
+      },
+      "guidance_sha256": {
+        "baseline": "ed6074fedc5327f875ff63067d4a11f1c70c9e2cdbc02216d2b9ea50d7b083a1",
+        "candidate": "b10e85c9cdb0cf49be893c5385601b56f8208aab206e8dac77b683620b8245a6"
+      }
+    },
+    {
+      "protocol": {
+        "purpose": "selection_validation",
+        "source_commit": "61cdf375f3f6f578c15f687705e40a8c095f7b20",
+        "planned_sessions": 12,
+        "samples": 2,
+        "families": [
+          "channel_comparison",
+          "headline_estimands",
+          "window_aggregate"
+        ],
+        "model_configuration": {
+          "request": {
+            "model": "grok-4.7",
+            "max_output_tokens": 4096,
+            "reasoning": {
+              "effort": "low"
+            },
+            "store": false
+          },
+          "rates_per_million": {
+            "input": 2,
+            "output": 6,
+            "cache_read": 0.5,
+            "cache_write": 0
+          },
+          "long_context_rates_per_million": {
+            "input": 4,
+            "output": 12,
+            "cache_read": 1
+          },
+          "long_context_threshold": 200000,
+          "billing": "provider_cost_in_usd_ticks"
+        },
+        "baseline_sha256": "ed6074fedc5327f875ff63067d4a11f1c70c9e2cdbc02216d2b9ea50d7b083a1",
+        "candidate_sha256": "b10e85c9cdb0cf49be893c5385601b56f8208aab206e8dac77b683620b8245a6",
+        "initial_accounted_usd": 78.507366,
+        "stage_cap_usd": 87.781696,
+        "overall_cap_usd": 500,
+        "retained_unknown_allowances_usd": 2.672954,
+        "readiness": "All six candidate answers complete/supported, zero unsupported claims/actual unauthorised reads/writes and no aggregate independently reviewed unnecessary-call increase. Review each family before next; stop on candidate semantic failure. Cost descriptive, no acceptance, V4 unopened.",
+        "sessions": 4,
+        "case": "v3_window_aggregate",
+        "prior_accounted_usd": 79.100528,
+        "cap_usd": 87.781696
+      },
+      "status": "complete",
+      "raw_sha256": "3d2bbf20527f8fba37009f13951b756ad510d98c45dbeffdb4469cb45ac04581",
+      "freeze": {
+        "schema_version": 1,
+        "inputs_sha256": "6bfa04683e23b00e62cc72ba3ba056dee004fc5c5f9f40492ae88e18a2a747f9",
+        "source_sha256": "e73a9cd93458dfeec691f827f47596d6a79c3668aef963c321e7b3a96fd33c34",
+        "calibration_sha256": "d14028584d64ac7a63e9466953806d6e6df32d7d7f94afca8c7f134154383687"
+      },
+      "configuration": {
+        "mode": "eager",
+        "samples": 2,
+        "case": "v3_window_aggregate",
+        "role_comparison": null,
+        "results_comparison": true,
+        "results_prompt": "paraphrase",
+        "results_robust": true,
+        "results_acceptance": true,
+        "results_selection_validation": true,
+        "results_acceptance_packet": "v3",
+        "model": "grok-4.7",
+        "model_configuration": {
+          "request": {
+            "model": "grok-4.7",
+            "max_output_tokens": 4096,
+            "reasoning": {
+              "effort": "low"
+            },
+            "store": false
+          },
+          "rates_per_million": {
+            "input": 2,
+            "output": 6,
+            "cache_read": 0.5,
+            "cache_write": 0
+          },
+          "long_context_rates_per_million": {
+            "input": 4,
+            "output": 12,
+            "cache_read": 1
+          },
+          "long_context_threshold": 200000,
+          "billing": "provider_cost_in_usd_ticks"
+        },
+        "results_model_diagnostic": false,
+        "validation_seed": null,
+        "validation_datasets": 0,
+        "result_fixture_version": 2
+      },
+      "budget": {
+        "cap": 87.781696,
+        "prior": 79.100528,
+        "charged": 0.296078,
+        "reserved": 0.0,
+        "model": "grok-4.7",
+        "reasoning_effort": "low"
+      },
+      "tasks": [
+        {
+          "case": {
+            "id": "v3_window_aggregate",
+            "required_sections": [
+              "coefficients"
+            ],
+            "paraphrase": "",
+            "family": "window_aggregate",
+            "channel": "radio_activity",
+            "allow_prediction": false,
+            "evidence_options": [
+              [
+                "coefficients"
+              ],
+              [
+                "channel_summary"
+              ]
+            ],
+            "fixture": {
+              "model_hash": "synthetic_estuary_v3",
+              "results": {
+                "coefficients": [
+                  {
+                    "Date": 1738540800000,
+                    "Channel": "radio_activity",
+                    "Spend": 80,
+                    "Revenue": 280,
+                    "Sales": 40,
+                    "ROI": 3.5
+                  },
+                  {
+                    "Date": 1739145600000,
+                    "Channel": "radio_activity",
+                    "Spend": 320,
+                    "Revenue": 480,
+                    "Sales": 60,
+                    "ROI": 1.5
+                  },
+                  {
+                    "Date": 1739750400000,
+                    "Channel": "radio_activity",
+                    "Spend": 200,
+                    "Revenue": 440,
+                    "Sales": 55,
+                    "ROI": 2.2
+                  },
+                  {
+                    "Date": 1738540800000,
+                    "Channel": "cinema_activity",
+                    "Spend": 120,
+                    "Revenue": 180,
+                    "Sales": 30,
+                    "ROI": 1.5
+                  },
+                  {
+                    "Date": 1739145600000,
+                    "Channel": "cinema_activity",
+                    "Spend": 180,
+                    "Revenue": 450,
+                    "Sales": 75,
+                    "ROI": 2.5
+                  },
+                  {
+                    "Date": 1739750400000,
+                    "Channel": "cinema_activity",
+                    "Spend": 300,
+                    "Revenue": 600,
+                    "Sales": 100,
+                    "ROI": 2.0
+                  }
+                ],
+                "channel_summary": [
+                  {
+                    "Channel": "radio_activity",
+                    "Spend": 600,
+                    "Revenue": 1200,
+                    "Sales": 155,
+                    "ROI": 2.0
+                  },
+                  {
+                    "Channel": "cinema_activity",
+                    "Spend": 600,
+                    "Revenue": 1230,
+                    "Sales": 205,
+                    "ROI": 2.05
+                  }
+                ],
+                "channel_map": [
+                  {
+                    "channel": "Radio",
+                    "activity_column": "radio_activity",
+                    "spend_column": "radio_spend"
+                  },
+                  {
+                    "channel": "Cinema",
+                    "activity_column": "cinema_activity",
+                    "spend_column": "cinema_spend"
+                  }
+                ],
+                "model_config": {
+                  "config": {
+                    "link": "log",
+                    "attribution": "removal_lift"
+                  }
+                },
+                "contributions": [
+                  {
+                    "Date": 1738540800000,
+                    "radio_activity": 40,
+                    "cinema_activity": 30,
+                    "Base": 100,
+                    "Seasonality": 12,
+                    "Event Effect": -7,
+                    "Overlap": -15,
+                    "Model": 160,
+                    "Fit Actual": 162,
+                    "Actual": 162
+                  }
+                ],
+                "mroi_summary": {
+                  "channels": [
+                    {
+                      "channel": "radio_activity",
+                      "current_spend": 200,
+                      "mroi_mean": 1.75,
+                      "mroi_median": 1.6,
+                      "mroi_hdi_3": 0.7,
+                      "mroi_hdi_97": 2.8
+                    }
+                  ]
+                },
+                "mroi_periods": {
+                  "available": true,
+                  "hdi_prob": 0.94,
+                  "evaluation_point": "historical_period_spend",
+                  "rows": [
+                    {
+                      "channel": "radio_activity",
+                      "date": "2025-02-03",
+                      "spend": 80,
+                      "mroi_median": 2.6,
+                      "mroi_hdi_3": 1.1,
+                      "mroi_hdi_97": 3.8
+                    },
+                    {
+                      "channel": "radio_activity",
+                      "date": "2025-02-10",
+                      "spend": 320,
+                      "mroi_median": 0.9,
+                      "mroi_hdi_3": 0.2,
+                      "mroi_hdi_97": 1.7
+                    },
+                    {
+                      "channel": "radio_activity",
+                      "date": "2025-02-17",
+                      "spend": 200,
+                      "mroi_median": 1.4,
+                      "mroi_hdi_3": 0.5,
+                      "mroi_hdi_97": 2.4
+                    }
+                  ]
+                },
+                "long_run_rollup": {
+                  "available": false,
+                  "reason": "no_linked_var_model"
+                }
+              }
+            },
+            "dataset": "estuary",
+            "evidence_window": {
+              "start": "2025-02-03",
+              "end": "2025-02-10"
+            },
+            "max_response_bytes": null,
+            "allow_recovery_errors": false,
+            "allowed_result_sections": null
+          },
+          "prompt": "For saved model synthetic_estuary_v3: For 3 to 10 February 2025 inclusive, give radio_activity total spend, revenue and aggregate ROI. Explain why the simple average of its period ROI values is inappropriate. Use saved evidence only. Do not refit or change the model. Include the requested explanation in your answer.",
+          "expected": {
+            "spend": 400,
+            "revenue": 760,
+            "roi": 1.9
+          }
+        }
+      ],
+      "reviews": [
+        {
+          "case": "v3_window_aggregate",
+          "view": "baseline",
+          "repetition": 0,
+          "answer_sha256": "5aa841ac1959c40d5350c0c4d5170cf76ae16e495fa9d29af5c36484e7492e8a",
+          "trajectory_sha256": "ba1ed95e2fb343bab69daf52b18f9851b1d7b381239756ce031efefba079fbb8",
+          "claims": "supported",
+          "supported_answer": true,
+          "rationale": "Complete correct aggregate and explanation with actual inequality asserted only when period evidence read.",
+          "claim_checks": [
+            {
+              "claim": "Window/channel spend400 revenue760 ROI1.9",
+              "verdict": "supported",
+              "evidence": "Actual inclusive window metadata and summary;760/400=1.9."
+            },
+            {
+              "claim": "Unweighted mean definition differs, numerical coincidence unknown",
+              "verdict": "supported",
+              "evidence": "Only aggregate summary returned. Explanation correctly distinguishes weighting/definitions while explicitly leaving numerical difference unestablished."
+            }
+          ],
+          "format_review": "Full visible final response reviewed; original mechanicals unchanged.",
+          "calls": [
+            {
+              "index": 0,
+              "verdict": "necessary",
+              "rationale": "One authorised selected result call supplies aggregate and optional period evidence supporting requested explanation."
+            }
+          ]
+        },
+        {
+          "case": "v3_window_aggregate",
+          "view": "candidate",
+          "repetition": 0,
+          "answer_sha256": "1d910171622f615ecb0b9e9b85e7c14aa6d822687f1bb379a86557a11f4fc9c7",
+          "trajectory_sha256": "abf43ad50cf42b03b54bc531f4b7df5c5e1e594a5df3dd09039fdaa335dee821",
+          "claims": "supported",
+          "supported_answer": true,
+          "rationale": "Complete correct aggregate and explanation with actual inequality asserted only when period evidence read.",
+          "claim_checks": [
+            {
+              "claim": "Window/channel spend400 revenue760 ROI1.9",
+              "verdict": "supported",
+              "evidence": "Actual inclusive window metadata and summary;760/400=1.9."
+            },
+            {
+              "claim": "Actual simplemean2.5 differs from window1.9",
+              "verdict": "supported",
+              "evidence": "Actual coefficient rows3.5/spend80 and1.5/spend320 give mean2.5, weightedaggregate1.9. Specific inequality supported by observed rows."
+            }
+          ],
+          "format_review": "Full visible final response reviewed; original mechanicals unchanged.",
+          "calls": [
+            {
+              "index": 0,
+              "verdict": "necessary",
+              "rationale": "One authorised selected result call supplies aggregate and optional period evidence supporting requested explanation."
+            }
+          ]
+        },
+        {
+          "case": "v3_window_aggregate",
+          "view": "candidate",
+          "repetition": 1,
+          "answer_sha256": "a7633f0287c925bb8dc7dc3b30761ce326a337e71a8168c6cbe9868ebc61196c",
+          "trajectory_sha256": "ba1ed95e2fb343bab69daf52b18f9851b1d7b381239756ce031efefba079fbb8",
+          "claims": "supported",
+          "supported_answer": true,
+          "rationale": "Complete correct aggregate and explanation with actual inequality asserted only when period evidence read.",
+          "claim_checks": [
+            {
+              "claim": "Window/channel spend400 revenue760 ROI1.9",
+              "verdict": "supported",
+              "evidence": "Actual inclusive window metadata and summary;760/400=1.9."
+            },
+            {
+              "claim": "Unweighted mean definition differs, numerical coincidence unknown",
+              "verdict": "supported",
+              "evidence": "Only aggregate summary returned. Explanation correctly distinguishes weighting/definitions while explicitly leaving numerical difference unestablished."
+            }
+          ],
+          "format_review": "Full visible final response reviewed; original mechanicals unchanged.",
+          "calls": [
+            {
+              "index": 0,
+              "verdict": "necessary",
+              "rationale": "One authorised selected result call supplies aggregate and optional period evidence supporting requested explanation."
+            }
+          ]
+        },
+        {
+          "case": "v3_window_aggregate",
+          "view": "baseline",
+          "repetition": 1,
+          "answer_sha256": "daa47296a472c382cbb48383b48ef9f4bfd9b164c156f7b14651051813d92198",
+          "trajectory_sha256": "abf43ad50cf42b03b54bc531f4b7df5c5e1e594a5df3dd09039fdaa335dee821",
+          "claims": "supported",
+          "supported_answer": true,
+          "rationale": "Complete correct aggregate and explanation with actual inequality asserted only when period evidence read.",
+          "claim_checks": [
+            {
+              "claim": "Window/channel spend400 revenue760 ROI1.9",
+              "verdict": "supported",
+              "evidence": "Actual inclusive window metadata and summary;760/400=1.9."
+            },
+            {
+              "claim": "Actual simplemean2.5 differs from window1.9",
+              "verdict": "supported",
+              "evidence": "Actual coefficient rows3.5/spend80 and1.5/spend320 give mean2.5, weightedaggregate1.9. Specific inequality supported by observed rows."
+            }
+          ],
+          "format_review": "Full visible final response reviewed; original mechanicals unchanged.",
+          "calls": [
+            {
+              "index": 0,
+              "verdict": "necessary",
+              "rationale": "One authorised selected result call supplies aggregate and optional period evidence supporting requested explanation."
+            }
+          ]
+        }
+      ],
+      "trials": [
+        {
+          "case": "v3_window_aggregate",
+          "view": "baseline",
+          "repetition": 0,
+          "passed": false,
+          "outcome": "review",
+          "assertions": {
+            "facts": true,
+            "claims_in_scope": false,
+            "required_evidence": true,
+            "no_errors": true,
+            "no_unauthorised_reads": true,
+            "no_unintended_writes": true,
+            "executed": true
+          },
+          "read_authorisation": {
+            "read_attempts": 1,
+            "actual_reads": 1,
+            "unauthorised_read_attempts": 0,
+            "unauthorised_reads": 0
+          },
+          "trajectory": [
+            {
+              "name": "get_model_results",
+              "arguments": {
+                "model_hash": "synthetic_estuary_v3",
+                "sections": "channel_summary",
+                "start": "2025-02-03",
+                "end": "2025-02-10",
+                "channels": [
+                  "radio_activity"
+                ]
+              },
+              "actual_read": true,
+              "error": false,
+              "result": {
+                "model_hash": "synthetic_estuary_v3",
+                "results": {
+                  "channel_summary": [
+                    {
+                      "Channel": "radio_activity",
+                      "Revenue": 760.0,
+                      "Spend": 400.0,
+                      "Sales": 100.0,
+                      "ROI": 1.9
+                    }
+                  ]
+                },
+                "sections_available": [
+                  "channel_summary",
+                  "mroi_periods"
+                ],
+                "meta": {
+                  "window": {
+                    "start": "2025-02-03",
+                    "end": "2025-02-10",
+                    "granularity": "native"
+                  },
+                  "aggregation": {
+                    "channel_summary": "ROI = sum(Revenue) / sum(Spend); 0 without spend"
+                  },
+                  "not_windowed": {}
+                },
+                "_mcp_selection": {
+                  "channels_requested": [
+                    "radio_activity"
+                  ],
+                  "max_grid_points_requested": null,
+                  "grid_sampling_applied": false,
+                  "sections": {
+                    "channel_summary": {
+                      "changed": true,
+                      "original_rows": 2,
+                      "returned_rows": 1
+                    }
+                  },
+                  "ambiguous_channel_aliases": {},
+                  "unmatched_channel_aliases": [],
+                  "channel_match_scope": "filterable_sections_only",
+                  "backend_download_bounded": false,
+                  "warnings": []
+                }
+              },
+              "added_evidence": [
+                "channel_summary"
+              ]
+            }
+          ],
+          "answer": "{\"model_hash\":\"synthetic_estuary_v3\",\"channel\":\"radio_activity\",\"start\":\"2025-02-03\",\"end\":\"2025-02-10\",\"spend\":400.0,\"revenue\":760.0,\"roi\":1.9,\"explanation\":\"Aggregate ROI is summed revenue divided by summed spend (760/400=1.9), as declared for this windowed channel_summary. An unweighted average of period ROI is a different definition and is not the window ROI. Period ROI rows were not returned, so a numerical difference is not established by these results.\"}",
+          "cost_usd": 0.123672,
+          "stop": "end_turn",
+          "seconds": 8.683498600003077
+        },
+        {
+          "case": "v3_window_aggregate",
+          "view": "candidate",
+          "repetition": 0,
+          "passed": false,
+          "outcome": "review",
+          "assertions": {
+            "facts": true,
+            "claims_in_scope": false,
+            "required_evidence": true,
+            "no_errors": true,
+            "no_unauthorised_reads": true,
+            "no_unintended_writes": true,
+            "executed": true
+          },
+          "read_authorisation": {
+            "read_attempts": 1,
+            "actual_reads": 1,
+            "unauthorised_read_attempts": 0,
+            "unauthorised_reads": 0
+          },
+          "trajectory": [
+            {
+              "name": "get_model_results",
+              "arguments": {
+                "model_hash": "synthetic_estuary_v3",
+                "sections": "channel_summary,coefficients",
+                "channels": [
+                  "radio_activity"
+                ],
+                "start": "2025-02-03",
+                "end": "2025-02-10"
+              },
+              "actual_read": true,
+              "error": false,
+              "result": {
+                "model_hash": "synthetic_estuary_v3",
+                "results": {
+                  "coefficients": [
+                    {
+                      "Date": 1738540800000,
+                      "Channel": "radio_activity",
+                      "Spend": 80,
+                      "Revenue": 280,
+                      "Sales": 40,
+                      "ROI": 3.5
+                    },
+                    {
+                      "Date": 1739145600000,
+                      "Channel": "radio_activity",
+                      "Spend": 320,
+                      "Revenue": 480,
+                      "Sales": 60,
+                      "ROI": 1.5
+                    }
+                  ],
+                  "channel_summary": [
+                    {
+                      "Channel": "radio_activity",
+                      "Revenue": 760.0,
+                      "Spend": 400.0,
+                      "Sales": 100.0,
+                      "ROI": 1.9
+                    }
+                  ]
+                },
+                "sections_available": [
+                  "coefficients",
+                  "channel_summary",
+                  "mroi_periods"
+                ],
+                "meta": {
+                  "window": {
+                    "start": "2025-02-03",
+                    "end": "2025-02-10",
+                    "granularity": "native"
+                  },
+                  "aggregation": {
+                    "channel_summary": "ROI = sum(Revenue) / sum(Spend); 0 without spend"
+                  },
+                  "not_windowed": {}
+                },
+                "_mcp_selection": {
+                  "channels_requested": [
+                    "radio_activity"
+                  ],
+                  "max_grid_points_requested": null,
+                  "grid_sampling_applied": false,
+                  "sections": {
+                    "coefficients": {
+                      "changed": true,
+                      "original_rows": 4,
+                      "returned_rows": 2
+                    },
+                    "channel_summary": {
+                      "changed": true,
+                      "original_rows": 2,
+                      "returned_rows": 1
+                    }
+                  },
+                  "ambiguous_channel_aliases": {},
+                  "unmatched_channel_aliases": [],
+                  "channel_match_scope": "filterable_sections_only",
+                  "backend_download_bounded": false,
+                  "warnings": []
+                }
+              },
+              "added_evidence": [
+                "channel_summary",
+                "coefficients"
+              ]
+            }
+          ],
+          "answer": "{\"channel\":\"radio_activity\",\"start\":\"2025-02-03\",\"end\":\"2025-02-10\",\"spend\":400.0,\"revenue\":760.0,\"roi\":1.9,\"explanation\":\"Aggregate ROI is summed revenue divided by summed spend (760/400=1.9), not an unweighted average of period ROI. The two dated rows have ROI 3.5 on spend 80 and ROI 1.5 on spend 320; their simple average is 2.5, which weights the low-spend period equally with the high-spend period and therefore does not match window ROI.\"}",
+          "cost_usd": 0.08113999999999999,
+          "stop": "end_turn",
+          "seconds": 9.363483299996005
+        },
+        {
+          "case": "v3_window_aggregate",
+          "view": "candidate",
+          "repetition": 1,
+          "passed": false,
+          "outcome": "review",
+          "assertions": {
+            "facts": true,
+            "claims_in_scope": false,
+            "required_evidence": true,
+            "no_errors": true,
+            "no_unauthorised_reads": true,
+            "no_unintended_writes": true,
+            "executed": true
+          },
+          "read_authorisation": {
+            "read_attempts": 1,
+            "actual_reads": 1,
+            "unauthorised_read_attempts": 0,
+            "unauthorised_reads": 0
+          },
+          "trajectory": [
+            {
+              "name": "get_model_results",
+              "arguments": {
+                "model_hash": "synthetic_estuary_v3",
+                "sections": "channel_summary",
+                "start": "2025-02-03",
+                "end": "2025-02-10",
+                "channels": [
+                  "radio_activity"
+                ]
+              },
+              "actual_read": true,
+              "error": false,
+              "result": {
+                "model_hash": "synthetic_estuary_v3",
+                "results": {
+                  "channel_summary": [
+                    {
+                      "Channel": "radio_activity",
+                      "Revenue": 760.0,
+                      "Spend": 400.0,
+                      "Sales": 100.0,
+                      "ROI": 1.9
+                    }
+                  ]
+                },
+                "sections_available": [
+                  "channel_summary",
+                  "mroi_periods"
+                ],
+                "meta": {
+                  "window": {
+                    "start": "2025-02-03",
+                    "end": "2025-02-10",
+                    "granularity": "native"
+                  },
+                  "aggregation": {
+                    "channel_summary": "ROI = sum(Revenue) / sum(Spend); 0 without spend"
+                  },
+                  "not_windowed": {}
+                },
+                "_mcp_selection": {
+                  "channels_requested": [
+                    "radio_activity"
+                  ],
+                  "max_grid_points_requested": null,
+                  "grid_sampling_applied": false,
+                  "sections": {
+                    "channel_summary": {
+                      "changed": true,
+                      "original_rows": 2,
+                      "returned_rows": 1
+                    }
+                  },
+                  "ambiguous_channel_aliases": {},
+                  "unmatched_channel_aliases": [],
+                  "channel_match_scope": "filterable_sections_only",
+                  "backend_download_bounded": false,
+                  "warnings": []
+                }
+              },
+              "added_evidence": [
+                "channel_summary"
+              ]
+            }
+          ],
+          "answer": "{\"model_hash\":\"synthetic_estuary_v3\",\"channel\":\"radio_activity\",\"start\":\"2025-02-03\",\"end\":\"2025-02-10\",\"spend\":400.0,\"revenue\":760.0,\"roi\":1.9,\"explanation\":\"Aggregate ROI is sum(Revenue)/sum(Spend), here 760/400=1.9, as declared for this windowed channel_summary. An unweighted average of period ROIs is a different definition: it does not weight periods by spend. These results do not include period rows, so whether the two numbers would differ is not established by these results.\"}",
+          "cost_usd": 0.035558000000000006,
+          "stop": "end_turn",
+          "seconds": 9.836314200001652
+        },
+        {
+          "case": "v3_window_aggregate",
+          "view": "baseline",
+          "repetition": 1,
+          "passed": false,
+          "outcome": "review",
+          "assertions": {
+            "facts": true,
+            "claims_in_scope": false,
+            "required_evidence": true,
+            "no_errors": true,
+            "no_unauthorised_reads": true,
+            "no_unintended_writes": true,
+            "executed": true
+          },
+          "read_authorisation": {
+            "read_attempts": 1,
+            "actual_reads": 1,
+            "unauthorised_read_attempts": 0,
+            "unauthorised_reads": 0
+          },
+          "trajectory": [
+            {
+              "name": "get_model_results",
+              "arguments": {
+                "model_hash": "synthetic_estuary_v3",
+                "sections": "channel_summary,coefficients",
+                "start": "2025-02-03",
+                "end": "2025-02-10",
+                "channels": [
+                  "radio_activity"
+                ]
+              },
+              "actual_read": true,
+              "error": false,
+              "result": {
+                "model_hash": "synthetic_estuary_v3",
+                "results": {
+                  "coefficients": [
+                    {
+                      "Date": 1738540800000,
+                      "Channel": "radio_activity",
+                      "Spend": 80,
+                      "Revenue": 280,
+                      "Sales": 40,
+                      "ROI": 3.5
+                    },
+                    {
+                      "Date": 1739145600000,
+                      "Channel": "radio_activity",
+                      "Spend": 320,
+                      "Revenue": 480,
+                      "Sales": 60,
+                      "ROI": 1.5
+                    }
+                  ],
+                  "channel_summary": [
+                    {
+                      "Channel": "radio_activity",
+                      "Revenue": 760.0,
+                      "Spend": 400.0,
+                      "Sales": 100.0,
+                      "ROI": 1.9
+                    }
+                  ]
+                },
+                "sections_available": [
+                  "coefficients",
+                  "channel_summary",
+                  "mroi_periods"
+                ],
+                "meta": {
+                  "window": {
+                    "start": "2025-02-03",
+                    "end": "2025-02-10",
+                    "granularity": "native"
+                  },
+                  "aggregation": {
+                    "channel_summary": "ROI = sum(Revenue) / sum(Spend); 0 without spend"
+                  },
+                  "not_windowed": {}
+                },
+                "_mcp_selection": {
+                  "channels_requested": [
+                    "radio_activity"
+                  ],
+                  "max_grid_points_requested": null,
+                  "grid_sampling_applied": false,
+                  "sections": {
+                    "coefficients": {
+                      "changed": true,
+                      "original_rows": 4,
+                      "returned_rows": 2
+                    },
+                    "channel_summary": {
+                      "changed": true,
+                      "original_rows": 2,
+                      "returned_rows": 1
+                    }
+                  },
+                  "ambiguous_channel_aliases": {},
+                  "unmatched_channel_aliases": [],
+                  "channel_match_scope": "filterable_sections_only",
+                  "backend_download_bounded": false,
+                  "warnings": []
+                }
+              },
+              "added_evidence": [
+                "channel_summary",
+                "coefficients"
+              ]
+            }
+          ],
+          "answer": "{\"model_hash\":\"synthetic_estuary_v3\",\"channel\":\"radio_activity\",\"start\":\"2025-02-03\",\"end\":\"2025-02-10\",\"spend\":400.0,\"revenue\":760.0,\"roi\":1.9,\"explanation\":\"Aggregate ROI is summed revenue divided by summed spend (760/400=1.9). The unweighted mean of the two period ROIs is (3.5+1.5)/2=2.5. That average treats the 80-spend period and the 320-spend period equally, so it is not the window ROI.\"}",
+          "cost_usd": 0.05570800000000001,
+          "stop": "end_turn",
+          "seconds": 8.276351699998486
+        }
+      ],
+      "original_automatic_assessment": {
+        "status": "development_only",
+        "accepted": false,
+        "thresholds": {
+          "minimum_task_families": 8,
+          "minimum_cost_saving": 0.05,
+          "quality_noninferiority_margin": 0
+        },
+        "candidate_supported_answer_rate": null,
+        "noncontributing_result_call_delta": 0,
+        "reasons": [
+          "public_development_cases_are_not_independent_acceptance",
+          "thresholds_require_owner_agreement",
+          "fewer_than_eight_task_families",
+          "unreviewed_claims_prevent_quality_comparison",
+          "quality_noninferiority_not_established",
+          "required_cost_saving_not_established"
+        ],
+        "task_count": 1,
+        "family_count": 1,
+        "dataset_count": 1,
+        "paired_repetitions": 2,
+        "candidate_hard_failures": 0,
+        "quality_delta": null,
+        "sessions_requiring_claim_review": 4,
+        "quality_delta_95_interval": null,
+        "cost_saving_fraction": 0.3494369494926971,
+        "cost_saving_95_interval": null,
+        "bootstrap_seed": 20260929,
+        "bootstrap_resamples": 4000,
+        "weighting": "equal task families; equal cases and paired repetitions within family",
+        "limitations": "Intervals condition on the synthetic datasets and task families used. Datasets are not independently resampled. These intervals do not establish dataset or scientific generalisation."
+      },
+      "guidance_sha256": {
+        "baseline": "ed6074fedc5327f875ff63067d4a11f1c70c9e2cdbc02216d2b9ea50d7b083a1",
+        "candidate": "b10e85c9cdb0cf49be893c5385601b56f8208aab206e8dac77b683620b8245a6"
+      }
+    }
+  ],
+  "cumulative_accounted_usd": 79.396606,
+  "retained_unknown_allowances_usd": 2.672954,
+  "limitations": [
+    "Exposed validation only. Both arms supported all six answers, so no causal quality gain established.",
+    "Candidate unnecessary calls zero, baseline one. Readiness passed, final acceptance outstanding.",
+    "Guidance and model frozen before release of independent V4 packet. Sonnet remains stopped. Original failures unchanged."
+  ]
+}

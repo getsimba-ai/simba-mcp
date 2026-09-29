@@ -59,7 +59,7 @@ async def test_alternative_sequences_and_answer_faults(task):
         ("create_model", {}),
         ("get_model_results", {"model_hash": "other"}),
         ("get_model_results", {"model_hash": "result-example", "sections": "prediction_window"}),
-        ("get_model_results", {"model_hash": "result-example", "granularity": "month"}),
+        ("get_model_results", {"model_hash": "result-example", "granularity": "invalid"}),
     ],
 )
 async def test_outside_task_requests_fail(name, args):
@@ -99,6 +99,39 @@ async def test_empty_filtered_evidence_cannot_support_a_correct_guessed_answer()
     )
     assert dispatch.grade(task.expected)["facts"]
     assert not dispatch.grade(task.expected)["required_evidence"]
+
+
+@pytest.mark.anyio
+@pytest.mark.parametrize(
+    "section,row_key", [("mroi_summary", "channels"), ("mroi_periods", "rows")]
+)
+@pytest.mark.parametrize("requested", ["Search Activity", "TV_activity", "missing"])
+async def test_marginal_evidence_requires_task_channel_not_unrelated_channels(
+    section, row_key, requested
+):
+    from dataclasses import replace
+
+    fixture = saved_results()
+    fixture["results"][section] = {
+        "available": True,
+        row_key: [
+            {"channel": "Search", "activity_column": "Search Activity", "mroi_mean": 2.0},
+            {"channel": "TV", "activity_column": "TV_activity", "mroi_mean": 1.0},
+        ],
+    }
+    task = replace(
+        result_tasks()[0],
+        fixture=fixture,
+        channel="Search Activity",
+        required_sections=frozenset({section}),
+        evidence_options=(),
+    )
+    dispatch = ResultSelectionDispatch(create_server(), task)
+    await dispatch(
+        "get_model_results",
+        {"model_hash": "result-example", "sections": section, "channels": [requested]},
+    )
+    assert dispatch.grade(task.expected)["required_evidence"] == (requested == "Search Activity")
 
 
 @pytest.mark.anyio

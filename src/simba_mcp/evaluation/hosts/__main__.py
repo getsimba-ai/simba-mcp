@@ -5,6 +5,7 @@ import asyncio
 import hashlib
 import json
 import os
+import random
 import secrets
 from dataclasses import asdict
 from pathlib import Path
@@ -64,7 +65,9 @@ async def run(args):
             "Selection validation requires an explicitly selected reviewed case packet"
         )
     packet = getattr(args, "results_acceptance_packet", "original")
-    if packet not in ("original", "fresh", "v2", "v3") or (packet != "original" and not acceptance):
+    if packet not in ("original", "fresh", "v2", "v3", "v4") or (
+        packet != "original" and not acceptance
+    ):
         raise ValueError("Fresh acceptance packet requires acceptance mode")
     diagnostic = getattr(args, "results_model_diagnostic", False)
     if diagnostic and (
@@ -111,6 +114,8 @@ async def run(args):
                 from ..result_acceptance_v2 import acceptance_v2_tasks as acceptance_tasks
             elif packet == "v3":
                 from ..result_acceptance_v3 import acceptance_v3_tasks as acceptance_tasks
+            elif packet == "v4":
+                from ..result_acceptance_v4 import acceptance_v4_tasks as acceptance_tasks
             else:
                 from ..result_acceptance import acceptance_tasks
 
@@ -141,6 +146,14 @@ async def run(args):
         selected = [task for task in selected if task[0].id in ROLE_CASES[role]]
     if not selected:
         raise ValueError("No tasks match the requested comparison")
+    order_seed = getattr(args, "case_order_seed", None)
+    if order_seed is not None and type(order_seed) is not int:
+        raise ValueError("Case order seed must be an integer")
+    schedule = [list(selected) for _ in range(args.samples)]
+    if order_seed is not None:
+        rng = random.Random(order_seed)
+        for repetition in schedule:
+            rng.shuffle(repetition)
     trial_filter = getattr(args, "results_trial", None)
     if trial_filter:
         allowed_trials = {
@@ -194,6 +207,12 @@ async def run(args):
                     "fixture": c.fixture,
                     "dataset": c.dataset,
                     "evidence_window": c.evidence_window,
+                    **({"section_windows": c.section_windows} if c.section_windows else {}),
+                    **(
+                        {"forbidden_result_sections": sorted(c.forbidden_result_sections)}
+                        if c.forbidden_result_sections
+                        else {}
+                    ),
                     "max_response_bytes": c.max_response_bytes,
                     "allow_recovery_errors": c.allow_recovery_errors,
                     "allowed_result_sections": sorted(c.allowed_result_sections)
@@ -208,6 +227,11 @@ async def run(args):
     }
     if guidance_arms:
         report["guidance"] = guidance_arms
+    if order_seed is not None:
+        report["configuration"]["case_order_seed"] = order_seed
+        report["configuration"]["case_order"] = [
+            [case.id for case, _, _ in repetition] for repetition in schedule
+        ]
     if trial_filter:
         report["configuration"]["results_trial"] = list(trial_filter)
     if robust:
@@ -256,8 +280,8 @@ async def run(args):
     try:
         verify()
         async with host_client(os.environ[key_name]) as provider:
-            for rep in range(args.samples):
-                for case, prompt, expected in selected:
+            for rep, repetition in enumerate(schedule):
+                for case, prompt, expected in repetition:
                     modes = ["eager", "deferred"] if rep % 2 == 0 else ["deferred", "eager"]
                     if args.mode != "both":
                         modes = [args.mode]
@@ -440,6 +464,9 @@ def main():
     parser.add_argument("--prior-usd", type=float, default=0)
     parser.add_argument("--samples", type=int, default=2)
     parser.add_argument(
+        "--case-order-seed", type=int, help="Freeze shuffled case order within each repetition"
+    )
+    parser.add_argument(
         "--results-trial",
         action="append",
         help="Run only VIEW:REPETITION for one selection-validation case; never grants paired acceptance",
@@ -485,7 +512,9 @@ def main():
         help="Reuse reviewed cases for selection only, never final acceptance",
     )
     parser.add_argument(
-        "--results-acceptance-packet", choices=("original", "fresh", "v2", "v3"), default="original"
+        "--results-acceptance-packet",
+        choices=("original", "fresh", "v2", "v3", "v4"),
+        default="original",
     )
     parser.add_argument(
         "--results-robust",
