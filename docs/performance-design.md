@@ -205,7 +205,7 @@ Observed results and SDK-floor verification are recorded in the
 and budget approval remain pending. A successful local report establishes neither
 host support for deferred discovery nor production performance.
 
-## Opt-in request budgets and admission (issue 48)
+## Request budgets and admission (issue 48)
 
 The shared API client owns one admission queue and request budget, in accordance
 with `docs/engineering.md`. `request_budget.py` owns only configuration, deadline
@@ -219,10 +219,19 @@ Set `SIMBA_API_REQUEST_POLICY_JSON` to a JSON object with all of these fields:
 positive integers; queue limits can be zero to refuse waiting. Caller ceilings
 cannot exceed process ceilings. Optional `operation_seconds` overrides totals for
 `read`, `write` and `upload`; upload means POST `/api/v1/ingest`. Values must be
-selected from capacity measurements. No production values are prescribed here.
-Unset or empty configuration preserves the existing timeout and retry behaviour.
-Invalid configuration fails startup. Removing the setting and restarting restores
-the previous behaviour.
+tuned from capacity measurements. Unset or empty configuration enables the initial
+server defaults: 180 seconds overall, 60 seconds per HTTP phase, 32 active requests
+per worker, eight active per caller, 128 queued per worker and 32 queued per caller.
+Queue waiting and retries share the overall budget. These are initial engineering
+settings, not measured production capacity or a latency improvement claim.
+Multiple workers multiply the process limits. Monitor overloads, deadline failures
+and queue latency when sizing a deployment.
+
+Set the variable to the JSON literal `false` and restart to disable the deadline
+and admission policy. Cancellation cleanup and single-send mutations remain active.
+A complete JSON object overrides the defaults; invalid configuration fails startup.
+These defaults apply to the MCP server runtime. Direct Python users of
+`SimbaAPIClient` retain explicit `request_policy` configuration.
 
 With a policy enabled, the monotonic total includes admission waiting, all HTTP
 attempts, parsing and retry sleeps. Phase timeouts are capped by the remaining

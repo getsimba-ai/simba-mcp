@@ -1,4 +1,4 @@
-"""Opt-in transport deadlines and bounded admission for the shared API client."""
+"""Transport deadlines and bounded admission for the shared API client."""
 
 import asyncio
 import hashlib
@@ -93,9 +93,23 @@ class RequestPolicy:
 
 def policy_from_json(raw):
     if not raw or not raw.strip():
-        return None
+        # Initial server defaults, configurable for each deployment's capacity.
+        # Retain the previous 60-second HTTP phase limits.
+        return RequestPolicy(
+            total_seconds=180,
+            connect_seconds=60,
+            read_seconds=60,
+            write_seconds=60,
+            pool_seconds=60,
+            max_active=32,
+            max_active_per_caller=8,
+            max_queued=128,
+            max_queued_per_caller=32,
+        )
     try:
         data = json.loads(raw)
+        if data is False:
+            return None
         if not isinstance(data, dict):
             raise TypeError("expected a JSON object")
         return RequestPolicy(**data)

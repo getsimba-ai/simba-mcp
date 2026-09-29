@@ -229,7 +229,14 @@ async def test_operation_deadline_and_timeout_phases():
 
 
 def test_policy_configuration_and_opaque_identity():
-    assert policy_from_json("") is None
+    default = policy_from_json(None)
+    assert default == policy_from_json("")
+    assert default.total_seconds == 180
+    assert default.read_seconds == default.write_seconds == 60
+    assert default.connect_seconds == default.pool_seconds == 60
+    assert (default.max_active, default.max_active_per_caller) == (32, 8)
+    assert (default.max_queued, default.max_queued_per_caller) == (128, 32)
+    assert policy_from_json("false") is None
     assert policy_from_json(json.dumps(policy().__dict__)) == policy()
     for invalid in (
         {"total_seconds": True},
