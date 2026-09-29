@@ -5,10 +5,11 @@ inferring scientific correctness. All execution still uses the canonical runner.
 """
 
 from dataclasses import dataclass, replace
+from decimal import Decimal
 
 from ...metadata import READ_ONLY
 from ..contracts import Case, Exchange, Step
-from ..result_cases import saved_results, selected_payload
+from ..result_cases import saved_results, selected_payload, varied_results
 from ..runner import contains, run_case
 from .result_grading import claims_in_scope, semantic_facts
 
@@ -23,6 +24,12 @@ class ResultTask:
     paraphrase: str = ""
     family: str = ""
     channel: str = "Search Activity"
+    evidence_options: tuple[frozenset[str], ...] = ()
+    fixture: dict | None = None
+    dataset: str = "development"
+
+    def evidence_sets(self):
+        return self.evidence_options or (self.required_sections,)
 
 
 def result_tasks():
@@ -128,6 +135,7 @@ def development_tasks():
             frozenset({"coefficients"}),
             {"roi": 2.5, "average_period_roi_valid": False},
             family="result_roi",
+            evidence_options=(frozenset({"coefficients"}), frozenset({"channel_summary"})),
         ),
         ResultTask(
             "result_marginal_window",
@@ -156,6 +164,54 @@ def development_tasks():
             family="result_prediction",
         ),
     ]
+
+
+def validation_tasks(seed, datasets):
+    """Fresh fixture values, with a separate decimal oracle for aggregate ratios."""
+    suite = []
+    for index in range(datasets):
+        fixture = varied_results(seed + index)
+        rows = fixture["results"]
+        search, tv = rows["channel_summary"]
+        marginal = rows["mroi_summary"]["channels"][0]
+
+        def ratio(revenue, spend):
+            return float(round(Decimal(str(revenue)) / Decimal(str(spend)), 6))
+
+        overrides = {
+            "result_roi": {
+                "revenue": search["Revenue"],
+                "spend": search["Spend"],
+                "roi": ratio(search["Revenue"], search["Spend"]),
+            },
+            "result_tv_roi": {"revenue": tv["Revenue"], "spend": tv["Spend"], "roi": tv["ROI"]},
+            "result_total_roi": {
+                "revenue": search["Revenue"] + tv["Revenue"],
+                "spend": search["Spend"] + tv["Spend"],
+                "roi": ratio(search["Revenue"] + tv["Revenue"], search["Spend"] + tv["Spend"]),
+            },
+            "result_period_roi": {"roi": ratio(search["Revenue"], search["Spend"])},
+            "result_marginal": {
+                "median": marginal["mroi_median"],
+                "lower": marginal["mroi_hdi_3"],
+                "upper": marginal["mroi_hdi_97"],
+            },
+            "result_marginal_window": {"median": marginal["mroi_median"]},
+            "result_overlap_value": {"overlap": rows["contributions"][0]["Overlap"]},
+        }
+        for task in development_tasks():
+            suite.append(
+                replace(
+                    task,
+                    id=f"{task.id}_dataset_{index}",
+                    fixture=fixture,
+                    dataset=f"generated_{index}",
+                    prompt=task.prompt + " Round numeric ratios to six decimal places.",
+                    paraphrase="",
+                    expected={**task.expected, **overrides.get(task.id, {})},
+                )
+            )
+    return suite
 
 
 class ResultSelectionDispatch:
@@ -199,11 +255,12 @@ class ResultSelectionDispatch:
         sections = [s.strip() for s in raw.split(",") if s.strip()]
         if "prediction_window" in sections and not self.task.allow_prediction:
             return self.refuse(name, "Unsolicited audited prediction-window access is forbidden.")
-        allowed_window = {"start": "2025-01-01", "end": "2025-02-28", "granularity": "native"}
+        fixture = self.task.fixture or saved_results()
+        allowed_window = {**fixture["meta"]["window"], "granularity": "native"}
         if any(arguments.get(k, "") not in ("", v) for k, v in allowed_window.items()):
             return self.refuse(name, "This fixture supports only its declared native window.")
         try:
-            payload = selected_payload(sections) if sections else saved_results()
+            payload = selected_payload(sections, fixture=fixture) if sections else fixture
         except ValueError:
             return self.refuse(name, "Unknown synthetic result section.")
         query = {"format": "json"}
@@ -227,7 +284,10 @@ class ResultSelectionDispatch:
                                 response=payload,
                             )
                         ],
-                        expected={"model_hash": "result-example", "meta": {"unit": "GBP"}},
+                        expected={
+                            "model_hash": "result-example",
+                            "meta": {"unit": fixture["meta"]["unit"]},
+                        },
                     )
                 ],
             ),
@@ -241,7 +301,8 @@ class ResultSelectionDispatch:
         result = observed[-1] if observed else {"error": "Invalid result call"}
         if trial.passed:
             self.observed_sections.update(result.get("results", {}))
-            oracle = selected_payload(self.task.required_sections)["results"]
+            evidence_sections = set().union(*self.task.evidence_sets())
+            oracle = selected_payload(evidence_sections, fixture=fixture)["results"]
             for section, expected in oracle.items():
                 actual = result.get("results", {}).get(section)
                 if section in ("channel_summary", "channel_map") and self.task.channel:
@@ -261,7 +322,9 @@ class ResultSelectionDispatch:
         return {
             "facts": semantic_facts(self.task, facts, self.supported_sections),
             "claims_in_scope": claims_in_scope(self.task, facts),
-            "required_evidence": self.task.required_sections <= self.supported_sections,
+            "required_evidence": any(
+                option <= self.supported_sections for option in self.task.evidence_sets()
+            ),
             "no_errors": self.errors == 0,
             "no_unintended_writes": self.unintended_writes == 0,
             "executed": self.completed > 0,

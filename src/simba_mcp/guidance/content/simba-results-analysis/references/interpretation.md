@@ -2,6 +2,11 @@
 
 - contributions is KPI space; coefficients is per-period revenue. Historical ROI,
   contribution and marginal ROI are different quantities. Preserve currency and units.
+- The headline mroi_summary fields evaluate marginal returns at the declared
+  point; default current spend is mean spend over active training periods, not
+  the latest spend. Separately named averaging-convention fields can contain
+  historical averages. Do not confuse these with the headline. Missing
+  mroi_periods does not make historical revenue/ROI in coefficients unavailable.
 - Use backend window aggregates: ROI is summed revenue divided by summed spend,
   never the average period ROI. Preserve meta.aggregation and meta.not_windowed.
   Do not sum marginal ROI or predictive interval endpoints. Bucketed predictions
@@ -10,10 +15,12 @@
   HDIs are 94%; other sections declare their own bands. Missing diagnostics do not
   prove convergence or failure. Use the declared quality policy for acceptance.
 - Overlap under log-link removal_lift reconciles the decomposition; it is not a
-  channel. Its absence does not establish an additive model. Preserve controls
+  channel and need not be negative with signed effects. Its absence does not
+  establish an additive model. Preserve controls
   and attribution convention. Never label KPI contributions as currency.
 - sections_available is response metadata, never a section to request. Read it
-  from an ordinary results response. Trust explicit available/reason fields. Older artefacts
+  from an ordinary results response. A listed selector does not prove its artefact
+  is populated. Trust explicit available/reason fields. Older artefacts
   can be unavailable. Retrieve supporting evidence or qualify the answer when
   units, uncertainty or provenance are absent.
 - Explicit channel/grid filters add _mcp_selection. Check changed sections, row

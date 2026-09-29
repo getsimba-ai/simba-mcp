@@ -5,6 +5,7 @@ import asyncio
 import hashlib
 import json
 import os
+import secrets
 from dataclasses import asdict
 from pathlib import Path
 
@@ -24,6 +25,7 @@ from .result_selection import (
     ResultSelectionDispatch,
     development_tasks,
     result_tasks,
+    validation_tasks,
 )
 from .roles import ROLE_CASES
 from .scenarios import SyntheticDispatch, answer, role_tasks, tasks
@@ -38,6 +40,10 @@ async def run(args):
     role = getattr(args, "role_comparison", None)
     baseline_path = getattr(args, "results_baseline", None)
     robust = getattr(args, "results_robust", False)
+    dataset_count = getattr(args, "results_validation_datasets", 0)
+    if dataset_count and (not robust or dataset_count not in (2, 3)):
+        raise ValueError("Generated validation requires robust mode and two or three datasets")
+    validation_seed = None
     if robust and not baseline_path:
         raise ValueError("Robust results assessment requires a paired guidance comparison")
     guidance_arms = None
@@ -58,9 +64,16 @@ async def run(args):
         raise ValueError("Role comparison requires eager mode to isolate catalogue visibility")
     suite = role_tasks() if role else tasks()
     if guidance_arms:
+        validation_seed = secrets.randbits(63) if dataset_count else None
         suite = [
             (task, task.prompt, task.expected)
-            for task in (development_tasks() if robust else result_tasks())
+            for task in (
+                validation_tasks(validation_seed, dataset_count)
+                if dataset_count
+                else development_tasks()
+                if robust
+                else result_tasks()
+            )
         ]
     selected = [task for task in suite if args.case is None or task[0].id == args.case]
     if role:
@@ -80,6 +93,8 @@ async def run(args):
             "results_prompt": getattr(args, "results_prompt", "mixed"),
             "results_robust": robust,
             "model": MODEL,
+            "validation_seed": validation_seed,
+            "validation_datasets": dataset_count,
         },
         "trials": [],
         "catalogue": [t.model_dump(mode="json") for t in tools],
@@ -94,6 +109,9 @@ async def run(args):
                     "family": c.family,
                     "channel": c.channel,
                     "allow_prediction": c.allow_prediction,
+                    "evidence_options": [sorted(s) for s in c.evidence_sets()],
+                    "fixture": c.fixture,
+                    "dataset": c.dataset,
                 },
                 "prompt": p,
                 "expected": e,
@@ -109,6 +127,7 @@ async def run(args):
             "purpose": "development",
             "samples": args.samples,
             "configuration": report["configuration"],
+            "authorised_budget": {"cap_usd": args.cap_usd, "prior_usd": args.prior_usd},
             "tasks": report["tasks"],
             "guidance": report["guidance"],
             "catalogue": report["catalogue"],
@@ -283,7 +302,10 @@ async def run(args):
     finally:
         if robust:
             report["assessment"] = assess_comparison(
-                report["trials"], {c.id: c.family for c, _, _ in selected}, samples=args.samples
+                report["trials"],
+                {c.id: c.family for c, _, _ in selected},
+                samples=args.samples,
+                datasets={c.id: c.dataset for c, _, _ in selected},
             )
         save()
 
@@ -304,6 +326,12 @@ def main():
         "--results-baseline", type=Path, help="Frozen guidance responses for paired results trials"
     )
     parser.add_argument("--results-prompt", choices=("mixed", "paraphrase"), default="mixed")
+    parser.add_argument(
+        "--results-validation-datasets",
+        type=int,
+        default=0,
+        help="Generate two or three fresh synthetic datasets after guidance selection",
+    )
     parser.add_argument(
         "--stop-file", type=Path, help="Stop at the next provider checkpoint if this file exists"
     )

@@ -284,3 +284,25 @@ quality and cost thresholds, then supply multiple datasets and externally held
 acceptance cases. Only after those prerequisites should another frozen comparison
 be used for acceptance. The issue and PR remain open and draft. The existing
 historical-marginal routing gap is not waived or claimed fixed by this work.
+# Pending acceptance: generated datasets and live contract checks
+
+The latest development changes extend the existing grader to task families across
+fresh generated numerical datasets, accept either sufficient aggregate ROI evidence
+source, freeze the dataset seed and budget configuration, and report dataset counts.
+They do not establish independent holdout acceptance. Guidance now distinguishes
+headline marginal ROI from historical averaging conventions and permits either sign
+for the Overlap reconciliation residual.
+
+Nineteen checks against captured live saved-result responses passed, including
+aggregate arithmetic, date selection, monthly aggregation and preservation of
+returned uncertainty bands by the candidate filter. These checks also confirmed
+fixture/dispatcher gaps: missing underlying channel rows, nested configuration,
+diagnostic shapes, conditional metadata, section availability and unknown-section
+behaviour. Historical marginal rows remain unwindowed with explicit disclosure.
+Those fixture/dispatcher corrections remain pending. Generated fixtures still
+inherit these limitations and must not be used to claim API fidelity or acceptance.
+
+The historical qualitative review in `selective-results-claim-review.json` is
+explicitly superseded as acceptance evidence. Original trial grades are preserved.
+Raw live responses and internal code audit records are not published. No new fits
+or paid provider sessions were used for this verification. The PR remains draft.

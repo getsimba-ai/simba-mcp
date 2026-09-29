@@ -1,0 +1,180 @@
+{
+  "schema_version": 1,
+  "review_status": "superseded_fixture_only_engineering_review_not_acceptance",
+  "source_evidence": "selective-results-robustness-evidence.json",
+  "source_sha256": "c8116d5b2b9a34d66a9d5655b8c038ad680086cdc65cb492e022a6ac6c3f1925",
+  "note": "Historical post-hoc fixture-only review. Subsequent individual calculation checks and live API verification identified contract gaps, so these verdicts are not current API-grounded acceptance. Original experiment grades remain unchanged.",
+  "reviews": [
+    {
+      "case": "result_roi",
+      "view": "baseline",
+      "repetition": 0,
+      "answer_sha256": "046443c50f14926abfde56696aa8489b308df7f10c2ded4a829ba4ed287f7208",
+      "engineering_claim_review": "supported",
+      "rationale": "Requested figures and explanation agree with the saved fixture; this is not a scientific validity endorsement. Existing routing and retrieval failures are not waived.",
+      "original_frozen_passed": false
+    },
+    {
+      "case": "result_roi",
+      "view": "candidate",
+      "repetition": 0,
+      "answer_sha256": "6193bd6fd87bea36590f0b1617d2e82729553ec77ca528ccb64d7714cb293005",
+      "engineering_claim_review": "supported",
+      "rationale": "Requested figures and explanation agree with the saved fixture; this is not a scientific validity endorsement. Existing routing and retrieval failures are not waived.",
+      "original_frozen_passed": false
+    },
+    {
+      "case": "result_diagnostics",
+      "view": "baseline",
+      "repetition": 0,
+      "answer_sha256": "a34118a62e1a41aee4ca454fa347874ffad9f08367ca93ae7fe134d23a1e9025",
+      "engineering_claim_review": "review",
+      "rationale": "Requested conclusion is reasonable, but the explanation assumes diagnostic section contents not present in the retrieved evidence. Existing evidence and routing failures remain.",
+      "original_frozen_passed": false
+    },
+    {
+      "case": "result_diagnostics",
+      "view": "candidate",
+      "repetition": 0,
+      "answer_sha256": "fcec2cc75245fa1ef213e59692ab1128def5c3de1e9a1fadd938a86e63bdbf2f",
+      "engineering_claim_review": "supported",
+      "rationale": "Requested figures and explanation agree with the saved fixture; this is not a scientific validity endorsement. Existing routing and retrieval failures are not waived.",
+      "original_frozen_passed": false
+    },
+    {
+      "case": "result_marginal",
+      "view": "baseline",
+      "repetition": 0,
+      "answer_sha256": "6d369a7515e45c811afe16fc2aaad3701b99de5f2fca3949079373d0febfb682",
+      "engineering_claim_review": "supported",
+      "rationale": "Requested figures and explanation agree with the saved fixture; this is not a scientific validity endorsement. Existing routing and retrieval failures are not waived.",
+      "original_frozen_passed": false
+    },
+    {
+      "case": "result_marginal",
+      "view": "candidate",
+      "repetition": 0,
+      "answer_sha256": "ae09f3a4197b7e6a6d1bb7b27654a8f3cabf44f0316c89bd1c5002f05fe3b38b",
+      "engineering_claim_review": "supported",
+      "rationale": "Requested figures and explanation agree with the saved fixture; this is not a scientific validity endorsement. Existing routing and retrieval failures are not waived.",
+      "original_frozen_passed": false
+    },
+    {
+      "case": "result_decomposition",
+      "view": "baseline",
+      "repetition": 0,
+      "answer_sha256": "c589129e3e2e42505a8b8f4f5e90fec373a52a5236d8d929980b08b9c7e215aa",
+      "engineering_claim_review": "fail",
+      "rationale": "Infers absent or negligible Overlap from channel_summary, although Overlap is a reconciliation term in contributions and the fixture has value -2.",
+      "original_frozen_passed": false
+    },
+    {
+      "case": "result_decomposition",
+      "view": "candidate",
+      "repetition": 0,
+      "answer_sha256": "32514a279c2c8a32736155d13edf9f666113e6e6d118a63010a77e3a28990ba9",
+      "engineering_claim_review": "review",
+      "rationale": "Correct requested fields and saved values; broader interpretation of interaction and the expected sign needs domain review.",
+      "original_frozen_passed": false
+    },
+    {
+      "case": "result_old_artifact",
+      "view": "baseline",
+      "repetition": 0,
+      "answer_sha256": "4ad372560a404c9bdeca9bfc572bef42d35365095eb06c04d2f6891ea6864e72",
+      "engineering_claim_review": "fail",
+      "rationale": "Describes current mroi_summary as aggregated across the historical window, contrary to its non-windowed current-activity meaning.",
+      "original_frozen_passed": false
+    },
+    {
+      "case": "result_old_artifact",
+      "view": "candidate",
+      "repetition": 0,
+      "answer_sha256": "6f70ff7fe74e5b9420c94b168ea5f783b18ee4605b2621d7a9f35b50cb14e3b0",
+      "engineering_claim_review": "review",
+      "rationale": "Correct unavailability result. Listing a selector in sections_available alone does not prove a saved alternative artefact is populated.",
+      "original_frozen_passed": false
+    },
+    {
+      "case": "result_tv_roi",
+      "view": "baseline",
+      "repetition": 0,
+      "answer_sha256": "18b18ffa6d7f6876dfa57f67c705dd6c8039a1a37046015ec08d1ac3a42e35a9",
+      "engineering_claim_review": "supported",
+      "rationale": "Requested figures and explanation agree with the saved fixture; this is not a scientific validity endorsement. Existing routing and retrieval failures are not waived.",
+      "original_frozen_passed": false
+    },
+    {
+      "case": "result_tv_roi",
+      "view": "candidate",
+      "repetition": 0,
+      "answer_sha256": "3eb9c187fa1f2bc2c0eb3637d4f6e7d5f9012d815150e3c6fb4f42c15e655393",
+      "engineering_claim_review": "supported",
+      "rationale": "Requested figures and explanation agree with the saved fixture; this is not a scientific validity endorsement. Existing routing and retrieval failures are not waived.",
+      "original_frozen_passed": false
+    },
+    {
+      "case": "result_total_roi",
+      "view": "baseline",
+      "repetition": 0,
+      "answer_sha256": "77e7b926050a1bbc9d3175b144b3b0e259c3f608b514d6e0d4a5494969054ed2",
+      "engineering_claim_review": "supported",
+      "rationale": "Requested figures and explanation agree with the saved fixture; this is not a scientific validity endorsement. Existing routing and retrieval failures are not waived.",
+      "original_frozen_passed": false
+    },
+    {
+      "case": "result_total_roi",
+      "view": "candidate",
+      "repetition": 0,
+      "answer_sha256": "76e49d6fd0f59552027ed74b57d3418016b5229fb1f92d5074f779360328dba5",
+      "engineering_claim_review": "supported",
+      "rationale": "Requested figures and explanation agree with the saved fixture; this is not a scientific validity endorsement. Existing routing and retrieval failures are not waived.",
+      "original_frozen_passed": false
+    },
+    {
+      "case": "result_period_roi",
+      "view": "baseline",
+      "repetition": 0,
+      "answer_sha256": "65dbf3e1a92929f38fde9cfd602d617152fb81ee156e892a420ae26a1af2e5ab",
+      "engineering_claim_review": "supported",
+      "rationale": "Requested figures and explanation agree with the saved fixture; this is not a scientific validity endorsement. Existing routing and retrieval failures are not waived.",
+      "original_frozen_passed": false
+    },
+    {
+      "case": "result_period_roi",
+      "view": "candidate",
+      "repetition": 0,
+      "answer_sha256": "89fc26891aede8547ad223d731289664759f434eb85c2d7104cdd7b7f975cc78",
+      "engineering_claim_review": "fail",
+      "rationale": "Correct aggregate ROI and averaging rule, but claims individual historical ROI cannot be shown because mroi_periods is missing. Historical ROI is available in coefficients; marginal ROI is a different quantity.",
+      "original_frozen_passed": false
+    },
+    {
+      "case": "result_marginal_window",
+      "view": "baseline",
+      "repetition": 0,
+      "answer_sha256": "46a3436a3313865e79fff3090fafa5315a66556577d13a5c2963c9879bc3c5da",
+      "engineering_claim_review": "fail",
+      "rationale": "Fails to return the saved current median and incorrectly describes current marginal ROI as an aggregate over the training window.",
+      "original_frozen_passed": false
+    },
+    {
+      "case": "result_marginal_window",
+      "view": "candidate",
+      "repetition": 0,
+      "answer_sha256": "b746baa35a1083c0301c63371715d6295c0ff76cc194ef16a66e6f04b54b6e2f",
+      "engineering_claim_review": "fail",
+      "rationale": "Correct requested numeric fields, but the explanation incorrectly describes current marginal ROI as an aggregate across the fitted window.",
+      "original_frozen_passed": false
+    },
+    {
+      "case": "result_overlap_value",
+      "view": "baseline",
+      "repetition": 0,
+      "answer_sha256": "5dbaa01809a1b3375314ebde140d79d9394079e133d7fb3ce03b710372a9fcb7",
+      "engineering_claim_review": "supported",
+      "rationale": "Requested figures and explanation agree with the saved fixture; this is not a scientific validity endorsement. Existing routing and retrieval failures are not waived.",
+      "original_frozen_passed": false
+    }
+  ]
+}

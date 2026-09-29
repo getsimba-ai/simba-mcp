@@ -10,6 +10,7 @@ from simba_mcp.evaluation.hosts.result_grading import structured_answer_only
 from simba_mcp.evaluation.hosts.result_selection import (
     ResultSelectionDispatch,
     development_tasks,
+    validation_tasks,
 )
 from simba_mcp.server import create_server
 
@@ -176,3 +177,104 @@ async def test_development_tasks_are_achievable_with_canonical_dispatch():
 )
 def test_formatting_is_separate_from_unreviewed_prose(text, expected):
     assert structured_answer_only(text) is expected
+
+
+@pytest.mark.anyio
+@pytest.mark.parametrize("sections", ["coefficients", "channel_summary"])
+async def test_period_aggregation_accepts_either_sufficient_evidence_source(sections):
+    task = next(t for t in development_tasks() if t.id == "result_period_roi")
+    dispatch = ResultSelectionDispatch(create_server(), task)
+    await dispatch("get_model_results", {"model_hash": "result-example", "sections": sections})
+    assert all(dispatch.grade(task.expected).values())
+
+
+@pytest.mark.anyio
+async def test_generated_validation_has_new_truth_and_preserves_evidence_constraints():
+    suite = validation_tasks(123456, 2)
+    assert len(suite) == 22
+    assert len({t.id for t in suite}) == 22
+    assert len({t.dataset for t in suite}) == 2
+    search = [t for t in suite if t.id.startswith("result_roi_")]
+    assert search[0].expected != search[1].expected
+    for task in suite:
+        dispatch = ResultSelectionDispatch(create_server(), task)
+        assert not dispatch.grade(task.expected)["required_evidence"]
+        _, error = await dispatch(
+            "get_model_results",
+            {
+                "model_hash": "result-example",
+                "sections": ",".join(sorted(task.required_sections)),
+            },
+        )
+        assert not error and all(dispatch.grade(task.expected).values()), task.id
+
+
+@pytest.mark.anyio
+async def test_generated_validation_cli_freezes_fixture_and_excludes_oracle_from_prompt(
+    tmp_path, monkeypatch
+):
+    import json
+    from types import SimpleNamespace
+
+    import httpx
+
+    from simba_mcp.evaluation.hosts import __main__ as command
+    from simba_mcp.guidance import read_guidance
+
+    seen = []
+
+    async def fake_session(provider, tools, prompt, dispatch, budget, checkpoint, **kwargs):
+        seen.append(prompt)
+        assert str(dispatch.task.expected) not in prompt
+        await dispatch(
+            "get_model_results",
+            {
+                "model_hash": "result-example",
+                "sections": ",".join(sorted(dispatch.task.required_sections)),
+            },
+        )
+        result = {
+            "final_text": json.dumps(dispatch.task.expected),
+            "cost_usd": 0.0,
+            "calls": [],
+            "responses": [],
+            "seconds": 0.0,
+        }
+        checkpoint(result)
+        return result
+
+    monkeypatch.setattr(command, "session", fake_session)
+    monkeypatch.setattr(command, "client", lambda _: httpx.AsyncClient())
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "synthetic-key")
+    # Source hashing is exercised separately; avoid repeated filesystem reads in this integration test.
+    monkeypatch.setattr(experiments, "source_fingerprint", lambda: "frozen-source")
+    baseline = tmp_path / "baseline.json"
+    baseline.write_text(
+        json.dumps(
+            {
+                s: read_guidance("results", s)
+                for s in ("entrypoint", "interpretation", "tool-reference")
+            }
+        )
+    )
+    output = tmp_path / "report.json"
+    await command.run(
+        SimpleNamespace(
+            output=output,
+            cap_usd=25,
+            prior_usd=11.438494,
+            samples=2,
+            mode="eager",
+            case=None,
+            results_baseline=baseline,
+            results_robust=True,
+            results_validation_datasets=2,
+        )
+    )
+    report = json.loads(output.read_text())
+    assert report["status"] == "complete" and len(seen) == 88
+    assert all(t["passed"] for t in report["trials"])
+    assert report["configuration"]["validation_seed"] is not None
+    assert all(t["case"]["fixture"] for t in report["tasks"])
+    assert report["assessment"]["dataset_count"] == 2
+    assert not report["assessment"]["accepted"]

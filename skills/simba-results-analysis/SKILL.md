@@ -2,7 +2,7 @@
 name: simba-results-analysis
 description: Read and interpret saved Simba results, contribution, ROI, uncertainty and diagnostics.
 metadata:
-  version: "4"
+  version: "5"
 ---
 
 # Analyse saved results
@@ -15,6 +15,7 @@ when the identifier is missing or the results endpoint explicitly rejects it.
 Choose sections from the question:
 
 - Revenue or ROI: channel_summary,channel_map; pass the requested start/end.
+- Individual historical ROI periods: coefficients; these are not marginal ROI.
 - Contribution decomposition: contributions,model_config; add channel_map for channel identity.
 - Convergence: model_stats,r_hat.
 - Current marginal ROI: mroi_summary,channel_map.

@@ -57,7 +57,7 @@ def verify_experiment(frozen, inputs, calibration):
         raise ValueError("Frozen experiment changed; stop without spending or regrading")
 
 
-def assess_comparison(rows, families, *, samples, resamples=4000, seed=20260929):
+def assess_comparison(rows, families, *, samples, resamples=4000, seed=20260929, datasets=None):
     """Equal-weight task-family bootstrap, keeping paired repetitions together.
 
     Intervals describe only the sampled development families, not production
@@ -178,6 +178,7 @@ def assess_comparison(rows, families, *, samples, resamples=4000, seed=20260929)
         "reasons": reasons,
         "task_count": len(families),
         "family_count": len(units),
+        "dataset_count": len(set(datasets.values())) if datasets else 1,
         "paired_repetitions": samples,
         "candidate_hard_failures": hard_failures,
         "quality_delta": None if pending_review else point[0],
@@ -188,6 +189,7 @@ def assess_comparison(rows, families, *, samples, resamples=4000, seed=20260929)
         "bootstrap_seed": seed,
         "bootstrap_resamples": resamples,
         "weighting": "equal task families; equal cases and paired repetitions within family",
-        "limitations": "All cases share one synthetic dataset. Intervals are conditional on "
-        "these task families and do not establish dataset or scientific generalisation.",
+        "limitations": "Intervals condition on the synthetic datasets and task families used. "
+        "Datasets are not independently resampled. These intervals do not establish "
+        "dataset or scientific generalisation.",
     }

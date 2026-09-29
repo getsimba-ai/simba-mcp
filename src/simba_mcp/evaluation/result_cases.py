@@ -1,6 +1,7 @@
 """Publishable saved-result fixtures with independently stated expected facts."""
 
 from copy import deepcopy
+from random import Random
 
 from .contracts import Case, Exchange, Step
 
@@ -99,9 +100,9 @@ def saved_results():
     }
 
 
-def selected_payload(sections):
+def selected_payload(sections, *, fixture=None):
     """Model supported section projection only, not backend maths or audit storage."""
-    payload = saved_results()
+    payload = deepcopy(fixture) if fixture is not None else saved_results()
     available = payload["sections_available"]
     if not set(sections) <= set(available):
         raise ValueError("Unsupported synthetic section")
@@ -113,6 +114,43 @@ def selected_payload(sections):
         }
     if "prediction_window" in sections:
         payload["results"]["prediction_window"] = {"available": False, "reason": "not_saved"}
+    return payload
+
+
+def varied_results(seed):
+    """Fresh numerical evidence; generated after guidance selection, never a fit.
+
+    These variants test transfer beyond memorised development values. They are
+    procedurally generated validation, not externally authored hidden benchmarks.
+    """
+    rng = Random(seed)
+    payload = saved_results()
+    rows = payload["results"]
+    period_spend = (rng.randrange(4, 12) * 25, rng.randrange(15, 30) * 25)
+    period_ratio = (rng.choice((1.5, 2.0, 3.5, 4.5)), rng.choice((0.5, 1.0, 2.5, 3.0)))
+    for row, spend, ratio in zip(rows["coefficients"], period_spend, period_ratio, strict=True):
+        row.update(Spend=float(spend), Revenue=spend * ratio, ROI=ratio)
+    search_spend = sum(period_spend)
+    search_revenue = sum(s * r for s, r in zip(period_spend, period_ratio, strict=True))
+    rows["channel_summary"][0].update(
+        Spend=float(search_spend),
+        Revenue=search_revenue,
+        ROI=search_revenue / search_spend,
+    )
+    tv_spend, tv_ratio = rng.randrange(5, 20) * 40, rng.choice((0.75, 1.25, 2.25, 3.25))
+    rows["channel_summary"][1].update(
+        Spend=float(tv_spend),
+        Revenue=tv_spend * tv_ratio,
+        ROI=tv_ratio,
+    )
+    median = rng.choice((0.8, 1.2, 1.8, 2.4))
+    rows["mroi_summary"]["channels"][0].update(
+        mroi_median=median,
+        mroi_hdi_3=round(median / 2, 2),
+        mroi_hdi_97=round(median * 1.5, 2),
+    )
+    overlap = -float(rng.randrange(3, 10))
+    rows["contributions"][0].update(Overlap=overlap, Model=112 + overlap)
     return payload
 
 

@@ -19,14 +19,14 @@ def semantic_facts(task, facts, supported_sections):
     if not isinstance(facts, dict):
         return False
     facts = dict(facts)
-    if task.id == "result_old_artifact" and "mroi_periods" in facts:
+    if (task.family or task.id) == "result_old_artifact" and "mroi_periods" in facts:
         nested = facts["mroi_periods"]
         if not isinstance(nested, dict):
             return False
         if any(k in facts and facts[k] != nested.get(k) for k in ("available", "reason")):
             return False
         facts = nested
-    if task.id == "result_diagnostics":
+    if (task.family or task.id) == "result_diagnostics":
         state = facts.get("convergence")
         established = facts.get("convergence_established")
         if "convergence" in facts and not (
@@ -75,9 +75,9 @@ def claims_in_scope(task, facts):
     if not isinstance(facts, dict):
         return False
     allowed = set(task.expected)
-    if task.id == "result_diagnostics":
+    if (task.family or task.id) == "result_diagnostics":
         allowed.add("convergence_established")
-    if task.id == "result_old_artifact" and "mroi_periods" in facts:
+    if (task.family or task.id) == "result_old_artifact" and "mroi_periods" in facts:
         nested = facts["mroi_periods"]
         if not isinstance(nested, dict) or not set(nested) <= allowed:
             return False
@@ -93,7 +93,7 @@ def fact_verdict(task, facts, supported_sections):
     """
     if semantic_facts(task, facts, supported_sections):
         return "pass"
-    if task.id == "result_diagnostics" and isinstance(facts, dict):
+    if (task.family or task.id) == "result_diagnostics" and isinstance(facts, dict):
         state = facts.get("convergence")
         established = facts.get("convergence_established")
         state_valid = (
