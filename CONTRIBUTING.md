@@ -34,6 +34,10 @@ opt out of (see `_create_app`).
 
 ## Running Tests
 
+For catalogue and synthetic request measurements, see
+[Measuring MCP performance](docs/performance.md). Metrics are opt-in and the
+offline commands require no Simba account or model-provider credentials.
+
 ```bash
 pytest -v
 ```

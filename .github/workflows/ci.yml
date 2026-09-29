@@ -12,6 +12,10 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.11", "3.12", "3.13"]
+        sdk: ["current"]
+        include:
+          - python-version: "3.11"
+            sdk: "2.1.0"
 
     steps:
       - uses: actions/checkout@v4
@@ -24,7 +28,11 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -e ".[dev]"
+          pip install -e ".[dev,performance]"
+
+      - name: Install supported SDK floor
+        if: matrix.sdk != 'current'
+        run: pip install "mcp==${{ matrix.sdk }}"
 
       - name: Lint
         run: ruff check src/ tests/
@@ -34,3 +42,22 @@ jobs:
 
       - name: Test
         run: pytest -v
+
+      - name: Check generated reference
+        run: python -m simba_mcp.reference --check
+
+      - name: Capture synthetic performance baseline
+        if: matrix.python-version == '3.11'
+        run: |
+          python -m simba_mcp.performance --encoding o200k_base --output-dir .codex/performance-baseline
+          python -m simba_mcp.benchmark --samples 30 --output-dir .codex/performance-baseline
+
+      - name: Retain baseline evidence
+        if: matrix.python-version == '3.11'
+        uses: actions/upload-artifact@v7
+        with:
+          name: performance-${{ matrix.sdk }}
+          path: .codex/performance-baseline/
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 90

@@ -8,7 +8,7 @@ from mcp.server.mcpserver.exceptions import ToolError, UnexpectedToolError
 from mcp.types import CallToolResult, TextContent
 from pydantic import ValidationError
 
-from . import runtime
+from . import runtime, telemetry
 from .auth import _bearer_token, _client, _local_files_allowed
 from .errors import api_error
 from .metadata import annotations_for
@@ -158,6 +158,15 @@ class SimbaMCPServer(MCPServer):
     `_wire_errors` wraps tool bodies and so never sees it (simba-mcp#26)."""
 
     async def call_tool(self, name, arguments, context=None):
+        sink = telemetry.get_sink()
+        if sink is None:
+            return await self._call_tool(name, arguments, context)
+        with telemetry.observe(name if name in _TOOL_NAMES else "other", sink) as observation:
+            result = await self._call_tool(name, arguments, context)
+            observation.result(result)
+            return result
+
+    async def _call_tool(self, name, arguments, context=None):
         try:
             return await super().call_tool(name, arguments, context)
         except ToolError as exc:
@@ -271,6 +280,9 @@ TOOLS = (
     adopt_model_into_study,
     compare_study_runs,
 )
+
+
+_TOOL_NAMES = frozenset(tool.__name__ for tool in TOOLS)
 
 
 def _wire_errors(tool):
