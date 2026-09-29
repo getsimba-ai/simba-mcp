@@ -80,3 +80,16 @@ agent, with qualified independence rather than complete blindness. The frozen
 fails the zero-unsupported-claims and 95%-supported-answer gates. Original automatic
 scores and full reviewed synthetic evidence remain separate. No further provider
 run is scheduled. The PR stays draft and issue #45 stays open.
+
+## Subsequent frozen grounding change and fresh attempt
+
+The [grounding validation](selective-results-grounding-validation.md) supported
+all 11 completed candidate and four control answers across separately recorded
+runs. Controls also passed, so no causal improvement was established. Guidance
+and model settings were frozen before a different author released eight fresh
+cases. The [fresh attempt](selective-results-fresh-acceptance.md) was interrupted
+by a grader-11 sufficient-evidence defect; a genuine unsupported candidate
+explanation was also found. Grader 12 repairs the evidence rule prospectively.
+Original scores and the interrupted provider response remain preserved.
+Acceptance is still unmet, no further provider run is scheduled, and #45 remains
+open with PR #58 draft.

@@ -171,6 +171,7 @@ def fresh_acceptance_tasks():
         "Use this reporting rule only: every saved R_hat must be strictly below 1.005. Return passes_requested_rule and max_r_hat. The saved success label does not override this rule.",
         {"r_hat"},
         {"passes_requested_rule": False, "max_r_hat": 1.008},
+        alternatives=({"r_hat"}, {"model_stats"}),
     )
     add(
         "absent_diagnostics",

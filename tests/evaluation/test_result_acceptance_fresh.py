@@ -147,3 +147,52 @@ async def test_fresh_zero_spend_accepts_complete_target_channel_periods_only():
     )
     assert not error
     assert not partial.grade(task.expected)["required_evidence"]
+
+
+@pytest.mark.anyio
+async def test_fresh_threshold_saved_maximum_is_sufficient_despite_success_label():
+    task = next(t for t in fresh_acceptance_tasks() if t.family == "diagnostic_threshold")
+    dispatch = ResultSelectionDispatch(create_server("compact"), task)
+    result, error = await dispatch(
+        "get_model_results", {"model_hash": "result-example", "sections": "model_stats"}
+    )
+    assert not error
+    stats = result["results"]["model_stats"][0]
+    assert stats["Status"] == "success"
+    assert float(stats["Output"]) >= 1.005
+    assert all(dispatch.grade(task.expected).values())
+    assert not dispatch.grade({"passes_requested_rule": True, "max_r_hat": 1.008})["facts"]
+
+
+@pytest.mark.anyio
+async def test_fresh_threshold_unrelated_section_cannot_support_correct_guess():
+    task = next(t for t in fresh_acceptance_tasks() if t.family == "diagnostic_threshold")
+    dispatch = ResultSelectionDispatch(create_server("compact"), task)
+    _, error = await dispatch(
+        "get_model_results", {"model_hash": "result-example", "sections": "channel_summary"}
+    )
+    assert not error
+    assert not dispatch.grade(task.expected)["required_evidence"]
+
+
+@pytest.mark.anyio
+async def test_fresh_window_accepts_complete_unwindowed_coefficients():
+    task = next(t for t in fresh_acceptance_tasks() if t.family == "inclusive_window")
+    dispatch = ResultSelectionDispatch(create_server("compact"), task)
+    _, error = await dispatch(
+        "get_model_results", {"model_hash": "result-example", "sections": "coefficients"}
+    )
+    assert not error
+    assert all(dispatch.grade(task.expected).values())
+
+
+@pytest.mark.anyio
+async def test_fresh_reconciliation_requires_mapping_not_names_or_configuration():
+    task = next(t for t in fresh_acceptance_tasks() if t.family == "signed_reconciliation")
+    dispatch = ResultSelectionDispatch(create_server("compact"), task)
+    _, error = await dispatch(
+        "get_model_results",
+        {"model_hash": "result-example", "sections": "contributions,model_config"},
+    )
+    assert not error
+    assert not dispatch.grade(task.expected)["required_evidence"]
