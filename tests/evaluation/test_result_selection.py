@@ -198,3 +198,42 @@ async def test_on_demand_guidance_cannot_leak_other_arm():
     dispatch = ResultSelectionDispatch(create_server(), result_tasks()[0], guidance=frozen)
     result, error = await dispatch("get_workflow_guidance", {"topic": "results"})
     assert not error and result == frozen["entrypoint"]
+
+
+def test_semantic_grader_keeps_literal_and_evidence_constraints_separate():
+    from simba_mcp.evaluation.hosts.result_selection import literal_fields, semantic_facts
+
+    roi, diagnostics, marginal, decomposition, old = result_tasks()
+    display = {**roi.expected, "channel": "Search"}
+    assert semantic_facts(roi, display, {"channel_map"})
+    assert not semantic_facts(roi, display, set())
+    assert not literal_fields(roi, display)
+    assert not semantic_facts(roi, {**display, "roi": 3.0}, {"channel_map"})
+    assert not semantic_facts(marginal, {**marginal.expected, "hdi_prob": 0.95}, set())
+    assert not semantic_facts(
+        decomposition, {"overlap_is_channel": 0, "attribution": "removal_lift"}, set()
+    )
+    for facts in [
+        {"convergence": "unknown", "reason": "not_saved"},
+        {"convergence_established": False, "reason": "The diagnostics are unavailable."},
+        {"convergence_established": False, "reason": "Diagnostics were not saved."},
+    ]:
+        assert semantic_facts(diagnostics, facts, set())
+    for facts in [
+        {"convergence": "pass", "reason": "not_saved"},
+        {"convergence": "failed", "reason": "not_saved"},
+        {"convergence_established": 0, "reason": "not_saved"},
+        {"convergence_established": True, "reason": "not_saved"},
+        {"convergence": "unknown", "convergence_established": True, "reason": "not_saved"},
+        {"convergence": "unknown", "reason": "r_hat_too_high"},
+    ]:
+        assert not semantic_facts(diagnostics, facts, set())
+    assert semantic_facts(old, {"mroi_periods": old.expected}, set())
+    assert not semantic_facts(old, {"available": True, "mroi_periods": old.expected}, set())
+    assert not semantic_facts(old, {"available": False, "reason": "no_spend"}, set())
+
+
+def test_paraphrases_are_frozen_before_trial_and_preserve_expected_contract():
+    for task in result_tasks():
+        assert task.paraphrase and task.paraphrase != task.prompt
+        assert "result-example" in task.paraphrase

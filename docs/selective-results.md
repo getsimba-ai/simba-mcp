@@ -84,7 +84,7 @@ results `entrypoint`, `interpretation` and `tool-reference`, captured before the
 change. The command refuses to overwrite evidence and retains reservations for
 requests with unknown usage. Use `--prior-usd` when continuing a stopped budget.
 
-### Observed agent results, 29 September 2026
+### First comparison: expanded guidance, 29 September 2026
 
 The frozen comparison completed all 50 sessions for US$4.737691 under its US$10
 cap, with no outstanding usage reservations. Model: `claude-haiku-4-5-20251001`,
@@ -111,10 +111,9 @@ not all numerical or scientific errors. Unnecessary `list_models`/`get_model`
 calls are genuine routing overhead under the known-model task contract, even
 though those reads are harmless. They were refused by the fixture dispatcher.
 
-**Acceptance failed.** The revised guidance retrieved more of the required
+**First-candidate acceptance failed.** The expanded guidance retrieved more of the required
 evidence but increased input tokens and accounted cost by about 32%. It does not
-demonstrate overall task improvement, lower cost or lower latency. Keep this
-candidate in draft; do not merge or close #45 on this evidence.
+demonstrate overall task improvement, lower cost or lower latency. Keep that first candidate retired; do not close #45 on this evidence.
 
 Next work: diagnose why the expanded guidance induces extra discovery; simplify
 the known-model path; refine task output requirements and semantic grading before
@@ -139,3 +138,7 @@ package build passed. The scripted evaluation completed two repetitions without
 provider calls or real model fits. CI is tracked in the implementation PR. The
 separate live agent acceptance failed as shown above. Issue #45 remains open; no
 deployment or scientific-model validation is claimed.
+
+## Bounded shorter-guidance iteration
+
+The follow-up retains the tested result handler, shortens canonical guidance and makes the supplied-model path explicit. Both arms use the same revised semantic grader, with literal output fidelity reported separately. The original first-comparison record is immutable. Three repetitions use the original question and two use frozen paraphrases; neither question names the required sections. Provider comparison is in progress and remains inside the original cumulative US$10 cap. No acceptance claim is made before completion.

@@ -12,7 +12,7 @@ from ...guidance import read_guidance
 from ...measurements import provenance
 from ...server import create_server
 from .anthropic import Budget, client, definitions, session
-from .result_selection import ResultSelectionDispatch, result_tasks
+from .result_selection import ResultSelectionDispatch, literal_fields, result_tasks
 from .roles import ROLE_CASES
 from .scenarios import SyntheticDispatch, answer, role_tasks, tasks
 
@@ -66,7 +66,11 @@ async def run(args):
             {
                 "case": c.model_dump()
                 if not guidance_arms
-                else {"id": c.id, "required_sections": sorted(c.required_sections)},
+                else {
+                    "id": c.id,
+                    "required_sections": sorted(c.required_sections),
+                    "paraphrase": c.paraphrase,
+                },
                 "prompt": p,
                 "expected": e,
             }
@@ -129,6 +133,11 @@ async def run(args):
                             ).hexdigest(),
                         }
                         report["trials"].append(row)
+                        session_prompt = case.paraphrase if guidance_arms and rep >= 3 else prompt
+                        if guidance_arms:
+                            row["prompt"] = session_prompt
+                            row["prompt_variant"] = "paraphrase" if rep >= 3 else "original"
+                            row["grader_version"] = 2
 
                         def checkpoint(record, row=row):
                             row["session"] = record
@@ -137,7 +146,7 @@ async def run(args):
                         result = await session(
                             provider,
                             definitions_sent,
-                            prompt,
+                            session_prompt,
                             dispatch,
                             budget,
                             checkpoint,
@@ -165,6 +174,7 @@ async def run(args):
                         )
                         if guidance_arms:
                             row["assertions"] = dispatch.grade(actual)
+                            row["literal_fields_match"] = literal_fields(case, actual)
                             row["passed"] = all(row["assertions"].values())
                             row["answer_correct"] = row["assertions"]["facts"]
                             row["observed_sections"] = sorted(dispatch.observed_sections)

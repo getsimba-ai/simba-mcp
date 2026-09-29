@@ -4,7 +4,7 @@ Allows alternative evidence-selection sequences without implementing a backend o
 inferring scientific correctness. All execution still uses the canonical runner.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from ...metadata import READ_ONLY
 from ..contracts import Case, Exchange, Step
@@ -19,11 +19,12 @@ class ResultTask:
     required_sections: frozenset[str]
     expected: dict
     allow_prediction: bool = False
+    paraphrase: str = ""
 
 
 def result_tasks():
     prefix = "The completed saved model is result-example. Read existing evidence only. "
-    return [
+    suite = [
         ResultTask(
             "result_roi",
             prefix
@@ -61,7 +62,7 @@ def result_tasks():
             "result_decomposition",
             prefix
             + "Explain the saved decomposition: is Overlap a media channel, and what attribution convention was used? Return overlap_is_channel and attribution as JSON.",
-            frozenset({"contributions", "model_config", "channel_map"}),
+            frozenset({"contributions", "model_config"}),
             {"overlap_is_channel": False, "attribution": "removal_lift"},
         ),
         ResultTask(
@@ -71,6 +72,18 @@ def result_tasks():
             frozenset({"mroi_periods"}),
             {"available": False, "reason": "fitted_before_mroi_periods"},
         ),
+    ]
+
+    paraphrases = [
+        "For Search, give me the combined January-February 2025 revenue and cost, and their return ratio. Use JSON fields channel, revenue, spend, roi and currency.",
+        "Can we tell from the stored diagnostics whether this model converged? Use JSON fields convergence and reason.",
+        "Show Search's marginal return at its current spending level, including its uncertainty bounds. Use JSON fields channel, median, lower, upper and hdi_prob.",
+        "In this model's decomposition, should Overlap be treated as a media channel, and which attribution method applies? Use JSON fields overlap_is_channel and attribution.",
+        "Are historical period-by-period marginal returns available in this saved fit? Use JSON fields available and reason.",
+    ]
+    return [
+        replace(task, paraphrase=prefix + wording)
+        for task, wording in zip(suite, paraphrases, strict=True)
     ]
 
 
@@ -176,10 +189,65 @@ class ResultSelectionDispatch:
     def grade(self, facts):
         """Facts and evidence gates are separate from provider formatting checks."""
         return {
-            "facts": isinstance(facts, dict)
-            and all(facts.get(k) == v for k, v in self.task.expected.items()),
+            "facts": semantic_facts(self.task, facts, self.supported_sections),
             "required_evidence": self.task.required_sections <= self.supported_sections,
             "no_errors": self.errors == 0,
             "no_unintended_writes": self.unintended_writes == 0,
             "executed": self.completed > 0,
         }
+
+
+def literal_fields(task, facts):
+    """Retain the original exact-field metric separately from semantic acceptance."""
+    return isinstance(facts, dict) and all(facts.get(k) == v for k, v in task.expected.items())
+
+
+def semantic_facts(task, facts, supported_sections):
+    """Bounded equivalences, not a general language judge or fuzzy numeric scorer.
+
+    Display names require the returned canonical map. Boolean evidence states
+    never coerce integers/strings. Unsupported explanations remain outside this
+    structured-fact metric and require separate claim review.
+    """
+    if not isinstance(facts, dict):
+        return False
+    facts = dict(facts)
+    if task.id == "result_old_artifact" and "mroi_periods" in facts:
+        nested = facts["mroi_periods"]
+        if not isinstance(nested, dict):
+            return False
+        if any(k in facts and facts[k] != nested.get(k) for k in ("available", "reason")):
+            return False
+        facts = nested
+    if task.id == "result_diagnostics":
+        state = facts.get("convergence")
+        established = facts.get("convergence_established")
+        if "convergence" in facts and state not in ("unknown", "unavailable", "not_established"):
+            return False
+        if "convergence_established" in facts and established is not False:
+            return False
+        if state is None and established is not False:
+            return False
+        reason = facts.get("reason")
+        if not isinstance(reason, str):
+            return False
+        # Missing saved evidence, not failed convergence, is the fact at issue.
+        normal = reason.lower().replace("_", " ")
+        return (
+            "not saved" in normal
+            or "was not saved" in normal
+            or "diagnostics are unavailable" in normal
+        )
+    if facts.get("channel") == "Search" and "channel_map" in supported_sections:
+        facts["channel"] = "Search Activity"
+    for key, expected in task.expected.items():
+        actual = facts.get(key)
+        if isinstance(expected, bool):
+            if actual is not expected:
+                return False
+        elif isinstance(expected, (int, float)):
+            if type(actual) not in (int, float) or actual != expected:
+                return False
+        elif actual != expected:
+            return False
+    return True
