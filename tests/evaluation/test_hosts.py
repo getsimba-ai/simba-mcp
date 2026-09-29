@@ -241,6 +241,50 @@ def test_format_failure_is_separate_from_correct_facts():
 
 
 @pytest.mark.anyio
+async def test_fresh_packet_runs_only_frozen_paired_fresh_cases(tmp_path, monkeypatch):
+    from simba_mcp.evaluation.hosts import __main__ as command
+    from simba_mcp.evaluation.result_acceptance_fresh import fresh_acceptance_tasks
+    from simba_mcp.guidance import read_guidance
+
+    async def fake_session(*args, **kwargs):
+        return {"final_text": "{}", "cost_usd": 0, "calls": [], "stop": "end_turn"}
+
+    monkeypatch.setattr(command, "session", fake_session)
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "synthetic-key")
+    baseline = tmp_path / "baseline.json"
+    baseline.write_text(
+        json.dumps(
+            {
+                s: read_guidance("results", s)
+                for s in ("entrypoint", "interpretation", "tool-reference")
+            }
+        )
+    )
+    output = tmp_path / "fresh.json"
+    await command.run(
+        SimpleNamespace(
+            output=output,
+            cap_usd=0,
+            prior_usd=0,
+            samples=2,
+            mode="eager",
+            case=None,
+            results_robust=True,
+            results_acceptance=True,
+            results_acceptance_packet="fresh",
+            results_baseline=baseline,
+            case_review={"verified": True, "guidance_unchanged": True},
+        )
+    )
+    report = json.loads(output.read_text())
+    assert len(report["trials"]) == 32
+    assert {r["case"] for r in report["trials"]} == {t.id for t in fresh_acceptance_tasks()}
+    assert report["configuration"]["results_acceptance_packet"] == "fresh"
+    assert report["experiment_inputs"]["purpose"] == "candidate_acceptance"
+    assert not report["assessment"]["accepted"]
+
+
+@pytest.mark.anyio
 async def test_new_session_discards_previous_search_context():
     requests = []
 

@@ -391,13 +391,17 @@ class ResultSelectionDispatch:
                     self.supported_sections.add(section)
             for section, expected in oracle.items():
                 actual = result.get("results", {}).get(section)
+                if section == "coefficients" and self.task.channel:
+                    expected = [row for row in expected if row.get("Channel") == self.task.channel]
                 if section in ("channel_summary", "channel_map") and self.task.channel:
                     key = "Channel" if section == "channel_summary" else "activity_column"
                     wanted = next(row for row in expected if row[key] == self.task.channel)
                     valid = isinstance(actual, list) and any(
                         contains(row, wanted) for row in actual
                     )
-                elif section in ("coefficients", "contributions") and self.task.evidence_window:
+                elif (
+                    section in ("coefficients", "contributions") and self.task.evidence_window
+                ) or (section == "coefficients" and self.task.channel):
                     valid = (
                         isinstance(actual, list)
                         and bool(expected)

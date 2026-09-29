@@ -42,6 +42,9 @@ async def run(args):
     baseline_path = getattr(args, "results_baseline", None)
     robust = getattr(args, "results_robust", False)
     acceptance = getattr(args, "results_acceptance", False)
+    packet = getattr(args, "results_acceptance_packet", "original")
+    if packet not in ("original", "fresh") or (packet == "fresh" and not acceptance):
+        raise ValueError("Fresh acceptance packet requires acceptance mode")
     diagnostic = getattr(args, "results_model_diagnostic", False)
     if diagnostic and (not robust or acceptance or role or args.mode != "eager"):
         raise ValueError("Model diagnostic requires robust eager mode without other comparisons")
@@ -79,7 +82,10 @@ async def run(args):
     suite = role_tasks() if role else tasks()
     if guidance_arms:
         if acceptance or diagnostic:
-            from ..result_acceptance import acceptance_tasks
+            if packet == "fresh":
+                from ..result_acceptance_fresh import fresh_acceptance_tasks as acceptance_tasks
+            else:
+                from ..result_acceptance import acceptance_tasks
 
         validation_seed = secrets.randbits(63) if dataset_count else None
         suite = [
@@ -121,6 +127,7 @@ async def run(args):
             "results_prompt": getattr(args, "results_prompt", "mixed"),
             "results_robust": robust,
             "results_acceptance": acceptance,
+            "results_acceptance_packet": packet,
             "model": budget.model,
             "model_configuration": model_configuration(budget.model),
             "results_model_diagnostic": diagnostic,
@@ -414,6 +421,9 @@ def main():
         help="Independently reviewed synthetic candidate cases; requires review manifest",
     )
     parser.add_argument("--case-review", type=Path)
+    parser.add_argument(
+        "--results-acceptance-packet", choices=("original", "fresh"), default="original"
+    )
     parser.add_argument(
         "--results-robust",
         action="store_true",
