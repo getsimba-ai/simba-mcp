@@ -8,7 +8,9 @@
   never average period ratios or sum mROI/interval bounds.
 - Headline mROI uses its declared evaluation point. Mean active-period spend is
   not latest spend; historical averages are separate. Preserve mean/median,
-  interval probability and availability. Do not invent missing bands.
+  interval probability and availability. HDI endpoints are not necessarily
+  equal-tailed quantiles, even when field names contain percentile numbers.
+  Do not invent missing bands.
 - Apply the requested diagnostic rule. Missing diagnostics prove neither
   convergence nor failure; completion is not scientific acceptance.
 - Overlap reconciles log-link removal_lift, can have either sign and is not media.

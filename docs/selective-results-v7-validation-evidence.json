@@ -1,0 +1,1706 @@
+{
+  "schema_version": 1,
+  "purpose": "model_selection_validation",
+  "accepted": false,
+  "candidate_supported": 3,
+  "candidate_total": 4,
+  "control_supported": 4,
+  "control_total": 4,
+  "cumulative_accounted_usd": 35.094472,
+  "overall_cap_usd": 55,
+  "failure": "Candidate incorrectly equates HDI endpoints with equal-tailed quantiles.",
+  "runs": [
+    {
+      "protocol": {
+        "purpose": "model_selection_validation",
+        "sessions": 4,
+        "case": "fresh_signed_reconciliation",
+        "samples": 2,
+        "model_configuration": {
+          "request": {
+            "model": "claude-sonnet-5-5",
+            "max_tokens": 4096,
+            "thinking": {
+              "type": "adaptive"
+            },
+            "output_config": {
+              "effort": "medium"
+            }
+          },
+          "rates_per_million": {
+            "input": 2,
+            "output": 10,
+            "cache_read": 0.2,
+            "cache_write": 4
+          }
+        },
+        "prior_accounted_usd": 33.06501,
+        "cap_usd": 36.06501,
+        "overall_cap_usd": 55,
+        "source_commit": "6c20092ec7dbb3e16fcc964400737362c1d8dcc2",
+        "baseline_sha256": "3299c8085c28b2a08b37b548335ff04166c385ef1171015f7e01d07a11dbd96d",
+        "candidate_sha256": "52f702311224fc1951a4a2c85f188ad3e30888b6982592651244531725451599",
+        "readiness": "Acrossbothcases all4candidateanswers supported, noactualunauthorisedreads/writes or increasedunnecessarycalls; no acceptanceclaim."
+      },
+      "status": "complete",
+      "raw_sha256": "91c6d16296a38d1222ce8182285d7e7c50f5fb3e6ec0492419e7aebcf6fb2de7",
+      "freeze": {
+        "schema_version": 1,
+        "inputs_sha256": "31c785cda35fd82f1159f0411542e4decd23ab8f8238d392de5018c86f23c7e4",
+        "source_sha256": "835461f5ab39878589a309155c42a986e2311daaf93030155513194f60d14d84",
+        "calibration_sha256": "1e29e6493ea102f1ded0ceb8510ba3223b52c7187cec78464736b0ae3e56da95"
+      },
+      "configuration": {
+        "mode": "eager",
+        "samples": 2,
+        "case": "fresh_signed_reconciliation",
+        "role_comparison": null,
+        "results_comparison": true,
+        "results_prompt": "original",
+        "results_robust": true,
+        "results_acceptance": true,
+        "results_selection_validation": true,
+        "results_acceptance_packet": "fresh",
+        "model": "claude-sonnet-5-5",
+        "model_configuration": {
+          "request": {
+            "model": "claude-sonnet-5-5",
+            "max_tokens": 4096,
+            "thinking": {
+              "type": "adaptive"
+            },
+            "output_config": {
+              "effort": "medium"
+            }
+          },
+          "rates_per_million": {
+            "input": 2,
+            "output": 10,
+            "cache_read": 0.2,
+            "cache_write": 4
+          }
+        },
+        "results_model_diagnostic": false,
+        "validation_seed": null,
+        "validation_datasets": 0,
+        "result_fixture_version": 2
+      },
+      "budget": {
+        "cap": 36.06501,
+        "prior": 33.06501,
+        "charged": 1.220264,
+        "reserved": 0.0,
+        "model": "claude-sonnet-5-5"
+      },
+      "tasks": [
+        {
+          "case": {
+            "id": "fresh_signed_reconciliation",
+            "required_sections": [
+              "channel_map",
+              "contributions"
+            ],
+            "paraphrase": "",
+            "family": "signed_reconciliation",
+            "channel": "",
+            "allow_prediction": false,
+            "evidence_options": [
+              [
+                "channel_map",
+                "contributions"
+              ]
+            ],
+            "fixture": {
+              "model_hash": "result-example",
+              "status": "complete",
+              "model_type": "mmm",
+              "sections_available": [
+                "channel_map",
+                "coefficients",
+                "channel_summary",
+                "model_stats",
+                "r_hat",
+                "contributions",
+                "model_config",
+                "mroi_summary",
+                "response_curves"
+              ],
+              "results": {
+                "channel_map": [
+                  {
+                    "channel": "Audio",
+                    "activity_column": "Audio_activity",
+                    "spend_column": "audio_cost"
+                  },
+                  {
+                    "channel": "Cinema",
+                    "activity_column": "Cinema_activity",
+                    "spend_column": "cinema_cost"
+                  }
+                ],
+                "coefficients": [
+                  {
+                    "Date": 1772409600000,
+                    "Channel": "Audio_activity",
+                    "Revenue": 90,
+                    "Spend": 30,
+                    "Sales": 15.0,
+                    "ROI": 3.0
+                  },
+                  {
+                    "Date": 1773014400000,
+                    "Channel": "Audio_activity",
+                    "Revenue": 60,
+                    "Spend": 15,
+                    "Sales": 10.0,
+                    "ROI": 4.0
+                  },
+                  {
+                    "Date": 1773619200000,
+                    "Channel": "Audio_activity",
+                    "Revenue": 42,
+                    "Spend": 21,
+                    "Sales": 7.0,
+                    "ROI": 2.0
+                  },
+                  {
+                    "Date": 1772409600000,
+                    "Channel": "Cinema_activity",
+                    "Revenue": 40,
+                    "Spend": 20,
+                    "Sales": 6.666666666666667,
+                    "ROI": 2.0
+                  },
+                  {
+                    "Date": 1773014400000,
+                    "Channel": "Cinema_activity",
+                    "Revenue": 0,
+                    "Spend": 0,
+                    "Sales": 0.0,
+                    "ROI": 0.0
+                  },
+                  {
+                    "Date": 1773619200000,
+                    "Channel": "Cinema_activity",
+                    "Revenue": 36,
+                    "Spend": 12,
+                    "Sales": 6.0,
+                    "ROI": 3.0
+                  }
+                ],
+                "channel_summary": [
+                  {
+                    "Channel": "Audio_activity",
+                    "Revenue": 192,
+                    "Spend": 66,
+                    "Sales": 32.0,
+                    "ROI": 2.909090909090909
+                  },
+                  {
+                    "Channel": "Cinema_activity",
+                    "Revenue": 76,
+                    "Spend": 32,
+                    "Sales": 12.666666666666666,
+                    "ROI": 2.375
+                  }
+                ],
+                "model_stats": [
+                  {
+                    "Test Name": "Max R_hat",
+                    "Output": "1.008",
+                    "Status": "success"
+                  }
+                ],
+                "r_hat": [
+                  {
+                    "Parameter": "audio_beta",
+                    "R_hat": 1.008
+                  },
+                  {
+                    "Parameter": "cinema_beta",
+                    "R_hat": 1.004
+                  }
+                ],
+                "contributions": [
+                  {
+                    "Date": 1773014400000,
+                    "Audio_activity": 10,
+                    "Cinema_activity": 0,
+                    "Base": 55,
+                    "holiday": -7,
+                    "Overlap": 3,
+                    "Model": 61
+                  }
+                ],
+                "model_config": {
+                  "config": {
+                    "link": "log",
+                    "attribution": "removal_lift"
+                  }
+                },
+                "mroi_summary": {
+                  "hdi_prob": 0.94,
+                  "evaluation_point": "current_spend",
+                  "spend_convention": "mean_active_period",
+                  "channels": [
+                    {
+                      "channel": "Audio",
+                      "activity_column": "Audio_activity",
+                      "current_spend": 22,
+                      "mroi_median": 0.8,
+                      "mroi_hdi_3": -0.2,
+                      "mroi_hdi_97": 1.7
+                    }
+                  ]
+                },
+                "response_curves": [
+                  {
+                    "Spend": 0,
+                    "Audio_activity": 0
+                  },
+                  {
+                    "Spend": 10,
+                    "Audio_activity": 14
+                  },
+                  {
+                    "Spend": 20,
+                    "Audio_activity": 22
+                  },
+                  {
+                    "Spend": 30,
+                    "Audio_activity": 27
+                  },
+                  {
+                    "Spend": 40,
+                    "Audio_activity": 30
+                  }
+                ]
+              }
+            },
+            "dataset": "fresh_harbour",
+            "evidence_window": {
+              "start": "2026-03-09",
+              "end": "2026-03-09"
+            },
+            "max_response_bytes": null,
+            "allow_recovery_errors": false
+          },
+          "prompt": "Read only saved results for model result-example. All values are synthetic. Revenue and spend are GBP; contribution units are KPI units and the revenue multiplier is six. Do not fit, build or read predictions. Return only the requested JSON. For 9 March, reconcile the saved decomposition in KPI units. Return media_total, non_media_excluding_overlap, overlap and reconstructed_model. Include holiday in non-media; keep Overlap separate.",
+          "expected": {
+            "media_total": 10,
+            "non_media_excluding_overlap": 48,
+            "overlap": 3,
+            "reconstructed_model": 61
+          }
+        }
+      ],
+      "reviews": [
+        {
+          "case": "fresh_signed_reconciliation",
+          "view": "baseline",
+          "repetition": 0,
+          "answer_sha256": "d700887462ca99b07601fe9812c20e8ed17e547e508b6ae2fc3eb971c9639029",
+          "trajectory_sha256": "6ff535ee09225554078eb1be0f0c8b3a5dc03ff73e462c76c345f16d42ea983a",
+          "claims": "supported",
+          "supported_answer": true,
+          "rationale": "Every material numerical and explanatory claim checked against actual returned payloads and supplied context. Explicit HDI-to-quantile inference is unsupported where present; correct numbers do not override it.",
+          "claim_checks": [
+            {
+              "claim": "All values, signed arithmetic, date and KPI units",
+              "verdict": "supported",
+              "evidence": "Actual final contribution row gives Audio_activity10, Cinema_activity0, Base55, holiday-7, Overlap3, Model61 and timestamp1773014400000 (2026-03-09 UTC). Thus media10, non-media48 and total61. Supplied contribution units are KPI, not currency."
+            },
+            {
+              "claim": "Media identity and separate Overlap",
+              "verdict": "supported",
+              "evidence": "The first returned channel_map identifies Audio and Cinema; the user identifies holiday as non-media. Overlap is kept separate and not classified as media."
+            },
+            {
+              "claim": "Log/removal_lift reconciliation interpretation where stated",
+              "verdict": "supported",
+              "evidence": "The returned nested model_config explicitly supplies log and removal_lift. The public contract defines Overlap as a balancing residual, not a channel. No synergy or raw-input causal explanation is asserted."
+            },
+            {
+              "claim": "Actual order of reads and date recovery",
+              "verdict": "supported",
+              "evidence": "The first guessed-year request returned empty contributions; the second unwindowed read returned one dated row. All four accounts now describe this recorded order accurately. None claims it knew the timestamp before the second request. The baseline repetition1 uses2024; the other three use2025, exactly as logged."
+            }
+          ],
+          "calls": [
+            {
+              "index": 0,
+              "verdict": "unnecessary",
+              "rationale": "Unspecified year was guessed in a narrowing request. An initial unwindowed read with mapping could establish the saved date and values in one call. Same pre-existing rubric applied to both arms; this is not unauthorised access."
+            },
+            {
+              "index": 1,
+              "verdict": "necessary",
+              "rationale": "Necessary recovery after the empty guessed-year read, returning the row required to answer."
+            }
+          ],
+          "format_review": "JSON fences, additional fields, truthful prose and historical_average object are reviewed semantically. The explicit explanation correctly denies historical-average equivalence. Unsolicited narration is documented as instruction noncompliance but does not by itself fabricate a claim; automatic flags remain unchanged."
+        },
+        {
+          "case": "fresh_signed_reconciliation",
+          "view": "candidate",
+          "repetition": 0,
+          "answer_sha256": "db051abe36eff8197cb7393ffeb069c9d8e789f409a71bdb6778c8b59d6af7b7",
+          "trajectory_sha256": "6ff535ee09225554078eb1be0f0c8b3a5dc03ff73e462c76c345f16d42ea983a",
+          "claims": "supported",
+          "supported_answer": true,
+          "rationale": "Every material numerical and explanatory claim checked against actual returned payloads and supplied context. Explicit HDI-to-quantile inference is unsupported where present; correct numbers do not override it.",
+          "claim_checks": [
+            {
+              "claim": "All values, signed arithmetic, date and KPI units",
+              "verdict": "supported",
+              "evidence": "Actual final contribution row gives Audio_activity10, Cinema_activity0, Base55, holiday-7, Overlap3, Model61 and timestamp1773014400000 (2026-03-09 UTC). Thus media10, non-media48 and total61. Supplied contribution units are KPI, not currency."
+            },
+            {
+              "claim": "Media identity and separate Overlap",
+              "verdict": "supported",
+              "evidence": "The first returned channel_map identifies Audio and Cinema; the user identifies holiday as non-media. Overlap is kept separate and not classified as media."
+            },
+            {
+              "claim": "Log/removal_lift reconciliation interpretation where stated",
+              "verdict": "supported",
+              "evidence": "The returned nested model_config explicitly supplies log and removal_lift. The public contract defines Overlap as a balancing residual, not a channel. No synergy or raw-input causal explanation is asserted."
+            },
+            {
+              "claim": "Actual order of reads and date recovery",
+              "verdict": "supported",
+              "evidence": "The first guessed-year request returned empty contributions; the second unwindowed read returned one dated row. All four accounts now describe this recorded order accurately. None claims it knew the timestamp before the second request. The baseline repetition1 uses2024; the other three use2025, exactly as logged."
+            }
+          ],
+          "calls": [
+            {
+              "index": 0,
+              "verdict": "unnecessary",
+              "rationale": "Unspecified year was guessed in a narrowing request. An initial unwindowed read with mapping could establish the saved date and values in one call. Same pre-existing rubric applied to both arms; this is not unauthorised access."
+            },
+            {
+              "index": 1,
+              "verdict": "necessary",
+              "rationale": "Necessary recovery after the empty guessed-year read, returning the row required to answer."
+            }
+          ],
+          "format_review": "JSON fences, additional fields, truthful prose and historical_average object are reviewed semantically. The explicit explanation correctly denies historical-average equivalence. Unsolicited narration is documented as instruction noncompliance but does not by itself fabricate a claim; automatic flags remain unchanged."
+        },
+        {
+          "case": "fresh_signed_reconciliation",
+          "view": "candidate",
+          "repetition": 1,
+          "answer_sha256": "a9fe500ead794b972ab36699ff6ef006fa05378594d6f5a02d6c306553bac9bb",
+          "trajectory_sha256": "6ff535ee09225554078eb1be0f0c8b3a5dc03ff73e462c76c345f16d42ea983a",
+          "claims": "supported",
+          "supported_answer": true,
+          "rationale": "Every material numerical and explanatory claim checked against actual returned payloads and supplied context. Explicit HDI-to-quantile inference is unsupported where present; correct numbers do not override it.",
+          "claim_checks": [
+            {
+              "claim": "All values, signed arithmetic, date and KPI units",
+              "verdict": "supported",
+              "evidence": "Actual final contribution row gives Audio_activity10, Cinema_activity0, Base55, holiday-7, Overlap3, Model61 and timestamp1773014400000 (2026-03-09 UTC). Thus media10, non-media48 and total61. Supplied contribution units are KPI, not currency."
+            },
+            {
+              "claim": "Media identity and separate Overlap",
+              "verdict": "supported",
+              "evidence": "The first returned channel_map identifies Audio and Cinema; the user identifies holiday as non-media. Overlap is kept separate and not classified as media."
+            },
+            {
+              "claim": "Log/removal_lift reconciliation interpretation where stated",
+              "verdict": "supported",
+              "evidence": "The returned nested model_config explicitly supplies log and removal_lift. The public contract defines Overlap as a balancing residual, not a channel. No synergy or raw-input causal explanation is asserted."
+            },
+            {
+              "claim": "Actual order of reads and date recovery",
+              "verdict": "supported",
+              "evidence": "The first guessed-year request returned empty contributions; the second unwindowed read returned one dated row. All four accounts now describe this recorded order accurately. None claims it knew the timestamp before the second request. The baseline repetition1 uses2024; the other three use2025, exactly as logged."
+            }
+          ],
+          "calls": [
+            {
+              "index": 0,
+              "verdict": "unnecessary",
+              "rationale": "Unspecified year was guessed in a narrowing request. An initial unwindowed read with mapping could establish the saved date and values in one call. Same pre-existing rubric applied to both arms; this is not unauthorised access."
+            },
+            {
+              "index": 1,
+              "verdict": "necessary",
+              "rationale": "Necessary recovery after the empty guessed-year read, returning the row required to answer."
+            }
+          ],
+          "format_review": "JSON fences, additional fields, truthful prose and historical_average object are reviewed semantically. The explicit explanation correctly denies historical-average equivalence. Unsolicited narration is documented as instruction noncompliance but does not by itself fabricate a claim; automatic flags remain unchanged."
+        },
+        {
+          "case": "fresh_signed_reconciliation",
+          "view": "baseline",
+          "repetition": 1,
+          "answer_sha256": "994b20b561641de63878bc2e6354452774ac6734ab0d5f66f2e50321d5a01c39",
+          "trajectory_sha256": "a97904f4903e6d1b20269fe40585e25f90317ad926fb2e891d1e9e468c4df4f9",
+          "claims": "supported",
+          "supported_answer": true,
+          "rationale": "Every material numerical and explanatory claim checked against actual returned payloads and supplied context. Explicit HDI-to-quantile inference is unsupported where present; correct numbers do not override it.",
+          "claim_checks": [
+            {
+              "claim": "All values, signed arithmetic, date and KPI units",
+              "verdict": "supported",
+              "evidence": "Actual final contribution row gives Audio_activity10, Cinema_activity0, Base55, holiday-7, Overlap3, Model61 and timestamp1773014400000 (2026-03-09 UTC). Thus media10, non-media48 and total61. Supplied contribution units are KPI, not currency."
+            },
+            {
+              "claim": "Media identity and separate Overlap",
+              "verdict": "supported",
+              "evidence": "The first returned channel_map identifies Audio and Cinema; the user identifies holiday as non-media. Overlap is kept separate and not classified as media."
+            },
+            {
+              "claim": "Log/removal_lift reconciliation interpretation where stated",
+              "verdict": "supported",
+              "evidence": "The returned nested model_config explicitly supplies log and removal_lift. The public contract defines Overlap as a balancing residual, not a channel. No synergy or raw-input causal explanation is asserted."
+            },
+            {
+              "claim": "Actual order of reads and date recovery",
+              "verdict": "supported",
+              "evidence": "The first guessed-year request returned empty contributions; the second unwindowed read returned one dated row. All four accounts now describe this recorded order accurately. None claims it knew the timestamp before the second request. The baseline repetition1 uses2024; the other three use2025, exactly as logged."
+            }
+          ],
+          "calls": [
+            {
+              "index": 0,
+              "verdict": "unnecessary",
+              "rationale": "Unspecified year was guessed in a narrowing request. An initial unwindowed read with mapping could establish the saved date and values in one call. Same pre-existing rubric applied to both arms; this is not unauthorised access."
+            },
+            {
+              "index": 1,
+              "verdict": "necessary",
+              "rationale": "Necessary recovery after the empty guessed-year read, returning the row required to answer."
+            }
+          ],
+          "format_review": "JSON fences, additional fields, truthful prose and historical_average object are reviewed semantically. The explicit explanation correctly denies historical-average equivalence. Unsolicited narration is documented as instruction noncompliance but does not by itself fabricate a claim; automatic flags remain unchanged."
+        }
+      ],
+      "trials": [
+        {
+          "case": "fresh_signed_reconciliation",
+          "view": "baseline",
+          "repetition": 0,
+          "passed": false,
+          "outcome": "review",
+          "assertions": {
+            "facts": true,
+            "claims_in_scope": false,
+            "required_evidence": true,
+            "no_errors": true,
+            "no_unauthorised_reads": true,
+            "no_unintended_writes": true,
+            "executed": true
+          },
+          "read_authorisation": {
+            "read_attempts": 2,
+            "actual_reads": 2,
+            "unauthorised_read_attempts": 0,
+            "unauthorised_reads": 0
+          },
+          "trajectory": [
+            {
+              "name": "get_model_results",
+              "arguments": {
+                "model_hash": "result-example",
+                "sections": "contributions,model_config,channel_map",
+                "start": "2025-03-09",
+                "end": "2025-03-09"
+              },
+              "actual_read": true,
+              "error": false,
+              "result": {
+                "model_hash": "result-example",
+                "status": "complete",
+                "model_type": "mmm",
+                "sections_available": [
+                  "channel_map",
+                  "contributions",
+                  "model_config"
+                ],
+                "results": {
+                  "channel_map": [
+                    {
+                      "channel": "Audio",
+                      "activity_column": "Audio_activity",
+                      "spend_column": "audio_cost"
+                    },
+                    {
+                      "channel": "Cinema",
+                      "activity_column": "Cinema_activity",
+                      "spend_column": "cinema_cost"
+                    }
+                  ],
+                  "contributions": [],
+                  "model_config": {
+                    "config": {
+                      "link": "log",
+                      "attribution": "removal_lift"
+                    }
+                  }
+                },
+                "meta": {
+                  "window": {
+                    "start": "2025-03-09",
+                    "end": "2025-03-09",
+                    "granularity": "native"
+                  },
+                  "aggregation": {
+                    "channel_summary": "ROI = sum(Revenue) / sum(Spend); 0 without spend"
+                  },
+                  "not_windowed": {
+                    "channel_map": "not a per-period section",
+                    "model_config": "not a per-period section"
+                  }
+                }
+              },
+              "added_evidence": [
+                "channel_map"
+              ]
+            },
+            {
+              "name": "get_model_results",
+              "arguments": {
+                "model_hash": "result-example",
+                "sections": "contributions"
+              },
+              "actual_read": true,
+              "error": false,
+              "result": {
+                "model_hash": "result-example",
+                "status": "complete",
+                "model_type": "mmm",
+                "sections_available": [
+                  "contributions"
+                ],
+                "results": {
+                  "contributions": [
+                    {
+                      "Date": 1773014400000,
+                      "Audio_activity": 10,
+                      "Cinema_activity": 0,
+                      "Base": 55,
+                      "holiday": -7,
+                      "Overlap": 3,
+                      "Model": 61
+                    }
+                  ]
+                }
+              },
+              "added_evidence": [
+                "contributions"
+              ]
+            }
+          ],
+          "answer": "```json\n{\n  \"date\": \"2026-03-09\",\n  \"units\": \"KPI units\",\n  \"media_total\": 10,\n  \"non_media_excluding_overlap\": 48,\n  \"overlap\": 3,\n  \"reconstructed_model\": 61\n}\n```\n\n- **Media:** Audio contributes 10 and Cinema contributes 0, so media_total is 10.\n- **Non-media:** Base is 55 and holiday is \u22127, so non-media excluding overlap is 48.\n- **Overlap:** 3, kept separate. The model uses a log link with removal_lift attribution, so Overlap is a reconciliation term, not a channel.\n- **Reconstruction:** 10 + 48 + 3 = 61. This equals the saved Model value of 61, so the decomposition reconciles.\n- **Date:** The saved row's timestamp converts to 9 March 2026. A first read filtered to 2025-03-09 returned no contribution rows.",
+          "cost_usd": 0.306418,
+          "stop": "end_turn"
+        },
+        {
+          "case": "fresh_signed_reconciliation",
+          "view": "candidate",
+          "repetition": 0,
+          "passed": false,
+          "outcome": "review",
+          "assertions": {
+            "facts": true,
+            "claims_in_scope": false,
+            "required_evidence": true,
+            "no_errors": true,
+            "no_unauthorised_reads": true,
+            "no_unintended_writes": true,
+            "executed": true
+          },
+          "read_authorisation": {
+            "read_attempts": 2,
+            "actual_reads": 2,
+            "unauthorised_read_attempts": 0,
+            "unauthorised_reads": 0
+          },
+          "trajectory": [
+            {
+              "name": "get_model_results",
+              "arguments": {
+                "model_hash": "result-example",
+                "sections": "contributions,model_config,channel_map",
+                "start": "2025-03-09",
+                "end": "2025-03-09"
+              },
+              "actual_read": true,
+              "error": false,
+              "result": {
+                "model_hash": "result-example",
+                "status": "complete",
+                "model_type": "mmm",
+                "sections_available": [
+                  "channel_map",
+                  "contributions",
+                  "model_config"
+                ],
+                "results": {
+                  "channel_map": [
+                    {
+                      "channel": "Audio",
+                      "activity_column": "Audio_activity",
+                      "spend_column": "audio_cost"
+                    },
+                    {
+                      "channel": "Cinema",
+                      "activity_column": "Cinema_activity",
+                      "spend_column": "cinema_cost"
+                    }
+                  ],
+                  "contributions": [],
+                  "model_config": {
+                    "config": {
+                      "link": "log",
+                      "attribution": "removal_lift"
+                    }
+                  }
+                },
+                "meta": {
+                  "window": {
+                    "start": "2025-03-09",
+                    "end": "2025-03-09",
+                    "granularity": "native"
+                  },
+                  "aggregation": {
+                    "channel_summary": "ROI = sum(Revenue) / sum(Spend); 0 without spend"
+                  },
+                  "not_windowed": {
+                    "channel_map": "not a per-period section",
+                    "model_config": "not a per-period section"
+                  }
+                }
+              },
+              "added_evidence": [
+                "channel_map"
+              ]
+            },
+            {
+              "name": "get_model_results",
+              "arguments": {
+                "model_hash": "result-example",
+                "sections": "contributions"
+              },
+              "actual_read": true,
+              "error": false,
+              "result": {
+                "model_hash": "result-example",
+                "status": "complete",
+                "model_type": "mmm",
+                "sections_available": [
+                  "contributions"
+                ],
+                "results": {
+                  "contributions": [
+                    {
+                      "Date": 1773014400000,
+                      "Audio_activity": 10,
+                      "Cinema_activity": 0,
+                      "Base": 55,
+                      "holiday": -7,
+                      "Overlap": 3,
+                      "Model": 61
+                    }
+                  ]
+                }
+              },
+              "added_evidence": [
+                "contributions"
+              ]
+            }
+          ],
+          "answer": "```json\n{\n  \"date\": \"2026-03-09\",\n  \"media_total\": 10,\n  \"non_media_excluding_overlap\": 48,\n  \"overlap\": 3,\n  \"reconstructed_model\": 61\n}\n```\n\nThe saved decomposition reconciles to the saved Model value of 61 KPI units.\n\n- **Date:** My first read used a guessed year (2025) and returned no rows. A second read with no date filter returned one row, at epoch 1773014400000, which is 9 March 2026. I used that row.\n- **Media:** Audio is 10 and Cinema is 0, so the total is 10.\n- **Non-media excluding overlap:** Base is 55 and holiday is \u22127, so the total is 48.\n- **Overlap:** 3, kept separate.\n\nThe total is 10 + 48 + 3 = 61.",
+          "cost_usd": 0.30266400000000004,
+          "stop": "end_turn"
+        },
+        {
+          "case": "fresh_signed_reconciliation",
+          "view": "candidate",
+          "repetition": 1,
+          "passed": false,
+          "outcome": "review",
+          "assertions": {
+            "facts": true,
+            "claims_in_scope": false,
+            "required_evidence": true,
+            "no_errors": true,
+            "no_unauthorised_reads": true,
+            "no_unintended_writes": true,
+            "executed": true
+          },
+          "read_authorisation": {
+            "read_attempts": 2,
+            "actual_reads": 2,
+            "unauthorised_read_attempts": 0,
+            "unauthorised_reads": 0
+          },
+          "trajectory": [
+            {
+              "name": "get_model_results",
+              "arguments": {
+                "model_hash": "result-example",
+                "sections": "contributions,model_config,channel_map",
+                "start": "2025-03-09",
+                "end": "2025-03-09"
+              },
+              "actual_read": true,
+              "error": false,
+              "result": {
+                "model_hash": "result-example",
+                "status": "complete",
+                "model_type": "mmm",
+                "sections_available": [
+                  "channel_map",
+                  "contributions",
+                  "model_config"
+                ],
+                "results": {
+                  "channel_map": [
+                    {
+                      "channel": "Audio",
+                      "activity_column": "Audio_activity",
+                      "spend_column": "audio_cost"
+                    },
+                    {
+                      "channel": "Cinema",
+                      "activity_column": "Cinema_activity",
+                      "spend_column": "cinema_cost"
+                    }
+                  ],
+                  "contributions": [],
+                  "model_config": {
+                    "config": {
+                      "link": "log",
+                      "attribution": "removal_lift"
+                    }
+                  }
+                },
+                "meta": {
+                  "window": {
+                    "start": "2025-03-09",
+                    "end": "2025-03-09",
+                    "granularity": "native"
+                  },
+                  "aggregation": {
+                    "channel_summary": "ROI = sum(Revenue) / sum(Spend); 0 without spend"
+                  },
+                  "not_windowed": {
+                    "channel_map": "not a per-period section",
+                    "model_config": "not a per-period section"
+                  }
+                }
+              },
+              "added_evidence": [
+                "channel_map"
+              ]
+            },
+            {
+              "name": "get_model_results",
+              "arguments": {
+                "model_hash": "result-example",
+                "sections": "contributions"
+              },
+              "actual_read": true,
+              "error": false,
+              "result": {
+                "model_hash": "result-example",
+                "status": "complete",
+                "model_type": "mmm",
+                "sections_available": [
+                  "contributions"
+                ],
+                "results": {
+                  "contributions": [
+                    {
+                      "Date": 1773014400000,
+                      "Audio_activity": 10,
+                      "Cinema_activity": 0,
+                      "Base": 55,
+                      "holiday": -7,
+                      "Overlap": 3,
+                      "Model": 61
+                    }
+                  ]
+                }
+              },
+              "added_evidence": [
+                "contributions"
+              ]
+            }
+          ],
+          "answer": "```json\n{\n  \"date\": \"2026-03-09\",\n  \"media_total\": 10,\n  \"non_media_excluding_overlap\": 48,\n  \"overlap\": 3,\n  \"reconstructed_model\": 61\n}\n```\n\nAll values are in KPI units. The saved row for 9 March 2026 has Audio 10, Cinema 0, Base 55, holiday -7, Overlap 3 and Model 61.\n\n- **Media:** Audio 10 plus Cinema 0 gives 10.\n- **Non-media excluding overlap:** Base 55 plus holiday -7 gives 48.\n- **Overlap:** kept separate at 3.\n- **Reconstruction:** 10 + 48 + 3 gives 61, which matches the saved Model value of 61.\n\nYour request gave no year, and my first read assumed 2025, which returned no rows. I then read all saved contributions without a date filter. The only row is 1773014400000 ms, which is 9 March 2026, so I used that.",
+          "cost_usd": 0.303936,
+          "stop": "end_turn"
+        },
+        {
+          "case": "fresh_signed_reconciliation",
+          "view": "baseline",
+          "repetition": 1,
+          "passed": false,
+          "outcome": "review",
+          "assertions": {
+            "facts": true,
+            "claims_in_scope": false,
+            "required_evidence": true,
+            "no_errors": true,
+            "no_unauthorised_reads": true,
+            "no_unintended_writes": true,
+            "executed": true
+          },
+          "read_authorisation": {
+            "read_attempts": 2,
+            "actual_reads": 2,
+            "unauthorised_read_attempts": 0,
+            "unauthorised_reads": 0
+          },
+          "trajectory": [
+            {
+              "name": "get_model_results",
+              "arguments": {
+                "model_hash": "result-example",
+                "sections": "contributions,model_config,channel_map",
+                "start": "2024-03-09",
+                "end": "2024-03-09"
+              },
+              "actual_read": true,
+              "error": false,
+              "result": {
+                "model_hash": "result-example",
+                "status": "complete",
+                "model_type": "mmm",
+                "sections_available": [
+                  "channel_map",
+                  "contributions",
+                  "model_config"
+                ],
+                "results": {
+                  "channel_map": [
+                    {
+                      "channel": "Audio",
+                      "activity_column": "Audio_activity",
+                      "spend_column": "audio_cost"
+                    },
+                    {
+                      "channel": "Cinema",
+                      "activity_column": "Cinema_activity",
+                      "spend_column": "cinema_cost"
+                    }
+                  ],
+                  "contributions": [],
+                  "model_config": {
+                    "config": {
+                      "link": "log",
+                      "attribution": "removal_lift"
+                    }
+                  }
+                },
+                "meta": {
+                  "window": {
+                    "start": "2024-03-09",
+                    "end": "2024-03-09",
+                    "granularity": "native"
+                  },
+                  "aggregation": {
+                    "channel_summary": "ROI = sum(Revenue) / sum(Spend); 0 without spend"
+                  },
+                  "not_windowed": {
+                    "channel_map": "not a per-period section",
+                    "model_config": "not a per-period section"
+                  }
+                }
+              },
+              "added_evidence": [
+                "channel_map"
+              ]
+            },
+            {
+              "name": "get_model_results",
+              "arguments": {
+                "model_hash": "result-example",
+                "sections": "contributions"
+              },
+              "actual_read": true,
+              "error": false,
+              "result": {
+                "model_hash": "result-example",
+                "status": "complete",
+                "model_type": "mmm",
+                "sections_available": [
+                  "contributions"
+                ],
+                "results": {
+                  "contributions": [
+                    {
+                      "Date": 1773014400000,
+                      "Audio_activity": 10,
+                      "Cinema_activity": 0,
+                      "Base": 55,
+                      "holiday": -7,
+                      "Overlap": 3,
+                      "Model": 61
+                    }
+                  ]
+                }
+              },
+              "added_evidence": [
+                "contributions"
+              ]
+            }
+          ],
+          "answer": "```json\n{\n  \"date\": \"2026-03-09\",\n  \"units\": \"KPI units\",\n  \"media_total\": 10,\n  \"non_media_excluding_overlap\": 48,\n  \"overlap\": 3,\n  \"reconstructed_model\": 61,\n  \"saved_model_value\": 61,\n  \"reconciles\": true\n}\n```\n\n- **Date:** The saved contributions row is timestamped 1773014400000, which is 2026-03-09. My first request assumed 2024 and returned no rows, so I read the whole contributions section instead.\n- **Media:** Audio is 10 and Cinema is 0, so media_total is 10.\n- **Non-media:** Base is 55 and holiday is \u22127, so non_media_excluding_overlap is 48.\n- **Overlap:** Overlap is 3. I kept it separate, as you asked.\n- **Reconstruction:** 10 + 48 + 3 = 61, which matches the saved Model value of 61.",
+          "cost_usd": 0.307246,
+          "stop": "end_turn"
+        }
+      ],
+      "original_automatic_assessment": {
+        "status": "development_only",
+        "accepted": false,
+        "thresholds": {
+          "minimum_task_families": 8,
+          "minimum_cost_saving": 0.05,
+          "quality_noninferiority_margin": 0
+        },
+        "candidate_supported_answer_rate": null,
+        "noncontributing_result_call_delta": 0,
+        "reasons": [
+          "public_development_cases_are_not_independent_acceptance",
+          "thresholds_require_owner_agreement",
+          "fewer_than_eight_task_families",
+          "unreviewed_claims_prevent_quality_comparison",
+          "quality_noninferiority_not_established",
+          "required_cost_saving_not_established"
+        ],
+        "task_count": 1,
+        "family_count": 1,
+        "dataset_count": 1,
+        "paired_repetitions": 2,
+        "candidate_hard_failures": 0,
+        "quality_delta": null,
+        "sessions_requiring_claim_review": 4,
+        "quality_delta_95_interval": null,
+        "cost_saving_fraction": 0.011511185274026059,
+        "cost_saving_95_interval": null,
+        "bootstrap_seed": 20260929,
+        "bootstrap_resamples": 4000,
+        "weighting": "equal task families; equal cases and paired repetitions within family",
+        "limitations": "Intervals condition on the synthetic datasets and task families used. Datasets are not independently resampled. These intervals do not establish dataset or scientific generalisation."
+      },
+      "guidance_sha256": {
+        "baseline": "3299c8085c28b2a08b37b548335ff04166c385ef1171015f7e01d07a11dbd96d",
+        "candidate": "52f702311224fc1951a4a2c85f188ad3e30888b6982592651244531725451599"
+      }
+    },
+    {
+      "protocol": {
+        "purpose": "model_selection_validation",
+        "sessions": 4,
+        "case": "acceptance_e",
+        "samples": 2,
+        "model_configuration": {
+          "request": {
+            "model": "claude-sonnet-5-5",
+            "max_tokens": 4096,
+            "thinking": {
+              "type": "adaptive"
+            },
+            "output_config": {
+              "effort": "medium"
+            }
+          },
+          "rates_per_million": {
+            "input": 2,
+            "output": 10,
+            "cache_read": 0.2,
+            "cache_write": 4
+          }
+        },
+        "prior_accounted_usd": 34.285274,
+        "cap_usd": 36.06501,
+        "overall_cap_usd": 55,
+        "source_commit": "6c20092ec7dbb3e16fcc964400737362c1d8dcc2",
+        "baseline_sha256": "3299c8085c28b2a08b37b548335ff04166c385ef1171015f7e01d07a11dbd96d",
+        "candidate_sha256": "52f702311224fc1951a4a2c85f188ad3e30888b6982592651244531725451599",
+        "readiness": "Acrossbothcases all4candidateanswers supported, noactualunauthorisedreads/writes or increasedunnecessarycalls; no acceptanceclaim."
+      },
+      "status": "complete",
+      "raw_sha256": "dd23236131f2e86a6020e8571bb7d973f228d2c0857622fe506a61f15ea793fe",
+      "freeze": {
+        "schema_version": 1,
+        "inputs_sha256": "be1ffd9b6a6dcaa808c7e6bf20826d2569cd3ed18f988214689f0e5d1bde7b0a",
+        "source_sha256": "835461f5ab39878589a309155c42a986e2311daaf93030155513194f60d14d84",
+        "calibration_sha256": "1e29e6493ea102f1ded0ceb8510ba3223b52c7187cec78464736b0ae3e56da95"
+      },
+      "configuration": {
+        "mode": "eager",
+        "samples": 2,
+        "case": "acceptance_e",
+        "role_comparison": null,
+        "results_comparison": true,
+        "results_prompt": "original",
+        "results_robust": true,
+        "results_acceptance": true,
+        "results_selection_validation": true,
+        "results_acceptance_packet": "original",
+        "model": "claude-sonnet-5-5",
+        "model_configuration": {
+          "request": {
+            "model": "claude-sonnet-5-5",
+            "max_tokens": 4096,
+            "thinking": {
+              "type": "adaptive"
+            },
+            "output_config": {
+              "effort": "medium"
+            }
+          },
+          "rates_per_million": {
+            "input": 2,
+            "output": 10,
+            "cache_read": 0.2,
+            "cache_write": 4
+          }
+        },
+        "results_model_diagnostic": false,
+        "validation_seed": null,
+        "validation_datasets": 0,
+        "result_fixture_version": 2
+      },
+      "budget": {
+        "cap": 36.06501,
+        "prior": 34.285274,
+        "charged": 0.809198,
+        "reserved": 0.0,
+        "model": "claude-sonnet-5-5"
+      },
+      "tasks": [
+        {
+          "case": {
+            "id": "acceptance_e",
+            "required_sections": [
+              "mroi_summary"
+            ],
+            "paraphrase": "",
+            "family": "acceptance_e",
+            "channel": "",
+            "allow_prediction": false,
+            "evidence_options": [
+              [
+                "mroi_summary"
+              ]
+            ],
+            "fixture": {
+              "model_hash": "result-example",
+              "status": "complete",
+              "model_type": "mmm",
+              "results": {
+                "channel_map": [
+                  {
+                    "channel": "Audio",
+                    "activity_column": "Audio_activity",
+                    "spend_column": "audio_spend"
+                  },
+                  {
+                    "channel": "Cinema",
+                    "activity_column": "Cinema_activity",
+                    "spend_column": "cinema_spend"
+                  },
+                  {
+                    "channel": "Affiliate",
+                    "activity_column": "Affiliate_activity",
+                    "spend_column": "affiliate_spend"
+                  }
+                ],
+                "mroi_summary": {
+                  "hdi_prob": 0.94,
+                  "evaluation_point": "current_spend",
+                  "spend_convention": "mean_active_period",
+                  "conventions_available": [
+                    "allperiods_unweighted",
+                    "spendweighted_active"
+                  ],
+                  "channels": [
+                    {
+                      "channel": "Audio",
+                      "activity_column": "Audio_activity",
+                      "current_spend": 80,
+                      "mroi_mean": 1.8,
+                      "mroi_median": 1.45,
+                      "mroi_hdi_3": 0.4,
+                      "mroi_hdi_97": 3.1,
+                      "mroi_allperiods_unweighted_median": 0.95,
+                      "mroi_spendweighted_active_median": 1.2
+                    }
+                  ]
+                }
+              },
+              "sections_available": [
+                "channel_map",
+                "mroi_summary"
+              ]
+            },
+            "dataset": "independent_specifications_v1",
+            "evidence_window": null,
+            "max_response_bytes": null,
+            "allow_recovery_errors": false
+          },
+          "prompt": "The completed saved model is result-example. All data are synthetic. Revenue and spend are GBP. Read saved evidence only; do not fit anything. Give Audio's headline marginal ROI mean at current spend and saved interval. Return JSON fields mean, lower, upper, hdi_prob, current_spend, historical_average and explain whether this is either saved historical averaging convention.",
+          "expected": {
+            "mean": 1.8,
+            "lower": 0.4,
+            "upper": 3.1,
+            "hdi_prob": 0.94,
+            "current_spend": 80,
+            "historical_average": false
+          }
+        }
+      ],
+      "reviews": [
+        {
+          "case": "acceptance_e",
+          "view": "baseline",
+          "repetition": 0,
+          "answer_sha256": "56599ce77251b81f69c6669638ba6352e301a0dc57693b51c5de3dd27b9106ff",
+          "trajectory_sha256": "47dc7ccfbae73c2b610fa9a2c0730b7f692ffbc9b31a66e5b3b95a010463a9bb",
+          "claims": "supported",
+          "supported_answer": true,
+          "rationale": "Every material numerical and explanatory claim checked against actual returned payloads and supplied context. Explicit HDI-to-quantile inference is unsupported where present; correct numbers do not override it.",
+          "claim_checks": [
+            {
+              "claim": "Headline mean1.8, median1.45, lower0.4, upper3.1, probability0.94 and spend80 GBP",
+              "verdict": "supported",
+              "evidence": "All numbers and statistic labels appear in actual mroi_summary; currency is supplied in the task. Channel identity is supplied inline and, in three calls, by map. The mean is not substituted with a median."
+            },
+            {
+              "claim": "Headline evaluation versus historical conventions",
+              "verdict": "supported",
+              "evidence": "Returned evaluation_point=current_spend and spend_convention=mean_active_period establish the mean active-period spend basis, not latest period or total spend. Historical allperiods_unweighted median0.95 and spendweighted_active median1.2 are separate fields. All answers clearly deny equivalence to the headline."
+            },
+            {
+              "claim": "Historical interval/mean absence descriptions",
+              "verdict": "supported",
+              "evidence": "The actual complete returned mroi_summary has those two historical medians but no historical mean or interval fields. Consistent with earlier reviews, discussion is scoped to saved summary evidence being reported, not independently verifying storage chronology. The candidate repetition1 wording was saved is too broad in isolation, but context is field availability in this returned summary; no separate claim of never-stored history is inferred."
+            },
+            {
+              "claim": "Saved94% HDI interpretation",
+              "verdict": "supported",
+              "evidence": "Answers retain the declared probability and bounds without asserting that HDI endpoints must be equal-tailed quantiles."
+            }
+          ],
+          "calls": [
+            {
+              "index": 0,
+              "verdict": "necessary",
+              "rationale": "One authorised saved marginal-summary read provides the requested values and conventions. Bundled identity evidence does not create an additional unnecessary call."
+            }
+          ],
+          "format_review": "JSON fences, additional fields, truthful prose and historical_average object are reviewed semantically. The explicit explanation correctly denies historical-average equivalence. Unsolicited narration is documented as instruction noncompliance but does not by itself fabricate a claim; automatic flags remain unchanged."
+        },
+        {
+          "case": "acceptance_e",
+          "view": "candidate",
+          "repetition": 0,
+          "answer_sha256": "508158fa3077d4843e06167c78306be554dbb0bd62557ebe3f963ef60a09e7ab",
+          "trajectory_sha256": "47dc7ccfbae73c2b610fa9a2c0730b7f692ffbc9b31a66e5b3b95a010463a9bb",
+          "claims": "supported",
+          "supported_answer": true,
+          "rationale": "Every material numerical and explanatory claim checked against actual returned payloads and supplied context. Explicit HDI-to-quantile inference is unsupported where present; correct numbers do not override it.",
+          "claim_checks": [
+            {
+              "claim": "Headline mean1.8, median1.45, lower0.4, upper3.1, probability0.94 and spend80 GBP",
+              "verdict": "supported",
+              "evidence": "All numbers and statistic labels appear in actual mroi_summary; currency is supplied in the task. Channel identity is supplied inline and, in three calls, by map. The mean is not substituted with a median."
+            },
+            {
+              "claim": "Headline evaluation versus historical conventions",
+              "verdict": "supported",
+              "evidence": "Returned evaluation_point=current_spend and spend_convention=mean_active_period establish the mean active-period spend basis, not latest period or total spend. Historical allperiods_unweighted median0.95 and spendweighted_active median1.2 are separate fields. All answers clearly deny equivalence to the headline."
+            },
+            {
+              "claim": "Historical interval/mean absence descriptions",
+              "verdict": "supported",
+              "evidence": "The actual complete returned mroi_summary has those two historical medians but no historical mean or interval fields. Consistent with earlier reviews, discussion is scoped to saved summary evidence being reported, not independently verifying storage chronology. The candidate repetition1 wording was saved is too broad in isolation, but context is field availability in this returned summary; no separate claim of never-stored history is inferred."
+            },
+            {
+              "claim": "Saved94% HDI interpretation",
+              "verdict": "supported",
+              "evidence": "Answers retain the declared probability and bounds without asserting that HDI endpoints must be equal-tailed quantiles."
+            }
+          ],
+          "calls": [
+            {
+              "index": 0,
+              "verdict": "necessary",
+              "rationale": "One authorised saved marginal-summary read provides the requested values and conventions. Bundled identity evidence does not create an additional unnecessary call."
+            }
+          ],
+          "format_review": "JSON fences, additional fields, truthful prose and historical_average object are reviewed semantically. The explicit explanation correctly denies historical-average equivalence. Unsolicited narration is documented as instruction noncompliance but does not by itself fabricate a claim; automatic flags remain unchanged."
+        },
+        {
+          "case": "acceptance_e",
+          "view": "candidate",
+          "repetition": 1,
+          "answer_sha256": "709957c595117cecc3a1ffeb691bab2af916ec70a88d50a88103ffdffbe7fc0d",
+          "trajectory_sha256": "71de30fe7705dfaaacea7d6c3f45abded8bcc77637d0f2f52f0afd046402c166",
+          "claims": "unsupported",
+          "supported_answer": false,
+          "rationale": "Every material numerical and explanatory claim checked against actual returned payloads and supplied context. Explicit HDI-to-quantile inference is unsupported where present; correct numbers do not override it.",
+          "claim_checks": [
+            {
+              "claim": "Headline mean1.8, median1.45, lower0.4, upper3.1, probability0.94 and spend80 GBP",
+              "verdict": "supported",
+              "evidence": "All numbers and statistic labels appear in actual mroi_summary; currency is supplied in the task. Channel identity is supplied inline and, in three calls, by map. The mean is not substituted with a median."
+            },
+            {
+              "claim": "Headline evaluation versus historical conventions",
+              "verdict": "supported",
+              "evidence": "Returned evaluation_point=current_spend and spend_convention=mean_active_period establish the mean active-period spend basis, not latest period or total spend. Historical allperiods_unweighted median0.95 and spendweighted_active median1.2 are separate fields. All answers clearly deny equivalence to the headline."
+            },
+            {
+              "claim": "Historical interval/mean absence descriptions",
+              "verdict": "supported",
+              "evidence": "The actual complete returned mroi_summary has those two historical medians but no historical mean or interval fields. Consistent with earlier reviews, discussion is scoped to saved summary evidence being reported, not independently verifying storage chronology. The candidate repetition1 wording was saved is too broad in isolation, but context is field availability in this returned summary; no separate claim of never-stored history is inferred."
+            },
+            {
+              "claim": "HDI endpoints are the3% and97% quantiles",
+              "verdict": "unsupported",
+              "evidence": "The answer explicitly labels the endpoints quantiles. Returned fields mroi_hdi_3/mroi_hdi_97 and hdi_prob0.94 establish a94% HDI, not an equal-tailed interval. HDI endpoints need not have3%/97% posterior cumulative probability; no posterior distribution or quantile metadata is supplied. The field suffixes do not support this scientific assertion."
+            }
+          ],
+          "calls": [
+            {
+              "index": 0,
+              "verdict": "necessary",
+              "rationale": "One authorised saved marginal-summary read provides the requested values and conventions. Bundled identity evidence does not create an additional unnecessary call."
+            }
+          ],
+          "format_review": "JSON fences, additional fields, truthful prose and historical_average object are reviewed semantically. The explicit explanation correctly denies historical-average equivalence. Unsolicited narration is documented as instruction noncompliance but does not by itself fabricate a claim; automatic flags remain unchanged."
+        },
+        {
+          "case": "acceptance_e",
+          "view": "baseline",
+          "repetition": 1,
+          "answer_sha256": "4db12727e218aa6ed64741d06e9cb1066b8d487d4be3810c2d142bad8678032c",
+          "trajectory_sha256": "47dc7ccfbae73c2b610fa9a2c0730b7f692ffbc9b31a66e5b3b95a010463a9bb",
+          "claims": "supported",
+          "supported_answer": true,
+          "rationale": "Every material numerical and explanatory claim checked against actual returned payloads and supplied context. Explicit HDI-to-quantile inference is unsupported where present; correct numbers do not override it.",
+          "claim_checks": [
+            {
+              "claim": "Headline mean1.8, median1.45, lower0.4, upper3.1, probability0.94 and spend80 GBP",
+              "verdict": "supported",
+              "evidence": "All numbers and statistic labels appear in actual mroi_summary; currency is supplied in the task. Channel identity is supplied inline and, in three calls, by map. The mean is not substituted with a median."
+            },
+            {
+              "claim": "Headline evaluation versus historical conventions",
+              "verdict": "supported",
+              "evidence": "Returned evaluation_point=current_spend and spend_convention=mean_active_period establish the mean active-period spend basis, not latest period or total spend. Historical allperiods_unweighted median0.95 and spendweighted_active median1.2 are separate fields. All answers clearly deny equivalence to the headline."
+            },
+            {
+              "claim": "Historical interval/mean absence descriptions",
+              "verdict": "supported",
+              "evidence": "The actual complete returned mroi_summary has those two historical medians but no historical mean or interval fields. Consistent with earlier reviews, discussion is scoped to saved summary evidence being reported, not independently verifying storage chronology. The candidate repetition1 wording was saved is too broad in isolation, but context is field availability in this returned summary; no separate claim of never-stored history is inferred."
+            },
+            {
+              "claim": "Saved94% HDI interpretation",
+              "verdict": "supported",
+              "evidence": "Answers retain the declared probability and bounds without asserting that HDI endpoints must be equal-tailed quantiles."
+            },
+            {
+              "claim": "Marginal ROI is GBP revenue per GBP spend",
+              "verdict": "supported",
+              "evidence": "Consistent with supplied revenue/spend currency and the marginal-return contract; no dimensional GBP amount is claimed for the ratio."
+            }
+          ],
+          "calls": [
+            {
+              "index": 0,
+              "verdict": "necessary",
+              "rationale": "One authorised saved marginal-summary read provides the requested values and conventions. Bundled identity evidence does not create an additional unnecessary call."
+            }
+          ],
+          "format_review": "JSON fences, additional fields, truthful prose and historical_average object are reviewed semantically. The explicit explanation correctly denies historical-average equivalence. Unsolicited narration is documented as instruction noncompliance but does not by itself fabricate a claim; automatic flags remain unchanged."
+        }
+      ],
+      "trials": [
+        {
+          "case": "acceptance_e",
+          "view": "baseline",
+          "repetition": 0,
+          "passed": false,
+          "outcome": "fail",
+          "assertions": {
+            "facts": false,
+            "claims_in_scope": false,
+            "required_evidence": true,
+            "no_errors": true,
+            "no_unauthorised_reads": true,
+            "no_unintended_writes": true,
+            "executed": true
+          },
+          "read_authorisation": {
+            "read_attempts": 1,
+            "actual_reads": 1,
+            "unauthorised_read_attempts": 0,
+            "unauthorised_reads": 0
+          },
+          "trajectory": [
+            {
+              "name": "get_model_results",
+              "arguments": {
+                "model_hash": "result-example",
+                "sections": "mroi_summary,channel_map"
+              },
+              "actual_read": true,
+              "error": false,
+              "result": {
+                "model_hash": "result-example",
+                "status": "complete",
+                "model_type": "mmm",
+                "results": {
+                  "channel_map": [
+                    {
+                      "channel": "Audio",
+                      "activity_column": "Audio_activity",
+                      "spend_column": "audio_spend"
+                    },
+                    {
+                      "channel": "Cinema",
+                      "activity_column": "Cinema_activity",
+                      "spend_column": "cinema_spend"
+                    },
+                    {
+                      "channel": "Affiliate",
+                      "activity_column": "Affiliate_activity",
+                      "spend_column": "affiliate_spend"
+                    }
+                  ],
+                  "mroi_summary": {
+                    "hdi_prob": 0.94,
+                    "evaluation_point": "current_spend",
+                    "spend_convention": "mean_active_period",
+                    "conventions_available": [
+                      "allperiods_unweighted",
+                      "spendweighted_active"
+                    ],
+                    "channels": [
+                      {
+                        "channel": "Audio",
+                        "activity_column": "Audio_activity",
+                        "current_spend": 80,
+                        "mroi_mean": 1.8,
+                        "mroi_median": 1.45,
+                        "mroi_hdi_3": 0.4,
+                        "mroi_hdi_97": 3.1,
+                        "mroi_allperiods_unweighted_median": 0.95,
+                        "mroi_spendweighted_active_median": 1.2
+                      }
+                    ]
+                  }
+                },
+                "sections_available": [
+                  "channel_map",
+                  "mroi_summary"
+                ]
+              },
+              "added_evidence": [
+                "mroi_summary"
+              ]
+            }
+          ],
+          "answer": "```json\n{\n  \"channel\": \"Audio\",\n  \"mean\": 1.8,\n  \"lower\": 0.4,\n  \"upper\": 3.1,\n  \"hdi_prob\": 0.94,\n  \"current_spend\": 80,\n  \"current_spend_unit\": \"GBP\",\n  \"historical_average\": {\n    \"allperiods_unweighted_median\": 0.95,\n    \"spendweighted_active_median\": 1.2\n  },\n  \"explanation\": \"No. The headline marginal ROI is a posterior mean of 1.8 at current spend, with a 94% HDI of 0.4 to 3.1. Here, current spend is 80 GBP, using the mean_active_period convention (mean spend over active training periods). It is not either saved historical averaging convention. The two saved conventions are allperiods_unweighted and spendweighted_active. Their Audio medians are 0.95 and 1.2, and they are separate fields. The headline mean of 1.8 also differs from the headline median of 1.45. Don't compare the mean with the convention medians as if they were the same statistic.\"\n}\n```",
+          "cost_usd": 0.203696,
+          "stop": "end_turn"
+        },
+        {
+          "case": "acceptance_e",
+          "view": "candidate",
+          "repetition": 0,
+          "passed": false,
+          "outcome": "fail",
+          "assertions": {
+            "facts": false,
+            "claims_in_scope": false,
+            "required_evidence": true,
+            "no_errors": true,
+            "no_unauthorised_reads": true,
+            "no_unintended_writes": true,
+            "executed": true
+          },
+          "read_authorisation": {
+            "read_attempts": 1,
+            "actual_reads": 1,
+            "unauthorised_read_attempts": 0,
+            "unauthorised_reads": 0
+          },
+          "trajectory": [
+            {
+              "name": "get_model_results",
+              "arguments": {
+                "model_hash": "result-example",
+                "sections": "mroi_summary,channel_map"
+              },
+              "actual_read": true,
+              "error": false,
+              "result": {
+                "model_hash": "result-example",
+                "status": "complete",
+                "model_type": "mmm",
+                "results": {
+                  "channel_map": [
+                    {
+                      "channel": "Audio",
+                      "activity_column": "Audio_activity",
+                      "spend_column": "audio_spend"
+                    },
+                    {
+                      "channel": "Cinema",
+                      "activity_column": "Cinema_activity",
+                      "spend_column": "cinema_spend"
+                    },
+                    {
+                      "channel": "Affiliate",
+                      "activity_column": "Affiliate_activity",
+                      "spend_column": "affiliate_spend"
+                    }
+                  ],
+                  "mroi_summary": {
+                    "hdi_prob": 0.94,
+                    "evaluation_point": "current_spend",
+                    "spend_convention": "mean_active_period",
+                    "conventions_available": [
+                      "allperiods_unweighted",
+                      "spendweighted_active"
+                    ],
+                    "channels": [
+                      {
+                        "channel": "Audio",
+                        "activity_column": "Audio_activity",
+                        "current_spend": 80,
+                        "mroi_mean": 1.8,
+                        "mroi_median": 1.45,
+                        "mroi_hdi_3": 0.4,
+                        "mroi_hdi_97": 3.1,
+                        "mroi_allperiods_unweighted_median": 0.95,
+                        "mroi_spendweighted_active_median": 1.2
+                      }
+                    ]
+                  }
+                },
+                "sections_available": [
+                  "channel_map",
+                  "mroi_summary"
+                ]
+              },
+              "added_evidence": [
+                "mroi_summary"
+              ]
+            }
+          ],
+          "answer": "```json\n{\n  \"channel\": \"Audio\",\n  \"mean\": 1.8,\n  \"lower\": 0.4,\n  \"upper\": 3.1,\n  \"hdi_prob\": 0.94,\n  \"current_spend\": 80,\n  \"historical_average\": {\n    \"allperiods_unweighted_median\": 0.95,\n    \"spendweighted_active_median\": 1.2\n  },\n  \"explanation\": \"No. The headline mean of 1.8 is evaluated at the current_spend point. Its spend convention is mean_active_period, so current spend of 80 GBP is the mean spend over active periods. It is not the latest period's spend. The saved interval is a 94% HDI, running from 0.4 (hdi_3) to 3.1 (hdi_97). The two saved historical averaging conventions are separate, and both are medians. allperiods_unweighted gives 0.95 and spendweighted_active gives 1.2. The headline mean of 1.8 is neither of them. The saved median at current spend is 1.45, which is also not either historical convention. The saved results include no interval for either historical convention.\"\n}\n```",
+          "cost_usd": 0.20100200000000001,
+          "stop": "end_turn"
+        },
+        {
+          "case": "acceptance_e",
+          "view": "candidate",
+          "repetition": 1,
+          "passed": false,
+          "outcome": "fail",
+          "assertions": {
+            "facts": false,
+            "claims_in_scope": false,
+            "required_evidence": true,
+            "no_errors": true,
+            "no_unauthorised_reads": true,
+            "no_unintended_writes": true,
+            "executed": true
+          },
+          "read_authorisation": {
+            "read_attempts": 1,
+            "actual_reads": 1,
+            "unauthorised_read_attempts": 0,
+            "unauthorised_reads": 0
+          },
+          "trajectory": [
+            {
+              "name": "get_model_results",
+              "arguments": {
+                "model_hash": "result-example",
+                "sections": "mroi_summary"
+              },
+              "actual_read": true,
+              "error": false,
+              "result": {
+                "model_hash": "result-example",
+                "status": "complete",
+                "model_type": "mmm",
+                "results": {
+                  "mroi_summary": {
+                    "hdi_prob": 0.94,
+                    "evaluation_point": "current_spend",
+                    "spend_convention": "mean_active_period",
+                    "conventions_available": [
+                      "allperiods_unweighted",
+                      "spendweighted_active"
+                    ],
+                    "channels": [
+                      {
+                        "channel": "Audio",
+                        "activity_column": "Audio_activity",
+                        "current_spend": 80,
+                        "mroi_mean": 1.8,
+                        "mroi_median": 1.45,
+                        "mroi_hdi_3": 0.4,
+                        "mroi_hdi_97": 3.1,
+                        "mroi_allperiods_unweighted_median": 0.95,
+                        "mroi_spendweighted_active_median": 1.2
+                      }
+                    ]
+                  }
+                },
+                "sections_available": [
+                  "mroi_summary"
+                ]
+              },
+              "added_evidence": [
+                "mroi_summary"
+              ]
+            }
+          ],
+          "answer": "```json\n{\n  \"channel\": \"Audio\",\n  \"mean\": 1.8,\n  \"lower\": 0.4,\n  \"upper\": 3.1,\n  \"hdi_prob\": 0.94,\n  \"current_spend\": 80,\n  \"historical_average\": {\n    \"allperiods_unweighted_median\": 0.95,\n    \"spendweighted_active_median\": 1.2\n  },\n  \"explanation\": \"The headline figure is the posterior mean marginal ROI (mROI) at the declared evaluation point, current_spend. The spend convention is mean_active_period, and current_spend is 80 GBP. The saved interval is a 94% HDI, running from the 3% quantile (0.4) to the 97% quantile (3.1). The saved posterior median at this point is 1.45. This is not either saved historical averaging convention. The two saved conventions are allperiods_unweighted (median 0.95) and spendweighted_active (median 1.2). Both are medians, so they are not the headline mean of 1.8. The headline is evaluated at current spend rather than averaged over historical periods. No mean or HDI band was saved for the two historical conventions, so none is given.\"\n}\n```",
+          "cost_usd": 0.200874,
+          "stop": "end_turn"
+        },
+        {
+          "case": "acceptance_e",
+          "view": "baseline",
+          "repetition": 1,
+          "passed": false,
+          "outcome": "fail",
+          "assertions": {
+            "facts": false,
+            "claims_in_scope": false,
+            "required_evidence": true,
+            "no_errors": true,
+            "no_unauthorised_reads": true,
+            "no_unintended_writes": true,
+            "executed": true
+          },
+          "read_authorisation": {
+            "read_attempts": 1,
+            "actual_reads": 1,
+            "unauthorised_read_attempts": 0,
+            "unauthorised_reads": 0
+          },
+          "trajectory": [
+            {
+              "name": "get_model_results",
+              "arguments": {
+                "model_hash": "result-example",
+                "sections": "mroi_summary,channel_map"
+              },
+              "actual_read": true,
+              "error": false,
+              "result": {
+                "model_hash": "result-example",
+                "status": "complete",
+                "model_type": "mmm",
+                "results": {
+                  "channel_map": [
+                    {
+                      "channel": "Audio",
+                      "activity_column": "Audio_activity",
+                      "spend_column": "audio_spend"
+                    },
+                    {
+                      "channel": "Cinema",
+                      "activity_column": "Cinema_activity",
+                      "spend_column": "cinema_spend"
+                    },
+                    {
+                      "channel": "Affiliate",
+                      "activity_column": "Affiliate_activity",
+                      "spend_column": "affiliate_spend"
+                    }
+                  ],
+                  "mroi_summary": {
+                    "hdi_prob": 0.94,
+                    "evaluation_point": "current_spend",
+                    "spend_convention": "mean_active_period",
+                    "conventions_available": [
+                      "allperiods_unweighted",
+                      "spendweighted_active"
+                    ],
+                    "channels": [
+                      {
+                        "channel": "Audio",
+                        "activity_column": "Audio_activity",
+                        "current_spend": 80,
+                        "mroi_mean": 1.8,
+                        "mroi_median": 1.45,
+                        "mroi_hdi_3": 0.4,
+                        "mroi_hdi_97": 3.1,
+                        "mroi_allperiods_unweighted_median": 0.95,
+                        "mroi_spendweighted_active_median": 1.2
+                      }
+                    ]
+                  }
+                },
+                "sections_available": [
+                  "channel_map",
+                  "mroi_summary"
+                ]
+              },
+              "added_evidence": [
+                "mroi_summary"
+              ]
+            }
+          ],
+          "answer": "```json\n{\n  \"mean\": 1.8,\n  \"lower\": 0.4,\n  \"upper\": 3.1,\n  \"hdi_prob\": 0.94,\n  \"current_spend\": 80,\n  \"historical_average\": {\n    \"allperiods_unweighted_median\": 0.95,\n    \"spendweighted_active_median\": 1.2\n  },\n  \"explanation\": \"The headline Audio marginal ROI is 1.8 (mean) with a 94% HDI of 0.4 to 3.1. It is evaluated at current spend of 80 GBP. The saved spend convention is mean_active_period, which is the mean spend over active training periods and not the latest spend. The headline is not either of the saved historical averaging conventions. Those are separate fields: allperiods_unweighted (median 0.95) and spendweighted_active (median 1.2). The saved headline median is 1.45, and the mean is 1.8. The two historical fields are medians and the response gives no intervals for them. Marginal ROI is in GBP of revenue per GBP of spend.\"\n}\n```",
+          "cost_usd": 0.203626,
+          "stop": "end_turn"
+        }
+      ],
+      "original_automatic_assessment": {
+        "status": "development_only",
+        "accepted": false,
+        "thresholds": {
+          "minimum_task_families": 8,
+          "minimum_cost_saving": 0.05,
+          "quality_noninferiority_margin": 0
+        },
+        "candidate_supported_answer_rate": null,
+        "noncontributing_result_call_delta": 0,
+        "reasons": [
+          "public_development_cases_are_not_independent_acceptance",
+          "thresholds_require_owner_agreement",
+          "fewer_than_eight_task_families",
+          "candidate_quality_or_routing_failures",
+          "unreviewed_claims_prevent_quality_comparison",
+          "quality_noninferiority_not_established",
+          "required_cost_saving_not_established"
+        ],
+        "task_count": 1,
+        "family_count": 1,
+        "dataset_count": 1,
+        "paired_repetitions": 2,
+        "candidate_hard_failures": 2,
+        "quality_delta": null,
+        "sessions_requiring_claim_review": 4,
+        "quality_delta_95_interval": null,
+        "cost_saving_fraction": 0.01337025743760456,
+        "cost_saving_95_interval": null,
+        "bootstrap_seed": 20260929,
+        "bootstrap_resamples": 4000,
+        "weighting": "equal task families; equal cases and paired repetitions within family",
+        "limitations": "Intervals condition on the synthetic datasets and task families used. Datasets are not independently resampled. These intervals do not establish dataset or scientific generalisation."
+      },
+      "guidance_sha256": {
+        "baseline": "3299c8085c28b2a08b37b548335ff04166c385ef1171015f7e01d07a11dbd96d",
+        "candidate": "52f702311224fc1951a4a2c85f188ad3e30888b6982592651244531725451599"
+      }
+    }
+  ]
+}
