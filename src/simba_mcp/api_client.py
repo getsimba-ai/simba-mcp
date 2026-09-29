@@ -12,6 +12,7 @@ from typing import Any, ClassVar
 
 import httpx
 
+from . import telemetry
 from .errors import api_error
 
 logger = logging.getLogger(__name__)
@@ -125,7 +126,10 @@ class SimbaAPIClient:
         last_exc: Exception | None = None
         for attempt in range(attempts):
             try:
-                response = await client.request(method, path, **kwargs)
+                with telemetry.backend_attempt(method, path) as observation:
+                    response = await client.request(method, path, **kwargs)
+                    if observation is not None:
+                        observation.response(response)
                 if response.status_code in RETRIABLE_STATUS_CODES and attempt < attempts - 1:
                     delay = BACKOFF_BASE * (2**attempt)
                     logger.warning(
@@ -138,7 +142,8 @@ class SimbaAPIClient:
                     )
                     await asyncio.sleep(delay)
                     continue
-                return await self._parse_response(response)
+                with telemetry.phase("http_parse"):
+                    return await self._parse_response(response)
             except httpx.TransportError as exc:
                 last_exc = exc
                 if attempt < attempts - 1:

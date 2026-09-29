@@ -5,6 +5,7 @@ from typing import Any
 
 from mcp.server.mcpserver import Context
 
+from .. import telemetry
 from ..auth import _client
 from ..errors import api_error
 from ..runtime import AppContext
@@ -292,9 +293,11 @@ async def get_model_results(
     if res.get("_status_code", 200) >= 400:
         return res
     if format == "json" and (channels is not None or max_grid_points is not None):
-        res = _filter_results(res, channels, max_grid_points)
+        with telemetry.phase("result_filter"):
+            res = _filter_results(res, channels, max_grid_points)
     if max_response_bytes is not None:
-        size = len(json.dumps(res, ensure_ascii=False).encode("utf-8"))
+        with telemetry.phase("result_cap_serialisation"):
+            size = len(json.dumps(res, ensure_ascii=False).encode("utf-8"))
         if size > max_response_bytes:
             return api_error(
                 413,
