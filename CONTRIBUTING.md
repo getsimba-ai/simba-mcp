@@ -73,3 +73,7 @@ changes. Test the actual MCP wire result as well as direct Python forwarding.
 Run `pytest`, `ruff check src/ tests/`, `ruff format --check src/ tests/`, and
 `uv build`. Verify the supported SDK floor separately when changing SDK-facing
 contracts. See [architecture](docs/architecture.md) for compatibility boundaries.
+
+Run `python -m simba_mcp.evaluation --samples 3 --output-dir .codex/evaluation`
+for deterministic workflow contracts. The [evaluation guide](docs/evaluation.md)
+describes synthetic cases, measurements and separate model-evaluation gates.
