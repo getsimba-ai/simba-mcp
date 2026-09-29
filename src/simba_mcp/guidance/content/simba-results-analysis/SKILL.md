@@ -2,7 +2,7 @@
 name: simba-results-analysis
 description: Read saved Simba results, ROI and diagnostics.
 metadata:
-  version: "14"
+  version: "15"
 ---
 
 # Analyse saved results
@@ -24,6 +24,7 @@ Use requested dates, never guessed bounds/year. Inspect dated rows when needed.
 Before answering, identify every requested output, including combined totals as well
 as individual values. Supply each once; check none is missing. Keep the requested
 explanation within 100 words unless more detail is requested or needed for coverage.
+Check that each formula describes the metric it labels; omit unrelated formulas.
 Stop once answered: no unsolicited methodology, tool-use or safety footer.
 Before sending, check every explanatory clause against a returned field,
 a shown calculation or the documented contract. Remove plausible but unestablished

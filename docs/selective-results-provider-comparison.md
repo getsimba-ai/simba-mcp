@@ -98,3 +98,30 @@ US$0.289594 retained allowance. Subsequent continuation must carry both forward.
 Private checkpoints now retain bounded provider error text and Retry-After for
 diagnosis; public exporters exclude those bodies and all encrypted reasoning.
 V4 remains unopened. Issue #45 remains open and PR #58 remains draft.
+
+## Completed continuation and next validation
+
+The separately frozen [continuation](selective-results-provider-continuation-evidence.json)
+at `433bccb` completed the missing groups after a cooldown. Successful execution,
+guidance and model settings were unchanged; only private HTTP error diagnostics
+had changed. The original interrupted attempt and reservation remain preserved.
+
+| Profile | Complete supported answers | Unsupported answers | Mean session time | Completed-session cost |
+| --- | ---: | ---: | ---: | ---: |
+| Grok 4.7 low | 19/20 | 1 | 14.0 seconds | US$1.516456 |
+| Sonnet medium | 18/20 | 2 | 6.6 seconds | US$4.081000 |
+
+Grok's remaining failure gives correct spend/revenue totals but appends a
+revenue/spend quotient as their formula. Neither total uses that quotient.
+The zero-unsupported-claims gate therefore fails for both profiles. The 95%
+supported-answer threshold alone does not grant readiness. All completed reviews
+report zero unnecessary calls and unauthorised reads. Timing and cost differences
+remain descriptive, with caching and provider differences, not a guidance-effect
+estimate or general model ranking.
+
+Accounted cumulative spend is US$74.803606, including both retained allowances.
+Version 15 prospectively clarifies separate sums versus ROI division and the fact
+that different aggregation formulas can yield equal numbers. Its next bounded
+validation compares V14 with V15 on three exposed families: aggregate windows,
+channel comparison and restricted historical totals. This is not acceptance;
+V4 remains unopened and no failure is rescored.

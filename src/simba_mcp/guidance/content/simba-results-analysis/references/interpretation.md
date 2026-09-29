@@ -6,8 +6,12 @@
   null and say "not established by these results". Do not assert or rule out a
   value, sign or equality. Avoid "is neither ... nor ..." and "is not zero":
   those exclude possibilities, whereas missing evidence does not.
-- Preserve units: contributions are KPI, coefficients revenue. Window ROI is
-  summed revenue / summed spend, not an unweighted average of period ROI.
+- Preserve units: contributions are KPI, coefficients revenue. Spend and revenue
+  totals are separate sums. Only ROI divides summed revenue by summed spend.
+  Window ROI is not defined as an unweighted average of period ROI, although the
+  two calculations can coincide. Assert an actual numerical difference only
+  after calculating both from returned period evidence; otherwise distinguish
+  the definitions without claiming unequal values.
   Respect meta.aggregation and meta.not_windowed. Date filters do not select or
   aggregate mroi_periods rows: inspect the returned dates and select requested
   rows yourself. Do not sum mROI or HDI bounds.
