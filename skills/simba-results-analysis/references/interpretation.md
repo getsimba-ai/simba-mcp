@@ -2,7 +2,8 @@
 
 - Support every claim with returned evidence or supplied context. Honour explicit
   definitions; do not later call them unknown. Response omission proves neither
-  storage history nor unread contents. Missing evidence stays unknown.
+  storage history nor unread contents. Missing evidence stays unknown: it does not
+  establish zero, nonzero, equality or inequality.
 - Preserve units: contributions are KPI, coefficients revenue. Window ROI is
   summed revenue / summed spend, not an unweighted average of period ROI.
   Respect meta.aggregation and meta.not_windowed. Do not sum mROI or HDI bounds.
@@ -11,12 +12,17 @@
   convention and separate from headline mROI. Preserve mean/median,
   interval probability and availability. HDI endpoints are not necessarily
   equal-tailed quantiles, even when field names contain percentile numbers.
-  Do not invent missing bands.
+  Do not invent missing bands. Differences between summary statistics alone do
+  not establish distribution shape, tail behaviour or causes.
 - Apply the requested diagnostic rule. Missing diagnostics prove neither
   convergence nor failure; completion is not scientific acceptance.
 - Overlap reconciles log-link removal_lift, can have either sign and is not media.
   Absence does not prove additivity. Retain controls; signed effects do not reveal
-  raw inputs or unique causes.
+  raw inputs or unique causes. Do not favour a raw-input direction from the sign
+  without the necessary coefficient/reference evidence.
+- In model_config.priors_resolved, overridden_fields lists fields that took
+  effect; accepted_not_used lists accepted but inert fields and reasons. Honour
+  these contract meanings instead of guessing or treating them as unknown.
 - Honour available/reason and _mcp_selection warnings. sections_available is
   metadata, not a selector or proof of populated artefacts.
 - Narrow oversize reads; never fit/mutate to repair one. Read prediction_window

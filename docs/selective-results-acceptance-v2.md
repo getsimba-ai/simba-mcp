@@ -1,5 +1,39 @@
 # Independent selective-results acceptance, packet 2
 
+## Decision: acceptance fails
+
+The frozen comparison at `3f01e89` completed all 40 sessions. Independent review
+supports **13/20 candidate answers (65%)**, versus **8/20 baseline answers (40%)**.
+Seven candidate answers contain unsupported claims. They infer distribution tails
+from summary statistics, favour a raw control-input direction without coefficient
+evidence, misstate which sections were read, contradict explicit prior-field
+semantics, or turn an unknown long-run effect into a claim that it is not zero.
+All arithmetic, claims and calls are preserved in the [evidence record](selective-results-acceptance-v2-evidence.json).
+
+Actual unauthorised reads and unintended writes are zero in both arms. Refused
+unauthorised attempts and independently judged unnecessary calls are **6 candidate
+versus 23 baseline**. Attempts are not reported as actual reads.
+
+Family-weighted estimated cost saving is **22.75%**, with a conditional 95%
+interval of **12.61% to 33.47%**. Lower cost is established on this packet. The
+supported-answer difference is +25 percentage points, but its interval is
+**-10 to +60 percentage points**, so quality nonregression remains inconclusive.
+The zero-unsupported-claims and 95%-supported-answer gates also fail. Do not merge.
+
+The run cost **US$11.177748**, taking cumulative accounted spend to **US$49.096088
+of US$55**, including all earlier charges and the retained allowance. No provider
+session or reservation remains from this run. All 546 local tests and all four
+packet-head CI jobs pass; they do not establish answer quality.
+
+These findings inform version 10 guidance, so this packet is now selection
+validation material. Its original frozen acceptance result remains unchanged.
+The next bounded check covers the five failing families with two repetitions per
+arm, comparing version 10 with version 9 under the remaining cumulative cap.
+Every candidate answer must be supported, with no actual unauthorised reads,
+writes or increase in unnecessary calls. It will stop at a checkpoint if a
+candidate readiness failure is found. A third independent packet remains private
+until candidate readiness and freeze; no acceptance claim is carried forward.
+
 ## Protocol and preflight
 
 Version 9 guidance and the existing Sonnet configuration were frozen before
