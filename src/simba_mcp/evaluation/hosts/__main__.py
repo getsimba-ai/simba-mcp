@@ -19,7 +19,7 @@ from ..experiments import (
 )
 from .anthropic import MODEL, Budget, client, definitions, session
 from .result_calibration import GRADER_VERSION, calibrate
-from .result_grading import literal_fields, structured_answer_only
+from .result_grading import fact_verdict, literal_fields, structured_answer_only
 from .result_selection import (
     ResultSelectionDispatch,
     development_tasks,
@@ -125,6 +125,9 @@ async def run(args):
         )
 
     def verify():
+        stop_file = getattr(args, "stop_file", None)
+        if stop_file and stop_file.exists():
+            raise RuntimeError("Operator requested stop; checkpoint and reservations retained")
         if robust:
             verify_experiment(report["frozen_experiment"], report["experiment_inputs"], calibrate())
 
@@ -228,8 +231,13 @@ async def run(args):
                         if guidance_arms:
                             row["assertions"] = dispatch.grade(actual)
                             if robust:
-                                row["assertions"]["no_unreviewed_prose"] = structured_answer_only(
-                                    result.get("final_text", "")
+                                row["fact_verdict"] = fact_verdict(
+                                    case, actual, dispatch.supported_sections
+                                )
+                                row["claim_review_required"] = (
+                                    not row["assertions"]["claims_in_scope"]
+                                    or not structured_answer_only(result.get("final_text", ""))
+                                    or row["fact_verdict"] == "review"
                                 )
                             row["literal_fields_match"] = literal_fields(case, actual)
                             row["passed"] = all(row["assertions"].values())
@@ -239,6 +247,24 @@ async def run(args):
                                 dispatch.observed_sections - case.required_sections
                             )
                             row["execution_trials"] = [t.model_dump() for t in dispatch.trials]
+                            if robust:
+                                definite_failure = row["fact_verdict"] == "fail" or not all(
+                                    row["assertions"][key]
+                                    for key in (
+                                        "required_evidence",
+                                        "no_errors",
+                                        "no_unintended_writes",
+                                        "executed",
+                                    )
+                                )
+                                row["outcome"] = (
+                                    "fail"
+                                    if definite_failure
+                                    else "review"
+                                    if row["claim_review_required"]
+                                    else "pass"
+                                )
+                                row["passed"] = row["outcome"] == "pass"
                         save()
                         print(
                             json.dumps(
@@ -278,6 +304,9 @@ def main():
         "--results-baseline", type=Path, help="Frozen guidance responses for paired results trials"
     )
     parser.add_argument("--results-prompt", choices=("mixed", "paraphrase"), default="mixed")
+    parser.add_argument(
+        "--stop-file", type=Path, help="Stop at the next provider checkpoint if this file exists"
+    )
     parser.add_argument(
         "--results-robust",
         action="store_true",

@@ -208,11 +208,14 @@ The follow-up work applies the discipline described in
 [Automating eval design and hillclimbing](https://claude.dev/blog/automating-eval-design-and-hillclimbing/)
 to the existing runner. Earlier measurements and scores remain immutable.
 
-- Grader version 4 has an explicit calibration corpus with correct, incorrect,
+- Grader version 5 has an explicit calibration corpus with correct, incorrect,
   contradictory and unsupported structured claims. These are engineering labels
   awaiting independent review. It rejects unknown additional fields instead of
   silently treating them as supported claims. Reason matching is deliberately
-  bounded; an unfamiliar valid paraphrase can require review rather than pass.
+  bounded; an unfamiliar valid paraphrase requires review. Reports distinguish
+  definite structured mismatches from pending review. Additional prose or fields
+  prevent an overall quality verdict until reviewed, without making the requested
+  numeric facts automatically wrong.
 - JSON code fences are a formatting difference. Prose outside the parsed answer
   requires separate review; this is not a general natural-language claim judge.
 - The expanded development suite contains eleven questions across six task
@@ -242,3 +245,42 @@ stays in the existing adapter and CLI; `result_selection` owns task dispatch;
 `result_grading` owns pure bounded grading; `result_calibration` owns labelled
 grader fixtures; `evaluation.experiments` owns frozen-input validation and paired
 assessment. Production tools do not import any of these evaluation modules.
+
+## Robustness pilot stopped for grading review
+
+The planned 66-session development comparison at source `84503db` was stopped
+after 19 completed sessions and one interrupted session. Frozen grader 4 combined
+correct structured facts with unreviewed explanatory prose in one pass flag. That
+flag could not support a meaningful comparison. Its original scores are retained
+in [the aborted pilot evidence](selective-results-robustness-evidence.json).
+
+Grader 5 now records `pass`, `fail` and `review`. Unknown explanatory wording and
+additional claims need review, while definite value/evidence/routing mismatches
+remain failures. Quality differences and intervals are withheld while claims
+remain unreviewed. This correction has local tests and a 20-example engineering
+calibration corpus. It has not been prospectively validated in another paid run.
+The corpus is included separately in the evidence file, not applied to overwrite
+the frozen pilot scores.
+
+Accounted cumulative spend is US$11.438494 against the authorised US$25 cap:
+US$11.148900 known charges and US$0.289594 retained for unknown in-flight usage.
+The remaining allowance is US$13.561506. The raw checkpoint retains its last
+running status; the enclosing abort record is authoritative. No retry or new
+provider run was started after the stop. The runner now also supports an operator
+stop file at provider checkpoints, preserving reservations and partial evidence.
+
+### Concrete review decisions before another comparison
+
+| Example | Requested fact verdict | Remaining review |
+| --- | --- | --- |
+| Search revenue 500, spend 200, ROI 2.5, with a prose summary | Pass when the corresponding evidence was fetched | Check additional prose claims |
+| Convergence false, with an unfamiliar explanation that diagnostics were not saved | Review, not a proved false answer | Confirm that the explanation expresses unknown convergence |
+| Convergence true when diagnostics were not saved | Fail | Cannot establish convergence from missing evidence |
+| Correct ROI plus an additional claim of causal validity | Requested numeric fields can pass | Extra claim remains unverified; overall acceptance is blocked |
+| Correct final answer after requesting metadata as a result section | Facts can pass | Routing still fails; recovery is not a clean tool sequence |
+
+Next: independently review the rubric and representative labelled answers, agree
+quality and cost thresholds, then supply multiple datasets and externally held
+acceptance cases. Only after those prerequisites should another frozen comparison
+be used for acceptance. The issue and PR remain open and draft. The existing
+historical-marginal routing gap is not waived or claimed fixed by this work.

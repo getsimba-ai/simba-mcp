@@ -85,6 +85,32 @@ def claims_in_scope(task, facts):
     return set(facts) <= allowed
 
 
+def fact_verdict(task, facts, supported_sections):
+    """Separate definite structured mismatches from explanations needing review.
+
+    A correct unknown-convergence state with an unfamiliar reason is not a
+    proven false claim. Its explanation needs independent semantic review.
+    """
+    if semantic_facts(task, facts, supported_sections):
+        return "pass"
+    if task.id == "result_diagnostics" and isinstance(facts, dict):
+        state = facts.get("convergence")
+        established = facts.get("convergence_established")
+        state_valid = (
+            state is False
+            or (isinstance(state, str) and state in ("unknown", "unavailable", "not_established"))
+            or ("convergence" not in facts and established is False)
+        )
+        if (
+            state_valid
+            and ("convergence_established" not in facts or established is False)
+            and isinstance(facts.get("reason"), str)
+            and facts["reason"].strip()
+        ):
+            return "review"
+    return "fail"
+
+
 def structured_answer_only(text):
     """Code fencing is formatting; prose outside the answer still needs review."""
     text = text.strip()

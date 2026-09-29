@@ -114,6 +114,42 @@ def test_opposing_family_effects_show_uncertainty():
     assert "five_percent_cost_saving_not_established" in report["reasons"]
 
 
+def test_pending_review_is_not_a_false_answer_or_a_quality_verdict():
+    families = {"a": "one", "b": "two"}
+    rows = rows_for(families)
+    for row in rows:
+        row.update(outcome="review", claim_review_required=True, passed=False)
+    report = experiments.assess_comparison(rows, families, samples=2)
+    assert report["quality_delta"] is None
+    assert report["quality_delta_95_interval"] is None
+    assert report["candidate_hard_failures"] == 0
+    assert report["sessions_requiring_claim_review"] == len(rows)
+    assert not report["accepted"]
+
+
+@pytest.mark.anyio
+async def test_operator_stop_prevents_opening_provider(tmp_path, monkeypatch):
+    from types import SimpleNamespace
+
+    from simba_mcp.evaluation.hosts import __main__ as command
+
+    stop = tmp_path / "stop"
+    stop.touch()
+    monkeypatch.setattr(command, "client", lambda _: pytest.fail("Provider must not open"))
+    with pytest.raises(RuntimeError, match="Operator requested stop"):
+        await command.run(
+            SimpleNamespace(
+                output=tmp_path / "evidence.json",
+                cap_usd=25,
+                prior_usd=11.438494,
+                samples=2,
+                mode="eager",
+                case=None,
+                stop_file=stop,
+            )
+        )
+
+
 @pytest.mark.anyio
 async def test_development_tasks_are_achievable_with_canonical_dispatch():
     for task in development_tasks():

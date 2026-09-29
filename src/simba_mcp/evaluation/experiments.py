@@ -139,8 +139,11 @@ def assess_comparison(rows, families, *, samples, resamples=4000, seed=20260929)
 
     quality_ci, savings_ci = interval(0), interval(1)
     candidates = [r for r in rows if r["view"] == "candidate"]
+    pending_review = sum(r.get("claim_review_required", False) for r in rows)
     hard_failures = sum(
-        not all(
+        r.get("outcome") == "fail"
+        if "outcome" in r
+        else not all(
             r.get("assertions", {}).get(k, False)
             for k in (
                 "facts",
@@ -151,9 +154,10 @@ def assess_comparison(rows, families, *, samples, resamples=4000, seed=20260929)
                 "executed",
             )
         )
-        or not r.get("assertions", {}).get("no_unreviewed_prose", False)
         for r in candidates
     )
+    if pending_review:
+        quality_ci = None
     reasons = [
         "public_development_cases_are_not_independent_acceptance",
         "thresholds_require_owner_agreement",
@@ -162,6 +166,8 @@ def assess_comparison(rows, families, *, samples, resamples=4000, seed=20260929)
         reasons.append("fewer_than_eight_task_families")
     if hard_failures:
         reasons.append("candidate_quality_or_routing_failures")
+    if pending_review:
+        reasons.append("unreviewed_claims_prevent_quality_comparison")
     if quality_ci is None or quality_ci[0] < -PROPOSED_THRESHOLDS["quality_noninferiority_margin"]:
         reasons.append("quality_noninferiority_not_established")
     if savings_ci is None or savings_ci[0] < PROPOSED_THRESHOLDS["minimum_cost_saving"]:
@@ -174,7 +180,8 @@ def assess_comparison(rows, families, *, samples, resamples=4000, seed=20260929)
         "family_count": len(units),
         "paired_repetitions": samples,
         "candidate_hard_failures": hard_failures,
-        "quality_delta": point[0],
+        "quality_delta": None if pending_review else point[0],
+        "sessions_requiring_claim_review": pending_review,
         "quality_delta_95_interval": quality_ci,
         "cost_saving_fraction": point[1],
         "cost_saving_95_interval": savings_ci,

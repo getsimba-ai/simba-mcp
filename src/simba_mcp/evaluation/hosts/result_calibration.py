@@ -6,15 +6,27 @@ Original provider evidence is never overwritten or silently rescored.
 
 from dataclasses import asdict
 
-from .result_grading import claims_in_scope, semantic_facts
+from .result_grading import claims_in_scope, fact_verdict, semantic_facts
 from .result_selection import result_tasks
 
-GRADER_VERSION = 4
+GRADER_VERSION = 5
 
 
 def calibration_cases():
     roi, diagnostic, marginal, decomposition, old = result_tasks()
     cases = [
+        (
+            "valid_explanation_for_review",
+            diagnostic,
+            {
+                "convergence": False,
+                "reason": "Both requested sections report not_saved. "
+                "Missing diagnostics do not prove convergence or failure.",
+            },
+            set(),
+            False,
+            True,
+        ),
         ("correct_roi", roi, roi.expected, {"channel_map"}, True, True),
         (
             "mapped_display_name",
@@ -125,14 +137,25 @@ def calibrate():
         task = tasks[case["task"]["id"]]
         actual = semantic_facts(task, case["facts"], set(case["supported_sections"]))
         bounded = claims_in_scope(task, case["facts"])
+        verdict = fact_verdict(task, case["facts"], set(case["supported_sections"]))
+        expected_verdict = (
+            "review"
+            if case["id"] in ("unknown_with_failure_claim", "valid_explanation_for_review")
+            else "pass"
+            if case["expected_facts"]
+            else "fail"
+        )
         case["task"]["required_sections"] = sorted(case["task"]["required_sections"])
         rows.append(
             {
                 **case,
                 "actual_facts": actual,
                 "actual_claims_in_scope": bounded,
+                "verdict": verdict,
+                "expected_verdict": expected_verdict,
                 "passed": actual == case["expected_facts"]
-                and bounded == case["expected_claims_in_scope"],
+                and bounded == case["expected_claims_in_scope"]
+                and verdict == expected_verdict,
             }
         )
     return {
