@@ -118,3 +118,10 @@ from projected availability. Review revision 2 corrects an initially over-strict
 classification: the supplied tool contract supports faithful older-fit fallback
 restatement, although this is not independent historical verification. The original cost
 interval remains inconclusive. These findings do not trigger guidance tuning.
+
+## Subsequent model selection
+
+The [stronger-model diagnostic](selective-results-model-diagnostic.md) reuses five
+cases from this packet with unchanged guidance. The packet is now model-selection
+validation material and must not be reused as fresh final acceptance. This does
+not alter the original failed decision, frozen scores or historical adjudication.
