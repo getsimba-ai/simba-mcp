@@ -1,0 +1,200 @@
+"""Result questions allow different valid sequences but reject evidence-free passes."""
+
+import pytest
+
+from simba_mcp.evaluation.hosts.result_selection import ResultSelectionDispatch, result_tasks
+from simba_mcp.evaluation.result_cases import result_cases, saved_results
+from simba_mcp.evaluation.runner import run_case
+from simba_mcp.server import create_server
+
+
+@pytest.fixture
+def anyio_backend():
+    return "asyncio"
+
+
+@pytest.mark.anyio
+@pytest.mark.parametrize("case", result_cases(), ids=lambda c: c.id)
+async def test_result_contracts(case):
+    trial = await run_case(case)
+    assert trial.passed, trial.assertions
+
+
+def test_roi_oracle_and_reconciliation():
+    result = saved_results()["results"]
+    periods = result["coefficients"]
+    assert sum(r["Revenue"] for r in periods) / sum(r["Spend"] for r in periods) == 2.5
+    assert sum(r["ROI"] for r in periods) / len(periods) != 2.5
+    row = result["contributions"][0]
+    assert (
+        sum(row[k] for k in ("Search Activity", "TV_activity", "Base", "price", "Overlap"))
+        == row["Model"]
+    )
+
+
+@pytest.mark.anyio
+@pytest.mark.parametrize("task", result_tasks(), ids=lambda t: t.id)
+async def test_alternative_sequences_and_answer_faults(task):
+    server = create_server("compact")
+    for split in (True, False):
+        dispatch = ResultSelectionDispatch(server, task)
+        assert not all(dispatch.grade(task.expected).values())
+        groups = (
+            sorted(task.required_sections) if split else [",".join(sorted(task.required_sections))]
+        )
+        for group in groups:
+            _, error = await dispatch(
+                "get_model_results", {"model_hash": "result-example", "sections": group}
+            )
+            assert not error
+        assert all(dispatch.grade(task.expected).values())
+        assert not dispatch.grade({})["facts"]
+
+
+@pytest.mark.anyio
+@pytest.mark.parametrize(
+    "name,args",
+    [
+        ("get_data_schema", {}),
+        ("create_model", {}),
+        ("get_model_results", {"model_hash": "other"}),
+        ("get_model_results", {"model_hash": "result-example", "sections": "prediction_window"}),
+        ("get_model_results", {"model_hash": "result-example", "start": "2030-01-01"}),
+        ("get_model_results", {"model_hash": "result-example", "sections": "imaginary"}),
+    ],
+)
+async def test_outside_task_requests_fail(name, args):
+    dispatch = ResultSelectionDispatch(create_server(), result_tasks()[0])
+    _, error = await dispatch(name, args)
+    assert error
+    assert not all(dispatch.grade(dispatch.task.expected).values())
+
+
+@pytest.mark.anyio
+async def test_payload_measurements_compare_same_facts():
+    task = result_tasks()[0]
+    full = ResultSelectionDispatch(create_server(), task)
+    selective = ResultSelectionDispatch(create_server(), task)
+    await full("get_model_results", {"model_hash": "result-example"})
+    await selective(
+        "get_model_results",
+        {"model_hash": "result-example", "sections": "channel_summary,channel_map"},
+    )
+    assert all(full.grade(task.expected).values())
+    assert all(selective.grade(task.expected).values())
+    assert selective.trials[0].content_json_bytes < full.trials[0].content_json_bytes
+    assert selective.trials[0].backend_downloaded_bytes < full.trials[0].backend_downloaded_bytes
+
+
+@pytest.mark.anyio
+async def test_empty_filtered_evidence_cannot_support_a_correct_guessed_answer():
+    task = result_tasks()[0]
+    dispatch = ResultSelectionDispatch(create_server(), task)
+    await dispatch(
+        "get_model_results",
+        {
+            "model_hash": "result-example",
+            "sections": "channel_summary,channel_map",
+            "channels": ["missing"],
+        },
+    )
+    assert dispatch.grade(task.expected)["facts"]
+    assert not dispatch.grade(task.expected)["required_evidence"]
+
+
+@pytest.mark.anyio
+async def test_changed_answer_is_detected_after_valid_evidence():
+    task = result_tasks()[0]
+    dispatch = ResultSelectionDispatch(create_server(), task)
+    await dispatch(
+        "get_model_results",
+        {"model_hash": "result-example", "sections": "channel_summary,channel_map"},
+    )
+    assert not dispatch.grade({**task.expected, "roi": 3.0})["facts"]
+
+
+@pytest.mark.anyio
+async def test_guidance_comparison_freezes_arms_and_uses_real_dispatch(tmp_path, monkeypatch):
+    import json
+    from types import SimpleNamespace
+
+    import httpx
+
+    from simba_mcp.evaluation.hosts import __main__ as command
+    from simba_mcp.guidance import read_guidance
+
+    seen = []
+    task = result_tasks()[0]
+
+    def respond(request):
+        body = json.loads(request.content)
+        seen.append(body)
+        if len(body["messages"]) == 1:
+            content = [
+                {
+                    "type": "tool_use",
+                    "id": "read",
+                    "name": "get_model_results",
+                    "input": {
+                        "model_hash": "result-example",
+                        "sections": "channel_summary,channel_map",
+                    },
+                }
+            ]
+            stop = "tool_use"
+        else:
+            content = [{"type": "text", "text": json.dumps(task.expected)}]
+            stop = "end_turn"
+        return httpx.Response(
+            200,
+            json={
+                "content": content,
+                "stop_reason": stop,
+                "usage": {"input_tokens": 20, "output_tokens": 10},
+            },
+        )
+
+    monkeypatch.setattr(
+        command, "client", lambda _: httpx.AsyncClient(transport=httpx.MockTransport(respond))
+    )
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "synthetic-key")
+    baseline = {
+        s: read_guidance("results", s) for s in ("entrypoint", "interpretation", "tool-reference")
+    }
+    baseline["entrypoint"]["content"] = "Frozen baseline marker"
+    baseline_path = tmp_path / "baseline.json"
+    baseline_path.write_text(json.dumps(baseline))
+    output = tmp_path / "report.json"
+    await command.run(
+        SimpleNamespace(
+            output=output,
+            cap_usd=10,
+            prior_usd=0,
+            mode="eager",
+            samples=2,
+            case=task.id,
+            role_comparison=None,
+            results_baseline=baseline_path,
+        )
+    )
+    report = json.loads(output.read_text())
+    assert [t["view"] for t in report["trials"]] == [
+        "baseline",
+        "candidate",
+        "candidate",
+        "baseline",
+    ]
+    assert all(t["passed"] for t in report["trials"])
+    assert len({t["definitions_sha256"] for t in report["trials"]}) == 1
+    assert "Frozen baseline marker" in seen[0]["system"]
+    assert "Frozen baseline marker" not in seen[2]["system"]
+    assert all(request["messages"][0] == seen[0]["messages"][0] for request in seen)
+    assert report["budget"]["reserved"] == 0
+
+
+@pytest.mark.anyio
+async def test_on_demand_guidance_cannot_leak_other_arm():
+    frozen = {"entrypoint": {"content": "baseline-only"}}
+    dispatch = ResultSelectionDispatch(create_server(), result_tasks()[0], guidance=frozen)
+    result, error = await dispatch("get_workflow_guidance", {"topic": "results"})
+    assert not error and result == frozen["entrypoint"]

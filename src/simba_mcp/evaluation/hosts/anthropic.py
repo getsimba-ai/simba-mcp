@@ -67,7 +67,9 @@ class Budget:
         return cost
 
 
-async def session(client, tools, prompt, dispatch, budget, checkpoint, *, max_turns=8):
+async def session(
+    client, tools, prompt, dispatch, budget, checkpoint, *, max_turns=8, system_context=""
+):
     """No retries or automatic fallback. Only ordinary tool_use blocks are dispatched.
 
     checkpoint persists the serial budget before requests and after usage receipt.
@@ -84,7 +86,8 @@ async def session(client, tools, prompt, dispatch, budget, checkpoint, *, max_tu
             "temperature": 0,
             "system": "Complete only the authorised synthetic task. Preserve exact settings. "
             "Do not repeat already completed preflights. Missing evidence is not a pass. "
-            "Never repeat an uncertain write. Return the requested facts as JSON.",
+            "Never repeat an uncertain write. Return the requested facts as JSON."
+            + ("\n\n" + system_context if system_context else ""),
             "tools": tools,
             "messages": messages,
         }

@@ -151,6 +151,14 @@ CONTEXT-SIZE TIP: a full pull is very large (curve sections alone are 100
 grid points x channels x 5 band columns). In conversational use, request
 only the sections you need and pass channels=[...] and max_grid_points=20.
 
+Explicit JSON channel/grid requests add `_mcp_selection` metadata describing
+requested selection, changed sections, original/returned row counts and grid
+sampling. Backend metadata and warnings remain unchanged. Alias collisions
+retain every matching exact identifier and are disclosed; never combine them.
+Unmatched aliases refer only to filterable sections. Empty channels and grid
+limits below 2 retain existing no-op behaviour with a warning. Unfiltered and
+CSV results are unchanged. Local filtering does not bound backend downloads.
+
 Args:
     model_hash: The model hash.
     sections: Comma-separated list of sections to include.

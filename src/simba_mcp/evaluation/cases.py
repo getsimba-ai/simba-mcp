@@ -382,4 +382,6 @@ def cases() -> list[Case]:
             ],
         )
     )
-    return suite
+    from .result_cases import result_cases
+
+    return [*suite, *result_cases()]

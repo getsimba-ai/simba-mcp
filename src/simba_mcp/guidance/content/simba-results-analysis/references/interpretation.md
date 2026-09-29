@@ -26,3 +26,24 @@
   feature-detect optional artifacts (`mroi_periods`, `cohort_ledger`,
   `*_mean` keys); older fits simply lack them; there is no
   backfill.
+
+## Selective reads and recovery
+
+- For a historical ROI answer, request `channel_summary,channel_map` and the
+  relevant inclusive date window. Add `coefficients` only when period-level
+  evidence or reconciliation is needed. Read currency and aggregation metadata;
+  if absent, qualify the answer or retrieve the supporting evidence.
+- Never average period ROIs or marginal medians. For example, revenues 200 and
+  300 on spends 50 and 150 imply total ROI 2.5, not the average period ROI of 3.
+  Backend windowed aggregates remain the source of reported model statistics.
+- A requested window does not change every section. Retain `meta.not_windowed`.
+  Bucketed predictive intervals cannot be constructed by summing their endpoints.
+- Channel/grid filtering is local JSON processing. `_mcp_selection` describes
+  actual changes and retains backend metadata. Unmatched aliases mean no match
+  in supported filterable sections, not proof a channel is absent from the model.
+- An oversized-result refusal contains no partial analytical evidence. Narrow
+  sections, channels or dates deliberately, then retry the safe read. Do not
+  start a fit, write data, or access `prediction_window` as automatic recovery.
+- Saved prediction-window access may create an audit event. Only request it when
+  needed for the user's question, preserve provenance, and never certify an
+  untouched holdout from the prediction values alone.
