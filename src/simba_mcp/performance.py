@@ -4,61 +4,12 @@ from __future__ import annotations
 
 import argparse
 import hashlib
-import importlib.metadata
 import json
-import platform
-import subprocess
 from pathlib import Path
 from time import perf_counter
 from typing import Any
 
-
-def compact(value: Any) -> str:
-    return json.dumps(value, ensure_ascii=False, separators=(",", ":"))
-
-
-def provenance() -> dict:
-    packages = {}
-    for name in ("simba-mcp", "mcp", "httpx", "pydantic", "tiktoken"):
-        try:
-            packages[name] = importlib.metadata.version(name)
-        except importlib.metadata.PackageNotFoundError:
-            packages[name] = None
-    source = Path(__file__).resolve().parent
-    digest = hashlib.sha256()
-    for path in sorted(source.rglob("*.py")):
-        digest.update(path.relative_to(source).as_posix().encode())
-        digest.update(b"\0")
-        digest.update(path.read_bytes().replace(b"\r\n", b"\n"))
-    root = source.parents[1]
-    revision, dirty = None, None
-    if (root / "pyproject.toml").is_file():
-        try:
-            revision = subprocess.check_output(
-                ["git", "-C", str(root), "rev-parse", "HEAD"],
-                stderr=subprocess.DEVNULL,
-                timeout=5,
-                text=True,
-            ).strip()
-            dirty = bool(
-                subprocess.check_output(
-                    ["git", "-C", str(root), "status", "--porcelain"],
-                    stderr=subprocess.DEVNULL,
-                    timeout=5,
-                    text=True,
-                ).strip()
-            )
-        except (OSError, subprocess.SubprocessError):
-            revision, dirty = None, None
-    return {
-        "packages": packages,
-        "python": platform.python_version(),
-        "platform": platform.system(),
-        "architecture": platform.machine(),
-        "git_revision": revision,
-        "git_dirty": dirty,
-        "python_source_sha256": digest.hexdigest(),
-    }
+from .measurements import compact, provenance
 
 
 def capture_surface() -> tuple[bytes, bytes]:

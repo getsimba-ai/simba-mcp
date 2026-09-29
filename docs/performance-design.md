@@ -138,9 +138,13 @@ usage fields are null with a reason, never zero. Record model/provider versions 
 sampling settings from the actual runner; no provider is chosen by this design.
 
 Offline contract fixtures come first and require no credentials or backend fits.
-Then add an explicitly bounded model-assisted runner with recorded spend limits.
+Then use a host-side model evaluation with recorded spend limits and the versioned
+[evaluation report contract](evaluation.md). The MCP package provides deterministic
+contract checks; it does not own model orchestration or scientific grading.
 Live fits and backend writes require separate authorisation. Compare the baseline
 to a candidate only when that candidate exists; an unimplemented mode is untested.
+PERF-02 establishes the baseline and budget decision. PERF-12 (#50) executes the
+comparison matrix for subsequent compact/discovery implementations.
 
 Hard gates: zero unintended writes, unchanged deterministic contracts and no loss
 of scientific evidence. Numerical latency/token budgets and stochastic quality

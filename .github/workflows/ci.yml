@@ -46,6 +46,20 @@ jobs:
       - name: Check generated reference
         run: python -m simba_mcp.reference --check
 
+      - name: Evaluate synthetic workflow contracts
+        run: python -m simba_mcp.evaluation --samples 3 --output-dir .codex/evaluation
+
+      - name: Retain workflow evidence
+        uses: actions/upload-artifact@v7
+        with:
+          name: evaluation-${{ matrix.python-version }}-${{ matrix.sdk }}
+          path: |
+            .codex/evaluation/evaluation.json
+            .codex/evaluation/evaluation.md
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 90
+
       - name: Capture synthetic performance baseline
         if: matrix.python-version == '3.11'
         run: |
