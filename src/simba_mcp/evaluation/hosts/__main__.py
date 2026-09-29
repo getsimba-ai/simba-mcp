@@ -11,8 +11,20 @@ from pathlib import Path
 from ...guidance import read_guidance
 from ...measurements import provenance
 from ...server import create_server
-from .anthropic import Budget, client, definitions, session
-from .result_selection import ResultSelectionDispatch, literal_fields, result_tasks
+from ..experiments import (
+    PROPOSED_THRESHOLDS,
+    assess_comparison,
+    freeze_experiment,
+    verify_experiment,
+)
+from .anthropic import MODEL, Budget, client, definitions, session
+from .result_calibration import GRADER_VERSION, calibrate
+from .result_grading import literal_fields, structured_answer_only
+from .result_selection import (
+    ResultSelectionDispatch,
+    development_tasks,
+    result_tasks,
+)
 from .roles import ROLE_CASES
 from .scenarios import SyntheticDispatch, answer, role_tasks, tasks
 
@@ -25,6 +37,9 @@ async def run(args):
     tools = await server.list_tools()
     role = getattr(args, "role_comparison", None)
     baseline_path = getattr(args, "results_baseline", None)
+    robust = getattr(args, "results_robust", False)
+    if robust and not baseline_path:
+        raise ValueError("Robust results assessment requires a paired guidance comparison")
     guidance_arms = None
     if baseline_path:
         if role or args.mode != "eager":
@@ -43,7 +58,10 @@ async def run(args):
         raise ValueError("Role comparison requires eager mode to isolate catalogue visibility")
     suite = role_tasks() if role else tasks()
     if guidance_arms:
-        suite = [(task, task.prompt, task.expected) for task in result_tasks()]
+        suite = [
+            (task, task.prompt, task.expected)
+            for task in (development_tasks() if robust else result_tasks())
+        ]
     selected = [task for task in suite if args.case is None or task[0].id == args.case]
     if role:
         selected = [task for task in selected if task[0].id in ROLE_CASES[role]]
@@ -60,6 +78,8 @@ async def run(args):
             "role_comparison": role,
             "results_comparison": bool(guidance_arms),
             "results_prompt": getattr(args, "results_prompt", "mixed"),
+            "results_robust": robust,
+            "model": MODEL,
         },
         "trials": [],
         "catalogue": [t.model_dump(mode="json") for t in tools],
@@ -71,6 +91,9 @@ async def run(args):
                     "id": c.id,
                     "required_sections": sorted(c.required_sections),
                     "paraphrase": c.paraphrase,
+                    "family": c.family,
+                    "channel": c.channel,
+                    "allow_prediction": c.allow_prediction,
                 },
                 "prompt": p,
                 "expected": e,
@@ -80,6 +103,30 @@ async def run(args):
     }
     if guidance_arms:
         report["guidance"] = guidance_arms
+    if robust:
+        report["calibration"] = calibrate()
+        report["experiment_inputs"] = {
+            "purpose": "development",
+            "samples": args.samples,
+            "configuration": report["configuration"],
+            "tasks": report["tasks"],
+            "guidance": report["guidance"],
+            "catalogue": report["catalogue"],
+            "proposed_thresholds": dict(PROPOSED_THRESHOLDS),
+            "acceptance_prerequisites": [
+                "independently reviewed labels",
+                "owner-agreed thresholds",
+                "externally held, previously unseen cases",
+                "multiple synthetic datasets",
+            ],
+        }
+        report["frozen_experiment"] = freeze_experiment(
+            report["experiment_inputs"], report["calibration"]
+        )
+
+    def verify():
+        if robust:
+            verify_experiment(report["frozen_experiment"], report["experiment_inputs"], calibrate())
 
     def save(_=None):
         report["budget"] = asdict(budget)
@@ -90,6 +137,7 @@ async def run(args):
 
     save()
     try:
+        verify()
         async with client(os.environ["ANTHROPIC_API_KEY"]) as provider:
             for rep in range(args.samples):
                 for case, prompt, expected in selected:
@@ -137,15 +185,16 @@ async def run(args):
                         paraphrased = bool(guidance_arms) and (
                             rep >= 3 or getattr(args, "results_prompt", "mixed") == "paraphrase"
                         )
-                        session_prompt = case.paraphrase if paraphrased else prompt
+                        session_prompt = (case.paraphrase or prompt) if paraphrased else prompt
                         if guidance_arms:
                             row["prompt"] = session_prompt
                             row["prompt_variant"] = "paraphrase" if paraphrased else "original"
-                            row["grader_version"] = 3
+                            row["grader_version"] = GRADER_VERSION
 
                         def checkpoint(record, row=row):
                             row["session"] = record
                             save()
+                            verify()
 
                         result = await session(
                             provider,
@@ -178,6 +227,10 @@ async def run(args):
                         )
                         if guidance_arms:
                             row["assertions"] = dispatch.grade(actual)
+                            if robust:
+                                row["assertions"]["no_unreviewed_prose"] = structured_answer_only(
+                                    result.get("final_text", "")
+                                )
                             row["literal_fields_match"] = literal_fields(case, actual)
                             row["passed"] = all(row["assertions"].values())
                             row["answer_correct"] = row["assertions"]["facts"]
@@ -202,6 +255,10 @@ async def run(args):
         report["error_type"] = type(error).__name__
         raise
     finally:
+        if robust:
+            report["assessment"] = assess_comparison(
+                report["trials"], {c.id: c.family for c, _, _ in selected}, samples=args.samples
+            )
         save()
 
 
@@ -213,13 +270,19 @@ def main():
     parser.add_argument("--samples", type=int, default=2)
     parser.add_argument("--mode", choices=("eager", "deferred", "both"), default="eager")
     parser.add_argument(
-        "--case", choices=[case.id for case, _, _ in role_tasks()] + [t.id for t in result_tasks()]
+        "--case",
+        choices=[case.id for case, _, _ in role_tasks()] + [t.id for t in development_tasks()],
     )
     parser.add_argument("--role-comparison", choices=tuple(ROLE_CASES))
     parser.add_argument(
         "--results-baseline", type=Path, help="Frozen guidance responses for paired results trials"
     )
     parser.add_argument("--results-prompt", choices=("mixed", "paraphrase"), default="mixed")
+    parser.add_argument(
+        "--results-robust",
+        action="store_true",
+        help="Frozen development comparison with calibration and paired intervals",
+    )
     args = parser.parse_args()
     if args.samples < 1:
         parser.error("samples must be positive")

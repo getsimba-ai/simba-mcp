@@ -114,7 +114,10 @@ async def test_changed_answer_is_detected_after_valid_evidence():
 
 
 @pytest.mark.anyio
-async def test_guidance_comparison_freezes_arms_and_uses_real_dispatch(tmp_path, monkeypatch):
+@pytest.mark.parametrize("robust", [False, True])
+async def test_guidance_comparison_freezes_arms_and_uses_real_dispatch(
+    tmp_path, monkeypatch, robust
+):
     import json
     from types import SimpleNamespace
 
@@ -175,6 +178,7 @@ async def test_guidance_comparison_freezes_arms_and_uses_real_dispatch(tmp_path,
             case=task.id,
             role_comparison=None,
             results_baseline=baseline_path,
+            results_robust=robust,
         )
     )
     report = json.loads(output.read_text())
@@ -190,6 +194,11 @@ async def test_guidance_comparison_freezes_arms_and_uses_real_dispatch(tmp_path,
     assert "Frozen baseline marker" not in seen[2]["system"]
     assert all(request["messages"][0] == seen[0]["messages"][0] for request in seen)
     assert report["budget"]["reserved"] == 0
+    if robust:
+        assert report["calibration"]["passed"]
+        assert report["frozen_experiment"]["source_sha256"]
+        assert report["assessment"]["status"] == "development_only"
+        assert not report["assessment"]["accepted"]
 
 
 @pytest.mark.anyio
@@ -201,7 +210,7 @@ async def test_on_demand_guidance_cannot_leak_other_arm():
 
 
 def test_semantic_grader_keeps_literal_and_evidence_constraints_separate():
-    from simba_mcp.evaluation.hosts.result_selection import literal_fields, semantic_facts
+    from simba_mcp.evaluation.hosts.result_grading import literal_fields, semantic_facts
 
     roi, diagnostics, marginal, decomposition, old = result_tasks()
     display = {**roi.expected, "channel": "Search"}

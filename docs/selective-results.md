@@ -202,3 +202,43 @@ under the same US$10 cap, with no outstanding usage reservations. The first 50
 sessions remain in their original evidence file; the second 50 plus eight targeted
 sessions are in the follow-up file. Production backend behaviour, general host
 coverage and scientific-model validity remain outside this evidence.
+# Evaluation robustness expansion
+
+The follow-up work applies the discipline described in
+[Automating eval design and hillclimbing](https://claude.dev/blog/automating-eval-design-and-hillclimbing/)
+to the existing runner. Earlier measurements and scores remain immutable.
+
+- Grader version 4 has an explicit calibration corpus with correct, incorrect,
+  contradictory and unsupported structured claims. These are engineering labels
+  awaiting independent review. It rejects unknown additional fields instead of
+  silently treating them as supported claims. Reason matching is deliberately
+  bounded; an unfamiliar valid paraphrase can require review rather than pass.
+- JSON code fences are a formatting difference. Prose outside the parsed answer
+  requires separate review; this is not a general natural-language claim judge.
+- The expanded development suite contains eleven questions across six task
+  families, including TV and combined ROI, unequal period ratios, non-windowed
+  marginal ROI, decomposition values and explicitly authorised unavailable
+  prediction evidence. All use one public synthetic dataset. They are not hidden
+  acceptance cases and do not establish scientific model validity.
+- The existing host command's `--results-robust` option freezes task definitions,
+  arm guidance, catalogue, model, calibration and normalised source fingerprints
+  before provider execution. Checkpoints reject drift. The runner retains its
+  serial spend reservations and never automatically retries uncertain requests.
+- Reports pair repetitions by task and arm, weight task families equally, and
+  bootstrap families and paired repetitions within each task. Missing, duplicate
+  or unfinished trials invalidate the comparison. Intervals are conditional on
+  this dataset and family selection, not population-wide confidence claims.
+- Proposed gates are zero structured/evidence/routing failures, no quality loss,
+  at least eight task families and a five-percent cost saving supported by the
+  interval. These thresholds need owner agreement. The current six-family suite
+  cannot satisfy that proposed coverage gate.
+- Final acceptance additionally requires independently reviewed labels, multiple
+  datasets and previously unseen cases held by an independent owner. This command
+  only runs development comparisons and cannot mark them accepted. A stronger-model
+  sanity check also remains outstanding. No new prompt-tuning loop is introduced.
+
+Ownership follows [the engineering objective](engineering.md): provider execution
+stays in the existing adapter and CLI; `result_selection` owns task dispatch;
+`result_grading` owns pure bounded grading; `result_calibration` owns labelled
+grader fixtures; `evaluation.experiments` owns frozen-input validation and paired
+assessment. Production tools do not import any of these evaluation modules.

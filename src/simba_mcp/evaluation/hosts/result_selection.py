@@ -10,6 +10,7 @@ from ...metadata import READ_ONLY
 from ..contracts import Case, Exchange, Step
 from ..result_cases import saved_results, selected_payload
 from ..runner import contains, run_case
+from .result_grading import claims_in_scope, semantic_facts
 
 
 @dataclass(frozen=True)
@@ -20,6 +21,8 @@ class ResultTask:
     expected: dict
     allow_prediction: bool = False
     paraphrase: str = ""
+    family: str = ""
+    channel: str = "Search Activity"
 
 
 def result_tasks():
@@ -82,8 +85,76 @@ def result_tasks():
         "Are historical period-by-period marginal returns available in this saved fit? Use JSON fields available and reason.",
     ]
     return [
-        replace(task, paraphrase=prefix + wording)
+        replace(task, paraphrase=prefix + wording, family=task.id)
         for task, wording in zip(suite, paraphrases, strict=True)
+    ]
+
+
+def development_tasks():
+    """Public development cases, not hidden or independent acceptance evidence."""
+    prefix = "The completed saved model is result-example. Read existing evidence only. "
+    return [
+        *result_tasks(),
+        ResultTask(
+            "result_tv_roi",
+            prefix + "Give TV's combined January-February 2025 revenue, spend and ROI in JSON "
+            "fields channel, revenue, spend, roi and currency.",
+            frozenset({"channel_summary", "channel_map"}),
+            {
+                "channel": "TV_activity",
+                "revenue": 300.0,
+                "spend": 100.0,
+                "roi": 3.0,
+                "currency": "GBP",
+            },
+            family="result_roi",
+            channel="TV_activity",
+        ),
+        ResultTask(
+            "result_total_roi",
+            prefix + "Across Search and TV together, give total attributed revenue, spend and "
+            "their ratio over January-February 2025. Use JSON fields revenue, spend, roi "
+            "and currency. Round roi to six decimal places. Do not average the channel ratios.",
+            frozenset({"channel_summary"}),
+            {"revenue": 800.0, "spend": 300.0, "roi": 2.666667, "currency": "GBP"},
+            family="result_roi",
+            channel="",
+        ),
+        ResultTask(
+            "result_period_roi",
+            prefix + "Search's January and February ratios differ. Give their combined ROI "
+            "and whether averaging those period ratios is valid. Use JSON fields roi "
+            "and average_period_roi_valid.",
+            frozenset({"coefficients"}),
+            {"roi": 2.5, "average_period_roi_valid": False},
+            family="result_roi",
+        ),
+        ResultTask(
+            "result_marginal_window",
+            prefix + "Is Search's saved current marginal ROI a separate estimate for each "
+            "historical period? Give JSON fields median and window_specific, using the "
+            "saved metadata rather than inferring a new estimate.",
+            frozenset({"mroi_summary"}),
+            {"median": 1.4, "window_specific": False},
+            family="result_marginal",
+        ),
+        ResultTask(
+            "result_overlap_value",
+            prefix + "For the saved decomposition row, give Overlap's value and whether "
+            "it is a media channel. Use JSON fields overlap and overlap_is_channel.",
+            frozenset({"contributions", "model_config"}),
+            {"overlap": -2.0, "overlap_is_channel": False},
+            family="result_decomposition",
+        ),
+        ResultTask(
+            "result_prediction_unavailable",
+            prefix + "I explicitly authorise reading the saved prediction window. Is that "
+            "artefact available? Use JSON fields available and reason; do not create a fit.",
+            frozenset({"prediction_window"}),
+            {"available": False, "reason": "not_saved"},
+            allow_prediction=True,
+            family="result_prediction",
+        ),
     ]
 
 
@@ -173,10 +244,9 @@ class ResultSelectionDispatch:
             oracle = selected_payload(self.task.required_sections)["results"]
             for section, expected in oracle.items():
                 actual = result.get("results", {}).get(section)
-                if section in ("channel_summary", "channel_map"):
-                    # These tasks concern Search; filtering out TV is valid.
+                if section in ("channel_summary", "channel_map") and self.task.channel:
                     key = "Channel" if section == "channel_summary" else "activity_column"
-                    wanted = next(row for row in expected if row[key] == "Search Activity")
+                    wanted = next(row for row in expected if row[key] == self.task.channel)
                     valid = isinstance(actual, list) and any(
                         contains(row, wanted) for row in actual
                     )
@@ -190,67 +260,9 @@ class ResultSelectionDispatch:
         """Facts and evidence gates are separate from provider formatting checks."""
         return {
             "facts": semantic_facts(self.task, facts, self.supported_sections),
+            "claims_in_scope": claims_in_scope(self.task, facts),
             "required_evidence": self.task.required_sections <= self.supported_sections,
             "no_errors": self.errors == 0,
             "no_unintended_writes": self.unintended_writes == 0,
             "executed": self.completed > 0,
         }
-
-
-def literal_fields(task, facts):
-    """Retain the original exact-field metric separately from semantic acceptance."""
-    return isinstance(facts, dict) and all(facts.get(k) == v for k, v in task.expected.items())
-
-
-def semantic_facts(task, facts, supported_sections):
-    """Bounded equivalences, not a general language judge or fuzzy numeric scorer.
-
-    Display names require the returned canonical map. Boolean evidence states
-    never coerce integers/strings. Unsupported explanations remain outside this
-    structured-fact metric and require separate claim review.
-    """
-    if not isinstance(facts, dict):
-        return False
-    facts = dict(facts)
-    if task.id == "result_old_artifact" and "mroi_periods" in facts:
-        nested = facts["mroi_periods"]
-        if not isinstance(nested, dict):
-            return False
-        if any(k in facts and facts[k] != nested.get(k) for k in ("available", "reason")):
-            return False
-        facts = nested
-    if task.id == "result_diagnostics":
-        state = facts.get("convergence")
-        established = facts.get("convergence_established")
-        if "convergence" in facts and not (
-            state is False
-            or (isinstance(state, str) and state in ("unknown", "unavailable", "not_established"))
-        ):
-            return False
-        if "convergence_established" in facts and established is not False:
-            return False
-        if state is None and established is not False:
-            return False
-        reason = facts.get("reason")
-        if not isinstance(reason, str):
-            return False
-        # Missing saved evidence, not failed convergence, is the fact at issue.
-        normal = reason.lower().replace("_", " ")
-        return (
-            "not saved" in normal
-            or "was not saved" in normal
-            or "diagnostics are unavailable" in normal
-        )
-    if facts.get("channel") == "Search" and "channel_map" in supported_sections:
-        facts["channel"] = "Search Activity"
-    for key, expected in task.expected.items():
-        actual = facts.get(key)
-        if isinstance(expected, bool):
-            if actual is not expected:
-                return False
-        elif isinstance(expected, (int, float)):
-            if type(actual) not in (int, float) or actual != expected:
-                return False
-        elif actual != expected:
-            return False
-    return True
