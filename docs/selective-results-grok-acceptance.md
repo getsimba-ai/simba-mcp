@@ -128,3 +128,43 @@ preserved. This is an outstanding acceptance concern, not a corrected score or
 permission to assume a favourable interpretation.
 
 
+
+## Completed V4 decision
+
+Acceptance failed. The fixed 120-session schedule completed across three preserved
+reports: 27 original sessions, 63 in the first continuation and 30 in the second.
+The first continuation stopped on a network read error. Its unfinished response
+had US$0.116610 billed and a US$1.269328 unresolved request reservation. Both were
+carried forward before the final continuation. No completed trial was rerun and
+no guidance, task, model setting or rubric changed during the comparison.
+
+Independent review found 59/60 supported candidate answers and 50/60 baseline
+answers. Candidate explanations include one unsupported residual-uncertainty
+claim. Baseline explanations include five unsupported claims, one inconclusive
+interval statement and four incomplete answers. The inconclusive baseline claim
+prevents the canonical assessment from establishing quality non-regression and
+its review-dependent rate/call gates. This does not erase the descriptive counts.
+
+Reviewed unnecessary calls were 6 candidate versus 119 baseline. Refused
+unauthorised read attempts were 6 versus 84, with zero actual unauthorised reads
+or unintended writes in either arm. These are separate measures.
+
+Completed-pair estimated cost saving was 29.79%, with a 95% interval from 15.11%
+to 41.25%. The prospective conservative sensitivity allocates US$0.060550 to the
+candidate's attribution case repetition 1, and US$0.116610 plus the entire
+US$1.269328 unknown allowance to its repetition 4. Under that allocation the
+estimated saving is 8.84%, with a 95% interval from -47.14% to 35.94%, therefore
+inconclusive. Actual billing attribution remains unchanged.
+
+Known stage charges total US$11.923688, including US$0.177160 interrupted billed
+overhead. Cumulative accounted spend is US$92.589622, including US$3.942282 retained
+unknown allowances and zero active reservation. The stage stayed below US$100;
+the overall authorised cap remains US$500. No Sonnet tests or real fits resumed.
+
+[Combined evidence](selective-results-grok-acceptance-evidence.json) preserves all
+120 adjudications, original automatic scores, raw hashes and source transitions.
+The earlier [interrupted evidence](selective-results-grok-interrupted-evidence.json)
+remains unchanged. These synthetic findings establish neither scientific MMM
+validity nor production generalisation. PR #58 remains draft and issue #45 open;
+there is no merge approval. If V4 informs further guidance changes, it becomes
+validation evidence for those changes and cannot provide fresh acceptance.
