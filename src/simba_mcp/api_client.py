@@ -138,6 +138,13 @@ class SimbaAPIClient:
         """Read a response incrementally, enforcing encoded and decoded ceilings."""
         encoded_limit = self.max_encoded_bytes
         decoded_limit = self.max_decoded_bytes
+        if encoded_limit is None and decoded_limit is None:
+            # Preserve HTTPX's negotiated encodings and decoder behaviour when
+            # transport limits have not been enabled.
+            body = await response.aread()
+            if observation is not None:
+                observation.body_bytes(downloaded=response.num_bytes_downloaded, decoded=len(body))
+            return body
         # A custom transport may hand HTTPX an already consumed, decompressed
         # body. Its encoded size and content-encoding can no longer be verified,
         # so do not claim that configured transport limits were enforced.
@@ -185,6 +192,7 @@ class SimbaAPIClient:
 
         body = bytearray()
         encoded_count = 0
+        first_decode = True
         decoded_count = 0
         chunks = response.aiter_raw(chunk_size=RESPONSE_STREAM_CHUNK_BYTES)
         async for chunk in chunks:
@@ -198,7 +206,16 @@ class SimbaAPIClient:
                 )
             try:
                 remaining = decoded_limit - decoded_count + 1 if decoded_limit is not None else 0
-                decoded = decoder.decompress(chunk, remaining) if decoder else chunk
+                try:
+                    decoded = decoder.decompress(chunk, remaining) if decoder else chunk
+                except zlib.error:
+                    # HTTP deflate servers use both zlib-wrapped and raw streams.
+                    # Retry only the first chunk, retaining the same output cap.
+                    if not first_decode or codings != ["deflate"]:
+                        raise
+                    decoder = zlib.decompressobj(-zlib.MAX_WBITS)
+                    decoded = decoder.decompress(chunk, remaining)
+                first_decode = False
             except zlib.error as exc:
                 raise ResponseReadError(
                     "Backend returned an invalid compressed response.", status_code=502
@@ -278,10 +295,11 @@ class SimbaAPIClient:
                 "Authorization": f"Bearer {caller_key}",
             }
         client = await self._get_client()
-        kwargs["headers"] = {
-            "Accept-Encoding": "identity",
-            **kwargs.get("headers", {}),
-        }
+        if self.max_encoded_bytes is not None:
+            kwargs["headers"] = {
+                "Accept-Encoding": "gzip, deflate",
+                **kwargs.get("headers", {}),
+            }
         last_exc: Exception | None = None
         for attempt in range(attempts):
             try:

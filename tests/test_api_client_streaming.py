@@ -3,6 +3,7 @@
 import asyncio
 import gzip
 import tracemalloc
+import zlib
 from contextlib import suppress
 
 import anyio
@@ -187,7 +188,8 @@ async def test_concatenated_gzip_members_are_refused_instead_of_partially_parsed
             200,
             headers={"content-type": "application/json", "content-encoding": "gzip"},
             stream=stream,
-        )
+        ),
+        decoded=1024,
     )
     events = []
     try:
@@ -359,3 +361,50 @@ def test_response_byte_limit_configuration_is_opt_in_and_validated(monkeypatch):
         monkeypatch.setenv("SIMBA_API_MAX_ENCODED_BYTES", invalid)
         with pytest.raises(ValueError, match="positive integer"):
             _response_byte_limit("SIMBA_API_MAX_ENCODED_BYTES")
+
+
+@pytest.mark.anyio
+@pytest.mark.parametrize("coding", ["gzip", "deflate", "raw-deflate"])
+@pytest.mark.parametrize("bounded", [False, True])
+@pytest.mark.parametrize("oversized", [False, True])
+async def test_compression_compatibility_and_decoded_boundary(coding, bounded, oversized):
+    raw = b'{"x":"' + b"z" * 65536 + b'"}'
+    if coding == "gzip":
+        encoded = gzip.compress(raw)
+    else:
+        compressor = zlib.compressobj(wbits=-15 if coding == "raw-deflate" else 15)
+        encoded = compressor.compress(raw) + compressor.flush()
+    requests = []
+    stream = ChunkStream([encoded[:1], encoded[1:]] if bounded else [encoded])
+
+    def handler(request):
+        requests.append(request)
+        return httpx.Response(
+            200,
+            headers={
+                "content-type": "application/json",
+                "content-encoding": "deflate" if coding == "raw-deflate" else coding,
+            },
+            stream=stream,
+        )
+
+    client = _client(
+        handler,
+        encoded=len(raw) if bounded else None,
+        decoded=len(raw) - int(oversized) if bounded else None,
+    )
+    try:
+        result = await client.get_schema()
+        if bounded and oversized:
+            assert result["_status_code"] == 413
+            assert result["limit"] == "decoded_bytes"
+        else:
+            assert result == {"x": "z" * 65536}
+        assert "gzip" in requests[0].headers["accept-encoding"]
+        if not bounded:
+            assert (
+                requests[0].headers["accept-encoding"] == client._client.headers["accept-encoding"]
+            )
+        assert stream.closed
+    finally:
+        await client.close()

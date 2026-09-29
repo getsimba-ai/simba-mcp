@@ -128,10 +128,12 @@ ceiling applies to both encoded and decoded representations. Empty or unset valu
 leave the existing full-result download path uncapped for compatibility. This is
 an opt-in, reversible rollout because production response-size baselines and an
 approved default ceiling are not yet available. Invalid values fail startup with
-a configuration error. The client requests identity encoding; if a backend still
-returns an unsupported encoding, the client returns a structured error and no
-partial data. Stacked or concatenated compressed streams are also refused until
-their bounded decoding is covered by a tested implementation.
+a configuration error. With limits enabled, the client negotiates gzip and
+deflate and accepts both zlib-wrapped and raw deflate. With limits unset, HTTPX
+retains its normal compression negotiation and decoding. The bounded path refuses
+unsupported encodings and stacked or concatenated compressed streams with a
+structured error and no partial data until their bounded decoding is covered by
+a tested implementation.
 
 An encoded ceiling counts response entity bytes yielded by HTTPX after transfer
 framing and before content decompression. A decoded ceiling counts bytes supplied
@@ -140,6 +142,13 @@ exceeds the configured encoded ceiling; streamed bytes remain authoritative. The
 MCP envelope and host-side token usage are separate measurements. No numerical
 ceiling is recommended until operators review representative result sizes and
 the baseline in PERF-09.
+
+Accepted bodies still need memory for buffering and parsing. Synthetic JSON
+containing one long string at decoded ceilings of 256 KiB, 1 MiB and 4 MiB peaked
+at approximately three times the decoded size in Python allocation tracing, for
+both identity and gzip responses. This is evidence for those shapes only, not a
+process RSS or concurrent-request bound. Object-heavy JSON and representative
+production response sizes still need measurement before approving defaults.
 
 ## Implementation and acceptance
 
