@@ -25,7 +25,7 @@ backend. No numerical speedup or model-quality threshold has been established.
 | The composition root registers 80 tools and exposes instructions | Observed locally: `server.py:TOOLS`, `mcp`; `reference.py:current` | Read live SDK output; do not count characters in source files |
 | Hosted requests share one HTTP pool, while credentials use a ContextVar | Observed locally: `runtime.py:app_lifespan`, `auth.py:_client`, `api_client.py:CALLER_API_KEY` | Observations must be task-local and contain no caller identity |
 | GET/HEAD can retry; writes default to one attempt | Observed locally: `SimbaAPIClient._request` | Observe every attempt without changing replay or recovery semantics |
-| The results byte cap is after download and filtering | Observed locally: `tools/results.py:get_model_results` | Distinguish HTTP body, decoded body, tool content and MCP representation |
+| The results byte cap is after download and filtering | Observed locally at the PERF-09 baseline; this branch adds earlier optional transport ceilings | Keep encoded body, decoded body, selected payload and MCP representation separate |
 | SDK tracing already exists and is inert without a configured OTel SDK | Documented: SDK OpenTelemetry guide; observed dependency `opentelemetry-api` | Do not install a tracing service or duplicate its transport implementation |
 | HTTPX response hooks run before the body is necessarily consumed | Documented: HTTPX event-hooks guide | Observe after the existing awaited request; do not read the body in a hook |
 | A smaller catalogue improves this application's task performance | Unverified | Requires repeated host/model trials in PERF-02 and later comparisons |
@@ -112,6 +112,34 @@ stderr can block if the surrounding process stops consuming it.
 Concurrent calls must have separate collectors even when they share the connection
 pool. There is no telemetry store to recover, no new business-state cache, no retry
 queue and no new durable identifiers.
+
+## PERF-09 response download bounds
+
+`SimbaAPIClient` now reads response bodies from an HTTPX stream, counts encoded
+bytes, and parses only after the complete body has passed the configured ceilings.
+For gzip and deflate responses it also bounds decoded bytes while decompressing.
+The existing `max_response_bytes` results option remains a later cap on the
+selected MCP result and its serialised content; it does not replace transport
+limits or include the full HTTP envelope.
+
+Set `SIMBA_API_MAX_ENCODED_BYTES` and `SIMBA_API_MAX_DECODED_BYTES` to positive
+integer byte counts to enable transport limits. If only one is set, the same
+ceiling applies to both encoded and decoded representations. Empty or unset values
+leave the existing full-result download path uncapped for compatibility. This is
+an opt-in, reversible rollout because production response-size baselines and an
+approved default ceiling are not yet available. Invalid values fail startup with
+a configuration error. The client requests identity encoding; if a backend still
+returns an unsupported encoding, the client returns a structured error and no
+partial data. Stacked or concatenated compressed streams are also refused until
+their bounded decoding is covered by a tested implementation.
+
+An encoded ceiling counts response entity bytes yielded by HTTPX after transfer
+framing and before content decompression. A decoded ceiling counts bytes supplied
+to JSON or CSV parsing. `Content-Length` is used only for early refusal when it
+exceeds the configured encoded ceiling; streamed bytes remain authoritative. The
+MCP envelope and host-side token usage are separate measurements. No numerical
+ceiling is recommended until operators review representative result sizes and
+the baseline in PERF-09.
 
 ## Implementation and acceptance
 

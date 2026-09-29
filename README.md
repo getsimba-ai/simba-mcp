@@ -372,7 +372,15 @@ How the key is supplied depends on where the server runs:
 | Environment Variable | Description | Default |
 |---------------------|-------------|---------|
 | `SIMBA_API_URL` | Simba API base URL | `http://localhost:5005` |
-| `SIMBA_API_KEY` | Your Simba API key (stdio mode only â€” HTTP callers send their own key as the bearer token) | (required for stdio) |
+| `SIMBA_API_MAX_ENCODED_BYTES` | Optional maximum response entity bytes before decompression | Unset (uncapped for compatibility) |
+| `SIMBA_API_MAX_DECODED_BYTES` | Optional maximum response bytes supplied to JSON/CSV parsing | Unset (uncapped for compatibility) |
+| `SIMBA_API_KEY` | Your Simba API key (stdio mode only; HTTP callers send their own key as the bearer token) | (required for stdio) |
+
+Set response byte ceilings to positive integer byte counts. If you set only one,
+the same ceiling applies before and after decompression. These opt-in limits refuse
+oversized responses without returning partial evidence. Review typical full-result
+sizes before choosing limits; the results tool's `max_response_bytes` option is a
+separate later cap on selected output.
 
 ## Transport Modes
 
