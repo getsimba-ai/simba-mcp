@@ -414,7 +414,9 @@ class TestLifespan:
         warnings = [r.message for r in caplog.records if "SIMBA_API_KEY" in r.message]
         assert len(warnings) == 1
         # Self-serve first (#938): the sign-up link comes before the demo link.
-        assert warnings[0].index("demo.simba-mmm.com/users/signup") < warnings[0].index("calendly.com")
+        assert warnings[0].index("demo.simba-mmm.com/users/signup") < warnings[0].index(
+            "calendly.com"
+        )
 
 
 class TestRunOptimizerPayload:
