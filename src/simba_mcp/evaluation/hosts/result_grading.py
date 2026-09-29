@@ -3,10 +3,71 @@
 import json
 import re
 
+# This bounded vocabulary is prospective and task-specific. It is not an
+# entailment model: novel prose and extra claims always need independent review.
+_RLC_ALIASES = {
+    "rlc01_attribution_absence": {
+        "link_function": "link",
+        "attribution_method": "attribution",
+        "additive": "is_additive",
+        "interactions_allocated": "interaction_allocated_across_components",
+        "modelled_visits": "first_week_visits",
+    },
+    "rlc01_diagnostics": {"convergence_status": "convergence"},
+}
+_RLC_CONTAINERS = {"answer", "result", "configuration", "first_week", "reconciliation"}
+
+
+def _rlc_normalise(task, facts):
+    """Collect only declared leaves, retaining duplicate contradictions.
+
+    Unknown containers and leaves are not stripped: they make scope fail.
+    Equality never treats booleans as numbers, including duplicate values.
+    """
+    family = task.family or task.id
+    aliases = _RLC_ALIASES.get(family)
+    if aliases is None:
+        return facts, True
+    if not isinstance(facts, dict):
+        return facts, False
+    collected = {}
+    scoped = True
+    conflict = False
+
+    def visit(obj):
+        nonlocal scoped, conflict
+        for key, value in obj.items():
+            if key in _RLC_CONTAINERS and isinstance(value, dict):
+                visit(value)
+                continue
+            key = aliases.get(key, key)
+            if key not in task.expected:
+                scoped = False
+                continue
+            if family == "rlc01_diagnostics" and key == "convergence" and value is None:
+                value = "unknown"
+            if key == "attribution" and isinstance(value, str):
+                value = {
+                    "Aumann-Shapley": "aumann_shapley",
+                    "Aumann Shapley": "aumann_shapley",
+                }.get(value, value)
+            if key in collected and (
+                collected[key] != value
+                or isinstance(collected[key], bool) != isinstance(value, bool)
+            ):
+                conflict = True
+            collected[key] = value
+
+    visit(facts)
+    return (None if conflict else collected), scoped
+
 
 def _missing_diagnostic_task(task):
     """Apply absence equivalences only to the exact absence question contract."""
-    return (task.family or task.id) == "result_diagnostics" and task.expected == {
+    return (task.family or task.id) in (
+        "result_diagnostics",
+        "rlc01_diagnostics",
+    ) and task.expected == {
         "convergence": "unknown",
         "reason": "not_returned",
     }
@@ -24,6 +85,7 @@ def semantic_facts(task, facts, supported_sections):
     never coerce integers/strings. Unsupported explanations remain outside this
     structured-fact metric and require separate claim review.
     """
+    facts, _ = _rlc_normalise(task, facts)
     if not isinstance(facts, dict):
         return False
     facts = dict(facts)
@@ -83,7 +145,8 @@ def claims_in_scope(task, facts):
     This is a schema boundary, not natural-language entailment. Free prose outside
     the parsed answer is reported separately by the host runner.
     """
-    if not isinstance(facts, dict):
+    facts, scoped = _rlc_normalise(task, facts)
+    if not isinstance(facts, dict) or not scoped:
         return False
     allowed = set(task.expected)
     if _missing_diagnostic_task(task):
@@ -104,6 +167,7 @@ def fact_verdict(task, facts, supported_sections):
     """
     if semantic_facts(task, facts, supported_sections):
         return "pass"
+    facts, _ = _rlc_normalise(task, facts)
     if _missing_diagnostic_task(task) and isinstance(facts, dict):
         state = facts.get("convergence")
         established = facts.get("convergence_established")
