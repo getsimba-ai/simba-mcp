@@ -427,7 +427,7 @@ async def run(args):
                     modes = ["eager", "deferred"] if rep % 2 == 0 else ["deferred", "eager"]
                     if args.mode != "both":
                         modes = [args.mode]
-                    arms = [(mode, "full") for mode in modes]
+                    arms = [(mode, tool_profile if rlc else "full") for mode in modes]
                     if role:
                         arms = [("eager", "full"), ("eager", role)]
                         if rep % 2:
@@ -445,7 +445,7 @@ async def run(args):
                             continue
                         arm_server = (
                             server
-                            if view == "full" or guidance_arms
+                            if rlc or view == "full" or guidance_arms
                             else create_server("compact", profile=view)
                         )
                         visible = await arm_server.list_tools()
