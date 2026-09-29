@@ -8,6 +8,7 @@ import asyncio
 import contextvars
 import json
 import logging
+import random
 import zlib
 from typing import Any, ClassVar
 
@@ -15,6 +16,14 @@ import httpx
 
 from . import telemetry
 from .errors import api_error
+from .request_budget import (
+    RequestAdmission,
+    RequestBudget,
+    RequestDeadline,
+    RequestOverload,
+    RequestPolicy,
+    retry_after_seconds,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -68,7 +77,10 @@ class SimbaAPIClient:
         *,
         max_encoded_bytes: int | None = None,
         max_decoded_bytes: int | None = None,
+        request_policy: RequestPolicy | None = None,
     ):
+        self.request_policy = request_policy
+        self._admission = RequestAdmission(request_policy) if request_policy else None
         self.base_url = base_url.rstrip("/")
         self._api_key = api_key
         self._headers = {"Authorization": f"Bearer {api_key}"}
@@ -265,6 +277,39 @@ class SimbaAPIClient:
         return bytes(body)
 
     async def _request(self, method: str, path: str, **kwargs) -> dict[str, Any]:
+        policy = self.request_policy
+        caller_key = CALLER_API_KEY.get()
+        credential = self._api_key if caller_key is None else caller_key
+        if policy is None or not credential:
+            return await self._request_impl(method, path, **kwargs)
+        budget = RequestBudget(policy.seconds(method, path))
+        deadline = asyncio.timeout(budget.remaining())
+        try:
+            async with deadline, self._admission.enter(self._admission.identity(credential)):
+                budget.remaining()
+                return await self._request_impl(method, path, request_budget=budget, **kwargs)
+        except RequestOverload:
+            return api_error(
+                429,
+                {
+                    "error": "Configured request admission queue is full; request was not sent.",
+                    "_error_code": "request_overloaded",
+                },
+            )
+        except (RequestDeadline, TimeoutError) as exc:
+            if isinstance(exc, TimeoutError) and not deadline.expired():
+                raise
+            return api_error(
+                504,
+                {
+                    "error": "Configured overall request deadline expired. A submitted backend job may still be running.",
+                    "_error_code": "request_deadline_exceeded",
+                },
+            )
+
+    async def _request_impl(
+        self, method: str, path: str, *, request_budget=None, **kwargs
+    ) -> dict[str, Any]:
         attempts = MAX_RETRIES if kwargs.pop("retry_safe", method.upper() in {"GET", "HEAD"}) else 1
         caller_key = CALLER_API_KEY.get()
         if caller_key is None:
@@ -302,6 +347,8 @@ class SimbaAPIClient:
             }
         last_exc: Exception | None = None
         for attempt in range(attempts):
+            if request_budget is not None:
+                kwargs["timeout"] = self.request_policy.timeout(request_budget.remaining())
             try:
                 with telemetry.backend_attempt(method, path) as observation:
                     async with client.stream(method, path, **kwargs) as response:
@@ -312,14 +359,21 @@ class SimbaAPIClient:
                             and attempt < attempts - 1
                         ):
                             retry_status = response.status_code
+                            retry_after = response.headers.get("retry-after")
                             body = None
                         else:
                             retry_status = None
                             body = await self._read_response_body(response, observation)
                             with telemetry.phase("http_parse"):
-                                return await self._parse_response(response, body)
+                                result = await self._parse_response(response, body)
+                            if request_budget is not None:
+                                request_budget.remaining()
+                            return result
                 if retry_status is not None:
                     delay = BACKOFF_BASE * (2**attempt)
+                    if request_budget is not None:
+                        delay = max(random.uniform(0, delay), retry_after_seconds(retry_after) or 0)
+                        request_budget.retry(delay)
                     logger.warning(
                         "Retryable %d from %s (attempt %d/%d, retrying in %.1fs)",
                         retry_status,
@@ -348,6 +402,9 @@ class SimbaAPIClient:
                 last_exc = exc
                 if attempt < attempts - 1:
                     delay = BACKOFF_BASE * (2**attempt)
+                    if request_budget is not None:
+                        delay = random.uniform(0, delay)
+                        request_budget.retry(delay)
                     logger.warning(
                         "Transport error on %s (attempt %d/%d, retrying in %.1fs): %s",
                         method,

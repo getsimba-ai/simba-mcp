@@ -204,3 +204,106 @@ Observed results and SDK-floor verification are recorded in the
 [initial baseline](performance-baseline.md). PERF-02 host selection, model trials
 and budget approval remain pending. A successful local report establishes neither
 host support for deferred discovery nor production performance.
+
+## Request budgets and admission (issue 48)
+
+The shared API client owns one admission queue and request budget, in accordance
+with `docs/engineering.md`. `request_budget.py` owns only configuration, deadline
+arithmetic and admission primitives; it does not dispatch tools, cache results or
+schedule backend jobs. Runtime constructs the policy once for its shared client.
+
+Set `SIMBA_API_REQUEST_POLICY_JSON` to a JSON object with all of these fields:
+`total_seconds`, `connect_seconds`, `read_seconds`, `write_seconds`,
+`pool_seconds`, `max_active`, `max_active_per_caller`, `max_queued` and
+`max_queued_per_caller`. Durations must be finite and positive; active limits are
+positive integers; queue limits can be zero to refuse waiting. Caller ceilings
+cannot exceed process ceilings. Optional `operation_seconds` overrides totals for
+`read`, `write` and `upload`; upload means POST `/api/v1/ingest`. Values must be
+tuned from capacity measurements. Unset, empty and JSON `false` leave the
+deadline and admission policy disabled. The server then keeps the existing
+60-second HTTPX timeout and does not limit admission. A complete JSON object
+enables a policy for that process; invalid configuration fails startup.
+Cancellation cleanup and single-send mutations remain active either way.
+Direct Python users of `SimbaAPIClient` also keep admission disabled unless
+they pass `request_policy`.
+
+Figures of 180 seconds overall, 60 seconds per phase, 32 active requests,
+eight active per caller, 128 queued and 32 queued per caller were an
+engineering proposal, not a measured production size. No representative
+request trace, worker count or proxy timeout in this repository selects them.
+They are not applied when the variable is unset. Multiple workers would
+multiply any limits an operator explicitly enables. Monitor overloads,
+deadline failures and queue latency before treating an explicit policy as
+capacity guidance.
+
+With a policy enabled, the monotonic total includes admission waiting, all HTTP
+attempts, parsing and retry sleeps. Phase timeouts are capped by the remaining
+budget. Only existing retry-eligible reads retry. Backoff uses full jitter;
+Retry-After integer seconds and HTTP dates are honoured as a minimum delay. A
+retry is refused if that delay consumes the remaining budget. Each next attempt
+is clipped to the remaining budget, rather than receiving a new total allowance.
+A successful return is checked against the budget after parsing as well.
+
+Admission limits active operations and queued calls for the shared process client
+and each credential identity. Active operations retain their permit during
+backoff. Oldest eligible queued callers proceed first, so a saturated caller does
+not block another eligible caller. Identities are keyed digests with a random
+process-local secret, retained only while in use and never emitted in telemetry.
+They isolate credential generations, not people: different valid keys belonging
+to one person are distinct caller identities. No authentication or backend
+permission is inferred from admission. Multiple worker processes have separate
+limits; deployment capacity must account for their aggregate.
+
+A full queue returns structured 429 `request_overloaded` without sending. Overall
+expiry returns structured 504 `request_deadline_exceeded`. Cancellation propagates
+and releases queue entries, active permits and response streams. Neither expiry
+nor cancellation proves that a submitted backend job stopped. Existing error
+recovery guidance and exact submission keys remain authoritative; mutations are
+not automatically retried. Callers should reconcile uncertain writes before
+repeating them.
+
+The deadline is cooperative: Python parsing, synchronous work and event-loop
+scheduling may overshoot the wall-clock target. Reverse proxies and host tool
+timeouts must allow sufficient time for the configured operation budget plus
+scheduling and error delivery, or they may interrupt it first. No proxy timeout
+is changed by this configuration.
+
+A synthetic 24-request burst with six credential identities, mixed small/64 KiB
+responses and 15/150 ms backend delays compared uncapped admission with test
+values of four active, one active per caller, eight queued, two queued per caller
+and a 60 ms total. Baseline completed 24/24, peaked at 24 backend requests and had
+165 ms p95 latency. The bounded case completed 5/24, refused 12 as overload and
+expired seven; peak backend requests were four and p95 was 65 ms. Python traced
+peak allocations were approximately 832 KiB versus 296 KiB. This demonstrates a
+resource/latency bound with reduced completion under intentionally tight limits,
+not a quality or throughput improvement. It is one mock-transport burst, not
+production sizing evidence or a universal memory bound.
+
+A separate exposed development comparison retained all 24 tasks, with a one-second
+budget, four active operations, one active per caller and enough queue capacity
+for the burst. Both baseline and bounded modes completed 24/24 without overload
+or deadline failures. Peak backend requests fell from 24 to four, while p95
+latency increased from 164 ms to 326 ms and maximum latency from 164 ms to 405 ms.
+Python traced peaks were 854,776 and 820,771 bytes. This workload has no simulated
+backend contention penalty, so queueing trades latency for lower concurrency;
+it does not demonstrate a latency or cost improvement. The earlier aggressive
+comparison is retained as a distinct pre-fairness-fix development result rather
+than overwritten. Neither development run is final acceptance evidence.
+
+A 30 September 2026 comparison left those earlier arms sealed and did not add
+samples to them. It compared the disabled client with an explicitly constructed
+180-second, 32/8/128/32 policy on a mock transport. Both completed sequential
+and concurrent normal reads, 64 KiB responses and a 0.4-second upload, with no
+overload or deadline refusal. Normal-scenario p95 stayed within 20 ms of the
+disabled arm on that machine, including event-loop scheduling. The 24-request
+bursts peaked at 24 handler entries in both modes, so the proposal did not bound
+that burst. An explicit 161-request hold did bound the process at 32 active and
+128 queued, refused the excess request before a handler entry, and released
+every permit. A second caller entered ahead of a caller already holding eight
+permits. Cancelling a queued request did not send it. Mutations were not
+repeated, including after cancellation of a write that had already entered the
+handler. Tracemalloc peaks were scenario-local and are not a process RSS bound.
+No paid model call was made. This does not establish a production latency, cost
+or completion improvement, so the server does not enable a numeric policy by
+default.
+

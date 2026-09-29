@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from mcp.server.mcpserver import MCPServer
 
 from .api_client import SimbaAPIClient
+from .request_budget import policy_from_json
 
 logger = logging.getLogger(__name__)
 MAX_UPLOAD_BYTES = 10 * 1024 * 1024
@@ -75,6 +76,7 @@ async def app_lifespan(server: MCPServer) -> AsyncIterator[AppContext]:
     client = SimbaAPIClient(
         base_url,
         api_key,
+        request_policy=policy_from_json(os.environ.get("SIMBA_API_REQUEST_POLICY_JSON")),
         max_encoded_bytes=_response_byte_limit("SIMBA_API_MAX_ENCODED_BYTES"),
         max_decoded_bytes=_response_byte_limit("SIMBA_API_MAX_DECODED_BYTES"),
     )
