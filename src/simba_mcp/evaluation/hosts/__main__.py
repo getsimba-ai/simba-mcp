@@ -15,6 +15,7 @@ from pathlib import Path
 
 from ...guidance import read_guidance
 from ...measurements import provenance
+from ...profiles import PROFILE_NAMES
 from ...server import create_server
 from ..experiments import (
     PROPOSED_THRESHOLDS,
@@ -59,7 +60,10 @@ async def run(args):
             raise ValueError("xAI evaluation supports eager tools only")
         host_client, host_definitions, host_session = xai.client, xai.definitions, xai.session
         key_name = "XAI_API_KEY"
-    server = create_server("compact")
+    tool_profile = getattr(args, "tool_profile", "full")
+    if tool_profile != "full" and getattr(args, "workflow_suite", None) != "rlc01":
+        raise ValueError("Explicit tool profiles require the prospective RLC suite")
+    server = create_server("compact", profile=tool_profile)
     tools = await server.list_tools()
     role = getattr(args, "role_comparison", None)
     baseline_path = getattr(args, "results_baseline", None)
@@ -230,6 +234,11 @@ async def run(args):
                         else {}
                     ),
                     "max_response_bytes": c.max_response_bytes,
+                    **(
+                        {"summary_granularity_independent": True}
+                        if c.summary_granularity_independent
+                        else {}
+                    ),
                     "allow_recovery_errors": c.allow_recovery_errors,
                     "allowed_result_sections": sorted(c.allowed_result_sections)
                     if c.allowed_result_sections is not None
@@ -242,7 +251,11 @@ async def run(args):
         ],
     }
     if rlc:
+        from .result_rlc_tasks import RLC_TASK_VERSION
+
         report["configuration"]["workflow_suite"] = "rlc01"
+        report["configuration"]["tool_profile"] = tool_profile
+        report["configuration"]["workflow_task_version"] = RLC_TASK_VERSION
         report["guidance"] = {
             "current": {
                 s: read_guidance("results", s)
@@ -642,6 +655,7 @@ def main():
     parser.add_argument("--cap-usd", type=float, required=True)
     parser.add_argument("--prior-usd", type=float, default=0)
     parser.add_argument("--samples", type=int, default=2)
+    parser.add_argument("--tool-profile", choices=PROFILE_NAMES, default="full")
     parser.add_argument(
         "--workflow-suite", choices=("rlc01",), help="Prospective 20-case development inventory"
     )

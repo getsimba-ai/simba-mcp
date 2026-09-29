@@ -42,7 +42,11 @@ async def test_rlc_cli_dispatches_and_freezes_single_arm(tmp_path, monkeypatch, 
         if isinstance(case, ResultTask):
             await dispatch(
                 "get_model_results",
-                {"model_hash": "result-example", "sections": "channel_summary,channel_map"},
+                {
+                    "model_hash": "result-example",
+                    "sections": "channel_summary,channel_map",
+                    **case.evidence_window,
+                },
             )
         else:
             for step in case.steps:
@@ -70,6 +74,7 @@ async def test_rlc_cli_dispatches_and_freezes_single_arm(tmp_path, monkeypatch, 
     report = json.loads(output.read_text())
     assert report["status"] == "complete"
     assert report["configuration"]["workflow_suite"] == "rlc01"
+    assert report["configuration"]["workflow_task_version"] == 2
     assert report["configuration"]["session_timeout_seconds"] == 5
     assert report["frozen_experiment"]["inputs_sha256"]
     assert len(report["trials"]) == 1

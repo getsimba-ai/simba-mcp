@@ -271,23 +271,12 @@ def role_tasks():
 
 def rlc_tasks():
     """Prospective development inventory, never a hidden acceptance packet."""
-    from .result_rlc_tasks import rlc_tasks as prospective_tasks
-    from .result_selection import development_tasks
+    from .result_rlc_tasks import rlc_development_tasks
 
     refusal = next(case for case in cases() if case.id == "stale_revision")
     return [
         *role_tasks(),
-        *[
-            (task, task.prompt, task.expected)
-            for task in [
-                *(
-                    t
-                    for t in development_tasks()
-                    if t.id not in {"result_diagnostics", "result_decomposition"}
-                ),
-                *prospective_tasks(),
-            ]
-        ],
+        *[(task, task.prompt, task.expected) for task in rlc_development_tasks()],
         (
             refusal,
             (
