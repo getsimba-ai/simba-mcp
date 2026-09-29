@@ -8,7 +8,7 @@ from simba_mcp.evaluation.result_acceptance_v4 import acceptance_v4_tasks
 
 def test_all_calibration_labels_and_critical_cases_match():
     report = calibrate()
-    assert GRADER_VERSION == 16
+    assert GRADER_VERSION == 17
     assert len(report["cases"]) >= 30
     assert len({row["id"] for row in report["cases"]}) == len(report["cases"])
     assert report["passed"], [r["id"] for r in report["cases"] if not r["passed"]]

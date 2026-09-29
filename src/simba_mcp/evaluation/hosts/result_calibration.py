@@ -10,7 +10,7 @@ from .result_grading import claims_in_scope, fact_verdict, semantic_facts
 from .result_rlc_tasks import rlc_tasks
 from .result_selection import result_tasks
 
-GRADER_VERSION = 16
+GRADER_VERSION = 17
 
 
 def calibration_cases():

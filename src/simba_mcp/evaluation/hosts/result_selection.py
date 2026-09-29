@@ -65,6 +65,7 @@ class ResultTask:
     allow_recovery_errors: bool = False
     allowed_result_sections: frozenset[str] | None = None
     forbidden_result_sections: frozenset[str] = frozenset()
+    summary_granularity_independent: bool = False
 
     def evidence_sets(self):
         return self.evidence_options or (self.required_sections,)
@@ -575,6 +576,15 @@ class ResultSelectionDispatch:
                         for key in ("start", "end", "granularity")
                     )
                     actual = self.summary_rows.get(expected_context, [])
+                    if self.task.summary_granularity_independent:
+                        # Task-declared total ROI ignores row bucket only. Date
+                        # boundaries stay exact; unrelated windows never mix.
+                        actual = [
+                            row
+                            for context, rows in self.summary_rows.items()
+                            if context[:2] == expected_context[:2]
+                            for row in rows
+                        ]
                 if section in self.result_rows:
                     actual = self.result_rows[section]
                 if section == "coefficients" and self.task.channel:
