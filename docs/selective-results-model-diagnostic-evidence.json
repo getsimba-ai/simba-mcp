@@ -1,0 +1,3364 @@
+{
+  "schema_version": 1,
+  "purpose": "model_selection_validation",
+  "accepted": false,
+  "scope": "Ten reused synthetic cases/repetitions. Separate agent claim and call review, not human approval or scientific MMM validity.",
+  "protocol": {
+    "purpose": "model_selection_validation",
+    "sessions": 10,
+    "cases": [
+      "acceptance_a",
+      "acceptance_d",
+      "acceptance_e",
+      "acceptance_f",
+      "acceptance_h"
+    ],
+    "samples": 2,
+    "model": "claude-sonnet-5-5",
+    "prior_accounted_usd": 25.372478,
+    "additional_limit_usd": 3,
+    "run_cap_usd": 28.372478,
+    "overall_cap_usd": 40,
+    "retained_interrupted_allowance_usd": 0.289594,
+    "source_commit": "650c1e241fa0e234cdbc241f420a7abf3928cd3d",
+    "review": "Separate agent reviews every claim and call using prior semantic standards",
+    "selection": "A,E passing controls; D,F,H prior failures. Cases reused, no acceptance claim."
+  },
+  "status": "complete",
+  "configuration": {
+    "mode": "eager",
+    "samples": 2,
+    "case": null,
+    "role_comparison": null,
+    "results_comparison": true,
+    "results_prompt": "original",
+    "results_robust": true,
+    "results_acceptance": false,
+    "model": "claude-sonnet-5-5",
+    "model_configuration": {
+      "request": {
+        "model": "claude-sonnet-5-5",
+        "max_tokens": 4096,
+        "thinking": {
+          "type": "adaptive"
+        },
+        "output_config": {
+          "effort": "medium"
+        }
+      },
+      "rates_per_million": {
+        "input": 2,
+        "output": 10,
+        "cache_read": 0.2,
+        "cache_write": 4
+      }
+    },
+    "results_model_diagnostic": true,
+    "validation_seed": null,
+    "validation_datasets": 0,
+    "result_fixture_version": 2
+  },
+  "raw_sha256": "b31e4c0f79cb3c43d004d34721ca730764bcfeaf9829fd893ebb5221339c1e68",
+  "freeze": {
+    "schema_version": 1,
+    "inputs_sha256": "216bcb0602ca7ceeb2b29997fb09e7aa5f944c5d0127817cf710f080e20bca09",
+    "source_sha256": "183dce4f199cba1d3d61c0c332ae2a7694350f1eaeba987f3e78697d87d97c1a",
+    "calibration_sha256": "5bab327bb4b27d62f61e1f646a66014f5efc7e46059881261cbc3ec5d9e4adcf"
+  },
+  "guidance_sha256": {
+    "candidate": "67bbc6203d9c01bab0f78e06457e9686cc5803ee2461701b782eec505d893ead"
+  },
+  "budget": {
+    "cap": 28.372478,
+    "prior": 25.372478,
+    "charged": 2.027546,
+    "reserved": 0.0,
+    "model": "claude-sonnet-5-5"
+  },
+  "cumulative_accounted_usd": 27.400024,
+  "summary": {
+    "sonnet": {
+      "sessions": 10,
+      "supported_answers": 9,
+      "unsupported_answers": 1,
+      "unnecessary_calls": 0,
+      "unauthorised_read_attempts": 0,
+      "unauthorised_reads": 0,
+      "cost_usd": 2.027546
+    },
+    "historical_haiku": {
+      "sessions": 10,
+      "supported_answers": 4,
+      "unsupported_answers": 6,
+      "unnecessary_calls": 0,
+      "unauthorised_read_attempts": 0,
+      "unauthorised_reads": 0,
+      "cost_usd": 0.763278
+    }
+  },
+  "tasks": [
+    {
+      "case": {
+        "id": "acceptance_a",
+        "required_sections": [
+          "channel_summary"
+        ],
+        "paraphrase": "",
+        "family": "acceptance_a",
+        "channel": "",
+        "allow_prediction": false,
+        "evidence_options": [
+          [
+            "channel_summary"
+          ],
+          [
+            "coefficients"
+          ]
+        ],
+        "fixture": {
+          "model_hash": "result-example",
+          "status": "complete",
+          "model_type": "mmm",
+          "results": {
+            "coefficients": [
+              {
+                "Date": 1772496000000,
+                "Channel": "Audio_activity",
+                "Revenue": 900,
+                "Spend": 100,
+                "Sales": 225.0,
+                "ROI": 9.0
+              },
+              {
+                "Date": 1772496000000,
+                "Channel": "Cinema_activity",
+                "Revenue": 800,
+                "Spend": 100,
+                "Sales": 200.0,
+                "ROI": 8.0
+              },
+              {
+                "Date": 1772496000000,
+                "Channel": "Affiliate_activity",
+                "Revenue": 700,
+                "Spend": 100,
+                "Sales": 175.0,
+                "ROI": 7.0
+              },
+              {
+                "Date": 1773100800000,
+                "Channel": "Audio_activity",
+                "Revenue": 30,
+                "Spend": 10,
+                "Sales": 7.5,
+                "ROI": 3.0
+              },
+              {
+                "Date": 1773100800000,
+                "Channel": "Cinema_activity",
+                "Revenue": 72,
+                "Spend": 24,
+                "Sales": 18.0,
+                "ROI": 3.0
+              },
+              {
+                "Date": 1773100800000,
+                "Channel": "Affiliate_activity",
+                "Revenue": 15,
+                "Spend": 5,
+                "Sales": 3.75,
+                "ROI": 3.0
+              },
+              {
+                "Date": 1773705600000,
+                "Channel": "Audio_activity",
+                "Revenue": 110,
+                "Spend": 50,
+                "Sales": 27.5,
+                "ROI": 2.2
+              },
+              {
+                "Date": 1773705600000,
+                "Channel": "Cinema_activity",
+                "Revenue": 20,
+                "Spend": 20,
+                "Sales": 5.0,
+                "ROI": 1.0
+              },
+              {
+                "Date": 1773705600000,
+                "Channel": "Affiliate_activity",
+                "Revenue": 28,
+                "Spend": 7,
+                "Sales": 7.0,
+                "ROI": 4.0
+              },
+              {
+                "Date": 1774310400000,
+                "Channel": "Audio_activity",
+                "Revenue": 60,
+                "Spend": 20,
+                "Sales": 15.0,
+                "ROI": 3.0
+              },
+              {
+                "Date": 1774310400000,
+                "Channel": "Cinema_activity",
+                "Revenue": 90,
+                "Spend": 30,
+                "Sales": 22.5,
+                "ROI": 3.0
+              },
+              {
+                "Date": 1774310400000,
+                "Channel": "Affiliate_activity",
+                "Revenue": 35,
+                "Spend": 14,
+                "Sales": 8.75,
+                "ROI": 2.5
+              },
+              {
+                "Date": 1774915200000,
+                "Channel": "Audio_activity",
+                "Revenue": 600,
+                "Spend": 100,
+                "Sales": 150.0,
+                "ROI": 6.0
+              },
+              {
+                "Date": 1774915200000,
+                "Channel": "Cinema_activity",
+                "Revenue": 500,
+                "Spend": 100,
+                "Sales": 125.0,
+                "ROI": 5.0
+              },
+              {
+                "Date": 1774915200000,
+                "Channel": "Affiliate_activity",
+                "Revenue": 400,
+                "Spend": 100,
+                "Sales": 100.0,
+                "ROI": 4.0
+              }
+            ],
+            "channel_summary": [
+              {
+                "Channel": "Audio_activity",
+                "Revenue": 1700,
+                "Spend": 280,
+                "Sales": 425.0,
+                "ROI": 6.071428571428571
+              },
+              {
+                "Channel": "Cinema_activity",
+                "Revenue": 1482,
+                "Spend": 274,
+                "Sales": 370.5,
+                "ROI": 5.408759124087592
+              },
+              {
+                "Channel": "Affiliate_activity",
+                "Revenue": 1178,
+                "Spend": 226,
+                "Sales": 294.5,
+                "ROI": 5.212389380530974
+              }
+            ],
+            "channel_map": [
+              {
+                "channel": "Audio",
+                "activity_column": "Audio_activity",
+                "spend_column": "audio_spend"
+              },
+              {
+                "channel": "Cinema",
+                "activity_column": "Cinema_activity",
+                "spend_column": "cinema_spend"
+              },
+              {
+                "channel": "Affiliate",
+                "activity_column": "Affiliate_activity",
+                "spend_column": "affiliate_spend"
+              }
+            ],
+            "mroi_summary": {
+              "hdi_prob": 0.94,
+              "evaluation_point": "current_spend",
+              "spend_convention": "mean_active_period",
+              "conventions_available": [
+                "allperiods_unweighted",
+                "spendweighted_active"
+              ],
+              "channels": [
+                {
+                  "channel": "Audio",
+                  "activity_column": "Audio_activity",
+                  "current_spend": 56,
+                  "mroi_mean": 1.8,
+                  "mroi_median": 1.45,
+                  "mroi_hdi_3": 0.4,
+                  "mroi_hdi_97": 3.1,
+                  "mroi_allperiods_unweighted_median": 0.95,
+                  "mroi_spendweighted_active_median": 1.2
+                }
+              ]
+            },
+            "model_stats": [
+              {
+                "Test Name": "Max R_hat",
+                "Output": "1.07",
+                "Status": "warning"
+              }
+            ],
+            "r_hat": [
+              {
+                "Parameter": "Audio_decay",
+                "R_hat": 1.07
+              },
+              {
+                "Parameter": "Cinema_beta",
+                "R_hat": 1.002
+              },
+              {
+                "Parameter": "Affiliate_beta",
+                "R_hat": 1.004
+              }
+            ],
+            "contributions": [
+              {
+                "Date": 1772496000000,
+                "Base": 100,
+                "Audio_activity": 225,
+                "Cinema_activity": 200,
+                "Affiliate_activity": 175,
+                "Weather": -8,
+                "Seasonality": 5,
+                "Overlap": 3,
+                "Model": 700
+              }
+            ],
+            "model_config": {
+              "config": {
+                "link": "log",
+                "attribution": "removal_lift"
+              }
+            },
+            "response_curves": [
+              {
+                "Spend": 0,
+                "Audio_activity": 0.0
+              },
+              {
+                "Spend": 1,
+                "Audio_activity": 1.8
+              },
+              {
+                "Spend": 2,
+                "Audio_activity": 3.6
+              },
+              {
+                "Spend": 3,
+                "Audio_activity": 5.4
+              },
+              {
+                "Spend": 4,
+                "Audio_activity": 7.2
+              },
+              {
+                "Spend": 5,
+                "Audio_activity": 9.0
+              },
+              {
+                "Spend": 6,
+                "Audio_activity": 10.8
+              },
+              {
+                "Spend": 7,
+                "Audio_activity": 12.6
+              },
+              {
+                "Spend": 8,
+                "Audio_activity": 14.4
+              },
+              {
+                "Spend": 9,
+                "Audio_activity": 16.2
+              },
+              {
+                "Spend": 10,
+                "Audio_activity": 18.0
+              },
+              {
+                "Spend": 11,
+                "Audio_activity": 19.8
+              },
+              {
+                "Spend": 12,
+                "Audio_activity": 21.6
+              },
+              {
+                "Spend": 13,
+                "Audio_activity": 23.400000000000002
+              },
+              {
+                "Spend": 14,
+                "Audio_activity": 25.2
+              },
+              {
+                "Spend": 15,
+                "Audio_activity": 27.0
+              },
+              {
+                "Spend": 16,
+                "Audio_activity": 28.8
+              },
+              {
+                "Spend": 17,
+                "Audio_activity": 30.6
+              },
+              {
+                "Spend": 18,
+                "Audio_activity": 32.4
+              },
+              {
+                "Spend": 19,
+                "Audio_activity": 34.2
+              },
+              {
+                "Spend": 20,
+                "Audio_activity": 36.0
+              },
+              {
+                "Spend": 21,
+                "Audio_activity": 37.800000000000004
+              },
+              {
+                "Spend": 22,
+                "Audio_activity": 39.6
+              },
+              {
+                "Spend": 23,
+                "Audio_activity": 41.4
+              },
+              {
+                "Spend": 24,
+                "Audio_activity": 43.2
+              },
+              {
+                "Spend": 25,
+                "Audio_activity": 45.0
+              },
+              {
+                "Spend": 26,
+                "Audio_activity": 46.800000000000004
+              },
+              {
+                "Spend": 27,
+                "Audio_activity": 48.6
+              },
+              {
+                "Spend": 28,
+                "Audio_activity": 50.4
+              },
+              {
+                "Spend": 29,
+                "Audio_activity": 52.2
+              },
+              {
+                "Spend": 30,
+                "Audio_activity": 54.0
+              },
+              {
+                "Spend": 31,
+                "Audio_activity": 55.800000000000004
+              },
+              {
+                "Spend": 32,
+                "Audio_activity": 57.6
+              },
+              {
+                "Spend": 33,
+                "Audio_activity": 59.4
+              },
+              {
+                "Spend": 34,
+                "Audio_activity": 61.2
+              },
+              {
+                "Spend": 35,
+                "Audio_activity": 63.0
+              },
+              {
+                "Spend": 36,
+                "Audio_activity": 64.8
+              },
+              {
+                "Spend": 37,
+                "Audio_activity": 66.60000000000001
+              },
+              {
+                "Spend": 38,
+                "Audio_activity": 68.4
+              },
+              {
+                "Spend": 39,
+                "Audio_activity": 70.2
+              },
+              {
+                "Spend": 40,
+                "Audio_activity": 72.0
+              },
+              {
+                "Spend": 41,
+                "Audio_activity": 73.8
+              },
+              {
+                "Spend": 42,
+                "Audio_activity": 75.60000000000001
+              },
+              {
+                "Spend": 43,
+                "Audio_activity": 77.4
+              },
+              {
+                "Spend": 44,
+                "Audio_activity": 79.2
+              },
+              {
+                "Spend": 45,
+                "Audio_activity": 81.0
+              },
+              {
+                "Spend": 46,
+                "Audio_activity": 82.8
+              },
+              {
+                "Spend": 47,
+                "Audio_activity": 84.60000000000001
+              },
+              {
+                "Spend": 48,
+                "Audio_activity": 86.4
+              },
+              {
+                "Spend": 49,
+                "Audio_activity": 88.2
+              },
+              {
+                "Spend": 50,
+                "Audio_activity": 90.0
+              },
+              {
+                "Spend": 51,
+                "Audio_activity": 91.8
+              },
+              {
+                "Spend": 52,
+                "Audio_activity": 93.60000000000001
+              },
+              {
+                "Spend": 53,
+                "Audio_activity": 95.4
+              },
+              {
+                "Spend": 54,
+                "Audio_activity": 97.2
+              },
+              {
+                "Spend": 55,
+                "Audio_activity": 99.0
+              },
+              {
+                "Spend": 56,
+                "Audio_activity": 100.8
+              },
+              {
+                "Spend": 57,
+                "Audio_activity": 102.60000000000001
+              },
+              {
+                "Spend": 58,
+                "Audio_activity": 104.4
+              },
+              {
+                "Spend": 59,
+                "Audio_activity": 106.2
+              },
+              {
+                "Spend": 60,
+                "Audio_activity": 108.0
+              },
+              {
+                "Spend": 61,
+                "Audio_activity": 109.8
+              },
+              {
+                "Spend": 62,
+                "Audio_activity": 111.60000000000001
+              },
+              {
+                "Spend": 63,
+                "Audio_activity": 113.4
+              },
+              {
+                "Spend": 64,
+                "Audio_activity": 115.2
+              },
+              {
+                "Spend": 65,
+                "Audio_activity": 117.0
+              },
+              {
+                "Spend": 66,
+                "Audio_activity": 118.8
+              },
+              {
+                "Spend": 67,
+                "Audio_activity": 120.60000000000001
+              },
+              {
+                "Spend": 68,
+                "Audio_activity": 122.4
+              },
+              {
+                "Spend": 69,
+                "Audio_activity": 124.2
+              },
+              {
+                "Spend": 70,
+                "Audio_activity": 126.0
+              },
+              {
+                "Spend": 71,
+                "Audio_activity": 127.8
+              },
+              {
+                "Spend": 72,
+                "Audio_activity": 129.6
+              },
+              {
+                "Spend": 73,
+                "Audio_activity": 131.4
+              },
+              {
+                "Spend": 74,
+                "Audio_activity": 133.20000000000002
+              },
+              {
+                "Spend": 75,
+                "Audio_activity": 135.0
+              },
+              {
+                "Spend": 76,
+                "Audio_activity": 136.8
+              },
+              {
+                "Spend": 77,
+                "Audio_activity": 138.6
+              },
+              {
+                "Spend": 78,
+                "Audio_activity": 140.4
+              },
+              {
+                "Spend": 79,
+                "Audio_activity": 142.20000000000002
+              },
+              {
+                "Spend": 80,
+                "Audio_activity": 144.0
+              },
+              {
+                "Spend": 81,
+                "Audio_activity": 145.8
+              },
+              {
+                "Spend": 82,
+                "Audio_activity": 147.6
+              },
+              {
+                "Spend": 83,
+                "Audio_activity": 149.4
+              },
+              {
+                "Spend": 84,
+                "Audio_activity": 151.20000000000002
+              },
+              {
+                "Spend": 85,
+                "Audio_activity": 153.0
+              },
+              {
+                "Spend": 86,
+                "Audio_activity": 154.8
+              },
+              {
+                "Spend": 87,
+                "Audio_activity": 156.6
+              },
+              {
+                "Spend": 88,
+                "Audio_activity": 158.4
+              },
+              {
+                "Spend": 89,
+                "Audio_activity": 160.20000000000002
+              },
+              {
+                "Spend": 90,
+                "Audio_activity": 162.0
+              },
+              {
+                "Spend": 91,
+                "Audio_activity": 163.8
+              },
+              {
+                "Spend": 92,
+                "Audio_activity": 165.6
+              },
+              {
+                "Spend": 93,
+                "Audio_activity": 167.4
+              },
+              {
+                "Spend": 94,
+                "Audio_activity": 169.20000000000002
+              },
+              {
+                "Spend": 95,
+                "Audio_activity": 171.0
+              },
+              {
+                "Spend": 96,
+                "Audio_activity": 172.8
+              },
+              {
+                "Spend": 97,
+                "Audio_activity": 174.6
+              },
+              {
+                "Spend": 98,
+                "Audio_activity": 176.4
+              },
+              {
+                "Spend": 99,
+                "Audio_activity": 178.20000000000002
+              }
+            ]
+          },
+          "sections_available": [
+            "coefficients",
+            "channel_summary",
+            "channel_map",
+            "mroi_summary",
+            "model_stats",
+            "r_hat",
+            "contributions",
+            "model_config",
+            "response_curves"
+          ]
+        },
+        "dataset": "independent_specifications_v1",
+        "evidence_window": {
+          "start": "2026-03-10",
+          "end": "2026-03-24",
+          "granularity": "native"
+        },
+        "max_response_bytes": null,
+        "allow_recovery_errors": false
+      },
+      "prompt": "The completed saved model is result-example. All data are synthetic. Revenue and spend are GBP. Read saved evidence only; do not fit anything. For 10 to 24 March 2026 inclusive, give total revenue, spend and ROI across Audio, Cinema and Affiliate. Round ROI to six places. Return JSON fields revenue, spend, roi, currency, and explain the calculation.",
+      "expected": {
+        "revenue": 460,
+        "spend": 180,
+        "roi": 2.555556,
+        "currency": "GBP"
+      }
+    },
+    {
+      "case": {
+        "id": "acceptance_d",
+        "required_sections": [
+          "model_stats",
+          "r_hat"
+        ],
+        "paraphrase": "",
+        "family": "acceptance_d",
+        "channel": "",
+        "allow_prediction": false,
+        "evidence_options": [
+          [
+            "model_stats",
+            "r_hat"
+          ]
+        ],
+        "fixture": {
+          "model_hash": "result-example",
+          "status": "complete",
+          "model_type": "mmm",
+          "results": {
+            "coefficients": [
+              {
+                "Date": 1772496000000,
+                "Channel": "Audio_activity",
+                "Revenue": 900,
+                "Spend": 100,
+                "Sales": 225.0,
+                "ROI": 9.0
+              },
+              {
+                "Date": 1772496000000,
+                "Channel": "Cinema_activity",
+                "Revenue": 800,
+                "Spend": 100,
+                "Sales": 200.0,
+                "ROI": 8.0
+              },
+              {
+                "Date": 1772496000000,
+                "Channel": "Affiliate_activity",
+                "Revenue": 700,
+                "Spend": 100,
+                "Sales": 175.0,
+                "ROI": 7.0
+              },
+              {
+                "Date": 1773100800000,
+                "Channel": "Audio_activity",
+                "Revenue": 30,
+                "Spend": 10,
+                "Sales": 7.5,
+                "ROI": 3.0
+              },
+              {
+                "Date": 1773100800000,
+                "Channel": "Cinema_activity",
+                "Revenue": 72,
+                "Spend": 24,
+                "Sales": 18.0,
+                "ROI": 3.0
+              },
+              {
+                "Date": 1773100800000,
+                "Channel": "Affiliate_activity",
+                "Revenue": 15,
+                "Spend": 5,
+                "Sales": 3.75,
+                "ROI": 3.0
+              },
+              {
+                "Date": 1773705600000,
+                "Channel": "Audio_activity",
+                "Revenue": 110,
+                "Spend": 50,
+                "Sales": 27.5,
+                "ROI": 2.2
+              },
+              {
+                "Date": 1773705600000,
+                "Channel": "Cinema_activity",
+                "Revenue": 20,
+                "Spend": 20,
+                "Sales": 5.0,
+                "ROI": 1.0
+              },
+              {
+                "Date": 1773705600000,
+                "Channel": "Affiliate_activity",
+                "Revenue": 28,
+                "Spend": 7,
+                "Sales": 7.0,
+                "ROI": 4.0
+              },
+              {
+                "Date": 1774310400000,
+                "Channel": "Audio_activity",
+                "Revenue": 60,
+                "Spend": 20,
+                "Sales": 15.0,
+                "ROI": 3.0
+              },
+              {
+                "Date": 1774310400000,
+                "Channel": "Cinema_activity",
+                "Revenue": 90,
+                "Spend": 30,
+                "Sales": 22.5,
+                "ROI": 3.0
+              },
+              {
+                "Date": 1774310400000,
+                "Channel": "Affiliate_activity",
+                "Revenue": 35,
+                "Spend": 14,
+                "Sales": 8.75,
+                "ROI": 2.5
+              },
+              {
+                "Date": 1774915200000,
+                "Channel": "Audio_activity",
+                "Revenue": 600,
+                "Spend": 100,
+                "Sales": 150.0,
+                "ROI": 6.0
+              },
+              {
+                "Date": 1774915200000,
+                "Channel": "Cinema_activity",
+                "Revenue": 500,
+                "Spend": 100,
+                "Sales": 125.0,
+                "ROI": 5.0
+              },
+              {
+                "Date": 1774915200000,
+                "Channel": "Affiliate_activity",
+                "Revenue": 400,
+                "Spend": 100,
+                "Sales": 100.0,
+                "ROI": 4.0
+              }
+            ],
+            "channel_summary": [
+              {
+                "Channel": "Audio_activity",
+                "Revenue": 1700,
+                "Spend": 280,
+                "Sales": 425.0,
+                "ROI": 6.071428571428571
+              },
+              {
+                "Channel": "Cinema_activity",
+                "Revenue": 1482,
+                "Spend": 274,
+                "Sales": 370.5,
+                "ROI": 5.408759124087592
+              },
+              {
+                "Channel": "Affiliate_activity",
+                "Revenue": 1178,
+                "Spend": 226,
+                "Sales": 294.5,
+                "ROI": 5.212389380530974
+              }
+            ],
+            "channel_map": [
+              {
+                "channel": "Audio",
+                "activity_column": "Audio_activity",
+                "spend_column": "audio_spend"
+              },
+              {
+                "channel": "Cinema",
+                "activity_column": "Cinema_activity",
+                "spend_column": "cinema_spend"
+              },
+              {
+                "channel": "Affiliate",
+                "activity_column": "Affiliate_activity",
+                "spend_column": "affiliate_spend"
+              }
+            ],
+            "mroi_summary": {
+              "hdi_prob": 0.94,
+              "evaluation_point": "current_spend",
+              "spend_convention": "mean_active_period",
+              "conventions_available": [
+                "allperiods_unweighted",
+                "spendweighted_active"
+              ],
+              "channels": [
+                {
+                  "channel": "Audio",
+                  "activity_column": "Audio_activity",
+                  "current_spend": 56,
+                  "mroi_mean": 1.8,
+                  "mroi_median": 1.45,
+                  "mroi_hdi_3": 0.4,
+                  "mroi_hdi_97": 3.1,
+                  "mroi_allperiods_unweighted_median": 0.95,
+                  "mroi_spendweighted_active_median": 1.2
+                }
+              ]
+            },
+            "contributions": [
+              {
+                "Date": 1772496000000,
+                "Base": 100,
+                "Audio_activity": 225,
+                "Cinema_activity": 200,
+                "Affiliate_activity": 175,
+                "Weather": -8,
+                "Seasonality": 5,
+                "Overlap": 3,
+                "Model": 700
+              }
+            ],
+            "model_config": {
+              "config": {
+                "link": "log",
+                "attribution": "removal_lift"
+              }
+            },
+            "response_curves": [
+              {
+                "Spend": 0,
+                "Audio_activity": 0.0
+              },
+              {
+                "Spend": 1,
+                "Audio_activity": 1.8
+              },
+              {
+                "Spend": 2,
+                "Audio_activity": 3.6
+              },
+              {
+                "Spend": 3,
+                "Audio_activity": 5.4
+              },
+              {
+                "Spend": 4,
+                "Audio_activity": 7.2
+              },
+              {
+                "Spend": 5,
+                "Audio_activity": 9.0
+              },
+              {
+                "Spend": 6,
+                "Audio_activity": 10.8
+              },
+              {
+                "Spend": 7,
+                "Audio_activity": 12.6
+              },
+              {
+                "Spend": 8,
+                "Audio_activity": 14.4
+              },
+              {
+                "Spend": 9,
+                "Audio_activity": 16.2
+              },
+              {
+                "Spend": 10,
+                "Audio_activity": 18.0
+              },
+              {
+                "Spend": 11,
+                "Audio_activity": 19.8
+              },
+              {
+                "Spend": 12,
+                "Audio_activity": 21.6
+              },
+              {
+                "Spend": 13,
+                "Audio_activity": 23.400000000000002
+              },
+              {
+                "Spend": 14,
+                "Audio_activity": 25.2
+              },
+              {
+                "Spend": 15,
+                "Audio_activity": 27.0
+              },
+              {
+                "Spend": 16,
+                "Audio_activity": 28.8
+              },
+              {
+                "Spend": 17,
+                "Audio_activity": 30.6
+              },
+              {
+                "Spend": 18,
+                "Audio_activity": 32.4
+              },
+              {
+                "Spend": 19,
+                "Audio_activity": 34.2
+              },
+              {
+                "Spend": 20,
+                "Audio_activity": 36.0
+              },
+              {
+                "Spend": 21,
+                "Audio_activity": 37.800000000000004
+              },
+              {
+                "Spend": 22,
+                "Audio_activity": 39.6
+              },
+              {
+                "Spend": 23,
+                "Audio_activity": 41.4
+              },
+              {
+                "Spend": 24,
+                "Audio_activity": 43.2
+              },
+              {
+                "Spend": 25,
+                "Audio_activity": 45.0
+              },
+              {
+                "Spend": 26,
+                "Audio_activity": 46.800000000000004
+              },
+              {
+                "Spend": 27,
+                "Audio_activity": 48.6
+              },
+              {
+                "Spend": 28,
+                "Audio_activity": 50.4
+              },
+              {
+                "Spend": 29,
+                "Audio_activity": 52.2
+              },
+              {
+                "Spend": 30,
+                "Audio_activity": 54.0
+              },
+              {
+                "Spend": 31,
+                "Audio_activity": 55.800000000000004
+              },
+              {
+                "Spend": 32,
+                "Audio_activity": 57.6
+              },
+              {
+                "Spend": 33,
+                "Audio_activity": 59.4
+              },
+              {
+                "Spend": 34,
+                "Audio_activity": 61.2
+              },
+              {
+                "Spend": 35,
+                "Audio_activity": 63.0
+              },
+              {
+                "Spend": 36,
+                "Audio_activity": 64.8
+              },
+              {
+                "Spend": 37,
+                "Audio_activity": 66.60000000000001
+              },
+              {
+                "Spend": 38,
+                "Audio_activity": 68.4
+              },
+              {
+                "Spend": 39,
+                "Audio_activity": 70.2
+              },
+              {
+                "Spend": 40,
+                "Audio_activity": 72.0
+              },
+              {
+                "Spend": 41,
+                "Audio_activity": 73.8
+              },
+              {
+                "Spend": 42,
+                "Audio_activity": 75.60000000000001
+              },
+              {
+                "Spend": 43,
+                "Audio_activity": 77.4
+              },
+              {
+                "Spend": 44,
+                "Audio_activity": 79.2
+              },
+              {
+                "Spend": 45,
+                "Audio_activity": 81.0
+              },
+              {
+                "Spend": 46,
+                "Audio_activity": 82.8
+              },
+              {
+                "Spend": 47,
+                "Audio_activity": 84.60000000000001
+              },
+              {
+                "Spend": 48,
+                "Audio_activity": 86.4
+              },
+              {
+                "Spend": 49,
+                "Audio_activity": 88.2
+              },
+              {
+                "Spend": 50,
+                "Audio_activity": 90.0
+              },
+              {
+                "Spend": 51,
+                "Audio_activity": 91.8
+              },
+              {
+                "Spend": 52,
+                "Audio_activity": 93.60000000000001
+              },
+              {
+                "Spend": 53,
+                "Audio_activity": 95.4
+              },
+              {
+                "Spend": 54,
+                "Audio_activity": 97.2
+              },
+              {
+                "Spend": 55,
+                "Audio_activity": 99.0
+              },
+              {
+                "Spend": 56,
+                "Audio_activity": 100.8
+              },
+              {
+                "Spend": 57,
+                "Audio_activity": 102.60000000000001
+              },
+              {
+                "Spend": 58,
+                "Audio_activity": 104.4
+              },
+              {
+                "Spend": 59,
+                "Audio_activity": 106.2
+              },
+              {
+                "Spend": 60,
+                "Audio_activity": 108.0
+              },
+              {
+                "Spend": 61,
+                "Audio_activity": 109.8
+              },
+              {
+                "Spend": 62,
+                "Audio_activity": 111.60000000000001
+              },
+              {
+                "Spend": 63,
+                "Audio_activity": 113.4
+              },
+              {
+                "Spend": 64,
+                "Audio_activity": 115.2
+              },
+              {
+                "Spend": 65,
+                "Audio_activity": 117.0
+              },
+              {
+                "Spend": 66,
+                "Audio_activity": 118.8
+              },
+              {
+                "Spend": 67,
+                "Audio_activity": 120.60000000000001
+              },
+              {
+                "Spend": 68,
+                "Audio_activity": 122.4
+              },
+              {
+                "Spend": 69,
+                "Audio_activity": 124.2
+              },
+              {
+                "Spend": 70,
+                "Audio_activity": 126.0
+              },
+              {
+                "Spend": 71,
+                "Audio_activity": 127.8
+              },
+              {
+                "Spend": 72,
+                "Audio_activity": 129.6
+              },
+              {
+                "Spend": 73,
+                "Audio_activity": 131.4
+              },
+              {
+                "Spend": 74,
+                "Audio_activity": 133.20000000000002
+              },
+              {
+                "Spend": 75,
+                "Audio_activity": 135.0
+              },
+              {
+                "Spend": 76,
+                "Audio_activity": 136.8
+              },
+              {
+                "Spend": 77,
+                "Audio_activity": 138.6
+              },
+              {
+                "Spend": 78,
+                "Audio_activity": 140.4
+              },
+              {
+                "Spend": 79,
+                "Audio_activity": 142.20000000000002
+              },
+              {
+                "Spend": 80,
+                "Audio_activity": 144.0
+              },
+              {
+                "Spend": 81,
+                "Audio_activity": 145.8
+              },
+              {
+                "Spend": 82,
+                "Audio_activity": 147.6
+              },
+              {
+                "Spend": 83,
+                "Audio_activity": 149.4
+              },
+              {
+                "Spend": 84,
+                "Audio_activity": 151.20000000000002
+              },
+              {
+                "Spend": 85,
+                "Audio_activity": 153.0
+              },
+              {
+                "Spend": 86,
+                "Audio_activity": 154.8
+              },
+              {
+                "Spend": 87,
+                "Audio_activity": 156.6
+              },
+              {
+                "Spend": 88,
+                "Audio_activity": 158.4
+              },
+              {
+                "Spend": 89,
+                "Audio_activity": 160.20000000000002
+              },
+              {
+                "Spend": 90,
+                "Audio_activity": 162.0
+              },
+              {
+                "Spend": 91,
+                "Audio_activity": 163.8
+              },
+              {
+                "Spend": 92,
+                "Audio_activity": 165.6
+              },
+              {
+                "Spend": 93,
+                "Audio_activity": 167.4
+              },
+              {
+                "Spend": 94,
+                "Audio_activity": 169.20000000000002
+              },
+              {
+                "Spend": 95,
+                "Audio_activity": 171.0
+              },
+              {
+                "Spend": 96,
+                "Audio_activity": 172.8
+              },
+              {
+                "Spend": 97,
+                "Audio_activity": 174.6
+              },
+              {
+                "Spend": 98,
+                "Audio_activity": 176.4
+              },
+              {
+                "Spend": 99,
+                "Audio_activity": 178.20000000000002
+              }
+            ]
+          },
+          "sections_available": [
+            "coefficients",
+            "channel_summary",
+            "channel_map",
+            "mroi_summary",
+            "contributions",
+            "model_config",
+            "response_curves"
+          ]
+        },
+        "dataset": "independent_specifications_v1",
+        "evidence_window": null,
+        "max_response_bytes": null,
+        "allow_recovery_errors": false
+      },
+      "prompt": "The completed saved model is result-example. All data are synthetic. Revenue and spend are GBP. Read saved evidence only; do not fit anything. Can saved model_stats and r_hat establish convergence? Request both. Return JSON fields convergence and reason; explain only what the response establishes.",
+      "expected": {
+        "convergence": "unknown",
+        "reason": "not_returned"
+      }
+    },
+    {
+      "case": {
+        "id": "acceptance_e",
+        "required_sections": [
+          "mroi_summary"
+        ],
+        "paraphrase": "",
+        "family": "acceptance_e",
+        "channel": "",
+        "allow_prediction": false,
+        "evidence_options": [
+          [
+            "mroi_summary"
+          ]
+        ],
+        "fixture": {
+          "model_hash": "result-example",
+          "status": "complete",
+          "model_type": "mmm",
+          "results": {
+            "channel_map": [
+              {
+                "channel": "Audio",
+                "activity_column": "Audio_activity",
+                "spend_column": "audio_spend"
+              },
+              {
+                "channel": "Cinema",
+                "activity_column": "Cinema_activity",
+                "spend_column": "cinema_spend"
+              },
+              {
+                "channel": "Affiliate",
+                "activity_column": "Affiliate_activity",
+                "spend_column": "affiliate_spend"
+              }
+            ],
+            "mroi_summary": {
+              "hdi_prob": 0.94,
+              "evaluation_point": "current_spend",
+              "spend_convention": "mean_active_period",
+              "conventions_available": [
+                "allperiods_unweighted",
+                "spendweighted_active"
+              ],
+              "channels": [
+                {
+                  "channel": "Audio",
+                  "activity_column": "Audio_activity",
+                  "current_spend": 80,
+                  "mroi_mean": 1.8,
+                  "mroi_median": 1.45,
+                  "mroi_hdi_3": 0.4,
+                  "mroi_hdi_97": 3.1,
+                  "mroi_allperiods_unweighted_median": 0.95,
+                  "mroi_spendweighted_active_median": 1.2
+                }
+              ]
+            }
+          },
+          "sections_available": [
+            "channel_map",
+            "mroi_summary"
+          ]
+        },
+        "dataset": "independent_specifications_v1",
+        "evidence_window": null,
+        "max_response_bytes": null,
+        "allow_recovery_errors": false
+      },
+      "prompt": "The completed saved model is result-example. All data are synthetic. Revenue and spend are GBP. Read saved evidence only; do not fit anything. Give Audio's headline marginal ROI mean at current spend and saved interval. Return JSON fields mean, lower, upper, hdi_prob, current_spend, historical_average and explain whether this is either saved historical averaging convention.",
+      "expected": {
+        "mean": 1.8,
+        "lower": 0.4,
+        "upper": 3.1,
+        "hdi_prob": 0.94,
+        "current_spend": 80,
+        "historical_average": false
+      }
+    },
+    {
+      "case": {
+        "id": "acceptance_f",
+        "required_sections": [
+          "contributions",
+          "model_config"
+        ],
+        "paraphrase": "",
+        "family": "acceptance_f",
+        "channel": "",
+        "allow_prediction": false,
+        "evidence_options": [
+          [
+            "contributions",
+            "model_config"
+          ]
+        ],
+        "fixture": {
+          "model_hash": "result-example",
+          "status": "complete",
+          "model_type": "mmm",
+          "results": {
+            "contributions": [
+              {
+                "Date": 1772496000000,
+                "Base": 100,
+                "Audio_activity": 18,
+                "Cinema_activity": 12,
+                "Weather": -8,
+                "Seasonality": 5,
+                "Overlap": 3,
+                "Model": 130
+              }
+            ],
+            "model_config": {
+              "config": {
+                "link": "log",
+                "attribution": "removal_lift"
+              }
+            }
+          },
+          "sections_available": [
+            "contributions",
+            "model_config"
+          ]
+        },
+        "dataset": "independent_specifications_v1",
+        "evidence_window": null,
+        "max_response_bytes": null,
+        "allow_recovery_errors": false
+      },
+      "prompt": "The completed saved model is result-example. All data are synthetic. Revenue and spend are GBP. Read saved evidence only; do not fit anything. Reconcile the decomposition row in KPI units. Supplied saved context: Weather uses its average reference and revenue multiplier is 4. Return JSON fields component_sum, model, overlap_is_channel, weather_reference; explain Overlap and the negative Weather contribution without inferring raw weather values.",
+      "expected": {
+        "component_sum": 130,
+        "model": 130,
+        "overlap_is_channel": false,
+        "weather_reference": "average"
+      }
+    },
+    {
+      "case": {
+        "id": "acceptance_h",
+        "required_sections": [
+          "mroi_periods"
+        ],
+        "paraphrase": "",
+        "family": "acceptance_h",
+        "channel": "",
+        "allow_prediction": false,
+        "evidence_options": [
+          [
+            "mroi_periods"
+          ]
+        ],
+        "fixture": {
+          "model_hash": "result-example",
+          "status": "complete",
+          "model_type": "mmm",
+          "results": {
+            "coefficients": [
+              {
+                "Date": 1772496000000,
+                "Channel": "Audio_activity",
+                "Revenue": 900,
+                "Spend": 100,
+                "Sales": 225.0,
+                "ROI": 9.0
+              },
+              {
+                "Date": 1772496000000,
+                "Channel": "Cinema_activity",
+                "Revenue": 800,
+                "Spend": 100,
+                "Sales": 200.0,
+                "ROI": 8.0
+              },
+              {
+                "Date": 1772496000000,
+                "Channel": "Affiliate_activity",
+                "Revenue": 700,
+                "Spend": 100,
+                "Sales": 175.0,
+                "ROI": 7.0
+              },
+              {
+                "Date": 1773100800000,
+                "Channel": "Audio_activity",
+                "Revenue": 30,
+                "Spend": 10,
+                "Sales": 7.5,
+                "ROI": 3.0
+              },
+              {
+                "Date": 1773100800000,
+                "Channel": "Cinema_activity",
+                "Revenue": 72,
+                "Spend": 24,
+                "Sales": 18.0,
+                "ROI": 3.0
+              },
+              {
+                "Date": 1773100800000,
+                "Channel": "Affiliate_activity",
+                "Revenue": 15,
+                "Spend": 5,
+                "Sales": 3.75,
+                "ROI": 3.0
+              },
+              {
+                "Date": 1773705600000,
+                "Channel": "Audio_activity",
+                "Revenue": 110,
+                "Spend": 50,
+                "Sales": 27.5,
+                "ROI": 2.2
+              },
+              {
+                "Date": 1773705600000,
+                "Channel": "Cinema_activity",
+                "Revenue": 20,
+                "Spend": 20,
+                "Sales": 5.0,
+                "ROI": 1.0
+              },
+              {
+                "Date": 1773705600000,
+                "Channel": "Affiliate_activity",
+                "Revenue": 28,
+                "Spend": 7,
+                "Sales": 7.0,
+                "ROI": 4.0
+              },
+              {
+                "Date": 1774310400000,
+                "Channel": "Audio_activity",
+                "Revenue": 60,
+                "Spend": 20,
+                "Sales": 15.0,
+                "ROI": 3.0
+              },
+              {
+                "Date": 1774310400000,
+                "Channel": "Cinema_activity",
+                "Revenue": 90,
+                "Spend": 30,
+                "Sales": 22.5,
+                "ROI": 3.0
+              },
+              {
+                "Date": 1774310400000,
+                "Channel": "Affiliate_activity",
+                "Revenue": 35,
+                "Spend": 14,
+                "Sales": 8.75,
+                "ROI": 2.5
+              },
+              {
+                "Date": 1774915200000,
+                "Channel": "Audio_activity",
+                "Revenue": 600,
+                "Spend": 100,
+                "Sales": 150.0,
+                "ROI": 6.0
+              },
+              {
+                "Date": 1774915200000,
+                "Channel": "Cinema_activity",
+                "Revenue": 500,
+                "Spend": 100,
+                "Sales": 125.0,
+                "ROI": 5.0
+              },
+              {
+                "Date": 1774915200000,
+                "Channel": "Affiliate_activity",
+                "Revenue": 400,
+                "Spend": 100,
+                "Sales": 100.0,
+                "ROI": 4.0
+              }
+            ],
+            "channel_summary": [
+              {
+                "Channel": "Audio_activity",
+                "Revenue": 1700,
+                "Spend": 280,
+                "Sales": 425.0,
+                "ROI": 6.071428571428571
+              },
+              {
+                "Channel": "Cinema_activity",
+                "Revenue": 1482,
+                "Spend": 274,
+                "Sales": 370.5,
+                "ROI": 5.408759124087592
+              },
+              {
+                "Channel": "Affiliate_activity",
+                "Revenue": 1178,
+                "Spend": 226,
+                "Sales": 294.5,
+                "ROI": 5.212389380530974
+              }
+            ],
+            "channel_map": [
+              {
+                "channel": "Audio",
+                "activity_column": "Audio_activity",
+                "spend_column": "audio_spend"
+              },
+              {
+                "channel": "Cinema",
+                "activity_column": "Cinema_activity",
+                "spend_column": "cinema_spend"
+              },
+              {
+                "channel": "Affiliate",
+                "activity_column": "Affiliate_activity",
+                "spend_column": "affiliate_spend"
+              }
+            ],
+            "mroi_summary": {
+              "hdi_prob": 0.94,
+              "evaluation_point": "current_spend",
+              "spend_convention": "mean_active_period",
+              "conventions_available": [
+                "allperiods_unweighted",
+                "spendweighted_active"
+              ],
+              "channels": [
+                {
+                  "channel": "Audio",
+                  "activity_column": "Audio_activity",
+                  "current_spend": 56,
+                  "mroi_mean": 1.8,
+                  "mroi_median": 1.45,
+                  "mroi_hdi_3": 0.4,
+                  "mroi_hdi_97": 3.1,
+                  "mroi_allperiods_unweighted_median": 0.95,
+                  "mroi_spendweighted_active_median": 1.2
+                }
+              ]
+            },
+            "model_stats": [
+              {
+                "Test Name": "Max R_hat",
+                "Output": "1.07",
+                "Status": "warning"
+              }
+            ],
+            "r_hat": [
+              {
+                "Parameter": "Audio_decay",
+                "R_hat": 1.07
+              },
+              {
+                "Parameter": "Cinema_beta",
+                "R_hat": 1.002
+              },
+              {
+                "Parameter": "Affiliate_beta",
+                "R_hat": 1.004
+              }
+            ],
+            "contributions": [
+              {
+                "Date": 1772496000000,
+                "Base": 100,
+                "Audio_activity": 225,
+                "Cinema_activity": 200,
+                "Affiliate_activity": 175,
+                "Weather": -8,
+                "Seasonality": 5,
+                "Overlap": 3,
+                "Model": 700
+              }
+            ],
+            "model_config": {
+              "config": {
+                "link": "log",
+                "attribution": "removal_lift"
+              }
+            },
+            "response_curves": [
+              {
+                "Spend": 0,
+                "Audio_activity": 0.0
+              },
+              {
+                "Spend": 1,
+                "Audio_activity": 1.8
+              },
+              {
+                "Spend": 2,
+                "Audio_activity": 3.6
+              },
+              {
+                "Spend": 3,
+                "Audio_activity": 5.4
+              },
+              {
+                "Spend": 4,
+                "Audio_activity": 7.2
+              },
+              {
+                "Spend": 5,
+                "Audio_activity": 9.0
+              },
+              {
+                "Spend": 6,
+                "Audio_activity": 10.8
+              },
+              {
+                "Spend": 7,
+                "Audio_activity": 12.6
+              },
+              {
+                "Spend": 8,
+                "Audio_activity": 14.4
+              },
+              {
+                "Spend": 9,
+                "Audio_activity": 16.2
+              },
+              {
+                "Spend": 10,
+                "Audio_activity": 18.0
+              },
+              {
+                "Spend": 11,
+                "Audio_activity": 19.8
+              },
+              {
+                "Spend": 12,
+                "Audio_activity": 21.6
+              },
+              {
+                "Spend": 13,
+                "Audio_activity": 23.400000000000002
+              },
+              {
+                "Spend": 14,
+                "Audio_activity": 25.2
+              },
+              {
+                "Spend": 15,
+                "Audio_activity": 27.0
+              },
+              {
+                "Spend": 16,
+                "Audio_activity": 28.8
+              },
+              {
+                "Spend": 17,
+                "Audio_activity": 30.6
+              },
+              {
+                "Spend": 18,
+                "Audio_activity": 32.4
+              },
+              {
+                "Spend": 19,
+                "Audio_activity": 34.2
+              },
+              {
+                "Spend": 20,
+                "Audio_activity": 36.0
+              },
+              {
+                "Spend": 21,
+                "Audio_activity": 37.800000000000004
+              },
+              {
+                "Spend": 22,
+                "Audio_activity": 39.6
+              },
+              {
+                "Spend": 23,
+                "Audio_activity": 41.4
+              },
+              {
+                "Spend": 24,
+                "Audio_activity": 43.2
+              },
+              {
+                "Spend": 25,
+                "Audio_activity": 45.0
+              },
+              {
+                "Spend": 26,
+                "Audio_activity": 46.800000000000004
+              },
+              {
+                "Spend": 27,
+                "Audio_activity": 48.6
+              },
+              {
+                "Spend": 28,
+                "Audio_activity": 50.4
+              },
+              {
+                "Spend": 29,
+                "Audio_activity": 52.2
+              },
+              {
+                "Spend": 30,
+                "Audio_activity": 54.0
+              },
+              {
+                "Spend": 31,
+                "Audio_activity": 55.800000000000004
+              },
+              {
+                "Spend": 32,
+                "Audio_activity": 57.6
+              },
+              {
+                "Spend": 33,
+                "Audio_activity": 59.4
+              },
+              {
+                "Spend": 34,
+                "Audio_activity": 61.2
+              },
+              {
+                "Spend": 35,
+                "Audio_activity": 63.0
+              },
+              {
+                "Spend": 36,
+                "Audio_activity": 64.8
+              },
+              {
+                "Spend": 37,
+                "Audio_activity": 66.60000000000001
+              },
+              {
+                "Spend": 38,
+                "Audio_activity": 68.4
+              },
+              {
+                "Spend": 39,
+                "Audio_activity": 70.2
+              },
+              {
+                "Spend": 40,
+                "Audio_activity": 72.0
+              },
+              {
+                "Spend": 41,
+                "Audio_activity": 73.8
+              },
+              {
+                "Spend": 42,
+                "Audio_activity": 75.60000000000001
+              },
+              {
+                "Spend": 43,
+                "Audio_activity": 77.4
+              },
+              {
+                "Spend": 44,
+                "Audio_activity": 79.2
+              },
+              {
+                "Spend": 45,
+                "Audio_activity": 81.0
+              },
+              {
+                "Spend": 46,
+                "Audio_activity": 82.8
+              },
+              {
+                "Spend": 47,
+                "Audio_activity": 84.60000000000001
+              },
+              {
+                "Spend": 48,
+                "Audio_activity": 86.4
+              },
+              {
+                "Spend": 49,
+                "Audio_activity": 88.2
+              },
+              {
+                "Spend": 50,
+                "Audio_activity": 90.0
+              },
+              {
+                "Spend": 51,
+                "Audio_activity": 91.8
+              },
+              {
+                "Spend": 52,
+                "Audio_activity": 93.60000000000001
+              },
+              {
+                "Spend": 53,
+                "Audio_activity": 95.4
+              },
+              {
+                "Spend": 54,
+                "Audio_activity": 97.2
+              },
+              {
+                "Spend": 55,
+                "Audio_activity": 99.0
+              },
+              {
+                "Spend": 56,
+                "Audio_activity": 100.8
+              },
+              {
+                "Spend": 57,
+                "Audio_activity": 102.60000000000001
+              },
+              {
+                "Spend": 58,
+                "Audio_activity": 104.4
+              },
+              {
+                "Spend": 59,
+                "Audio_activity": 106.2
+              },
+              {
+                "Spend": 60,
+                "Audio_activity": 108.0
+              },
+              {
+                "Spend": 61,
+                "Audio_activity": 109.8
+              },
+              {
+                "Spend": 62,
+                "Audio_activity": 111.60000000000001
+              },
+              {
+                "Spend": 63,
+                "Audio_activity": 113.4
+              },
+              {
+                "Spend": 64,
+                "Audio_activity": 115.2
+              },
+              {
+                "Spend": 65,
+                "Audio_activity": 117.0
+              },
+              {
+                "Spend": 66,
+                "Audio_activity": 118.8
+              },
+              {
+                "Spend": 67,
+                "Audio_activity": 120.60000000000001
+              },
+              {
+                "Spend": 68,
+                "Audio_activity": 122.4
+              },
+              {
+                "Spend": 69,
+                "Audio_activity": 124.2
+              },
+              {
+                "Spend": 70,
+                "Audio_activity": 126.0
+              },
+              {
+                "Spend": 71,
+                "Audio_activity": 127.8
+              },
+              {
+                "Spend": 72,
+                "Audio_activity": 129.6
+              },
+              {
+                "Spend": 73,
+                "Audio_activity": 131.4
+              },
+              {
+                "Spend": 74,
+                "Audio_activity": 133.20000000000002
+              },
+              {
+                "Spend": 75,
+                "Audio_activity": 135.0
+              },
+              {
+                "Spend": 76,
+                "Audio_activity": 136.8
+              },
+              {
+                "Spend": 77,
+                "Audio_activity": 138.6
+              },
+              {
+                "Spend": 78,
+                "Audio_activity": 140.4
+              },
+              {
+                "Spend": 79,
+                "Audio_activity": 142.20000000000002
+              },
+              {
+                "Spend": 80,
+                "Audio_activity": 144.0
+              },
+              {
+                "Spend": 81,
+                "Audio_activity": 145.8
+              },
+              {
+                "Spend": 82,
+                "Audio_activity": 147.6
+              },
+              {
+                "Spend": 83,
+                "Audio_activity": 149.4
+              },
+              {
+                "Spend": 84,
+                "Audio_activity": 151.20000000000002
+              },
+              {
+                "Spend": 85,
+                "Audio_activity": 153.0
+              },
+              {
+                "Spend": 86,
+                "Audio_activity": 154.8
+              },
+              {
+                "Spend": 87,
+                "Audio_activity": 156.6
+              },
+              {
+                "Spend": 88,
+                "Audio_activity": 158.4
+              },
+              {
+                "Spend": 89,
+                "Audio_activity": 160.20000000000002
+              },
+              {
+                "Spend": 90,
+                "Audio_activity": 162.0
+              },
+              {
+                "Spend": 91,
+                "Audio_activity": 163.8
+              },
+              {
+                "Spend": 92,
+                "Audio_activity": 165.6
+              },
+              {
+                "Spend": 93,
+                "Audio_activity": 167.4
+              },
+              {
+                "Spend": 94,
+                "Audio_activity": 169.20000000000002
+              },
+              {
+                "Spend": 95,
+                "Audio_activity": 171.0
+              },
+              {
+                "Spend": 96,
+                "Audio_activity": 172.8
+              },
+              {
+                "Spend": 97,
+                "Audio_activity": 174.6
+              },
+              {
+                "Spend": 98,
+                "Audio_activity": 176.4
+              },
+              {
+                "Spend": 99,
+                "Audio_activity": 178.20000000000002
+              }
+            ]
+          },
+          "sections_available": [
+            "coefficients",
+            "channel_summary",
+            "channel_map",
+            "mroi_summary",
+            "model_stats",
+            "r_hat",
+            "contributions",
+            "model_config",
+            "response_curves"
+          ]
+        },
+        "dataset": "independent_specifications_v1",
+        "evidence_window": null,
+        "max_response_bytes": null,
+        "allow_recovery_errors": false
+      },
+      "prompt": "The completed saved model is result-example. All data are synthetic. Revenue and spend are GBP. Read saved evidence only; do not fit anything. Can you report historical marginal ROI from this saved model? Explicitly check mroi_periods, return JSON fields available and reason, and explain the scope of any unavailable artefact. Do not fit anything.",
+      "expected": {
+        "available": false,
+        "reason": "fitted_before_mroi_periods"
+      }
+    }
+  ],
+  "reviews": [
+    {
+      "claims": "supported",
+      "claim_checks": [
+        {
+          "claim": "Audio200/80, Cinema182/74, Affiliate78/26; total460 GBP revenue and180 GBP spend; six-place ROI2.555556",
+          "verdict": "supported",
+          "evidence": "Actual returned window summaries independently sum to460 and180;460/180 rounds correctly. Per-channel ratios2.5,2.459459 and3.0 are correct to displayed precision."
+        },
+        {
+          "claim": "Inclusive10-24 March2026, exact saved model, ratio of sums rather than mean channel ratios",
+          "verdict": "supported",
+          "evidence": "Returned meta.window, meta.aggregation and channel_map establish temporal and identity basis. A simple mean of those channel ratios differs from total ROI."
+        },
+        {
+          "claim": "No fit; synthetic data",
+          "verdict": "supported",
+          "evidence": "Only one saved-result read occurred; task identifies data as synthetic. Rep0 native granularity is present in metadata."
+        }
+      ],
+      "format_review": "Fenced JSON and extra explanatory fields are reviewed semantically; original automatic scores remain unchanged.",
+      "case": "acceptance_a",
+      "view": "candidate",
+      "repetition": 0,
+      "supported_answer": true,
+      "rationale": "All material claims supported when read in full against returned evidence, supplied context and public contract; interpretation caveats retained below.",
+      "answer_sha256": "eb51797a5c6b259b43ec7959b230ef51355e902b5d44701b32880597c78d7c51",
+      "trajectory_sha256": "619728b0e4319938cadea7284ef5ebe673fe781748d7e3b33fff824911e602da",
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Single selective saved-result request supplies the evidence needed for this question. Bundled map/configuration is proportionate; no repeated, forbidden or unrelated call."
+        }
+      ]
+    },
+    {
+      "claims": "supported",
+      "claim_checks": [
+        {
+          "claim": "Requested model_stats,r_hat; complete status but empty results and sections_available",
+          "verdict": "supported",
+          "evidence": "Exact request and actual returned envelope establish all these statements."
+        },
+        {
+          "claim": "Response contains no R-hat, ESS, divergences or other fit diagnostics",
+          "verdict": "supported",
+          "evidence": "These statements are explicitly about the returned empty response, not a global inventory or a claim that diagnostics were never saved."
+        },
+        {
+          "claim": "Convergence not established; absence proves neither convergence nor failure; present diagnostics and declared policy required",
+          "verdict": "supported",
+          "evidence": "Appropriately bounded inference from missing evidence; complete status is not treated as convergence acceptance."
+        }
+      ],
+      "format_review": "not established is a correct semantic equivalent of unknown. Its mismatch with the frozen literal fields is not an explanatory failure.",
+      "case": "acceptance_d",
+      "view": "candidate",
+      "repetition": 0,
+      "supported_answer": true,
+      "rationale": "All material claims supported when read in full against returned evidence, supplied context and public contract; interpretation caveats retained below.",
+      "answer_sha256": "5173a1c870c2dc0d9cf774919ebbe4e36e1c2a6baf124ab46d282de35a1b196c",
+      "trajectory_sha256": "8fe2bf9de77d26eae24a659286c1f2c6eb6aca272da73c6b595b2a0bda8a692c",
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Single selective saved-result request supplies the evidence needed for this question. Bundled map/configuration is proportionate; no repeated, forbidden or unrelated call."
+        }
+      ]
+    },
+    {
+      "claims": "supported",
+      "claim_checks": [
+        {
+          "claim": "Audio200/80, Cinema182/74, Affiliate78/26; total460 GBP revenue and180 GBP spend; six-place ROI2.555556",
+          "verdict": "supported",
+          "evidence": "Actual returned window summaries independently sum to460 and180;460/180 rounds correctly. Per-channel ratios2.5,2.459459 and3.0 are correct to displayed precision."
+        },
+        {
+          "claim": "Inclusive10-24 March2026, exact saved model, ratio of sums rather than mean channel ratios",
+          "verdict": "supported",
+          "evidence": "Returned meta.window, meta.aggregation and channel_map establish temporal and identity basis. A simple mean of those channel ratios differs from total ROI."
+        },
+        {
+          "claim": "No fit; synthetic data",
+          "verdict": "supported",
+          "evidence": "Only one saved-result read occurred; task identifies data as synthetic. Rep0 native granularity is present in metadata."
+        }
+      ],
+      "format_review": "Fenced JSON and extra explanatory fields are reviewed semantically; original automatic scores remain unchanged.",
+      "case": "acceptance_a",
+      "view": "candidate",
+      "repetition": 1,
+      "supported_answer": true,
+      "rationale": "All material claims supported when read in full against returned evidence, supplied context and public contract; interpretation caveats retained below.",
+      "answer_sha256": "13efe5d89d75e68e07a7ee999dd18e644eee646af1f6f4ac1211ba3dea84b5b1",
+      "trajectory_sha256": "619728b0e4319938cadea7284ef5ebe673fe781748d7e3b33fff824911e602da",
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Single selective saved-result request supplies the evidence needed for this question. Bundled map/configuration is proportionate; no repeated, forbidden or unrelated call."
+        }
+      ]
+    },
+    {
+      "claims": "supported",
+      "claim_checks": [
+        {
+          "claim": "Requested model_stats,r_hat; complete status but empty results and sections_available",
+          "verdict": "supported",
+          "evidence": "Exact request and actual returned envelope establish all these statements."
+        },
+        {
+          "claim": "Response contains no R-hat, ESS, divergences or other fit diagnostics",
+          "verdict": "supported",
+          "evidence": "These statements are explicitly about the returned empty response, not a global inventory or a claim that diagnostics were never saved."
+        },
+        {
+          "claim": "Convergence not established; absence proves neither convergence nor failure; present diagnostics and declared policy required",
+          "verdict": "supported",
+          "evidence": "Appropriately bounded inference from missing evidence; complete status is not treated as convergence acceptance."
+        }
+      ],
+      "format_review": "not established is a correct semantic equivalent of unknown. Its mismatch with the frozen literal fields is not an explanatory failure.",
+      "case": "acceptance_d",
+      "view": "candidate",
+      "repetition": 1,
+      "supported_answer": true,
+      "rationale": "All material claims supported when read in full against returned evidence, supplied context and public contract; interpretation caveats retained below.",
+      "answer_sha256": "4870ccb97e024a66cc207ff1e9e4b36ae9dff59a1ce4d4de12923f532cee8655",
+      "trajectory_sha256": "8fe2bf9de77d26eae24a659286c1f2c6eb6aca272da73c6b595b2a0bda8a692c",
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Single selective saved-result request supplies the evidence needed for this question. Bundled map/configuration is proportionate; no repeated, forbidden or unrelated call."
+        }
+      ]
+    },
+    {
+      "claims": "unsupported",
+      "claim_checks": [
+        {
+          "claim": "Headline mean1.8, median1.45,94% HDI0.4-3.1,current spend80 GBP; historical medians0.95/1.2",
+          "verdict": "supported",
+          "evidence": "Every numerical/statistic field appears in returned mroi_summary. Currency is supplied by the user."
+        },
+        {
+          "claim": "Headline at mean active spend is neither historical averaging convention",
+          "verdict": "supported",
+          "evidence": "Explicit operative explanation distinguishes the headline evaluation point, posterior mean/median and historical medians correctly."
+        },
+        {
+          "claim": "Saved results do not say whether current_spend is per period or total",
+          "verdict": "unsupported",
+          "evidence": "Returned spend_convention is mean_active_period; the answer itself correctly defines it as mean spend over active periods. This identifies an average period-spend basis rather than training-window total. The final caveat contradicts available metadata."
+        },
+        {
+          "claim": "No spend unit beyond supplied GBP",
+          "verdict": "supported",
+          "evidence": "No more specific calendar duration is provided; absence of weekly/monthly frequency is a valid limitation, distinct from the false per-period-versus-total caveat."
+        }
+      ],
+      "format_review": "historical_average object quotes the two alternatives rather than false; surrounding No and explicit explanation establish the requested distinction. Failure is the additional metadata caveat, not this shape.",
+      "case": "acceptance_e",
+      "view": "candidate",
+      "repetition": 0,
+      "supported_answer": false,
+      "rationale": "Returned spend_convention is mean_active_period; the answer itself correctly defines it as mean spend over active periods. This identifies an average period-spend basis rather than training-window total. The final caveat contradicts available metadata.",
+      "answer_sha256": "86b74c711ae708ccf5ebb5db3c1e21502d03766bd1025cc25584b38223f442ff",
+      "trajectory_sha256": "47dc7ccfbae73c2b610fa9a2c0730b7f692ffbc9b31a66e5b3b95a010463a9bb",
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Single selective saved-result request supplies the evidence needed for this question. Bundled map/configuration is proportionate; no repeated, forbidden or unrelated call."
+        }
+      ]
+    },
+    {
+      "claims": "supported",
+      "claim_checks": [
+        {
+          "claim": "Headline mean1.8, median1.45,94% HDI0.4-3.1,current80 GBP; alternatives0.95/1.2",
+          "verdict": "supported",
+          "evidence": "Actual mroi_summary fields match every numerical claim and statistic."
+        },
+        {
+          "claim": "Headline posterior mean evaluated at mean active spend; not either historical averaging convention",
+          "verdict": "supported",
+          "evidence": "The answer explicitly distinguishes both evaluation basis and statistic. No historical median is substituted for the requested mean."
+        },
+        {
+          "claim": "Returned saved summary gives no historical-convention intervals",
+          "verdict": "supported",
+          "evidence": "The complete returned mroi_summary includes historical medians but no corresponding historical interval fields. This is scoped to supplied saved evidence."
+        }
+      ],
+      "format_review": "Object in historical_average differs from literal false, but No and complete explanation answer the semantic question unambiguously. Extra channel and explanation fields do not introduce unsupported claims.",
+      "case": "acceptance_e",
+      "view": "candidate",
+      "repetition": 1,
+      "supported_answer": true,
+      "rationale": "All material claims supported when read in full against returned evidence, supplied context and public contract; interpretation caveats retained below.",
+      "answer_sha256": "afcb832ada3818d39d194df1bfb5bb89dfadbb579e4a36ee31c7acb17c0dc3c5",
+      "trajectory_sha256": "47dc7ccfbae73c2b610fa9a2c0730b7f692ffbc9b31a66e5b3b95a010463a9bb",
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Single selective saved-result request supplies the evidence needed for this question. Bundled map/configuration is proportionate; no repeated, forbidden or unrelated call."
+        }
+      ]
+    },
+    {
+      "claims": "supported",
+      "claim_checks": [
+        {
+          "claim": "100+18+12-8+5+3=130; model130; difference0; date1772496000000; KPI units",
+          "verdict": "supported",
+          "evidence": "Every component/date matches returned row. Independent sum closes exactly; public contract defines contributions as KPI space."
+        },
+        {
+          "claim": "Log/removal_lift residual Overlap+3, not a channel; no ranking/share/optimisation",
+          "verdict": "supported",
+          "evidence": "Returned config and public contract support the general interaction residual interpretation. Unlike the prior Haiku answer, this does not identify Audio/Cinema synergy as the cause of its positive sign."
+        },
+        {
+          "claim": "Average Weather reference; -8 modelled contribution; below-reference input or negative fitted effect as unresolved possibilities",
+          "verdict": "supported",
+          "evidence": "User supplies reference and row supplies sign. Full explanation explicitly says evidence does not select a possibility, denies inference of raw weather values and rejects bad-weather inference. Treated consistently with prior acceptance of general qualified possibilities, not as an asserted observation of weather direction."
+        },
+        {
+          "claim": "Supplied multiplier4, no GBP conversion performed and no multiplier in returned results",
+          "verdict": "supported",
+          "evidence": "User supplies multiplier4; actual projected response omits it. Answer preserves KPI reconciliation and does not claim independently established per-channel revenue attribution."
+        }
+      ],
+      "format_review": "Expanded average reference string is a valid paraphrase; exact string mismatch remains in original automatic score.",
+      "case": "acceptance_f",
+      "view": "candidate",
+      "repetition": 0,
+      "supported_answer": true,
+      "rationale": "All material claims supported when read in full against returned evidence, supplied context and public contract; interpretation caveats retained below.",
+      "answer_sha256": "53e8b3025e543d16d68b836096d681ce2e12d91464cdd69f5e39479b3ae5048f",
+      "trajectory_sha256": "997ff64001e155b1c684125d115c338e8cfd985f3104887a89896061687e6131",
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Single selective saved-result request supplies the evidence needed for this question. Bundled map/configuration is proportionate; no repeated, forbidden or unrelated call."
+        }
+      ]
+    },
+    {
+      "claims": "supported",
+      "claim_checks": [
+        {
+          "claim": "All components/date, total130, difference0 and KPI rather than GBP",
+          "verdict": "supported",
+          "evidence": "Actual contribution row and arithmetic support each quoted number and unit."
+        },
+        {
+          "claim": "Log/removal_lift residual+3 closes row, not media to rank/share/optimise",
+          "verdict": "supported",
+          "evidence": "Saved config establishes multiplicative link and removal-lift; contract establishes residual interpretation. No specific pairwise synergy attribution is asserted."
+        },
+        {
+          "claim": "Weather less favourable relative to reference means -8 KPI modelled effect; no raw values inferred",
+          "verdict": "supported",
+          "evidence": "Read in full as the sign of the attributed KPI effect relative to the reference, not a claim of lower raw weather observations. Explicit disclaimer names raw temperature/rain as unknown. This differs from the prior below-average raw-weather claim."
+        },
+        {
+          "claim": "Supplied multiplier4 acknowledged, no conversion, returned results do not state conversion applicability",
+          "verdict": "supported",
+          "evidence": "The answer explicitly acknowledges supplied context. The narrow statement about returned results is literally true: they contain no multiplier metadata. It is an unnecessary caveat, not a denial of the user-supplied multiplier or a fabricated revenue calculation."
+        },
+        {
+          "claim": "Only contributions/model_config returned; channel_map requested but omitted and not advertised",
+          "verdict": "supported",
+          "evidence": "Exact returned results and sections_available support the procedural description."
+        }
+      ],
+      "format_review": "Expanded average reference is semantically correct. Multiplier caveat is retained as a precision issue but does not assert a contradictory value or override supplied context.",
+      "case": "acceptance_f",
+      "view": "candidate",
+      "repetition": 1,
+      "supported_answer": true,
+      "rationale": "All material claims supported when read in full against returned evidence, supplied context and public contract; interpretation caveats retained below.",
+      "answer_sha256": "281ce6cff4136e03835e036d20119a6db4930f26f6d666becb4981b704696429",
+      "trajectory_sha256": "997ff64001e155b1c684125d115c338e8cfd985f3104887a89896061687e6131",
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Single selective saved-result request supplies the evidence needed for this question. Bundled map/configuration is proportionate; no repeated, forbidden or unrelated call."
+        }
+      ]
+    },
+    {
+      "claims": "supported",
+      "claim_checks": [
+        {
+          "claim": "mroi_periods unavailable, exact reason, complete saved model and cannot report historical mROI",
+          "verdict": "supported",
+          "evidence": "Explicit request returns available:false and fitted_before_mroi_periods; envelope status is complete."
+        },
+        {
+          "claim": "Before-artefact explanation and refit route",
+          "verdict": "supported",
+          "evidence": "Faithful interpretation of the supplied public fallback contract, not independent verification of fitting history."
+        },
+        {
+          "claim": "Only historical series affected; other saved results unaffected",
+          "verdict": "supported",
+          "evidence": "Read as scope of this artefact limitation. The same answer explicitly says other sections were not read, does not quote their values or certify their availability, and correctly says ordinary ROI/current mROI cannot substitute."
+        },
+        {
+          "claim": "Historical average ROI/current mROI differ; no estimation or fit; no changes",
+          "verdict": "supported",
+          "evidence": "Public section contracts distinguish these quantities and the single read-only call confirms no fit or mutation."
+        }
+      ],
+      "format_review": "Fenced JSON and extra explanatory fields are reviewed semantically; original automatic scores remain unchanged.",
+      "case": "acceptance_h",
+      "view": "candidate",
+      "repetition": 0,
+      "supported_answer": true,
+      "rationale": "All material claims supported when read in full against returned evidence, supplied context and public contract; interpretation caveats retained below.",
+      "answer_sha256": "562f51efcb8568fa099dd587faba056ab494313d63e437e436149407b0b8fd94",
+      "trajectory_sha256": "080f422a662004d2e8809156c8b69b0ae41b694df56894f02a56141d323268b3",
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Single selective saved-result request supplies the evidence needed for this question. Bundled map/configuration is proportionate; no repeated, forbidden or unrelated call."
+        }
+      ]
+    },
+    {
+      "claims": "supported",
+      "claim_checks": [
+        {
+          "claim": "Exact unavailable fallback and cannot report/infer historical mROI",
+          "verdict": "supported",
+          "evidence": "Actual explicit mroi_periods response supports availability/reason; answer does not invent values."
+        },
+        {
+          "claim": "Pre-feature explanation and new-fit route",
+          "verdict": "supported",
+          "evidence": "Supported as documented fallback interpretation. No independent chronology claim or fit execution is inferred."
+        },
+        {
+          "claim": "Missing historical artefact does not itself remove ordinary ROI/current mROI; other sections should/may be readable",
+          "verdict": "supported",
+          "evidence": "General contract distinction is qualified with should/may. Crucially the answer explicitly states mroi_summary was not requested and its availability cannot be confirmed; no populated artefact is certified."
+        },
+        {
+          "claim": "Current mROI declared spend point, default mean active spend, not historical series; no changes",
+          "verdict": "supported",
+          "evidence": "Public guidance establishes default evaluation point and metric distinctions; trajectory confirms one saved read and no mutation."
+        }
+      ],
+      "format_review": "Fenced JSON and extra explanatory fields are reviewed semantically; original automatic scores remain unchanged.",
+      "case": "acceptance_h",
+      "view": "candidate",
+      "repetition": 1,
+      "supported_answer": true,
+      "rationale": "All material claims supported when read in full against returned evidence, supplied context and public contract; interpretation caveats retained below.",
+      "answer_sha256": "b2dc0bcb358ec6480a66d9b720bc009a1c9860c61e231037a0aee2e8544f56ec",
+      "trajectory_sha256": "080f422a662004d2e8809156c8b69b0ae41b694df56894f02a56141d323268b3",
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Single selective saved-result request supplies the evidence needed for this question. Bundled map/configuration is proportionate; no repeated, forbidden or unrelated call."
+        }
+      ]
+    }
+  ],
+  "trials": [
+    {
+      "case": "acceptance_a",
+      "view": "candidate",
+      "repetition": 0,
+      "passed": false,
+      "outcome": "review",
+      "fact_verdict": "pass",
+      "assertions": {
+        "facts": true,
+        "claims_in_scope": false,
+        "required_evidence": true,
+        "no_errors": true,
+        "no_unauthorised_reads": true,
+        "no_unintended_writes": true,
+        "executed": true
+      },
+      "read_authorisation": {
+        "read_attempts": 1,
+        "actual_reads": 1,
+        "unauthorised_read_attempts": 0,
+        "unauthorised_reads": 0
+      },
+      "trajectory": [
+        {
+          "name": "get_model_results",
+          "arguments": {
+            "model_hash": "result-example",
+            "sections": "channel_summary,channel_map",
+            "start": "2026-03-10",
+            "end": "2026-03-24"
+          },
+          "actual_read": true,
+          "error": false,
+          "result": {
+            "model_hash": "result-example",
+            "status": "complete",
+            "model_type": "mmm",
+            "results": {
+              "channel_summary": [
+                {
+                  "Channel": "Audio_activity",
+                  "Revenue": 200.0,
+                  "Spend": 80.0,
+                  "Sales": 50.0,
+                  "ROI": 2.5
+                },
+                {
+                  "Channel": "Cinema_activity",
+                  "Revenue": 182.0,
+                  "Spend": 74.0,
+                  "Sales": 45.5,
+                  "ROI": 2.4594594594594597
+                },
+                {
+                  "Channel": "Affiliate_activity",
+                  "Revenue": 78.0,
+                  "Spend": 26.0,
+                  "Sales": 19.5,
+                  "ROI": 3.0
+                }
+              ],
+              "channel_map": [
+                {
+                  "channel": "Audio",
+                  "activity_column": "Audio_activity",
+                  "spend_column": "audio_spend"
+                },
+                {
+                  "channel": "Cinema",
+                  "activity_column": "Cinema_activity",
+                  "spend_column": "cinema_spend"
+                },
+                {
+                  "channel": "Affiliate",
+                  "activity_column": "Affiliate_activity",
+                  "spend_column": "affiliate_spend"
+                }
+              ]
+            },
+            "sections_available": [
+              "channel_summary",
+              "channel_map"
+            ],
+            "meta": {
+              "window": {
+                "start": "2026-03-10",
+                "end": "2026-03-24",
+                "granularity": "native"
+              },
+              "aggregation": {
+                "channel_summary": "ROI = sum(Revenue) / sum(Spend); 0 without spend"
+              },
+              "not_windowed": {
+                "channel_map": "not a per-period section"
+              }
+            }
+          },
+          "added_evidence": [
+            "channel_summary"
+          ]
+        }
+      ],
+      "answer": "Revenue = 200 + 182 + 78 = 460. Spend = 80 + 74 + 26 = 180. ROI = 460 / 180 = 2.555556 (rounded to six places).\n\n```json\n{\n  \"revenue\": 460.0,\n  \"spend\": 180.0,\n  \"roi\": 2.555556,\n  \"currency\": \"GBP\",\n  \"explanation\": \"I read the saved channel_summary for result-example for 2026-03-10 to 2026-03-24 inclusive, at native granularity. Revenue is 200 (Audio) + 182 (Cinema) + 78 (Affiliate) = 460 GBP. Spend is 80 + 74 + 26 = 180 GBP. Combined ROI is total revenue divided by total spend, 460 / 180 = 2.5555556, which rounds to 2.555556. I did not average the per-channel ROIs (2.5, 2.459459 and 3.0). That would give a different, incorrect figure. Nothing was fitted.\"\n}\n```",
+      "cost_usd": 0.203584,
+      "stop": "end_turn"
+    },
+    {
+      "case": "acceptance_d",
+      "view": "candidate",
+      "repetition": 0,
+      "passed": false,
+      "outcome": "fail",
+      "fact_verdict": "fail",
+      "assertions": {
+        "facts": false,
+        "claims_in_scope": true,
+        "required_evidence": true,
+        "no_errors": true,
+        "no_unauthorised_reads": true,
+        "no_unintended_writes": true,
+        "executed": true
+      },
+      "read_authorisation": {
+        "read_attempts": 1,
+        "actual_reads": 1,
+        "unauthorised_read_attempts": 0,
+        "unauthorised_reads": 0
+      },
+      "trajectory": [
+        {
+          "name": "get_model_results",
+          "arguments": {
+            "model_hash": "result-example",
+            "sections": "model_stats,r_hat"
+          },
+          "actual_read": true,
+          "error": false,
+          "result": {
+            "model_hash": "result-example",
+            "status": "complete",
+            "model_type": "mmm",
+            "results": {},
+            "sections_available": []
+          },
+          "added_evidence": [
+            "model_stats",
+            "r_hat"
+          ]
+        }
+      ],
+      "answer": "```json\n{\n  \"convergence\": \"not established\",\n  \"reason\": \"I requested model_stats and r_hat for result-example. The model status is complete, but the results object came back empty and sections_available was empty. The response contained no r_hat values, no effective sample sizes, no divergence counts and no other fit diagnostics. A missing diagnostic is not a pass, and it doesn't show failure either. The saved evidence is silent on convergence, so I can't say the model converged. Convergence would need diagnostics that are actually present, judged against a declared quality policy.\"\n}\n```",
+      "cost_usd": 0.20041399999999998,
+      "stop": "end_turn"
+    },
+    {
+      "case": "acceptance_e",
+      "view": "candidate",
+      "repetition": 0,
+      "passed": false,
+      "outcome": "fail",
+      "fact_verdict": "fail",
+      "assertions": {
+        "facts": false,
+        "claims_in_scope": false,
+        "required_evidence": true,
+        "no_errors": true,
+        "no_unauthorised_reads": true,
+        "no_unintended_writes": true,
+        "executed": true
+      },
+      "read_authorisation": {
+        "read_attempts": 1,
+        "actual_reads": 1,
+        "unauthorised_read_attempts": 0,
+        "unauthorised_reads": 0
+      },
+      "trajectory": [
+        {
+          "name": "get_model_results",
+          "arguments": {
+            "model_hash": "result-example",
+            "sections": "mroi_summary,channel_map"
+          },
+          "actual_read": true,
+          "error": false,
+          "result": {
+            "model_hash": "result-example",
+            "status": "complete",
+            "model_type": "mmm",
+            "results": {
+              "channel_map": [
+                {
+                  "channel": "Audio",
+                  "activity_column": "Audio_activity",
+                  "spend_column": "audio_spend"
+                },
+                {
+                  "channel": "Cinema",
+                  "activity_column": "Cinema_activity",
+                  "spend_column": "cinema_spend"
+                },
+                {
+                  "channel": "Affiliate",
+                  "activity_column": "Affiliate_activity",
+                  "spend_column": "affiliate_spend"
+                }
+              ],
+              "mroi_summary": {
+                "hdi_prob": 0.94,
+                "evaluation_point": "current_spend",
+                "spend_convention": "mean_active_period",
+                "conventions_available": [
+                  "allperiods_unweighted",
+                  "spendweighted_active"
+                ],
+                "channels": [
+                  {
+                    "channel": "Audio",
+                    "activity_column": "Audio_activity",
+                    "current_spend": 80,
+                    "mroi_mean": 1.8,
+                    "mroi_median": 1.45,
+                    "mroi_hdi_3": 0.4,
+                    "mroi_hdi_97": 3.1,
+                    "mroi_allperiods_unweighted_median": 0.95,
+                    "mroi_spendweighted_active_median": 1.2
+                  }
+                ]
+              }
+            },
+            "sections_available": [
+              "channel_map",
+              "mroi_summary"
+            ]
+          },
+          "added_evidence": [
+            "mroi_summary"
+          ]
+        }
+      ],
+      "answer": "```json\n{\n  \"channel\": \"Audio\",\n  \"mean\": 1.8,\n  \"lower\": 0.4,\n  \"upper\": 3.1,\n  \"hdi_prob\": 0.94,\n  \"current_spend\": 80,\n  \"historical_average\": {\n    \"allperiods_unweighted_median\": 0.95,\n    \"spendweighted_active_median\": 1.2\n  },\n  \"explanation\": \"No. The headline marginal ROI (mean 1.8, 94% HDI 0.4 to 3.1) is evaluated at current spend of 80 GBP. That is the mean spend over active periods (spend_convention mean_active_period). It is not either saved historical averaging convention. The two saved conventions are separate fields, and both are medians: allperiods_unweighted at 0.95 and spendweighted_active at 1.2. The headline mean (1.8) and its median (1.45) are different statistics from those two medians. The saved results don't state the spend unit beyond the GBP you gave, and they don't say whether current_spend is per period or a total.\"\n}\n```",
+      "cost_usd": 0.202918,
+      "stop": "end_turn"
+    },
+    {
+      "case": "acceptance_f",
+      "view": "candidate",
+      "repetition": 0,
+      "passed": false,
+      "outcome": "fail",
+      "fact_verdict": "fail",
+      "assertions": {
+        "facts": false,
+        "claims_in_scope": false,
+        "required_evidence": true,
+        "no_errors": true,
+        "no_unauthorised_reads": true,
+        "no_unintended_writes": true,
+        "executed": true
+      },
+      "read_authorisation": {
+        "read_attempts": 1,
+        "actual_reads": 1,
+        "unauthorised_read_attempts": 0,
+        "unauthorised_reads": 0
+      },
+      "trajectory": [
+        {
+          "name": "get_model_results",
+          "arguments": {
+            "model_hash": "result-example",
+            "sections": "contributions,model_config,channel_map"
+          },
+          "actual_read": true,
+          "error": false,
+          "result": {
+            "model_hash": "result-example",
+            "status": "complete",
+            "model_type": "mmm",
+            "results": {
+              "contributions": [
+                {
+                  "Date": 1772496000000,
+                  "Base": 100,
+                  "Audio_activity": 18,
+                  "Cinema_activity": 12,
+                  "Weather": -8,
+                  "Seasonality": 5,
+                  "Overlap": 3,
+                  "Model": 130
+                }
+              ],
+              "model_config": {
+                "config": {
+                  "link": "log",
+                  "attribution": "removal_lift"
+                }
+              }
+            },
+            "sections_available": [
+              "contributions",
+              "model_config"
+            ]
+          },
+          "added_evidence": [
+            "contributions",
+            "model_config"
+          ]
+        }
+      ],
+      "answer": "Sum: 100+18+12\u22128+5+3 = 130, matching Model.\n\n```json\n{\n  \"component_sum\": 130,\n  \"model\": 130,\n  \"overlap_is_channel\": false,\n  \"weather_reference\": \"average (from the supplied saved context; not read from raw weather values)\",\n  \"reconciliation\": {\n    \"units\": \"KPI units, not GBP\",\n    \"row_date_epoch_ms\": 1772496000000,\n    \"components\": {\n      \"Base\": 100,\n      \"Audio_activity\": 18,\n      \"Cinema_activity\": 12,\n      \"Weather\": -8,\n      \"Seasonality\": 5,\n      \"Overlap\": 3\n    },\n    \"difference_from_model\": 0\n  },\n  \"explanations\": {\n    \"Overlap\": \"The model uses a log link with removal_lift attribution. Overlap is a reconciliation term. It covers the interaction left over when each driver's effect is removed separately, so the parts add up to the modelled total. It is not a media channel. Do not rank it, give it a share or ROI, or optimise it. Here it is +3 KPI units.\",\n    \"Weather\": \"Weather contributes \u22128 KPI units on this row. Weather uses its average reference, so a negative value means the weather input was below its own average reference in this period, or the fitted effect for it is negative. The saved evidence does not say which. I have not inferred any raw weather value, and the negative sign alone doesn't show that weather was 'bad'.\",\n    \"multiplier_note\": \"The supplied revenue multiplier of 4 would convert KPI units to GBP revenue. I did not apply it, because the reconciliation is in KPI units. The results do not show a multiplier.\"\n  }\n}\n```",
+      "cost_usd": 0.204664,
+      "stop": "end_turn"
+    },
+    {
+      "case": "acceptance_h",
+      "view": "candidate",
+      "repetition": 0,
+      "passed": false,
+      "outcome": "review",
+      "fact_verdict": "pass",
+      "assertions": {
+        "facts": true,
+        "claims_in_scope": false,
+        "required_evidence": true,
+        "no_errors": true,
+        "no_unauthorised_reads": true,
+        "no_unintended_writes": true,
+        "executed": true
+      },
+      "read_authorisation": {
+        "read_attempts": 1,
+        "actual_reads": 1,
+        "unauthorised_read_attempts": 0,
+        "unauthorised_reads": 0
+      },
+      "trajectory": [
+        {
+          "name": "get_model_results",
+          "arguments": {
+            "model_hash": "result-example",
+            "sections": "mroi_periods"
+          },
+          "actual_read": true,
+          "error": false,
+          "result": {
+            "model_hash": "result-example",
+            "status": "complete",
+            "model_type": "mmm",
+            "results": {
+              "mroi_periods": {
+                "available": false,
+                "reason": "fitted_before_mroi_periods"
+              }
+            },
+            "sections_available": [
+              "mroi_periods"
+            ]
+          },
+          "added_evidence": [
+            "mroi_periods"
+          ]
+        }
+      ],
+      "answer": "```json\n{\n  \"model_hash\": \"result-example\",\n  \"section\": \"mroi_periods\",\n  \"available\": false,\n  \"reason\": \"fitted_before_mroi_periods\",\n  \"can_report_historical_marginal_roi\": false,\n  \"scope_of_unavailability\": \"The backend has no mroi_periods artefact for this saved model, because it was fitted before that artefact existed. Only the period-by-period historical marginal ROI series is missing. The model itself is complete, and its other saved results are unaffected. I did not estimate historical marginal ROI from other sections. I did not refit, because a refit would create a different model and reading results should not change anything.\",\n  \"note\": \"Historical marginal ROI is unknown for this model. This is missing evidence, not a zero or a pass. Historical average ROI from coefficients or channel_summary, and current marginal ROI from mroi_summary, are different quantities. Neither substitutes for it, and I did not read them here.\"\n}\n```",
+      "cost_usd": 0.20185799999999998,
+      "stop": "end_turn"
+    },
+    {
+      "case": "acceptance_a",
+      "view": "candidate",
+      "repetition": 1,
+      "passed": false,
+      "outcome": "review",
+      "fact_verdict": "pass",
+      "assertions": {
+        "facts": true,
+        "claims_in_scope": false,
+        "required_evidence": true,
+        "no_errors": true,
+        "no_unauthorised_reads": true,
+        "no_unintended_writes": true,
+        "executed": true
+      },
+      "read_authorisation": {
+        "read_attempts": 1,
+        "actual_reads": 1,
+        "unauthorised_read_attempts": 0,
+        "unauthorised_reads": 0
+      },
+      "trajectory": [
+        {
+          "name": "get_model_results",
+          "arguments": {
+            "model_hash": "result-example",
+            "sections": "channel_summary,channel_map",
+            "start": "2026-03-10",
+            "end": "2026-03-24"
+          },
+          "actual_read": true,
+          "error": false,
+          "result": {
+            "model_hash": "result-example",
+            "status": "complete",
+            "model_type": "mmm",
+            "results": {
+              "channel_summary": [
+                {
+                  "Channel": "Audio_activity",
+                  "Revenue": 200.0,
+                  "Spend": 80.0,
+                  "Sales": 50.0,
+                  "ROI": 2.5
+                },
+                {
+                  "Channel": "Cinema_activity",
+                  "Revenue": 182.0,
+                  "Spend": 74.0,
+                  "Sales": 45.5,
+                  "ROI": 2.4594594594594597
+                },
+                {
+                  "Channel": "Affiliate_activity",
+                  "Revenue": 78.0,
+                  "Spend": 26.0,
+                  "Sales": 19.5,
+                  "ROI": 3.0
+                }
+              ],
+              "channel_map": [
+                {
+                  "channel": "Audio",
+                  "activity_column": "Audio_activity",
+                  "spend_column": "audio_spend"
+                },
+                {
+                  "channel": "Cinema",
+                  "activity_column": "Cinema_activity",
+                  "spend_column": "cinema_spend"
+                },
+                {
+                  "channel": "Affiliate",
+                  "activity_column": "Affiliate_activity",
+                  "spend_column": "affiliate_spend"
+                }
+              ]
+            },
+            "sections_available": [
+              "channel_summary",
+              "channel_map"
+            ],
+            "meta": {
+              "window": {
+                "start": "2026-03-10",
+                "end": "2026-03-24",
+                "granularity": "native"
+              },
+              "aggregation": {
+                "channel_summary": "ROI = sum(Revenue) / sum(Spend); 0 without spend"
+              },
+              "not_windowed": {
+                "channel_map": "not a per-period section"
+              }
+            }
+          },
+          "added_evidence": [
+            "channel_summary"
+          ]
+        }
+      ],
+      "answer": "Revenue = 200 + 182 + 78 = 460. Spend = 80 + 74 + 26 = 180. ROI = 460 / 180 = 2.555556 (rounded to six places).\n\n```json\n{\n  \"revenue\": 460.0,\n  \"spend\": 180.0,\n  \"roi\": 2.555556,\n  \"currency\": \"GBP\",\n  \"explanation\": \"I read the saved channel_summary for result-example over 2026-03-10 to 2026-03-24 inclusive. Revenue is the sum across Audio (200), Cinema (182) and Affiliate (78), which is 460 GBP. Spend is the sum of 80, 74 and 26, which is 180 GBP. ROI is total revenue divided by total spend, 460/180 = 2.555556. It is not the average of the channel ROIs (2.5, 2.459459 and 3.0), which would give a different figure. No model was fitted. The data are synthetic.\"\n}\n```",
+      "cost_usd": 0.203384,
+      "stop": "end_turn"
+    },
+    {
+      "case": "acceptance_d",
+      "view": "candidate",
+      "repetition": 1,
+      "passed": false,
+      "outcome": "fail",
+      "fact_verdict": "fail",
+      "assertions": {
+        "facts": false,
+        "claims_in_scope": true,
+        "required_evidence": true,
+        "no_errors": true,
+        "no_unauthorised_reads": true,
+        "no_unintended_writes": true,
+        "executed": true
+      },
+      "read_authorisation": {
+        "read_attempts": 1,
+        "actual_reads": 1,
+        "unauthorised_read_attempts": 0,
+        "unauthorised_reads": 0
+      },
+      "trajectory": [
+        {
+          "name": "get_model_results",
+          "arguments": {
+            "model_hash": "result-example",
+            "sections": "model_stats,r_hat"
+          },
+          "actual_read": true,
+          "error": false,
+          "result": {
+            "model_hash": "result-example",
+            "status": "complete",
+            "model_type": "mmm",
+            "results": {},
+            "sections_available": []
+          },
+          "added_evidence": [
+            "model_stats",
+            "r_hat"
+          ]
+        }
+      ],
+      "answer": "```json\n{\n  \"convergence\": \"not established\",\n  \"reason\": \"I requested model_stats and r_hat for result-example. The model status is complete, but the results object came back empty and sections_available was empty. The response has no r_hat values, no effective sample sizes, no divergence counts and no fit diagnostics. A missing artifact is not evidence of convergence, and it isn't evidence of failure either. Convergence stays unknown until the diagnostics are available and can be checked against a declared quality policy. A 'complete' status only shows that the fit finished.\"\n}\n```",
+      "cost_usd": 0.200404,
+      "stop": "end_turn"
+    },
+    {
+      "case": "acceptance_e",
+      "view": "candidate",
+      "repetition": 1,
+      "passed": false,
+      "outcome": "fail",
+      "fact_verdict": "fail",
+      "assertions": {
+        "facts": false,
+        "claims_in_scope": false,
+        "required_evidence": true,
+        "no_errors": true,
+        "no_unauthorised_reads": true,
+        "no_unintended_writes": true,
+        "executed": true
+      },
+      "read_authorisation": {
+        "read_attempts": 1,
+        "actual_reads": 1,
+        "unauthorised_read_attempts": 0,
+        "unauthorised_reads": 0
+      },
+      "trajectory": [
+        {
+          "name": "get_model_results",
+          "arguments": {
+            "model_hash": "result-example",
+            "sections": "mroi_summary,channel_map"
+          },
+          "actual_read": true,
+          "error": false,
+          "result": {
+            "model_hash": "result-example",
+            "status": "complete",
+            "model_type": "mmm",
+            "results": {
+              "channel_map": [
+                {
+                  "channel": "Audio",
+                  "activity_column": "Audio_activity",
+                  "spend_column": "audio_spend"
+                },
+                {
+                  "channel": "Cinema",
+                  "activity_column": "Cinema_activity",
+                  "spend_column": "cinema_spend"
+                },
+                {
+                  "channel": "Affiliate",
+                  "activity_column": "Affiliate_activity",
+                  "spend_column": "affiliate_spend"
+                }
+              ],
+              "mroi_summary": {
+                "hdi_prob": 0.94,
+                "evaluation_point": "current_spend",
+                "spend_convention": "mean_active_period",
+                "conventions_available": [
+                  "allperiods_unweighted",
+                  "spendweighted_active"
+                ],
+                "channels": [
+                  {
+                    "channel": "Audio",
+                    "activity_column": "Audio_activity",
+                    "current_spend": 80,
+                    "mroi_mean": 1.8,
+                    "mroi_median": 1.45,
+                    "mroi_hdi_3": 0.4,
+                    "mroi_hdi_97": 3.1,
+                    "mroi_allperiods_unweighted_median": 0.95,
+                    "mroi_spendweighted_active_median": 1.2
+                  }
+                ]
+              }
+            },
+            "sections_available": [
+              "channel_map",
+              "mroi_summary"
+            ]
+          },
+          "added_evidence": [
+            "mroi_summary"
+          ]
+        }
+      ],
+      "answer": "```json\n{\n  \"channel\": \"Audio\",\n  \"mean\": 1.8,\n  \"lower\": 0.4,\n  \"upper\": 3.1,\n  \"hdi_prob\": 0.94,\n  \"current_spend\": 80,\n  \"historical_average\": {\n    \"allperiods_unweighted_median\": 0.95,\n    \"spendweighted_active_median\": 1.2\n  },\n  \"explanation\": \"No. The headline marginal ROI mean of 1.8 (94% HDI 0.4 to 3.1) is evaluated at current spend of 80 GBP. The saved summary defines current spend as the mean spend over active periods (spend_convention mean_active_period). It is a posterior mean. The saved median for the same headline is 1.45. The two saved historical averaging conventions are separate fields. They are allperiods_unweighted (median 0.95) and spendweighted_active (median 1.2). Both are medians, so neither one is the headline mean. The saved results give no interval for either historical convention.\"\n}\n```",
+      "cost_usd": 0.202758,
+      "stop": "end_turn"
+    },
+    {
+      "case": "acceptance_f",
+      "view": "candidate",
+      "repetition": 1,
+      "passed": false,
+      "outcome": "fail",
+      "fact_verdict": "fail",
+      "assertions": {
+        "facts": false,
+        "claims_in_scope": false,
+        "required_evidence": true,
+        "no_errors": true,
+        "no_unauthorised_reads": true,
+        "no_unintended_writes": true,
+        "executed": true
+      },
+      "read_authorisation": {
+        "read_attempts": 1,
+        "actual_reads": 1,
+        "unauthorised_read_attempts": 0,
+        "unauthorised_reads": 0
+      },
+      "trajectory": [
+        {
+          "name": "get_model_results",
+          "arguments": {
+            "model_hash": "result-example",
+            "sections": "contributions,model_config,channel_map"
+          },
+          "actual_read": true,
+          "error": false,
+          "result": {
+            "model_hash": "result-example",
+            "status": "complete",
+            "model_type": "mmm",
+            "results": {
+              "contributions": [
+                {
+                  "Date": 1772496000000,
+                  "Base": 100,
+                  "Audio_activity": 18,
+                  "Cinema_activity": 12,
+                  "Weather": -8,
+                  "Seasonality": 5,
+                  "Overlap": 3,
+                  "Model": 130
+                }
+              ],
+              "model_config": {
+                "config": {
+                  "link": "log",
+                  "attribution": "removal_lift"
+                }
+              }
+            },
+            "sections_available": [
+              "contributions",
+              "model_config"
+            ]
+          },
+          "added_evidence": [
+            "contributions",
+            "model_config"
+          ]
+        }
+      ],
+      "answer": "Sum: 100+18+12\u22128+5+3 = 130, which matches Model.\n\n```json\n{\n  \"component_sum\": 130,\n  \"model\": 130,\n  \"overlap_is_channel\": false,\n  \"weather_reference\": \"average (saved context; raw weather values not inferred)\",\n  \"reconciliation\": {\n    \"unit\": \"KPI units (not GBP)\",\n    \"row_date_epoch_ms\": 1772496000000,\n    \"components\": {\"Base\": 100, \"Audio_activity\": 18, \"Cinema_activity\": 12, \"Weather\": -8, \"Seasonality\": 5, \"Overlap\": 3},\n    \"difference\": 0\n  },\n  \"explanations\": {\n    \"Overlap\": \"The saved model uses a log link with removal_lift attribution. Under that convention Overlap is a reconciliation term. It makes the decomposition add up to Model because channel effects multiply. It is not a media channel, so don't rank it, give it a share, or optimise it. Its +3 here is just the residual that closes the row.\",\n    \"Weather\": \"Weather is a control. Its reference is the average, so the contribution is measured relative to typical conditions. A contribution of -8 KPI units means Weather was less favourable than the average reference on this date, and it lowered the KPI by 8 relative to that baseline. This does not show what the raw weather values were (temperature, rain and so on), and I have not inferred them.\",\n    \"multiplier\": \"The supplied context says the revenue multiplier is 4. The contributions above are KPI units. I have not converted them to GBP revenue, and the results don't say whether the conversion applies to this row.\"\n  },\n  \"not_read\": \"Only the contributions and model_config sections were read. The channel_map section was not returned, and the saved results didn't list it as available.\"\n}\n```",
+      "cost_usd": 0.204934,
+      "stop": "end_turn"
+    },
+    {
+      "case": "acceptance_h",
+      "view": "candidate",
+      "repetition": 1,
+      "passed": false,
+      "outcome": "review",
+      "fact_verdict": "pass",
+      "assertions": {
+        "facts": true,
+        "claims_in_scope": false,
+        "required_evidence": true,
+        "no_errors": true,
+        "no_unauthorised_reads": true,
+        "no_unintended_writes": true,
+        "executed": true
+      },
+      "read_authorisation": {
+        "read_attempts": 1,
+        "actual_reads": 1,
+        "unauthorised_read_attempts": 0,
+        "unauthorised_reads": 0
+      },
+      "trajectory": [
+        {
+          "name": "get_model_results",
+          "arguments": {
+            "model_hash": "result-example",
+            "sections": "mroi_periods"
+          },
+          "actual_read": true,
+          "error": false,
+          "result": {
+            "model_hash": "result-example",
+            "status": "complete",
+            "model_type": "mmm",
+            "results": {
+              "mroi_periods": {
+                "available": false,
+                "reason": "fitted_before_mroi_periods"
+              }
+            },
+            "sections_available": [
+              "mroi_periods"
+            ]
+          },
+          "added_evidence": [
+            "mroi_periods"
+          ]
+        }
+      ],
+      "answer": "```json\n{\n  \"model_hash\": \"result-example\",\n  \"section\": \"mroi_periods\",\n  \"available\": false,\n  \"reason\": \"fitted_before_mroi_periods\",\n  \"can_report_historical_marginal_roi\": false\n}\n```\n\n**Scope of the unavailable artefact:**\n- The `mroi_periods` artefact is missing for this saved model because the model was fitted before that artefact was produced. The backend returned `available: false` with reason `fitted_before_mroi_periods`.\n- Only the period-by-period historical marginal ROI is affected. I can't report it, and I haven't estimated or inferred it.\n- The missing artefact doesn't affect other saved results. Historical average revenue and ROI in `coefficients` and `channel_summary` should still be readable. Those are average ROI figures, not marginal ROI.\n- Current marginal ROI from `mroi_summary` may also still be readable. It is evaluated at a declared spend point, which by default is mean spend over active training periods. I didn't request it, so I can't confirm it is available. It is not a historical series.\n- Getting historical marginal ROI would need a new fit, and you asked me not to fit anything. I made no changes.",
+      "cost_usd": 0.202628,
+      "stop": "end_turn"
+    }
+  ],
+  "historical_evidence_sha256": "9c141d9adb36de44502e220739205e3b05056aa0d8e6b92156fae5b1fb0694e2",
+  "limitations": [
+    "Cases selected for known failures and passing controls, not a representative sample",
+    "Changed model, tokenizer, thinking and output budget; historical comparator not rerun",
+    "Original scores retained; model-selection cases are no longer final acceptance"
+  ]
+}

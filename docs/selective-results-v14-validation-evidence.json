@@ -1,0 +1,1027 @@
+{
+  "protocol": {
+    "purpose": "model_selection_validation",
+    "sessions": 4,
+    "case": "v3_kpi_revenue_basis",
+    "samples": 2,
+    "model_configuration": {
+      "request": {
+        "model": "claude-sonnet-5-5",
+        "max_tokens": 4096,
+        "thinking": {
+          "type": "adaptive"
+        },
+        "output_config": {
+          "effort": "medium"
+        }
+      },
+      "rates_per_million": {
+        "input": 2,
+        "output": 10,
+        "cache_read": 0.2,
+        "cache_write": 4
+      }
+    },
+    "prior_accounted_usd": 66.961418,
+    "cap_usd": 70.961418,
+    "overall_cap_usd": 90,
+    "source_commit": "1368f73b740cbaa04b9b563de86abd77ae874312",
+    "baseline_sha256": "23ecdc75faefc820b8d3002b29a1ea3c9465f9db62474cbb7ba53171f1708420",
+    "candidate_sha256": "977bc38d76924ad355fc7e9950368c971311c09c4f31b7d781711f8039e4e737",
+    "readiness": "All six candidate answers across three predeclared families supported, zero unsupported claims/actual unauthorised reads/writes and no aggregate unnecessary-call increase. Review each family before starting the next. Stop on candidate readiness failure. Cost observed, not acceptance proof; reused cases."
+  },
+  "status": "complete",
+  "raw_sha256": "4cfb52237216f7546b7112784e5490fbd2b9fa004820be7842ae4042e9c1920d",
+  "freeze": {
+    "schema_version": 1,
+    "inputs_sha256": "60906bf507f5f137f680aa9f4a3dad08686505802de9298c16d7c6627ad02d2d",
+    "source_sha256": "9c9f36948b383033ad1806b58db72dbf40dd001b7606b013213fd53becd7de32",
+    "calibration_sha256": "d14028584d64ac7a63e9466953806d6e6df32d7d7f94afca8c7f134154383687"
+  },
+  "configuration": {
+    "mode": "eager",
+    "samples": 2,
+    "case": "v3_kpi_revenue_basis",
+    "role_comparison": null,
+    "results_comparison": true,
+    "results_prompt": "original",
+    "results_robust": true,
+    "results_acceptance": true,
+    "results_selection_validation": true,
+    "results_acceptance_packet": "v3",
+    "model": "claude-sonnet-5-5",
+    "model_configuration": {
+      "request": {
+        "model": "claude-sonnet-5-5",
+        "max_tokens": 4096,
+        "thinking": {
+          "type": "adaptive"
+        },
+        "output_config": {
+          "effort": "medium"
+        }
+      },
+      "rates_per_million": {
+        "input": 2,
+        "output": 10,
+        "cache_read": 0.2,
+        "cache_write": 4
+      }
+    },
+    "results_model_diagnostic": false,
+    "validation_seed": null,
+    "validation_datasets": 0,
+    "result_fixture_version": 2
+  },
+  "budget": {
+    "cap": 70.961418,
+    "prior": 66.961418,
+    "charged": 0.820278,
+    "reserved": 0.0,
+    "model": "claude-sonnet-5-5"
+  },
+  "tasks": [
+    {
+      "case": {
+        "id": "v3_kpi_revenue_basis",
+        "required_sections": [
+          "coefficients"
+        ],
+        "paraphrase": "",
+        "family": "kpi_revenue_basis",
+        "channel": "radio_activity",
+        "allow_prediction": false,
+        "evidence_options": [
+          [
+            "coefficients"
+          ],
+          [
+            "period_revenue_rows"
+          ]
+        ],
+        "fixture": {
+          "model_hash": "synthetic_estuary_v3",
+          "results": {
+            "coefficients": [
+              {
+                "Date": 1738540800000,
+                "Channel": "radio_activity",
+                "Spend": 80,
+                "Revenue": 280,
+                "Sales": 40,
+                "ROI": 3.5
+              },
+              {
+                "Date": 1739145600000,
+                "Channel": "radio_activity",
+                "Spend": 320,
+                "Revenue": 480,
+                "Sales": 60,
+                "ROI": 1.5
+              },
+              {
+                "Date": 1739750400000,
+                "Channel": "radio_activity",
+                "Spend": 200,
+                "Revenue": 440,
+                "Sales": 55,
+                "ROI": 2.2
+              },
+              {
+                "Date": 1738540800000,
+                "Channel": "cinema_activity",
+                "Spend": 120,
+                "Revenue": 180,
+                "Sales": 30,
+                "ROI": 1.5
+              },
+              {
+                "Date": 1739145600000,
+                "Channel": "cinema_activity",
+                "Spend": 180,
+                "Revenue": 450,
+                "Sales": 75,
+                "ROI": 2.5
+              },
+              {
+                "Date": 1739750400000,
+                "Channel": "cinema_activity",
+                "Spend": 300,
+                "Revenue": 600,
+                "Sales": 100,
+                "ROI": 2.0
+              }
+            ],
+            "channel_summary": [
+              {
+                "Channel": "radio_activity",
+                "Spend": 600,
+                "Revenue": 1200,
+                "Sales": 155,
+                "ROI": 2.0
+              },
+              {
+                "Channel": "cinema_activity",
+                "Spend": 600,
+                "Revenue": 1230,
+                "Sales": 205,
+                "ROI": 2.05
+              }
+            ],
+            "channel_map": [
+              {
+                "channel": "Radio",
+                "activity_column": "radio_activity",
+                "spend_column": "radio_spend"
+              },
+              {
+                "channel": "Cinema",
+                "activity_column": "cinema_activity",
+                "spend_column": "cinema_spend"
+              }
+            ],
+            "model_config": {
+              "config": {
+                "link": "log",
+                "attribution": "removal_lift"
+              }
+            },
+            "contributions": [
+              {
+                "Date": 1738540800000,
+                "radio_activity": 40,
+                "cinema_activity": 30,
+                "Base": 100,
+                "Seasonality": 12,
+                "Event Effect": -7,
+                "Overlap": -15,
+                "Model": 160,
+                "Fit Actual": 162,
+                "Actual": 162
+              }
+            ],
+            "mroi_summary": {
+              "channels": [
+                {
+                  "channel": "radio_activity",
+                  "current_spend": 200,
+                  "mroi_mean": 1.75,
+                  "mroi_median": 1.6,
+                  "mroi_hdi_3": 0.7,
+                  "mroi_hdi_97": 2.8
+                }
+              ]
+            },
+            "mroi_periods": {
+              "available": true,
+              "hdi_prob": 0.94,
+              "evaluation_point": "historical_period_spend",
+              "rows": [
+                {
+                  "channel": "radio_activity",
+                  "date": "2025-02-03",
+                  "spend": 80,
+                  "mroi_median": 2.6,
+                  "mroi_hdi_3": 1.1,
+                  "mroi_hdi_97": 3.8
+                },
+                {
+                  "channel": "radio_activity",
+                  "date": "2025-02-10",
+                  "spend": 320,
+                  "mroi_median": 0.9,
+                  "mroi_hdi_3": 0.2,
+                  "mroi_hdi_97": 1.7
+                },
+                {
+                  "channel": "radio_activity",
+                  "date": "2025-02-17",
+                  "spend": 200,
+                  "mroi_median": 1.4,
+                  "mroi_hdi_3": 0.5,
+                  "mroi_hdi_97": 2.4
+                }
+              ]
+            },
+            "long_run_rollup": {
+              "available": false,
+              "reason": "no_linked_var_model"
+            }
+          }
+        },
+        "dataset": "estuary",
+        "evidence_window": {
+          "start": "2025-02-03",
+          "end": "2025-02-10"
+        },
+        "max_response_bytes": null,
+        "allow_recovery_errors": false,
+        "allowed_result_sections": null
+      },
+      "prompt": "For saved model synthetic_estuary_v3: For radio_activity on 3 and 10 February 2025, give summed Sales and Revenue and the implied Revenue/Sales factor for each date. Would one constant factor reproduce both saved period revenues? Use saved evidence only. Do not refit or change the model. Include the requested explanation in your answer.",
+      "expected": {
+        "sales": 100,
+        "revenue": 760,
+        "first_factor": 7,
+        "second_factor": 8
+      }
+    }
+  ],
+  "reviews": [
+    {
+      "case": "v3_kpi_revenue_basis",
+      "view": "baseline",
+      "repetition": 0,
+      "answer_sha256": "6399470653f2016654a31df3370ac5ddfb1bfffe1afc51be3c9c0d9ce5f68675",
+      "trajectory_sha256": "fcfa351e2ffbdf1ae1d42b02b3a79c41a0ab12dcb36d6cda1aaac5b97ac77103",
+      "claims": "supported",
+      "supported_answer": false,
+      "rationale": "All asserted facts supported; complete only when both requested combined totals are explicitly supplied.",
+      "claim_checks": [
+        {
+          "claim": "Per-date saved values and factors",
+          "verdict": "supported",
+          "evidence": "Actual coefficients:3February Sales40/Revenue280 gives7;10February Sales60/Revenue480 gives8. Dates, channel identity and single-row observations match."
+        },
+        {
+          "claim": "No single constant reproduces both revenues",
+          "verdict": "supported",
+          "evidence": "40k=280 requires7 while60k=480 requires8.7*60=420 not480;8*40=320 not280. No cause of variation inferred."
+        },
+        {
+          "claim": "Contribution cross-check where mentioned",
+          "verdict": "supported",
+          "evidence": "Returned contributions contain3February radio_activity40 only, matching Sales40. No10February contribution row is returned; coefficient Sales60 remains valid evidence."
+        },
+        {
+          "claim": "Requested combined totals",
+          "verdict": "unsupported",
+          "evidence": "Incomplete answer: requested combined Sales100 and Revenue760 are absent. Per-date values are correct but do not answer this requested aggregation. This is not an unsupported factual claim."
+        }
+      ],
+      "format_review": "Equivalent prose, table and JSON formats accepted. Completeness remains separate from factual support; no literal-format failure.",
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "One authorised saved-result read retrieves requested per-date coefficient evidence; bundled cross-check sections are not additional calls."
+        }
+      ]
+    },
+    {
+      "case": "v3_kpi_revenue_basis",
+      "view": "candidate",
+      "repetition": 0,
+      "answer_sha256": "eddc9b67091c59fdb16f5bf61afda3d0117caf0ca8760439d1bfc7a0a3fc573a",
+      "trajectory_sha256": "fcfa351e2ffbdf1ae1d42b02b3a79c41a0ab12dcb36d6cda1aaac5b97ac77103",
+      "claims": "supported",
+      "supported_answer": true,
+      "rationale": "All asserted facts supported; complete only when both requested combined totals are explicitly supplied.",
+      "claim_checks": [
+        {
+          "claim": "Per-date saved values and factors",
+          "verdict": "supported",
+          "evidence": "Actual coefficients:3February Sales40/Revenue280 gives7;10February Sales60/Revenue480 gives8. Dates, channel identity and single-row observations match."
+        },
+        {
+          "claim": "No single constant reproduces both revenues",
+          "verdict": "supported",
+          "evidence": "40k=280 requires7 while60k=480 requires8.7*60=420 not480;8*40=320 not280. No cause of variation inferred."
+        },
+        {
+          "claim": "Contribution cross-check where mentioned",
+          "verdict": "supported",
+          "evidence": "Returned contributions contain3February radio_activity40 only, matching Sales40. No10February contribution row is returned; coefficient Sales60 remains valid evidence."
+        },
+        {
+          "claim": "Requested combined totals",
+          "verdict": "supported",
+          "evidence": "Candidate repetition0 explicitly states summed Sales100 and Revenue760 across both dates, satisfying the request."
+        }
+      ],
+      "format_review": "Equivalent prose, table and JSON formats accepted. Completeness remains separate from factual support; no literal-format failure.",
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "One authorised saved-result read retrieves requested per-date coefficient evidence; bundled cross-check sections are not additional calls."
+        }
+      ]
+    },
+    {
+      "case": "v3_kpi_revenue_basis",
+      "view": "candidate",
+      "repetition": 1,
+      "answer_sha256": "7e155a559e9da2ac2c7729ac876359275fbae3e8be9239785f951ce3d21bfd2f",
+      "trajectory_sha256": "c97406445d809ed4469852f7e6df2f0c1ac2c951c828a7ff8075968f5f409b5d",
+      "claims": "supported",
+      "supported_answer": false,
+      "rationale": "All asserted facts supported; complete only when both requested combined totals are explicitly supplied.",
+      "claim_checks": [
+        {
+          "claim": "Per-date saved values and factors",
+          "verdict": "supported",
+          "evidence": "Actual coefficients:3February Sales40/Revenue280 gives7;10February Sales60/Revenue480 gives8. Dates, channel identity and single-row observations match."
+        },
+        {
+          "claim": "No single constant reproduces both revenues",
+          "verdict": "supported",
+          "evidence": "40k=280 requires7 while60k=480 requires8.7*60=420 not480;8*40=320 not280. No cause of variation inferred."
+        },
+        {
+          "claim": "Contribution cross-check where mentioned",
+          "verdict": "supported",
+          "evidence": "Returned contributions contain3February radio_activity40 only, matching Sales40. No10February contribution row is returned; coefficient Sales60 remains valid evidence."
+        },
+        {
+          "claim": "Requested combined totals",
+          "verdict": "unsupported",
+          "evidence": "Incomplete answer: requested combined Sales100 and Revenue760 are absent. Per-date values are correct but do not answer this requested aggregation. This is not an unsupported factual claim."
+        }
+      ],
+      "format_review": "Equivalent prose, table and JSON formats accepted. Completeness remains separate from factual support; no literal-format failure.",
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "One authorised saved-result read retrieves requested per-date coefficient evidence; bundled cross-check sections are not additional calls."
+        }
+      ]
+    },
+    {
+      "case": "v3_kpi_revenue_basis",
+      "view": "baseline",
+      "repetition": 1,
+      "answer_sha256": "19780925fbe6de109a182efd5f543568956df97fc5cfb6b54db486a985fddbb5",
+      "trajectory_sha256": "fcfa351e2ffbdf1ae1d42b02b3a79c41a0ab12dcb36d6cda1aaac5b97ac77103",
+      "claims": "supported",
+      "supported_answer": false,
+      "rationale": "All asserted facts supported; complete only when both requested combined totals are explicitly supplied.",
+      "claim_checks": [
+        {
+          "claim": "Per-date saved values and factors",
+          "verdict": "supported",
+          "evidence": "Actual coefficients:3February Sales40/Revenue280 gives7;10February Sales60/Revenue480 gives8. Dates, channel identity and single-row observations match."
+        },
+        {
+          "claim": "No single constant reproduces both revenues",
+          "verdict": "supported",
+          "evidence": "40k=280 requires7 while60k=480 requires8.7*60=420 not480;8*40=320 not280. No cause of variation inferred."
+        },
+        {
+          "claim": "Contribution cross-check where mentioned",
+          "verdict": "supported",
+          "evidence": "Returned contributions contain3February radio_activity40 only, matching Sales40. No10February contribution row is returned; coefficient Sales60 remains valid evidence."
+        },
+        {
+          "claim": "Requested combined totals",
+          "verdict": "unsupported",
+          "evidence": "Incomplete answer: requested combined Sales100 and Revenue760 are absent. Per-date values are correct but do not answer this requested aggregation. This is not an unsupported factual claim."
+        }
+      ],
+      "format_review": "Equivalent prose, table and JSON formats accepted. Completeness remains separate from factual support; no literal-format failure.",
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "One authorised saved-result read retrieves requested per-date coefficient evidence; bundled cross-check sections are not additional calls."
+        }
+      ]
+    }
+  ],
+  "trials": [
+    {
+      "case": "v3_kpi_revenue_basis",
+      "view": "baseline",
+      "repetition": 0,
+      "passed": false,
+      "outcome": "fail",
+      "assertions": {
+        "facts": false,
+        "claims_in_scope": false,
+        "required_evidence": true,
+        "no_errors": true,
+        "no_unauthorised_reads": true,
+        "no_unintended_writes": true,
+        "executed": true
+      },
+      "read_authorisation": {
+        "read_attempts": 1,
+        "actual_reads": 1,
+        "unauthorised_read_attempts": 0,
+        "unauthorised_reads": 0
+      },
+      "trajectory": [
+        {
+          "name": "get_model_results",
+          "arguments": {
+            "model_hash": "synthetic_estuary_v3",
+            "sections": "contributions,coefficients,channel_map",
+            "channels": [
+              "radio_activity"
+            ],
+            "start": "2025-02-03",
+            "end": "2025-02-10"
+          },
+          "actual_read": true,
+          "error": false,
+          "result": {
+            "model_hash": "synthetic_estuary_v3",
+            "results": {
+              "coefficients": [
+                {
+                  "Date": 1738540800000,
+                  "Channel": "radio_activity",
+                  "Spend": 80,
+                  "Revenue": 280,
+                  "Sales": 40,
+                  "ROI": 3.5
+                },
+                {
+                  "Date": 1739145600000,
+                  "Channel": "radio_activity",
+                  "Spend": 320,
+                  "Revenue": 480,
+                  "Sales": 60,
+                  "ROI": 1.5
+                }
+              ],
+              "channel_map": [
+                {
+                  "channel": "Radio",
+                  "activity_column": "radio_activity",
+                  "spend_column": "radio_spend"
+                },
+                {
+                  "channel": "Cinema",
+                  "activity_column": "cinema_activity",
+                  "spend_column": "cinema_spend"
+                }
+              ],
+              "contributions": [
+                {
+                  "Date": 1738540800000,
+                  "radio_activity": 40,
+                  "cinema_activity": 30,
+                  "Base": 100,
+                  "Seasonality": 12,
+                  "Event Effect": -7,
+                  "Overlap": -15,
+                  "Model": 160,
+                  "Fit Actual": 162,
+                  "Actual": 162
+                }
+              ]
+            },
+            "sections_available": [
+              "coefficients",
+              "channel_map",
+              "contributions",
+              "mroi_periods"
+            ],
+            "meta": {
+              "window": {
+                "start": "2025-02-03",
+                "end": "2025-02-10",
+                "granularity": "native"
+              },
+              "aggregation": {
+                "channel_summary": "ROI = sum(Revenue) / sum(Spend); 0 without spend"
+              },
+              "not_windowed": {
+                "channel_map": "not a per-period section"
+              }
+            },
+            "_mcp_selection": {
+              "channels_requested": [
+                "radio_activity"
+              ],
+              "max_grid_points_requested": null,
+              "grid_sampling_applied": false,
+              "sections": {
+                "coefficients": {
+                  "changed": true,
+                  "original_rows": 4,
+                  "returned_rows": 2
+                },
+                "channel_map": {
+                  "changed": false,
+                  "original_rows": 2,
+                  "returned_rows": 2
+                },
+                "contributions": {
+                  "changed": false,
+                  "original_rows": 1,
+                  "returned_rows": 1
+                }
+              },
+              "ambiguous_channel_aliases": {},
+              "unmatched_channel_aliases": [],
+              "channel_match_scope": "filterable_sections_only",
+              "backend_download_bounded": false,
+              "warnings": []
+            }
+          },
+          "added_evidence": [
+            "coefficients",
+            "period_revenue_rows"
+          ]
+        }
+      ],
+      "answer": "```json\n{\n  \"channel\": \"radio_activity\",\n  \"rows\": [\n    {\"date\": \"2025-02-03\", \"Sales\": 40, \"Revenue\": 280, \"Revenue_per_Sales\": 7.0},\n    {\"date\": \"2025-02-10\", \"Sales\": 60, \"Revenue\": 480, \"Revenue_per_Sales\": 8.0}\n  ],\n  \"one_constant_factor_reproduces_both\": false,\n  \"explanation\": \"The factor is Revenue divided by Sales. It is 280/40 = 7.0 on 3 February and 480/60 = 8.0 on 10 February. These two factors differ. A single constant factor k would need 40k = 280 and 60k = 480. The first equation gives k = 7 and the second gives k = 8, so no one value satisfies both. If k = 7, 10 February would be 420, not 480. If k = 8, 3 February would be 320, not 280. The saved results do not say why the factor changes between the two dates.\"\n}\n```",
+      "cost_usd": 0.204068,
+      "stop": "end_turn"
+    },
+    {
+      "case": "v3_kpi_revenue_basis",
+      "view": "candidate",
+      "repetition": 0,
+      "passed": false,
+      "outcome": "fail",
+      "assertions": {
+        "facts": false,
+        "claims_in_scope": false,
+        "required_evidence": true,
+        "no_errors": true,
+        "no_unauthorised_reads": true,
+        "no_unintended_writes": true,
+        "executed": true
+      },
+      "read_authorisation": {
+        "read_attempts": 1,
+        "actual_reads": 1,
+        "unauthorised_read_attempts": 0,
+        "unauthorised_reads": 0
+      },
+      "trajectory": [
+        {
+          "name": "get_model_results",
+          "arguments": {
+            "model_hash": "synthetic_estuary_v3",
+            "sections": "contributions,coefficients,channel_map",
+            "channels": [
+              "radio_activity"
+            ],
+            "start": "2025-02-03",
+            "end": "2025-02-10"
+          },
+          "actual_read": true,
+          "error": false,
+          "result": {
+            "model_hash": "synthetic_estuary_v3",
+            "results": {
+              "coefficients": [
+                {
+                  "Date": 1738540800000,
+                  "Channel": "radio_activity",
+                  "Spend": 80,
+                  "Revenue": 280,
+                  "Sales": 40,
+                  "ROI": 3.5
+                },
+                {
+                  "Date": 1739145600000,
+                  "Channel": "radio_activity",
+                  "Spend": 320,
+                  "Revenue": 480,
+                  "Sales": 60,
+                  "ROI": 1.5
+                }
+              ],
+              "channel_map": [
+                {
+                  "channel": "Radio",
+                  "activity_column": "radio_activity",
+                  "spend_column": "radio_spend"
+                },
+                {
+                  "channel": "Cinema",
+                  "activity_column": "cinema_activity",
+                  "spend_column": "cinema_spend"
+                }
+              ],
+              "contributions": [
+                {
+                  "Date": 1738540800000,
+                  "radio_activity": 40,
+                  "cinema_activity": 30,
+                  "Base": 100,
+                  "Seasonality": 12,
+                  "Event Effect": -7,
+                  "Overlap": -15,
+                  "Model": 160,
+                  "Fit Actual": 162,
+                  "Actual": 162
+                }
+              ]
+            },
+            "sections_available": [
+              "coefficients",
+              "channel_map",
+              "contributions",
+              "mroi_periods"
+            ],
+            "meta": {
+              "window": {
+                "start": "2025-02-03",
+                "end": "2025-02-10",
+                "granularity": "native"
+              },
+              "aggregation": {
+                "channel_summary": "ROI = sum(Revenue) / sum(Spend); 0 without spend"
+              },
+              "not_windowed": {
+                "channel_map": "not a per-period section"
+              }
+            },
+            "_mcp_selection": {
+              "channels_requested": [
+                "radio_activity"
+              ],
+              "max_grid_points_requested": null,
+              "grid_sampling_applied": false,
+              "sections": {
+                "coefficients": {
+                  "changed": true,
+                  "original_rows": 4,
+                  "returned_rows": 2
+                },
+                "channel_map": {
+                  "changed": false,
+                  "original_rows": 2,
+                  "returned_rows": 2
+                },
+                "contributions": {
+                  "changed": false,
+                  "original_rows": 1,
+                  "returned_rows": 1
+                }
+              },
+              "ambiguous_channel_aliases": {},
+              "unmatched_channel_aliases": [],
+              "channel_match_scope": "filterable_sections_only",
+              "backend_download_bounded": false,
+              "warnings": []
+            }
+          },
+          "added_evidence": [
+            "coefficients",
+            "period_revenue_rows"
+          ]
+        }
+      ],
+      "answer": "For radio_activity, the coefficients section has one row for each requested date. The Sales and Revenue figures below come from those rows.\n\n| Date | Sales | Revenue | Revenue/Sales |\n|---|---|---|---|\n| 3 Feb 2025 | 40 | 280 | 7.0 |\n| 10 Feb 2025 | 60 | 480 | 8.0 |\n\nEach date has a single row, so the summed values equal the row values. Across both dates, summed Sales is 100 and summed Revenue is 760.\n\n**No, one constant factor would not reproduce both saved period revenues.** A factor of 7 would give 420 for 10 Feb, against the saved 480. A factor of 8 would give 320 for 3 Feb, against the saved 280. The implied factors differ, so no single constant fits both periods.\n\nThe saved evidence doesn't establish why the factor differs. The contributions section shows radio_activity at 40 on 3 Feb, which matches that date's Sales. It has no 10 Feb row, so it adds nothing for that date.",
+      "cost_usd": 0.205748,
+      "stop": "end_turn"
+    },
+    {
+      "case": "v3_kpi_revenue_basis",
+      "view": "candidate",
+      "repetition": 1,
+      "passed": false,
+      "outcome": "fail",
+      "assertions": {
+        "facts": false,
+        "claims_in_scope": false,
+        "required_evidence": true,
+        "no_errors": true,
+        "no_unauthorised_reads": true,
+        "no_unintended_writes": true,
+        "executed": true
+      },
+      "read_authorisation": {
+        "read_attempts": 1,
+        "actual_reads": 1,
+        "unauthorised_read_attempts": 0,
+        "unauthorised_reads": 0
+      },
+      "trajectory": [
+        {
+          "name": "get_model_results",
+          "arguments": {
+            "model_hash": "synthetic_estuary_v3",
+            "sections": "contributions,coefficients",
+            "channels": [
+              "radio_activity"
+            ],
+            "start": "2025-02-03",
+            "end": "2025-02-10"
+          },
+          "actual_read": true,
+          "error": false,
+          "result": {
+            "model_hash": "synthetic_estuary_v3",
+            "results": {
+              "coefficients": [
+                {
+                  "Date": 1738540800000,
+                  "Channel": "radio_activity",
+                  "Spend": 80,
+                  "Revenue": 280,
+                  "Sales": 40,
+                  "ROI": 3.5
+                },
+                {
+                  "Date": 1739145600000,
+                  "Channel": "radio_activity",
+                  "Spend": 320,
+                  "Revenue": 480,
+                  "Sales": 60,
+                  "ROI": 1.5
+                }
+              ],
+              "contributions": [
+                {
+                  "Date": 1738540800000,
+                  "radio_activity": 40,
+                  "cinema_activity": 30,
+                  "Base": 100,
+                  "Seasonality": 12,
+                  "Event Effect": -7,
+                  "Overlap": -15,
+                  "Model": 160,
+                  "Fit Actual": 162,
+                  "Actual": 162
+                }
+              ]
+            },
+            "sections_available": [
+              "coefficients",
+              "contributions",
+              "mroi_periods"
+            ],
+            "meta": {
+              "window": {
+                "start": "2025-02-03",
+                "end": "2025-02-10",
+                "granularity": "native"
+              },
+              "aggregation": {
+                "channel_summary": "ROI = sum(Revenue) / sum(Spend); 0 without spend"
+              },
+              "not_windowed": {}
+            },
+            "_mcp_selection": {
+              "channels_requested": [
+                "radio_activity"
+              ],
+              "max_grid_points_requested": null,
+              "grid_sampling_applied": false,
+              "sections": {
+                "coefficients": {
+                  "changed": true,
+                  "original_rows": 4,
+                  "returned_rows": 2
+                },
+                "contributions": {
+                  "changed": false,
+                  "original_rows": 1,
+                  "returned_rows": 1
+                }
+              },
+              "ambiguous_channel_aliases": {},
+              "unmatched_channel_aliases": [],
+              "channel_match_scope": "filterable_sections_only",
+              "backend_download_bounded": false,
+              "warnings": []
+            }
+          },
+          "added_evidence": [
+            "coefficients",
+            "period_revenue_rows"
+          ]
+        }
+      ],
+      "answer": "No. One constant factor would not reproduce both saved period revenues. The implied factors differ, 7 on 3 February and 8 on 10 February.\n\n| Date | Sales (summed) | Revenue (summed) | Revenue/Sales |\n|---|---|---|---|\n| 3 Feb 2025 | 40 | 280 | 7.0 |\n| 10 Feb 2025 | 60 | 480 | 8.0 |\n\n- A factor of 7 would give 420 revenue on 10 February, not the saved 480.\n- A factor of 8 would give 320 revenue on 3 February, not the saved 280.\n\nThese figures come from the saved coefficients rows for radio_activity, one row per date, so each date's sum is that single row. The contributions section shows radio_activity at 40 for 3 February, which matches that Sales value. It returned no row for 10 February, so I could not cross-check the 60 there. The saved results don't establish why the factor differs between the dates.",
+      "cost_usd": 0.206194,
+      "stop": "end_turn"
+    },
+    {
+      "case": "v3_kpi_revenue_basis",
+      "view": "baseline",
+      "repetition": 1,
+      "passed": false,
+      "outcome": "fail",
+      "assertions": {
+        "facts": false,
+        "claims_in_scope": false,
+        "required_evidence": true,
+        "no_errors": true,
+        "no_unauthorised_reads": true,
+        "no_unintended_writes": true,
+        "executed": true
+      },
+      "read_authorisation": {
+        "read_attempts": 1,
+        "actual_reads": 1,
+        "unauthorised_read_attempts": 0,
+        "unauthorised_reads": 0
+      },
+      "trajectory": [
+        {
+          "name": "get_model_results",
+          "arguments": {
+            "model_hash": "synthetic_estuary_v3",
+            "sections": "contributions,coefficients,channel_map",
+            "channels": [
+              "radio_activity"
+            ],
+            "start": "2025-02-03",
+            "end": "2025-02-10"
+          },
+          "actual_read": true,
+          "error": false,
+          "result": {
+            "model_hash": "synthetic_estuary_v3",
+            "results": {
+              "coefficients": [
+                {
+                  "Date": 1738540800000,
+                  "Channel": "radio_activity",
+                  "Spend": 80,
+                  "Revenue": 280,
+                  "Sales": 40,
+                  "ROI": 3.5
+                },
+                {
+                  "Date": 1739145600000,
+                  "Channel": "radio_activity",
+                  "Spend": 320,
+                  "Revenue": 480,
+                  "Sales": 60,
+                  "ROI": 1.5
+                }
+              ],
+              "channel_map": [
+                {
+                  "channel": "Radio",
+                  "activity_column": "radio_activity",
+                  "spend_column": "radio_spend"
+                },
+                {
+                  "channel": "Cinema",
+                  "activity_column": "cinema_activity",
+                  "spend_column": "cinema_spend"
+                }
+              ],
+              "contributions": [
+                {
+                  "Date": 1738540800000,
+                  "radio_activity": 40,
+                  "cinema_activity": 30,
+                  "Base": 100,
+                  "Seasonality": 12,
+                  "Event Effect": -7,
+                  "Overlap": -15,
+                  "Model": 160,
+                  "Fit Actual": 162,
+                  "Actual": 162
+                }
+              ]
+            },
+            "sections_available": [
+              "coefficients",
+              "channel_map",
+              "contributions",
+              "mroi_periods"
+            ],
+            "meta": {
+              "window": {
+                "start": "2025-02-03",
+                "end": "2025-02-10",
+                "granularity": "native"
+              },
+              "aggregation": {
+                "channel_summary": "ROI = sum(Revenue) / sum(Spend); 0 without spend"
+              },
+              "not_windowed": {
+                "channel_map": "not a per-period section"
+              }
+            },
+            "_mcp_selection": {
+              "channels_requested": [
+                "radio_activity"
+              ],
+              "max_grid_points_requested": null,
+              "grid_sampling_applied": false,
+              "sections": {
+                "coefficients": {
+                  "changed": true,
+                  "original_rows": 4,
+                  "returned_rows": 2
+                },
+                "channel_map": {
+                  "changed": false,
+                  "original_rows": 2,
+                  "returned_rows": 2
+                },
+                "contributions": {
+                  "changed": false,
+                  "original_rows": 1,
+                  "returned_rows": 1
+                }
+              },
+              "ambiguous_channel_aliases": {},
+              "unmatched_channel_aliases": [],
+              "channel_match_scope": "filterable_sections_only",
+              "backend_download_bounded": false,
+              "warnings": []
+            }
+          },
+          "added_evidence": [
+            "coefficients",
+            "period_revenue_rows"
+          ]
+        }
+      ],
+      "answer": "```json\n{\n  \"channel\": \"radio_activity\",\n  \"dates\": {\n    \"2025-02-03\": {\"Sales\": 40, \"Revenue\": 280, \"Revenue_per_Sales_factor\": 7.0},\n    \"2025-02-10\": {\"Sales\": 60, \"Revenue\": 480, \"Revenue_per_Sales_factor\": 8.0}\n  },\n  \"one_constant_factor_reproduces_both\": false,\n  \"explanation\": \"The saved factor is 280/40 = 7.0 on 3 Feb and 480/60 = 8.0 on 10 Feb. A single constant factor k would need 40k = 280 and 60k = 480. Those give k = 7 and k = 8, so no one value satisfies both. Using 7 would give 420 revenue for 10 Feb, not the saved 480. Using 8 would give 320 for 3 Feb, not the saved 280. Each date has one coefficients row, so the figures are those rows and not sums across several rows. The results do not establish why the factor differs between the two dates.\"\n}\n```",
+      "cost_usd": 0.204268,
+      "stop": "end_turn"
+    }
+  ],
+  "original_automatic_assessment": {
+    "status": "development_only",
+    "accepted": false,
+    "thresholds": {
+      "minimum_task_families": 8,
+      "minimum_cost_saving": 0.05,
+      "quality_noninferiority_margin": 0
+    },
+    "candidate_supported_answer_rate": null,
+    "noncontributing_result_call_delta": 0,
+    "reasons": [
+      "public_development_cases_are_not_independent_acceptance",
+      "thresholds_require_owner_agreement",
+      "fewer_than_eight_task_families",
+      "candidate_quality_or_routing_failures",
+      "unreviewed_claims_prevent_quality_comparison",
+      "quality_noninferiority_not_established",
+      "required_cost_saving_not_established"
+    ],
+    "task_count": 1,
+    "family_count": 1,
+    "dataset_count": 1,
+    "paired_repetitions": 2,
+    "candidate_hard_failures": 2,
+    "quality_delta": null,
+    "sessions_requiring_claim_review": 4,
+    "quality_delta_95_interval": null,
+    "cost_saving_fraction": -0.008830962736569692,
+    "cost_saving_95_interval": null,
+    "bootstrap_seed": 20260929,
+    "bootstrap_resamples": 4000,
+    "weighting": "equal task families; equal cases and paired repetitions within family",
+    "limitations": "Intervals condition on the synthetic datasets and task families used. Datasets are not independently resampled. These intervals do not establish dataset or scientific generalisation."
+  },
+  "guidance_sha256": {
+    "baseline": "23ecdc75faefc820b8d3002b29a1ea3c9465f9db62474cbb7ba53171f1708420",
+    "candidate": "977bc38d76924ad355fc7e9950368c971311c09c4f31b7d781711f8039e4e737"
+  },
+  "purpose": "selection_validation",
+  "accepted": false,
+  "planned_sessions": 12,
+  "completed_sessions": 4,
+  "unrun_sessions": 8,
+  "cumulative_accounted_usd": 67.781696,
+  "limitation": "Original completeness labels subsequently challenged by separately published prompt-scope ambiguity audit; not silently rescored."
+}

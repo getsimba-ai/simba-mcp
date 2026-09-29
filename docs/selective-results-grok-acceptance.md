@@ -1,0 +1,170 @@
+# Grok selective-results acceptance
+
+Status: original run stopped after 27 completed sessions and one partially billed
+session because a local atomic checkpoint replacement failed. Acceptance remains
+unmet. The [original evidence](selective-results-grok-interrupted-evidence.json)
+preserves all completed reviews, the partial charge and a separate interpretation
+audit.
+
+Version 16 guidance passed a fixed, exposed validation on Grok 4.7 with low
+reasoning and 4,096 maximum output tokens. Both arms supported all six answers.
+The candidate made zero unnecessary calls versus one for the version 15 control.
+There were no unsupported claims or unauthorised reads. This establishes readiness
+for an independent comparison, not a causal quality gain or final acceptance.
+The [hash-bound evidence](selective-results-v16-validation-evidence.json) preserves
+all answers, calls and original automatic scores. Earlier failures remain intact.
+
+Guidance and model settings were frozen before the separately authored version 4
+packet was released for integration. Its author had inspected public contracts
+and generic engineering instructions, but not candidate guidance or tuning
+outputs when authoring it. Subsequent integration and independent review inspect
+the adapter and other public fixtures. This is qualified independence, not a
+claim that every participant is blind to earlier results.
+
+## Frozen design
+
+The planned comparison has ten task families across two synthetic datasets,
+six paired repetitions per family, and 120 sessions. Both arms use the same Grok
+configuration, fixtures, tools and questions. The control is the original
+pre-selective guidance. The candidate is version 16. No further guidance tuning
+uses this packet. All six repetitions use the authored questions because the
+packet has no separate paraphrases. Repetitions do not create independent task
+families.
+
+Case order is shuffled within each repetition using seed 20260929 and recorded
+in the frozen configuration. Arm order alternates baseline/candidate and
+candidate/baseline across repetitions. All explanations and calls receive
+independent review, including refused read attempts and actual reads separately.
+
+Apply the unchanged gates: zero unsupported claims or unauthorised reads, at
+least 95% supported candidate answers, no increase in unnecessary calls, lower
+cost and no material quality regression. Use the existing family-weighted paired
+hierarchical bootstrap with 4,000 resamples and seed 20260929. The 95% cost-saving
+interval must have a positive lower bound; the quality-delta interval must have
+a non-negative lower bound. Explicitly set minimum cost saving and the quality
+noninferiority margin to zero. Uncertain findings remain inconclusive.
+
+Complete the fixed schedule without success-based early stopping or adding
+samples after inspecting results. An operational failure stops execution and
+preserves the checkpoint, billed work and unresolved reservation. Any continuation
+needs a separately recorded protocol. Partial execution cannot establish
+acceptance. Preserve original grades separately from semantic adjudication.
+
+The cumulative amount before this stage is US$79.396606, including US$2.672954
+retained unknown allowances. The stage ceiling is US$100 within the owner's
+US$500 total cap. No Sonnet tests or real model fits are authorised for this stage.
+
+## Interpretation limits
+
+Intervals condition on these ten families and two fixed datasets. They do not
+estimate deployment-wide reliability. An all-success quality interval does not
+prove absence of future failures. Automatic caching, output length and latency
+are reported separately; equal model settings do not imply identical per-session
+compute. This evaluates saved-result workflow correctness, not scientific MMM
+validity. Issue #45 stays open and PR #58 stays draft until acceptance; merging
+also requires explicit owner approval.
+
+Integration follows [the engineering objective](engineering.md). The existing
+fixture selector owns synthetic projection, the host command owns scheduling,
+and the existing provider session, spend ledger and reviewed assessment remain
+canonical. Packet preflight repairs and the final source/configuration hashes
+must be recorded before provider execution.
+
+## Prospective preflight repairs
+
+Before any V4 provider session, integration aligned diagnostic identifiers and
+table fields with the preserved contract, moved control references to the
+appropriate configuration level, and applied the established zero-spend ROI
+convention. Requested aggregate answers and authored arithmetic stayed unchanged.
+The canonical fixture selector now supports native actual/model windows and
+week, month and quarter totals for actual/model, coefficients and contributions.
+Ratios are recomputed from sums and predictive intervals omitted. Default and
+bundled reads remain valid. Monday-Sunday weeks are a declared synthetic
+assumption because the public contract does not specify the weekly anchor.
+
+The evidence checker now accepts a task's requested marginal channel without
+requiring unrelated channels. Section-specific contribution windows preserve
+full-period revenue evidence separately. Split channel-map reads accumulate.
+Aggregate questions accept coefficient buckets; individual-period questions
+still require evidence that preserves the requested periods.
+Diagnostics accept either the complete R-hat table or the saved maximum and
+parameter with a coefficient diagnostic. Safe default reads remain permitted;
+forbidden prediction access remains a separate authority failure. Full datasets
+and natural task prompts are preserved, with no answer schemas appended.
+
+These changes are versioned prospectively as fixture 3 and grader 15. Original
+scores are not recalculated. Local arithmetic and actual-dispatch checks verify
+sufficient alternatives and reject wrong windows or missing channel evidence.
+Monthly behaviour follows the public tool contract; this preflight does not
+claim a new live backend verification.
+
+## Recorded interruption and continuation
+
+Source `12c35c4` passed 674 local tests and all four CI jobs before this local
+failure. xAI responses were successful. The original report remains stopped;
+its 27 completed sessions are not rerun. One unfinished baseline session incurred
+US$0.060550 before local persistence failed. All charges are known and retained:
+US$2.828072 for the interrupted stage, US$82.224678 cumulative, zero active
+reservation, and the historical US$2.672954 unknown allowance still included.
+
+An independently reviewed repair retries only the local atomic rename. It does
+not retry provider requests. Explicit continuation requires the original report
+hash, a reviewed source transition, unchanged frozen experiment inputs and the
+full cumulative ledger. Completed successes and failures are skipped equally;
+the incomplete trial restarts as a separately billed attempt. The original
+120-session schedule, cases, model, guidance, rubric and US$100 stage ceiling
+remain fixed. The continuation supplies the 93 unfinished trial identities.
+
+Completed-pair cost statistics will remain separate from interrupted overhead.
+All billed overhead is reported. Before continuation, a conservative sensitivity
+is specified: assign the interrupted US$0.060550 to the candidate in the affected
+pair, even though it was actually billed to the baseline. Lower cost must also
+hold under that allocation before acceptance. No partial response is graded.
+
+One completed candidate answer has a disputed residual-uncertainty sentence.
+The original reviewer classified it as unsupported; a second reviewer found
+material ambiguity rather than a clean supported answer. Both judgements remain
+preserved. This is an outstanding acceptance concern, not a corrected score or
+permission to assume a favourable interpretation.
+
+
+
+## Completed V4 decision
+
+Acceptance failed. The fixed 120-session schedule completed across three preserved
+reports: 27 original sessions, 63 in the first continuation and 30 in the second.
+The first continuation stopped on a network read error. Its unfinished response
+had US$0.116610 billed and a US$1.269328 unresolved request reservation. Both were
+carried forward before the final continuation. No completed trial was rerun and
+no guidance, task, model setting or rubric changed during the comparison.
+
+Independent review found 59/60 supported candidate answers and 50/60 baseline
+answers. Candidate explanations include one unsupported residual-uncertainty
+claim. Baseline explanations include five unsupported claims, one inconclusive
+interval statement and four incomplete answers. The inconclusive baseline claim
+prevents the canonical assessment from establishing quality non-regression and
+its review-dependent rate/call gates. This does not erase the descriptive counts.
+
+Reviewed unnecessary calls were 6 candidate versus 119 baseline. Refused
+unauthorised read attempts were 6 versus 84, with zero actual unauthorised reads
+or unintended writes in either arm. These are separate measures.
+
+Completed-pair estimated cost saving was 29.79%, with a 95% interval from 15.11%
+to 41.25%. The prospective conservative sensitivity allocates US$0.060550 to the
+candidate's attribution case repetition 1, and US$0.116610 plus the entire
+US$1.269328 unknown allowance to its repetition 4. Under that allocation the
+estimated saving is 8.84%, with a 95% interval from -47.14% to 35.94%, therefore
+inconclusive. Actual billing attribution remains unchanged.
+
+Known stage charges total US$11.923688, including US$0.177160 interrupted billed
+overhead. Cumulative accounted spend is US$92.589622, including US$3.942282 retained
+unknown allowances and zero active reservation. The stage stayed below US$100;
+the overall authorised cap remains US$500. No Sonnet tests or real fits resumed.
+
+[Combined evidence](selective-results-grok-acceptance-evidence.json) preserves all
+120 adjudications, original automatic scores, raw hashes and source transitions.
+The earlier [interrupted evidence](selective-results-grok-interrupted-evidence.json)
+remains unchanged. These synthetic findings establish neither scientific MMM
+validity nor production generalisation. PR #58 remains draft and issue #45 open;
+there is no merge approval. If V4 informs further guidance changes, it becomes
+validation evidence for those changes and cannot provide fresh acceptance.

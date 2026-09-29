@@ -1,0 +1,2752 @@
+{
+  "schema_version": 2,
+  "review_revision_note": "Full supplied tool-contract review distinguishes supported older-fit fallback restatement from independent historical verification. Supersedes the first overly strict retrospective classification; frozen grader-8 scores remain unchanged.",
+  "scope": "Explicit retrospective engineering adjudication of all 88 complete development answers and all calls. Original grader-8 records unchanged. Prose and nested fields reviewed with repeated supported details grouped by subject; exceptions individually stated. Not independent human approval.",
+  "source_sha256": "f242e7f84054aa59a652cef3444f14ec21285edea2776e23a3b4bbea76125199",
+  "contract_basis": [
+    "public tool contract",
+    "same-day deployed API verification for window and marginal semantics",
+    "supplied synthetic fixture rows"
+  ],
+  "limits": [
+    "Missing diagnostic/prediction live examples not verified.",
+    "Signed Overlap remains synthetic arithmetic.",
+    "Historical actual-read counts reconstructed from saved dispatch outcomes, not live audit events.",
+    "No guidance tuning follows this review."
+  ],
+  "summary": {
+    "baseline": {
+      "supported_answers": 16,
+      "answers_with_unsupported_claims": 27,
+      "unnecessary_calls": 64,
+      "unauthorised_read_attempts": 43,
+      "unauthorised_reads": 0
+    },
+    "candidate": {
+      "supported_answers": 19,
+      "answers_with_unsupported_claims": 25,
+      "unnecessary_calls": 8,
+      "unauthorised_read_attempts": 1,
+      "unauthorised_reads": 0
+    }
+  },
+  "reviews": [
+    {
+      "trial_index": 0,
+      "case": "result_roi_dataset_0",
+      "view": "baseline",
+      "repetition": 0,
+      "answer_sha256": "eeeeca33bbf46d720cf345768cd91e9c5def89cfc3d79e193fc559546a08ff12",
+      "claims": "supported",
+      "supported_content_and_exceptions": [
+        "Identity, source totals, dates, currency and ratio explanation match the supplied channel map, requested window and ratio of sums."
+      ],
+      "numerical_checks": [
+        {
+          "source": "complete synthetic coefficients",
+          "revenue": 2175.0,
+          "spend": 775.0,
+          "ratio_six_places": 2.806452
+        }
+      ],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "unnecessary",
+          "rationale": "Model identifier and read scope already supplied; refused discovery does not advance this task.",
+          "unauthorised_attempt": true,
+          "actual_read": false
+        },
+        {
+          "index": 1,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": true
+    },
+    {
+      "trial_index": 1,
+      "case": "result_roi_dataset_0",
+      "view": "candidate",
+      "repetition": 0,
+      "answer_sha256": "7b79900bc7920294b0a64c147c002cfa2381f445bde56212de733fc397318496",
+      "claims": "supported",
+      "supported_content_and_exceptions": [
+        "Identity, source totals, dates, currency and ratio explanation match the supplied channel map, requested window and ratio of sums."
+      ],
+      "numerical_checks": [
+        {
+          "source": "complete synthetic coefficients",
+          "revenue": 2175.0,
+          "spend": 775.0,
+          "ratio_six_places": 2.806452
+        }
+      ],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": true
+    },
+    {
+      "trial_index": 2,
+      "case": "result_diagnostics_dataset_0",
+      "view": "baseline",
+      "repetition": 0,
+      "answer_sha256": "083ca318122ae03b2e75e149e21283c8295e60de41a234657caabc0f28479903",
+      "claims": "unsupported",
+      "supported_content_and_exceptions": [
+        "Unknown convergence is appropriate. Claims that the model has no saved sections, or only channel_summary, exceed the projected response. A projected sections_available list is not a global inventory or storage history."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "unnecessary",
+          "rationale": "Model identifier and read scope already supplied; refused discovery does not advance this task.",
+          "unauthorised_attempt": true,
+          "actual_read": false
+        },
+        {
+          "index": 1,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": false
+    },
+    {
+      "trial_index": 3,
+      "case": "result_diagnostics_dataset_0",
+      "view": "candidate",
+      "repetition": 0,
+      "answer_sha256": "b649b6c5fa40f89943cd22bad2b911bcc83d2868fbd20b190851b386f8062410",
+      "claims": "unsupported",
+      "supported_content_and_exceptions": [
+        "Unknown convergence is appropriate. Claims that the model has no saved sections, or only channel_summary, exceed the projected response. A projected sections_available list is not a global inventory or storage history."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        },
+        {
+          "index": 1,
+          "verdict": "unnecessary",
+          "rationale": "Revenue summary cannot establish missing convergence diagnostics.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": false
+    },
+    {
+      "trial_index": 4,
+      "case": "result_marginal_dataset_0",
+      "view": "baseline",
+      "repetition": 0,
+      "answer_sha256": "328346646ef8d4a9e5a10e6810b7b7350af52106fc91e4b0b63961ea288c24fe",
+      "claims": "supported",
+      "supported_content_and_exceptions": [
+        "Saved median, interval probability/bounds, currency and evaluation point match mroi_summary. Interval width is descriptive; no posterior re-estimation is claimed."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "unnecessary",
+          "rationale": "Model identifier and read scope already supplied; refused discovery does not advance this task.",
+          "unauthorised_attempt": true,
+          "actual_read": false
+        },
+        {
+          "index": 1,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": true
+    },
+    {
+      "trial_index": 5,
+      "case": "result_marginal_dataset_0",
+      "view": "candidate",
+      "repetition": 0,
+      "answer_sha256": "b49fc2fec86727b5a752f2f596aeaf11825c06dbe477a21aea501357ec50da5c",
+      "claims": "supported",
+      "supported_content_and_exceptions": [
+        "Saved median, interval probability/bounds, currency and evaluation point match mroi_summary. Interval width is descriptive; no posterior re-estimation is claimed."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": true
+    },
+    {
+      "trial_index": 6,
+      "case": "result_decomposition_dataset_0",
+      "view": "baseline",
+      "repetition": 0,
+      "answer_sha256": "71a6eaa9d47bb7c880581a11f4262b2bbf0c244f6f2bb1f5f4bfd7dcca41c604",
+      "claims": "unsupported",
+      "supported_content_and_exceptions": [
+        "Configuration and non-channel classification are supported. Media-only interaction/synergy explanations overstate a reconciliation residual involving all components; saved configuration does not establish realised scientific interactions."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "unnecessary",
+          "rationale": "Model identifier and read scope already supplied; refused discovery does not advance this task.",
+          "unauthorised_attempt": true,
+          "actual_read": false
+        },
+        {
+          "index": 1,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        },
+        {
+          "index": 2,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": false
+    },
+    {
+      "trial_index": 7,
+      "case": "result_decomposition_dataset_0",
+      "view": "candidate",
+      "repetition": 0,
+      "answer_sha256": "df99778ccbd0498acb54c8ea0f8d04cef06934b0c7cd5af33035c7b49d0ee9c1",
+      "claims": "unsupported",
+      "supported_content_and_exceptions": [
+        "Configuration and non-channel classification are supported. Media-only interaction/synergy explanations overstate a reconciliation residual involving all components; saved configuration does not establish realised scientific interactions."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": false
+    },
+    {
+      "trial_index": 8,
+      "case": "result_old_artifact_dataset_0",
+      "view": "baseline",
+      "repetition": 0,
+      "answer_sha256": "1576776e9b2fb11dcee65719140e084def81a80a493c748248a8137a3966913b",
+      "claims": "supported",
+      "supported_content_and_exceptions": [
+        "Unavailable and fitted_before_mroi_periods match the fallback. The supplied tool contract explicitly describes older fits and refit-to-enable, so faithful restatement is contract-supported, not independent historical verification. Headline mROI availability is separate; exclusions of other causes exceed this contract."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": true
+    },
+    {
+      "trial_index": 9,
+      "case": "result_old_artifact_dataset_0",
+      "view": "candidate",
+      "repetition": 0,
+      "answer_sha256": "48098567daaa74ac533b3735809f552660af1c08be3c18c999c4b4be4064d5c8",
+      "claims": "supported",
+      "supported_content_and_exceptions": [
+        "Unavailable and fitted_before_mroi_periods match the fallback. The supplied tool contract explicitly describes older fits and refit-to-enable, so faithful restatement is contract-supported, not independent historical verification. Headline mROI availability is separate; exclusions of other causes exceed this contract."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": true
+    },
+    {
+      "trial_index": 10,
+      "case": "result_tv_roi_dataset_0",
+      "view": "baseline",
+      "repetition": 0,
+      "answer_sha256": "69e84662f855ab5c6804ba7caf5e9a2235cef1f8f3eb3ad95955131b851b8074",
+      "claims": "supported",
+      "supported_content_and_exceptions": [
+        "Identity, source totals, dates and currency match the source. Revenue/spend interpretation and decimal/percentage expression of that ratio are supported; no net-profit ROI is claimed."
+      ],
+      "numerical_checks": [
+        {
+          "source": "complete synthetic coefficients",
+          "revenue": 550.0,
+          "spend": 440.0,
+          "ratio_six_places": 1.25
+        }
+      ],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "unnecessary",
+          "rationale": "Model identifier and read scope already supplied; refused discovery does not advance this task.",
+          "unauthorised_attempt": true,
+          "actual_read": false
+        },
+        {
+          "index": 1,
+          "verdict": "unnecessary",
+          "rationale": "Bucketing is unnecessary for the requested combined total and unsupported by this declared fixture.",
+          "unauthorised_attempt": false,
+          "actual_read": false
+        },
+        {
+          "index": 2,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": true
+    },
+    {
+      "trial_index": 11,
+      "case": "result_tv_roi_dataset_0",
+      "view": "candidate",
+      "repetition": 0,
+      "answer_sha256": "37fd277b03909680bcd449bd5a3eb5f168c3eb69d0fdd9b5cd923985c31ea052",
+      "claims": "supported",
+      "supported_content_and_exceptions": [
+        "Identity, source totals, dates and currency match the source. Revenue/spend interpretation and decimal/percentage expression of that ratio are supported; no net-profit ROI is claimed."
+      ],
+      "numerical_checks": [
+        {
+          "source": "complete synthetic coefficients",
+          "revenue": 550.0,
+          "spend": 440.0,
+          "ratio_six_places": 1.25
+        }
+      ],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": true
+    },
+    {
+      "trial_index": 12,
+      "case": "result_total_roi_dataset_0",
+      "view": "baseline",
+      "repetition": 0,
+      "answer_sha256": "c057181c19a19902af4868a2fbc23009ac3aca1a40e26946b57bcb407b158307",
+      "claims": "unsupported",
+      "supported_content_and_exceptions": [
+        "Channel revenues/spends and addition are supported. The ratio and requested rounding require the separate arithmetic check below.",
+        "Dataset 0 candidate computes the ratio correctly but falsely calls its unrounded value rounded to six places. Dataset 0 baseline and all dataset 1 answers give incorrect arithmetic."
+      ],
+      "numerical_checks": [
+        {
+          "source": "complete synthetic coefficients",
+          "revenue": 2725.0,
+          "spend": 1215.0,
+          "ratio_six_places": 2.242798
+        }
+      ],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "unnecessary",
+          "rationale": "Model identifier and read scope already supplied; refused discovery does not advance this task.",
+          "unauthorised_attempt": true,
+          "actual_read": false
+        },
+        {
+          "index": 1,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": false
+    },
+    {
+      "trial_index": 13,
+      "case": "result_total_roi_dataset_0",
+      "view": "candidate",
+      "repetition": 0,
+      "answer_sha256": "a06649bad7783d5e207f0fc07e96625c356289286f5ca55a93b153cef3a162a0",
+      "claims": "unsupported",
+      "supported_content_and_exceptions": [
+        "Channel revenues/spends and addition are supported. The ratio and requested rounding require the separate arithmetic check below.",
+        "Dataset 0 candidate computes the ratio correctly but falsely calls its unrounded value rounded to six places. Dataset 0 baseline and all dataset 1 answers give incorrect arithmetic."
+      ],
+      "numerical_checks": [
+        {
+          "source": "complete synthetic coefficients",
+          "revenue": 2725.0,
+          "spend": 1215.0,
+          "ratio_six_places": 2.242798
+        }
+      ],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": false
+    },
+    {
+      "trial_index": 14,
+      "case": "result_period_roi_dataset_0",
+      "view": "baseline",
+      "repetition": 0,
+      "answer_sha256": "055672d2896ce04acd863be627a06f6aaa92ae2d8396e6974d157896701053e8",
+      "claims": "unsupported",
+      "supported_content_and_exceptions": [
+        "Period values, summed totals, weighted ratio and rejection of the unweighted average are supported. Specific date/quotation exceptions are separately recorded.",
+        "Both Unix dates are incorrectly labelled 2024; they are 2025."
+      ],
+      "numerical_checks": [
+        {
+          "source": "complete synthetic coefficients",
+          "revenue": 2175.0,
+          "spend": 775.0,
+          "ratio_six_places": 2.806452
+        }
+      ],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "unnecessary",
+          "rationale": "Model identifier and read scope already supplied; refused discovery does not advance this task.",
+          "unauthorised_attempt": true,
+          "actual_read": false
+        },
+        {
+          "index": 1,
+          "verdict": "unnecessary",
+          "rationale": "Requests the wrong year despite the explicit 2025 question.",
+          "unauthorised_attempt": false,
+          "actual_read": false
+        },
+        {
+          "index": 2,
+          "verdict": "unnecessary",
+          "rationale": "Requests the wrong year despite the explicit 2025 question.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        },
+        {
+          "index": 3,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        },
+        {
+          "index": 4,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": false
+    },
+    {
+      "trial_index": 15,
+      "case": "result_period_roi_dataset_0",
+      "view": "candidate",
+      "repetition": 0,
+      "answer_sha256": "bb352c80526987260515da81fd0cc9a840d983d675db52bc5226dcffb4f5c50c",
+      "claims": "supported",
+      "supported_content_and_exceptions": [
+        "Period values, summed totals, weighted ratio and rejection of the unweighted average are supported. Specific date/quotation exceptions are separately recorded."
+      ],
+      "numerical_checks": [
+        {
+          "source": "complete synthetic coefficients",
+          "revenue": 2175.0,
+          "spend": 775.0,
+          "ratio_six_places": 2.806452
+        }
+      ],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "unnecessary",
+          "rationale": "Requests the wrong year despite the explicit 2025 question.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        },
+        {
+          "index": 1,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": true
+    },
+    {
+      "trial_index": 16,
+      "case": "result_marginal_window_dataset_0",
+      "view": "baseline",
+      "repetition": 0,
+      "answer_sha256": "db8442fdcb3431e5aea032511f49c4ff5ad274d0e5635c612376fc9be8bf0b3b",
+      "claims": "supported",
+      "supported_content_and_exceptions": [
+        "Headline and period-specific statistics differ. The retrieved fallback and supplied tool contract support its older-fit explanation at contract level. This does not remove an available headline estimate. Saved HDI endpoints are not guaranteed percentiles."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "unnecessary",
+          "rationale": "Model identifier and read scope already supplied; refused discovery does not advance this task.",
+          "unauthorised_attempt": true,
+          "actual_read": false
+        },
+        {
+          "index": 1,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": true
+    },
+    {
+      "trial_index": 17,
+      "case": "result_marginal_window_dataset_0",
+      "view": "candidate",
+      "repetition": 0,
+      "answer_sha256": "dc3b6d698861ed4f07e4794b6ac66a6cd79b0e04af4bc49502a3dcfd3fe90844",
+      "claims": "unsupported",
+      "supported_content_and_exceptions": [
+        "Headline and period-specific statistics differ. The retrieved fallback and supplied tool contract support its older-fit explanation at contract level. This does not remove an available headline estimate. Saved HDI endpoints are not guaranteed percentiles.",
+        "HDI endpoints are incorrectly named percentiles."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": false
+    },
+    {
+      "trial_index": 18,
+      "case": "result_overlap_value_dataset_0",
+      "view": "baseline",
+      "repetition": 0,
+      "answer_sha256": "b9d9ef9445a6f36763879b059472e64532ed8a3bc7d15d753cc2925cc531927b",
+      "claims": "unsupported",
+      "supported_content_and_exceptions": [
+        "Returned Overlap number and non-channel status are supported when retrieved. GBP units are not supported: contributions are KPI-space quantities. Media-interaction interpretation exceeds reconciliation evidence.",
+        "The model hash and results-read permission were already supplied. The answer incorrectly asks for both and does not answer."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "unnecessary",
+          "rationale": "Model identifier and read scope already supplied; refused discovery does not advance this task.",
+          "unauthorised_attempt": true,
+          "actual_read": false
+        },
+        {
+          "index": 1,
+          "verdict": "unnecessary",
+          "rationale": "Model identifier and read scope already supplied; refused discovery does not advance this task.",
+          "unauthorised_attempt": true,
+          "actual_read": false
+        }
+      ],
+      "supported_answer": false
+    },
+    {
+      "trial_index": 19,
+      "case": "result_overlap_value_dataset_0",
+      "view": "candidate",
+      "repetition": 0,
+      "answer_sha256": "bf759415d02b2a6acee11c6665f6709f4be1bf05873d5157c9e50f52987e03fc",
+      "claims": "unsupported",
+      "supported_content_and_exceptions": [
+        "Returned Overlap number and non-channel status are supported when retrieved. GBP units are not supported: contributions are KPI-space quantities. Media-interaction interpretation exceeds reconciliation evidence."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": false
+    },
+    {
+      "trial_index": 20,
+      "case": "result_prediction_unavailable_dataset_0",
+      "view": "baseline",
+      "repetition": 0,
+      "answer_sha256": "1a08a1aee15fed49f2b6e3f0a10518d4fa6eed88337493a0deeb8624f8387ea2",
+      "claims": "unsupported",
+      "supported_content_and_exceptions": [
+        "Explicit projection does not return prediction evidence. Assertions that no outputs were saved, that only channel_summary exists, or that fitting/storage history is known are unsupported. No-fit statements agree with the trajectory."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "unnecessary",
+          "rationale": "Unrelated summary/configuration or repeated prediction request adds no availability evidence.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        },
+        {
+          "index": 1,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        },
+        {
+          "index": 2,
+          "verdict": "unnecessary",
+          "rationale": "Model identifier and read scope already supplied; refused discovery does not advance this task.",
+          "unauthorised_attempt": true,
+          "actual_read": false
+        }
+      ],
+      "supported_answer": false
+    },
+    {
+      "trial_index": 21,
+      "case": "result_prediction_unavailable_dataset_0",
+      "view": "candidate",
+      "repetition": 0,
+      "answer_sha256": "1579fcb4f25c5a21c311605dfbac795e32cfd2413ac97bb197af71a7cea735e9",
+      "claims": "unsupported",
+      "supported_content_and_exceptions": [
+        "Explicit projection does not return prediction evidence. Assertions that no outputs were saved, that only channel_summary exists, or that fitting/storage history is known are unsupported. No-fit statements agree with the trajectory."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        },
+        {
+          "index": 1,
+          "verdict": "unnecessary",
+          "rationale": "Unrelated summary/configuration or repeated prediction request adds no availability evidence.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        },
+        {
+          "index": 2,
+          "verdict": "unnecessary",
+          "rationale": "Unrelated summary/configuration or repeated prediction request adds no availability evidence.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": false
+    },
+    {
+      "trial_index": 22,
+      "case": "result_roi_dataset_1",
+      "view": "baseline",
+      "repetition": 0,
+      "answer_sha256": "1e6918eea52a6f1b279ccef5c9ea47595a326a43638f2329b880c84c2f0102f9",
+      "claims": "supported",
+      "supported_content_and_exceptions": [
+        "Identity, source totals, dates, currency and ratio explanation match the supplied channel map, requested window and ratio of sums."
+      ],
+      "numerical_checks": [
+        {
+          "source": "complete synthetic coefficients",
+          "revenue": 2850.0,
+          "spend": 825.0,
+          "ratio_six_places": 3.454545
+        }
+      ],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "unnecessary",
+          "rationale": "Model identifier and read scope already supplied; refused discovery does not advance this task.",
+          "unauthorised_attempt": true,
+          "actual_read": false
+        },
+        {
+          "index": 1,
+          "verdict": "unnecessary",
+          "rationale": "Bucketing is unnecessary for the requested combined total and unsupported by this declared fixture.",
+          "unauthorised_attempt": false,
+          "actual_read": false
+        },
+        {
+          "index": 2,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": true
+    },
+    {
+      "trial_index": 23,
+      "case": "result_roi_dataset_1",
+      "view": "candidate",
+      "repetition": 0,
+      "answer_sha256": "8f4802a50d0d114bb3e4e53b4a611e049fb91212b6a1553a4fb79c19681592d1",
+      "claims": "supported",
+      "supported_content_and_exceptions": [
+        "Identity, source totals, dates, currency and ratio explanation match the supplied channel map, requested window and ratio of sums."
+      ],
+      "numerical_checks": [
+        {
+          "source": "complete synthetic coefficients",
+          "revenue": 2850.0,
+          "spend": 825.0,
+          "ratio_six_places": 3.454545
+        }
+      ],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": true
+    },
+    {
+      "trial_index": 24,
+      "case": "result_diagnostics_dataset_1",
+      "view": "baseline",
+      "repetition": 0,
+      "answer_sha256": "083ca318122ae03b2e75e149e21283c8295e60de41a234657caabc0f28479903",
+      "claims": "unsupported",
+      "supported_content_and_exceptions": [
+        "Unknown convergence is appropriate. Claims that the model has no saved sections, or only channel_summary, exceed the projected response. A projected sections_available list is not a global inventory or storage history."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "unnecessary",
+          "rationale": "Model identifier and read scope already supplied; refused discovery does not advance this task.",
+          "unauthorised_attempt": true,
+          "actual_read": false
+        },
+        {
+          "index": 1,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": false
+    },
+    {
+      "trial_index": 25,
+      "case": "result_diagnostics_dataset_1",
+      "view": "candidate",
+      "repetition": 0,
+      "answer_sha256": "fbd181a684a1e642b0a2e2147c1900adc14d951afda1bfd208e28dc9acc36541",
+      "claims": "unsupported",
+      "supported_content_and_exceptions": [
+        "Unknown convergence is appropriate. Claims that the model has no saved sections, or only channel_summary, exceed the projected response. A projected sections_available list is not a global inventory or storage history."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        },
+        {
+          "index": 1,
+          "verdict": "unnecessary",
+          "rationale": "Revenue summary cannot establish missing convergence diagnostics.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": false
+    },
+    {
+      "trial_index": 26,
+      "case": "result_marginal_dataset_1",
+      "view": "baseline",
+      "repetition": 0,
+      "answer_sha256": "1544e7e3bac269e4f085423e3eacfd81eacc33763c78e564616c361372bd432b",
+      "claims": "supported",
+      "supported_content_and_exceptions": [
+        "Saved median, interval probability/bounds, currency and evaluation point match mroi_summary. Interval width is descriptive; no posterior re-estimation is claimed."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "unnecessary",
+          "rationale": "Model identifier and read scope already supplied; refused discovery does not advance this task.",
+          "unauthorised_attempt": true,
+          "actual_read": false
+        },
+        {
+          "index": 1,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": true
+    },
+    {
+      "trial_index": 27,
+      "case": "result_marginal_dataset_1",
+      "view": "candidate",
+      "repetition": 0,
+      "answer_sha256": "e25d82fcac1ec4d9f080219d7293b602a004e9a1e8cb10b25d889acebb731a9c",
+      "claims": "supported",
+      "supported_content_and_exceptions": [
+        "Saved median, interval probability/bounds, currency and evaluation point match mroi_summary. Interval width is descriptive; no posterior re-estimation is claimed."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": true
+    },
+    {
+      "trial_index": 28,
+      "case": "result_decomposition_dataset_1",
+      "view": "baseline",
+      "repetition": 0,
+      "answer_sha256": "f231a36c2289598447b3119cc32ba65770f660ea4b5437c7448d9e2bbc042642",
+      "claims": "unsupported",
+      "supported_content_and_exceptions": [
+        "Configuration and non-channel classification are supported. Media-only interaction/synergy explanations overstate a reconciliation residual involving all components; saved configuration does not establish realised scientific interactions."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "unnecessary",
+          "rationale": "Model identifier and read scope already supplied; refused discovery does not advance this task.",
+          "unauthorised_attempt": true,
+          "actual_read": false
+        },
+        {
+          "index": 1,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        },
+        {
+          "index": 2,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": false
+    },
+    {
+      "trial_index": 29,
+      "case": "result_decomposition_dataset_1",
+      "view": "candidate",
+      "repetition": 0,
+      "answer_sha256": "4b9a41a76c2ea437210e5de19984308298be068cc029894be950042c38db7c23",
+      "claims": "unsupported",
+      "supported_content_and_exceptions": [
+        "Configuration and non-channel classification are supported. Media-only interaction/synergy explanations overstate a reconciliation residual involving all components; saved configuration does not establish realised scientific interactions."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": false
+    },
+    {
+      "trial_index": 30,
+      "case": "result_old_artifact_dataset_1",
+      "view": "baseline",
+      "repetition": 0,
+      "answer_sha256": "dc43270001373fc2f6943559ca5da60338e6c346a018d7cdcad1fba6169e3aef",
+      "claims": "unsupported",
+      "supported_content_and_exceptions": [
+        "Unavailable and fitted_before_mroi_periods match the fallback. The supplied tool contract explicitly describes older fits and refit-to-enable, so faithful restatement is contract-supported, not independent historical verification. Headline mROI availability is separate; exclusions of other causes exceed this contract.",
+        "The assertion that the backend stores only summary-level mROI overgeneralises this model-specific unavailable artefact."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "unnecessary",
+          "rationale": "Model identifier and read scope already supplied; refused discovery does not advance this task.",
+          "unauthorised_attempt": true,
+          "actual_read": false
+        },
+        {
+          "index": 1,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        },
+        {
+          "index": 2,
+          "verdict": "unnecessary",
+          "rationale": "The explicit unavailable historical artefact already answers the question; unrelated alternatives were not requested.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        },
+        {
+          "index": 3,
+          "verdict": "unnecessary",
+          "rationale": "The explicit unavailable historical artefact already answers the question; unrelated alternatives were not requested.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": false
+    },
+    {
+      "trial_index": 31,
+      "case": "result_old_artifact_dataset_1",
+      "view": "candidate",
+      "repetition": 0,
+      "answer_sha256": "f2d2d4a6c250cffc11fc4cdb91351988a636d4a7af941c10af9de260a947afef",
+      "claims": "unsupported",
+      "supported_content_and_exceptions": [
+        "Unavailable and fitted_before_mroi_periods match the fallback. The supplied tool contract explicitly describes older fits and refit-to-enable, so faithful restatement is contract-supported, not independent historical verification. Headline mROI availability is separate; exclusions of other causes exceed this contract.",
+        "The claim that this excludes a data or configuration issue is not established by the literal fallback."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": false
+    },
+    {
+      "trial_index": 32,
+      "case": "result_tv_roi_dataset_1",
+      "view": "baseline",
+      "repetition": 0,
+      "answer_sha256": "8f6a2703b833a8280a035956fe4c4498765928164f5169e14f16caf9549c3f03",
+      "claims": "supported",
+      "supported_content_and_exceptions": [
+        "Identity, source totals, dates and currency match the source. Revenue/spend interpretation and decimal/percentage expression of that ratio are supported; no net-profit ROI is claimed."
+      ],
+      "numerical_checks": [
+        {
+          "source": "complete synthetic coefficients",
+          "revenue": 2340.0,
+          "spend": 720.0,
+          "ratio_six_places": 3.25
+        }
+      ],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "unnecessary",
+          "rationale": "Model identifier and read scope already supplied; refused discovery does not advance this task.",
+          "unauthorised_attempt": true,
+          "actual_read": false
+        },
+        {
+          "index": 1,
+          "verdict": "unnecessary",
+          "rationale": "Bucketing is unnecessary for the requested combined total and unsupported by this declared fixture.",
+          "unauthorised_attempt": false,
+          "actual_read": false
+        },
+        {
+          "index": 2,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": true
+    },
+    {
+      "trial_index": 33,
+      "case": "result_tv_roi_dataset_1",
+      "view": "candidate",
+      "repetition": 0,
+      "answer_sha256": "3238915562df567ea8481837db52adb50978c00b06c65c7796d717517e681d79",
+      "claims": "supported",
+      "supported_content_and_exceptions": [
+        "Identity, source totals, dates and currency match the source. Revenue/spend interpretation and decimal/percentage expression of that ratio are supported; no net-profit ROI is claimed."
+      ],
+      "numerical_checks": [
+        {
+          "source": "complete synthetic coefficients",
+          "revenue": 2340.0,
+          "spend": 720.0,
+          "ratio_six_places": 3.25
+        }
+      ],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": true
+    },
+    {
+      "trial_index": 34,
+      "case": "result_total_roi_dataset_1",
+      "view": "baseline",
+      "repetition": 0,
+      "answer_sha256": "1d8783a11eda9efa47dc33e5ac15facf9e45a43db1fd6deca994c8a9f63d3e75",
+      "claims": "unsupported",
+      "supported_content_and_exceptions": [
+        "Channel revenues/spends and addition are supported. The ratio and requested rounding require the separate arithmetic check below.",
+        "Dataset 0 candidate computes the ratio correctly but falsely calls its unrounded value rounded to six places. Dataset 0 baseline and all dataset 1 answers give incorrect arithmetic."
+      ],
+      "numerical_checks": [
+        {
+          "source": "complete synthetic coefficients",
+          "revenue": 5190.0,
+          "spend": 1545.0,
+          "ratio_six_places": 3.359223
+        }
+      ],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "unnecessary",
+          "rationale": "Model identifier and read scope already supplied; refused discovery does not advance this task.",
+          "unauthorised_attempt": true,
+          "actual_read": false
+        },
+        {
+          "index": 1,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": false
+    },
+    {
+      "trial_index": 35,
+      "case": "result_total_roi_dataset_1",
+      "view": "candidate",
+      "repetition": 0,
+      "answer_sha256": "ed1aef5ff14bd260f442c3d052302359fbe7b68dabfccd83a219086602eb4b2f",
+      "claims": "unsupported",
+      "supported_content_and_exceptions": [
+        "Channel revenues/spends and addition are supported. The ratio and requested rounding require the separate arithmetic check below.",
+        "Dataset 0 candidate computes the ratio correctly but falsely calls its unrounded value rounded to six places. Dataset 0 baseline and all dataset 1 answers give incorrect arithmetic."
+      ],
+      "numerical_checks": [
+        {
+          "source": "complete synthetic coefficients",
+          "revenue": 5190.0,
+          "spend": 1545.0,
+          "ratio_six_places": 3.359223
+        }
+      ],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": false
+    },
+    {
+      "trial_index": 36,
+      "case": "result_period_roi_dataset_1",
+      "view": "baseline",
+      "repetition": 0,
+      "answer_sha256": "4b3e0c03f8133a671f6a1514c1674f1128154e4c1a8bd4e2d1122d178edac31f",
+      "claims": "supported",
+      "supported_content_and_exceptions": [
+        "Period values, summed totals, weighted ratio and rejection of the unweighted average are supported. Specific date/quotation exceptions are separately recorded."
+      ],
+      "numerical_checks": [
+        {
+          "source": "complete synthetic coefficients",
+          "revenue": 2850.0,
+          "spend": 825.0,
+          "ratio_six_places": 3.454545
+        }
+      ],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "unnecessary",
+          "rationale": "Model identifier and read scope already supplied; refused discovery does not advance this task.",
+          "unauthorised_attempt": true,
+          "actual_read": false
+        },
+        {
+          "index": 1,
+          "verdict": "unnecessary",
+          "rationale": "Requests the wrong year despite the explicit 2025 question.",
+          "unauthorised_attempt": false,
+          "actual_read": false
+        },
+        {
+          "index": 2,
+          "verdict": "unnecessary",
+          "rationale": "Requests the wrong year despite the explicit 2025 question.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        },
+        {
+          "index": 3,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        },
+        {
+          "index": 4,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": true
+    },
+    {
+      "trial_index": 37,
+      "case": "result_period_roi_dataset_1",
+      "view": "candidate",
+      "repetition": 0,
+      "answer_sha256": "bcf08e71a89d922f66e587e6a524325c8ceeda3f575b40512b1d9f31f8148f0d",
+      "claims": "supported",
+      "supported_content_and_exceptions": [
+        "Period values, summed totals, weighted ratio and rejection of the unweighted average are supported. Specific date/quotation exceptions are separately recorded."
+      ],
+      "numerical_checks": [
+        {
+          "source": "complete synthetic coefficients",
+          "revenue": 2850.0,
+          "spend": 825.0,
+          "ratio_six_places": 3.454545
+        }
+      ],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": true
+    },
+    {
+      "trial_index": 38,
+      "case": "result_marginal_window_dataset_1",
+      "view": "baseline",
+      "repetition": 0,
+      "answer_sha256": "4921d968dc8952d103b1fb95143eac1262ec88046ec11f1dc5a8fed01b9a8a17",
+      "claims": "unsupported",
+      "supported_content_and_exceptions": [
+        "Headline and period-specific statistics differ. The retrieved fallback and supplied tool contract support its older-fit explanation at contract level. This does not remove an available headline estimate. Saved HDI endpoints are not guaranteed percentiles.",
+        "Missing historical artefact is incorrectly used to deny the requested available headline median."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "unnecessary",
+          "rationale": "Model identifier and read scope already supplied; refused discovery does not advance this task.",
+          "unauthorised_attempt": true,
+          "actual_read": false
+        },
+        {
+          "index": 1,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": false
+    },
+    {
+      "trial_index": 39,
+      "case": "result_marginal_window_dataset_1",
+      "view": "candidate",
+      "repetition": 0,
+      "answer_sha256": "d58d24139d5cedd49c00be9ce8433888d60ad5d4c01c50b52b18703ee3a2aa78",
+      "claims": "supported",
+      "supported_content_and_exceptions": [
+        "Headline and period-specific statistics differ. The retrieved fallback and supplied tool contract support its older-fit explanation at contract level. This does not remove an available headline estimate. Saved HDI endpoints are not guaranteed percentiles."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": true
+    },
+    {
+      "trial_index": 40,
+      "case": "result_overlap_value_dataset_1",
+      "view": "baseline",
+      "repetition": 0,
+      "answer_sha256": "b9d9ef9445a6f36763879b059472e64532ed8a3bc7d15d753cc2925cc531927b",
+      "claims": "unsupported",
+      "supported_content_and_exceptions": [
+        "Returned Overlap number and non-channel status are supported when retrieved. GBP units are not supported: contributions are KPI-space quantities. Media-interaction interpretation exceeds reconciliation evidence.",
+        "The model hash and results-read permission were already supplied. The answer incorrectly asks for both and does not answer."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "unnecessary",
+          "rationale": "Model identifier and read scope already supplied; refused discovery does not advance this task.",
+          "unauthorised_attempt": true,
+          "actual_read": false
+        },
+        {
+          "index": 1,
+          "verdict": "unnecessary",
+          "rationale": "Model identifier and read scope already supplied; refused discovery does not advance this task.",
+          "unauthorised_attempt": true,
+          "actual_read": false
+        }
+      ],
+      "supported_answer": false
+    },
+    {
+      "trial_index": 41,
+      "case": "result_overlap_value_dataset_1",
+      "view": "candidate",
+      "repetition": 0,
+      "answer_sha256": "6c2bd40bce05555b0f3f3c6f86c69ce7708c930de9c49013291a2d70802a9b59",
+      "claims": "unsupported",
+      "supported_content_and_exceptions": [
+        "Returned Overlap number and non-channel status are supported when retrieved. GBP units are not supported: contributions are KPI-space quantities. Media-interaction interpretation exceeds reconciliation evidence."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": false
+    },
+    {
+      "trial_index": 42,
+      "case": "result_prediction_unavailable_dataset_1",
+      "view": "baseline",
+      "repetition": 0,
+      "answer_sha256": "2768557a0378f0a1163778cbeed5824ea2e9baa846f011230b732fa151809d80",
+      "claims": "unsupported",
+      "supported_content_and_exceptions": [
+        "Explicit projection does not return prediction evidence. Assertions that no outputs were saved, that only channel_summary exists, or that fitting/storage history is known are unsupported. No-fit statements agree with the trajectory."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "unnecessary",
+          "rationale": "Unrelated summary/configuration or repeated prediction request adds no availability evidence.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        },
+        {
+          "index": 1,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": false
+    },
+    {
+      "trial_index": 43,
+      "case": "result_prediction_unavailable_dataset_1",
+      "view": "candidate",
+      "repetition": 0,
+      "answer_sha256": "3eb6ef73354c0dbcd974497232c9ce44187fd767fc926fdecac45d70d13acaf5",
+      "claims": "unsupported",
+      "supported_content_and_exceptions": [
+        "Explicit projection does not return prediction evidence. Assertions that no outputs were saved, that only channel_summary exists, or that fitting/storage history is known are unsupported. No-fit statements agree with the trajectory."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        },
+        {
+          "index": 1,
+          "verdict": "unnecessary",
+          "rationale": "Model identifier and read scope already supplied; refused discovery does not advance this task.",
+          "unauthorised_attempt": true,
+          "actual_read": false
+        }
+      ],
+      "supported_answer": false
+    },
+    {
+      "trial_index": 44,
+      "case": "result_roi_dataset_0",
+      "view": "candidate",
+      "repetition": 1,
+      "answer_sha256": "7b79900bc7920294b0a64c147c002cfa2381f445bde56212de733fc397318496",
+      "claims": "supported",
+      "supported_content_and_exceptions": [
+        "Identity, source totals, dates, currency and ratio explanation match the supplied channel map, requested window and ratio of sums."
+      ],
+      "numerical_checks": [
+        {
+          "source": "complete synthetic coefficients",
+          "revenue": 2175.0,
+          "spend": 775.0,
+          "ratio_six_places": 2.806452
+        }
+      ],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": true
+    },
+    {
+      "trial_index": 45,
+      "case": "result_roi_dataset_0",
+      "view": "baseline",
+      "repetition": 1,
+      "answer_sha256": "00966004bd7de062e12fafd0d55e4596d46a94436dd32bc8acbfd998ab2220ea",
+      "claims": "supported",
+      "supported_content_and_exceptions": [
+        "Identity, source totals, dates, currency and ratio explanation match the supplied channel map, requested window and ratio of sums."
+      ],
+      "numerical_checks": [
+        {
+          "source": "complete synthetic coefficients",
+          "revenue": 2175.0,
+          "spend": 775.0,
+          "ratio_six_places": 2.806452
+        }
+      ],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "unnecessary",
+          "rationale": "Model identifier and read scope already supplied; refused discovery does not advance this task.",
+          "unauthorised_attempt": true,
+          "actual_read": false
+        },
+        {
+          "index": 1,
+          "verdict": "unnecessary",
+          "rationale": "Bucketing is unnecessary for the requested combined total and unsupported by this declared fixture.",
+          "unauthorised_attempt": false,
+          "actual_read": false
+        },
+        {
+          "index": 2,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": true
+    },
+    {
+      "trial_index": 46,
+      "case": "result_diagnostics_dataset_0",
+      "view": "candidate",
+      "repetition": 1,
+      "answer_sha256": "b649b6c5fa40f89943cd22bad2b911bcc83d2868fbd20b190851b386f8062410",
+      "claims": "unsupported",
+      "supported_content_and_exceptions": [
+        "Unknown convergence is appropriate. Claims that the model has no saved sections, or only channel_summary, exceed the projected response. A projected sections_available list is not a global inventory or storage history."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        },
+        {
+          "index": 1,
+          "verdict": "unnecessary",
+          "rationale": "Revenue summary cannot establish missing convergence diagnostics.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": false
+    },
+    {
+      "trial_index": 47,
+      "case": "result_diagnostics_dataset_0",
+      "view": "baseline",
+      "repetition": 1,
+      "answer_sha256": "083ca318122ae03b2e75e149e21283c8295e60de41a234657caabc0f28479903",
+      "claims": "unsupported",
+      "supported_content_and_exceptions": [
+        "Unknown convergence is appropriate. Claims that the model has no saved sections, or only channel_summary, exceed the projected response. A projected sections_available list is not a global inventory or storage history."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "unnecessary",
+          "rationale": "Model identifier and read scope already supplied; refused discovery does not advance this task.",
+          "unauthorised_attempt": true,
+          "actual_read": false
+        },
+        {
+          "index": 1,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": false
+    },
+    {
+      "trial_index": 48,
+      "case": "result_marginal_dataset_0",
+      "view": "candidate",
+      "repetition": 1,
+      "answer_sha256": "f5f8339ee6c117445497715e9b5824ec3b3aa13b70d4f7347c23cb69d6001c25",
+      "claims": "supported",
+      "supported_content_and_exceptions": [
+        "Saved median, interval probability/bounds, currency and evaluation point match mroi_summary. Interval width is descriptive; no posterior re-estimation is claimed."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": true
+    },
+    {
+      "trial_index": 49,
+      "case": "result_marginal_dataset_0",
+      "view": "baseline",
+      "repetition": 1,
+      "answer_sha256": "78dbe76020eaa249f78c23f5f6bd5c287fc82668a9ade3bd8d7ffb5a128b34a5",
+      "claims": "unsupported",
+      "supported_content_and_exceptions": [
+        "Saved median, interval probability/bounds, currency and evaluation point match mroi_summary. Interval width is descriptive; no posterior re-estimation is claimed.",
+        "HDI endpoints are incorrectly equated with 3rd/97th percentiles. The labels do not establish equal tails."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "unnecessary",
+          "rationale": "Model identifier and read scope already supplied; refused discovery does not advance this task.",
+          "unauthorised_attempt": true,
+          "actual_read": false
+        },
+        {
+          "index": 1,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": false
+    },
+    {
+      "trial_index": 50,
+      "case": "result_decomposition_dataset_0",
+      "view": "candidate",
+      "repetition": 1,
+      "answer_sha256": "a5a96d64e4c0883b3df903e803e47daa21bc8cb8e69b5376d171ef3be77d7762",
+      "claims": "unsupported",
+      "supported_content_and_exceptions": [
+        "Configuration and non-channel classification are supported. Media-only interaction/synergy explanations overstate a reconciliation residual involving all components; saved configuration does not establish realised scientific interactions.",
+        "Overlap presence is claimed to confirm synergies and absence to prove additive structure; neither inference follows."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": false
+    },
+    {
+      "trial_index": 51,
+      "case": "result_decomposition_dataset_0",
+      "view": "baseline",
+      "repetition": 1,
+      "answer_sha256": "71a6eaa9d47bb7c880581a11f4262b2bbf0c244f6f2bb1f5f4bfd7dcca41c604",
+      "claims": "unsupported",
+      "supported_content_and_exceptions": [
+        "Configuration and non-channel classification are supported. Media-only interaction/synergy explanations overstate a reconciliation residual involving all components; saved configuration does not establish realised scientific interactions."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "unnecessary",
+          "rationale": "Model identifier and read scope already supplied; refused discovery does not advance this task.",
+          "unauthorised_attempt": true,
+          "actual_read": false
+        },
+        {
+          "index": 1,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        },
+        {
+          "index": 2,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": false
+    },
+    {
+      "trial_index": 52,
+      "case": "result_old_artifact_dataset_0",
+      "view": "candidate",
+      "repetition": 1,
+      "answer_sha256": "4a26c7d633a6f307a27227820d4f88de2173787bb98a101a03b8ee1cd63c0a77",
+      "claims": "supported",
+      "supported_content_and_exceptions": [
+        "Unavailable and fitted_before_mroi_periods match the fallback. The supplied tool contract explicitly describes older fits and refit-to-enable, so faithful restatement is contract-supported, not independent historical verification. Headline mROI availability is separate; exclusions of other causes exceed this contract."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": true
+    },
+    {
+      "trial_index": 53,
+      "case": "result_old_artifact_dataset_0",
+      "view": "baseline",
+      "repetition": 1,
+      "answer_sha256": "c90138a0e06131fc20c3d203bd7e1e536211593bda1c4c9b4dd680234bc381b6",
+      "claims": "supported",
+      "supported_content_and_exceptions": [
+        "Unavailable and fitted_before_mroi_periods match the fallback. The supplied tool contract explicitly describes older fits and refit-to-enable, so faithful restatement is contract-supported, not independent historical verification. Headline mROI availability is separate; exclusions of other causes exceed this contract."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": true
+    },
+    {
+      "trial_index": 54,
+      "case": "result_tv_roi_dataset_0",
+      "view": "candidate",
+      "repetition": 1,
+      "answer_sha256": "37fd277b03909680bcd449bd5a3eb5f168c3eb69d0fdd9b5cd923985c31ea052",
+      "claims": "supported",
+      "supported_content_and_exceptions": [
+        "Identity, source totals, dates and currency match the source. Revenue/spend interpretation and decimal/percentage expression of that ratio are supported; no net-profit ROI is claimed."
+      ],
+      "numerical_checks": [
+        {
+          "source": "complete synthetic coefficients",
+          "revenue": 550.0,
+          "spend": 440.0,
+          "ratio_six_places": 1.25
+        }
+      ],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": true
+    },
+    {
+      "trial_index": 55,
+      "case": "result_tv_roi_dataset_0",
+      "view": "baseline",
+      "repetition": 1,
+      "answer_sha256": "326c2dcff45cb9c6be4b025bbe79bbf543beee4522e988a0925c25eb8a99177a",
+      "claims": "supported",
+      "supported_content_and_exceptions": [
+        "Identity, source totals, dates and currency match the source. Revenue/spend interpretation and decimal/percentage expression of that ratio are supported; no net-profit ROI is claimed."
+      ],
+      "numerical_checks": [
+        {
+          "source": "complete synthetic coefficients",
+          "revenue": 550.0,
+          "spend": 440.0,
+          "ratio_six_places": 1.25
+        }
+      ],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "unnecessary",
+          "rationale": "Model identifier and read scope already supplied; refused discovery does not advance this task.",
+          "unauthorised_attempt": true,
+          "actual_read": false
+        },
+        {
+          "index": 1,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": false
+    },
+    {
+      "trial_index": 56,
+      "case": "result_total_roi_dataset_0",
+      "view": "candidate",
+      "repetition": 1,
+      "answer_sha256": "7a89529db1c98a98d88b3c20e0414ec18e2b1cc8ca48f8e4600c33775af63feb",
+      "claims": "unsupported",
+      "supported_content_and_exceptions": [
+        "Channel revenues/spends and addition are supported. The ratio and requested rounding require the separate arithmetic check below.",
+        "Dataset 0 candidate computes the ratio correctly but falsely calls its unrounded value rounded to six places. Dataset 0 baseline and all dataset 1 answers give incorrect arithmetic."
+      ],
+      "numerical_checks": [
+        {
+          "source": "complete synthetic coefficients",
+          "revenue": 2725.0,
+          "spend": 1215.0,
+          "ratio_six_places": 2.242798
+        }
+      ],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": false
+    },
+    {
+      "trial_index": 57,
+      "case": "result_total_roi_dataset_0",
+      "view": "baseline",
+      "repetition": 1,
+      "answer_sha256": "20a562ff6a0be85f9c868f4d64cb7c32e544130709b8073f4fa278e9e036f36d",
+      "claims": "unsupported",
+      "supported_content_and_exceptions": [
+        "Channel revenues/spends and addition are supported. The ratio and requested rounding require the separate arithmetic check below.",
+        "Dataset 0 candidate computes the ratio correctly but falsely calls its unrounded value rounded to six places. Dataset 0 baseline and all dataset 1 answers give incorrect arithmetic."
+      ],
+      "numerical_checks": [
+        {
+          "source": "complete synthetic coefficients",
+          "revenue": 2725.0,
+          "spend": 1215.0,
+          "ratio_six_places": 2.242798
+        }
+      ],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "unnecessary",
+          "rationale": "Model identifier and read scope already supplied; refused discovery does not advance this task.",
+          "unauthorised_attempt": true,
+          "actual_read": false
+        },
+        {
+          "index": 1,
+          "verdict": "unnecessary",
+          "rationale": "Bucketing is unnecessary for the requested combined total and unsupported by this declared fixture.",
+          "unauthorised_attempt": false,
+          "actual_read": false
+        },
+        {
+          "index": 2,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": false
+    },
+    {
+      "trial_index": 58,
+      "case": "result_period_roi_dataset_0",
+      "view": "candidate",
+      "repetition": 1,
+      "answer_sha256": "b131236d0d9ec715e0ccde048dcccf1cb35922f053639e3df6a04dfb122412eb",
+      "claims": "supported",
+      "supported_content_and_exceptions": [
+        "Period values, summed totals, weighted ratio and rejection of the unweighted average are supported. Specific date/quotation exceptions are separately recorded."
+      ],
+      "numerical_checks": [
+        {
+          "source": "complete synthetic coefficients",
+          "revenue": 2175.0,
+          "spend": 775.0,
+          "ratio_six_places": 2.806452
+        }
+      ],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": true
+    },
+    {
+      "trial_index": 59,
+      "case": "result_period_roi_dataset_0",
+      "view": "baseline",
+      "repetition": 1,
+      "answer_sha256": "055672d2896ce04acd863be627a06f6aaa92ae2d8396e6974d157896701053e8",
+      "claims": "unsupported",
+      "supported_content_and_exceptions": [
+        "Period values, summed totals, weighted ratio and rejection of the unweighted average are supported. Specific date/quotation exceptions are separately recorded.",
+        "Both Unix dates are incorrectly labelled 2024; they are 2025."
+      ],
+      "numerical_checks": [
+        {
+          "source": "complete synthetic coefficients",
+          "revenue": 2175.0,
+          "spend": 775.0,
+          "ratio_six_places": 2.806452
+        }
+      ],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "unnecessary",
+          "rationale": "Model identifier and read scope already supplied; refused discovery does not advance this task.",
+          "unauthorised_attempt": true,
+          "actual_read": false
+        },
+        {
+          "index": 1,
+          "verdict": "unnecessary",
+          "rationale": "Requests the wrong year despite the explicit 2025 question.",
+          "unauthorised_attempt": false,
+          "actual_read": false
+        },
+        {
+          "index": 2,
+          "verdict": "unnecessary",
+          "rationale": "Requests the wrong year despite the explicit 2025 question.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        },
+        {
+          "index": 3,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        },
+        {
+          "index": 4,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": false
+    },
+    {
+      "trial_index": 60,
+      "case": "result_marginal_window_dataset_0",
+      "view": "candidate",
+      "repetition": 1,
+      "answer_sha256": "9b28327ba9ebd36690f33b4c28729265e397687dca4dfbc7c3032555f16440fe",
+      "claims": "unsupported",
+      "supported_content_and_exceptions": [
+        "Headline and period-specific statistics differ. The retrieved fallback and supplied tool contract support its older-fit explanation at contract level. This does not remove an available headline estimate. Saved HDI endpoints are not guaranteed percentiles.",
+        "HDI endpoints are incorrectly named percentiles."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": false
+    },
+    {
+      "trial_index": 61,
+      "case": "result_marginal_window_dataset_0",
+      "view": "baseline",
+      "repetition": 1,
+      "answer_sha256": "089fa5d1f41f312c08c4916bf8ba25661be6428aade4c5c06842a09aa23e465f",
+      "claims": "unsupported",
+      "supported_content_and_exceptions": [
+        "Headline and period-specific statistics differ. The retrieved fallback and supplied tool contract support its older-fit explanation at contract level. This does not remove an available headline estimate. Saved HDI endpoints are not guaranteed percentiles.",
+        "Missing historical artefact is incorrectly used to deny the headline median; model status is also mislabelled with an artefact reason."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "unnecessary",
+          "rationale": "Model identifier and read scope already supplied; refused discovery does not advance this task.",
+          "unauthorised_attempt": true,
+          "actual_read": false
+        },
+        {
+          "index": 1,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        },
+        {
+          "index": 2,
+          "verdict": "unnecessary",
+          "rationale": "Posterior/model_stats cannot substitute for the requested saved headline mROI; the correct section was not requested.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": false
+    },
+    {
+      "trial_index": 62,
+      "case": "result_overlap_value_dataset_0",
+      "view": "candidate",
+      "repetition": 1,
+      "answer_sha256": "36cdb871ede1652d2433f1191f2f39995c03d234713d607dd2ae99a08703a782",
+      "claims": "unsupported",
+      "supported_content_and_exceptions": [
+        "Returned Overlap number and non-channel status are supported when retrieved. GBP units are not supported: contributions are KPI-space quantities. Media-interaction interpretation exceeds reconciliation evidence."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": false
+    },
+    {
+      "trial_index": 63,
+      "case": "result_overlap_value_dataset_0",
+      "view": "baseline",
+      "repetition": 1,
+      "answer_sha256": "b9d9ef9445a6f36763879b059472e64532ed8a3bc7d15d753cc2925cc531927b",
+      "claims": "unsupported",
+      "supported_content_and_exceptions": [
+        "Returned Overlap number and non-channel status are supported when retrieved. GBP units are not supported: contributions are KPI-space quantities. Media-interaction interpretation exceeds reconciliation evidence.",
+        "The model hash and results-read permission were already supplied. The answer incorrectly asks for both and does not answer."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "unnecessary",
+          "rationale": "Model identifier and read scope already supplied; refused discovery does not advance this task.",
+          "unauthorised_attempt": true,
+          "actual_read": false
+        },
+        {
+          "index": 1,
+          "verdict": "unnecessary",
+          "rationale": "Model identifier and read scope already supplied; refused discovery does not advance this task.",
+          "unauthorised_attempt": true,
+          "actual_read": false
+        }
+      ],
+      "supported_answer": false
+    },
+    {
+      "trial_index": 64,
+      "case": "result_prediction_unavailable_dataset_0",
+      "view": "candidate",
+      "repetition": 1,
+      "answer_sha256": "c89779287692a7a85682bdc898b6e45ec4a9c9bbb3c8693cd5bdc0cfdacfee4f",
+      "claims": "unsupported",
+      "supported_content_and_exceptions": [
+        "Explicit projection does not return prediction evidence. Assertions that no outputs were saved, that only channel_summary exists, or that fitting/storage history is known are unsupported. No-fit statements agree with the trajectory."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": false
+    },
+    {
+      "trial_index": 65,
+      "case": "result_prediction_unavailable_dataset_0",
+      "view": "baseline",
+      "repetition": 1,
+      "answer_sha256": "3f784c6579ca08501c8f643e60e99571cec90736481ed6b0febcb216f3a8fc3f",
+      "claims": "unsupported",
+      "supported_content_and_exceptions": [
+        "Explicit projection does not return prediction evidence. Assertions that no outputs were saved, that only channel_summary exists, or that fitting/storage history is known are unsupported. No-fit statements agree with the trajectory."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "unnecessary",
+          "rationale": "Unrelated summary/configuration or repeated prediction request adds no availability evidence.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        },
+        {
+          "index": 1,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        },
+        {
+          "index": 2,
+          "verdict": "unnecessary",
+          "rationale": "Model identifier and read scope already supplied; refused discovery does not advance this task.",
+          "unauthorised_attempt": true,
+          "actual_read": false
+        }
+      ],
+      "supported_answer": false
+    },
+    {
+      "trial_index": 66,
+      "case": "result_roi_dataset_1",
+      "view": "candidate",
+      "repetition": 1,
+      "answer_sha256": "a973204f745449a7c0f88db892f8f09b187252a91ecad349b95f2f280c6a6bd4",
+      "claims": "supported",
+      "supported_content_and_exceptions": [
+        "Identity, source totals, dates, currency and ratio explanation match the supplied channel map, requested window and ratio of sums."
+      ],
+      "numerical_checks": [
+        {
+          "source": "complete synthetic coefficients",
+          "revenue": 2850.0,
+          "spend": 825.0,
+          "ratio_six_places": 3.454545
+        }
+      ],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": true
+    },
+    {
+      "trial_index": 67,
+      "case": "result_roi_dataset_1",
+      "view": "baseline",
+      "repetition": 1,
+      "answer_sha256": "c6b397160558420f07741e8235fb27c72b510aabbac75ce971ab16ce53b8487b",
+      "claims": "supported",
+      "supported_content_and_exceptions": [
+        "Identity, source totals, dates, currency and ratio explanation match the supplied channel map, requested window and ratio of sums."
+      ],
+      "numerical_checks": [
+        {
+          "source": "complete synthetic coefficients",
+          "revenue": 2850.0,
+          "spend": 825.0,
+          "ratio_six_places": 3.454545
+        }
+      ],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "unnecessary",
+          "rationale": "Model identifier and read scope already supplied; refused discovery does not advance this task.",
+          "unauthorised_attempt": true,
+          "actual_read": false
+        },
+        {
+          "index": 1,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": true
+    },
+    {
+      "trial_index": 68,
+      "case": "result_diagnostics_dataset_1",
+      "view": "candidate",
+      "repetition": 1,
+      "answer_sha256": "fbd181a684a1e642b0a2e2147c1900adc14d951afda1bfd208e28dc9acc36541",
+      "claims": "unsupported",
+      "supported_content_and_exceptions": [
+        "Unknown convergence is appropriate. Claims that the model has no saved sections, or only channel_summary, exceed the projected response. A projected sections_available list is not a global inventory or storage history."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        },
+        {
+          "index": 1,
+          "verdict": "unnecessary",
+          "rationale": "Revenue summary cannot establish missing convergence diagnostics.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": false
+    },
+    {
+      "trial_index": 69,
+      "case": "result_diagnostics_dataset_1",
+      "view": "baseline",
+      "repetition": 1,
+      "answer_sha256": "083ca318122ae03b2e75e149e21283c8295e60de41a234657caabc0f28479903",
+      "claims": "unsupported",
+      "supported_content_and_exceptions": [
+        "Unknown convergence is appropriate. Claims that the model has no saved sections, or only channel_summary, exceed the projected response. A projected sections_available list is not a global inventory or storage history."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "unnecessary",
+          "rationale": "Model identifier and read scope already supplied; refused discovery does not advance this task.",
+          "unauthorised_attempt": true,
+          "actual_read": false
+        },
+        {
+          "index": 1,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": false
+    },
+    {
+      "trial_index": 70,
+      "case": "result_marginal_dataset_1",
+      "view": "candidate",
+      "repetition": 1,
+      "answer_sha256": "e25d82fcac1ec4d9f080219d7293b602a004e9a1e8cb10b25d889acebb731a9c",
+      "claims": "supported",
+      "supported_content_and_exceptions": [
+        "Saved median, interval probability/bounds, currency and evaluation point match mroi_summary. Interval width is descriptive; no posterior re-estimation is claimed."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": true
+    },
+    {
+      "trial_index": 71,
+      "case": "result_marginal_dataset_1",
+      "view": "baseline",
+      "repetition": 1,
+      "answer_sha256": "b5830b5d5f1b7d8284e4ab1d21a351a7ace76bd0469d038ad2b93f87e4cf67fc",
+      "claims": "supported",
+      "supported_content_and_exceptions": [
+        "Saved median, interval probability/bounds, currency and evaluation point match mroi_summary. Interval width is descriptive; no posterior re-estimation is claimed."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "unnecessary",
+          "rationale": "Model identifier and read scope already supplied; refused discovery does not advance this task.",
+          "unauthorised_attempt": true,
+          "actual_read": false
+        },
+        {
+          "index": 1,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": true
+    },
+    {
+      "trial_index": 72,
+      "case": "result_decomposition_dataset_1",
+      "view": "candidate",
+      "repetition": 1,
+      "answer_sha256": "e43641365fb7e4cfc937c2c13781ab095ddad9aa926fc8c62fb10fa8c2cf816f",
+      "claims": "unsupported",
+      "supported_content_and_exceptions": [
+        "Configuration and non-channel classification are supported. Media-only interaction/synergy explanations overstate a reconciliation residual involving all components; saved configuration does not establish realised scientific interactions."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": false
+    },
+    {
+      "trial_index": 73,
+      "case": "result_decomposition_dataset_1",
+      "view": "baseline",
+      "repetition": 1,
+      "answer_sha256": "f231a36c2289598447b3119cc32ba65770f660ea4b5437c7448d9e2bbc042642",
+      "claims": "unsupported",
+      "supported_content_and_exceptions": [
+        "Configuration and non-channel classification are supported. Media-only interaction/synergy explanations overstate a reconciliation residual involving all components; saved configuration does not establish realised scientific interactions."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "unnecessary",
+          "rationale": "Model identifier and read scope already supplied; refused discovery does not advance this task.",
+          "unauthorised_attempt": true,
+          "actual_read": false
+        },
+        {
+          "index": 1,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        },
+        {
+          "index": 2,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": false
+    },
+    {
+      "trial_index": 74,
+      "case": "result_old_artifact_dataset_1",
+      "view": "candidate",
+      "repetition": 1,
+      "answer_sha256": "f2d2d4a6c250cffc11fc4cdb91351988a636d4a7af941c10af9de260a947afef",
+      "claims": "unsupported",
+      "supported_content_and_exceptions": [
+        "Unavailable and fitted_before_mroi_periods match the fallback. The supplied tool contract explicitly describes older fits and refit-to-enable, so faithful restatement is contract-supported, not independent historical verification. Headline mROI availability is separate; exclusions of other causes exceed this contract.",
+        "The claim that this excludes a data or configuration issue is not established by the literal fallback."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": false
+    },
+    {
+      "trial_index": 75,
+      "case": "result_old_artifact_dataset_1",
+      "view": "baseline",
+      "repetition": 1,
+      "answer_sha256": "1576776e9b2fb11dcee65719140e084def81a80a493c748248a8137a3966913b",
+      "claims": "supported",
+      "supported_content_and_exceptions": [
+        "Unavailable and fitted_before_mroi_periods match the fallback. The supplied tool contract explicitly describes older fits and refit-to-enable, so faithful restatement is contract-supported, not independent historical verification. Headline mROI availability is separate; exclusions of other causes exceed this contract."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": true
+    },
+    {
+      "trial_index": 76,
+      "case": "result_tv_roi_dataset_1",
+      "view": "candidate",
+      "repetition": 1,
+      "answer_sha256": "3238915562df567ea8481837db52adb50978c00b06c65c7796d717517e681d79",
+      "claims": "supported",
+      "supported_content_and_exceptions": [
+        "Identity, source totals, dates and currency match the source. Revenue/spend interpretation and decimal/percentage expression of that ratio are supported; no net-profit ROI is claimed."
+      ],
+      "numerical_checks": [
+        {
+          "source": "complete synthetic coefficients",
+          "revenue": 2340.0,
+          "spend": 720.0,
+          "ratio_six_places": 3.25
+        }
+      ],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": true
+    },
+    {
+      "trial_index": 77,
+      "case": "result_tv_roi_dataset_1",
+      "view": "baseline",
+      "repetition": 1,
+      "answer_sha256": "442c1e4a54ef984ba5c63b53dcbe4dec7d5ebeb4734f06095fd354d20416d592",
+      "claims": "supported",
+      "supported_content_and_exceptions": [
+        "Identity, source totals, dates and currency match the source. Revenue/spend interpretation and decimal/percentage expression of that ratio are supported; no net-profit ROI is claimed."
+      ],
+      "numerical_checks": [
+        {
+          "source": "complete synthetic coefficients",
+          "revenue": 2340.0,
+          "spend": 720.0,
+          "ratio_six_places": 3.25
+        }
+      ],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "unnecessary",
+          "rationale": "Model identifier and read scope already supplied; refused discovery does not advance this task.",
+          "unauthorised_attempt": true,
+          "actual_read": false
+        },
+        {
+          "index": 1,
+          "verdict": "unnecessary",
+          "rationale": "Bucketing is unnecessary for the requested combined total and unsupported by this declared fixture.",
+          "unauthorised_attempt": false,
+          "actual_read": false
+        },
+        {
+          "index": 2,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": true
+    },
+    {
+      "trial_index": 78,
+      "case": "result_total_roi_dataset_1",
+      "view": "candidate",
+      "repetition": 1,
+      "answer_sha256": "13a52644ab5886d234e2a53b8186b13e1a44f5d0cec16cb59d489d178f1fd866",
+      "claims": "unsupported",
+      "supported_content_and_exceptions": [
+        "Channel revenues/spends and addition are supported. The ratio and requested rounding require the separate arithmetic check below.",
+        "Dataset 0 candidate computes the ratio correctly but falsely calls its unrounded value rounded to six places. Dataset 0 baseline and all dataset 1 answers give incorrect arithmetic."
+      ],
+      "numerical_checks": [
+        {
+          "source": "complete synthetic coefficients",
+          "revenue": 5190.0,
+          "spend": 1545.0,
+          "ratio_six_places": 3.359223
+        }
+      ],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": false
+    },
+    {
+      "trial_index": 79,
+      "case": "result_total_roi_dataset_1",
+      "view": "baseline",
+      "repetition": 1,
+      "answer_sha256": "d3cbcd3f4184f745466d97ad5432c65476075b337d27824d2aea6266ab018662",
+      "claims": "unsupported",
+      "supported_content_and_exceptions": [
+        "Channel revenues/spends and addition are supported. The ratio and requested rounding require the separate arithmetic check below.",
+        "Dataset 0 candidate computes the ratio correctly but falsely calls its unrounded value rounded to six places. Dataset 0 baseline and all dataset 1 answers give incorrect arithmetic."
+      ],
+      "numerical_checks": [
+        {
+          "source": "complete synthetic coefficients",
+          "revenue": 5190.0,
+          "spend": 1545.0,
+          "ratio_six_places": 3.359223
+        }
+      ],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "unnecessary",
+          "rationale": "Model identifier and read scope already supplied; refused discovery does not advance this task.",
+          "unauthorised_attempt": true,
+          "actual_read": false
+        },
+        {
+          "index": 1,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": false
+    },
+    {
+      "trial_index": 80,
+      "case": "result_period_roi_dataset_1",
+      "view": "candidate",
+      "repetition": 1,
+      "answer_sha256": "605f0774f38e098e49e187d8a42b28547993a97acf851e7c52c345ea8612ae0c",
+      "claims": "unsupported",
+      "supported_content_and_exceptions": [
+        "Period values, summed totals, weighted ratio and rejection of the unweighted average are supported. Specific date/quotation exceptions are separately recorded.",
+        "The aggregation principle is correct, but the purported verbatim backend quotation is a guidance paraphrase, not returned metadata."
+      ],
+      "numerical_checks": [
+        {
+          "source": "complete synthetic coefficients",
+          "revenue": 2850.0,
+          "spend": 825.0,
+          "ratio_six_places": 3.454545
+        }
+      ],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": false
+    },
+    {
+      "trial_index": 81,
+      "case": "result_period_roi_dataset_1",
+      "view": "baseline",
+      "repetition": 1,
+      "answer_sha256": "4b3e0c03f8133a671f6a1514c1674f1128154e4c1a8bd4e2d1122d178edac31f",
+      "claims": "supported",
+      "supported_content_and_exceptions": [
+        "Period values, summed totals, weighted ratio and rejection of the unweighted average are supported. Specific date/quotation exceptions are separately recorded."
+      ],
+      "numerical_checks": [
+        {
+          "source": "complete synthetic coefficients",
+          "revenue": 2850.0,
+          "spend": 825.0,
+          "ratio_six_places": 3.454545
+        }
+      ],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "unnecessary",
+          "rationale": "Model identifier and read scope already supplied; refused discovery does not advance this task.",
+          "unauthorised_attempt": true,
+          "actual_read": false
+        },
+        {
+          "index": 1,
+          "verdict": "unnecessary",
+          "rationale": "Requests the wrong year despite the explicit 2025 question.",
+          "unauthorised_attempt": false,
+          "actual_read": false
+        },
+        {
+          "index": 2,
+          "verdict": "unnecessary",
+          "rationale": "Requests the wrong year despite the explicit 2025 question.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        },
+        {
+          "index": 3,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        },
+        {
+          "index": 4,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": true
+    },
+    {
+      "trial_index": 82,
+      "case": "result_marginal_window_dataset_1",
+      "view": "candidate",
+      "repetition": 1,
+      "answer_sha256": "d58d24139d5cedd49c00be9ce8433888d60ad5d4c01c50b52b18703ee3a2aa78",
+      "claims": "supported",
+      "supported_content_and_exceptions": [
+        "Headline and period-specific statistics differ. The retrieved fallback and supplied tool contract support its older-fit explanation at contract level. This does not remove an available headline estimate. Saved HDI endpoints are not guaranteed percentiles."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": true
+    },
+    {
+      "trial_index": 83,
+      "case": "result_marginal_window_dataset_1",
+      "view": "baseline",
+      "repetition": 1,
+      "answer_sha256": "6bf691855ead5117ebf88e838c5b69556e7eea33c6ec8a2f62504a0037024e61",
+      "claims": "unsupported",
+      "supported_content_and_exceptions": [
+        "Headline and period-specific statistics differ. The retrieved fallback and supplied tool contract support its older-fit explanation at contract level. This does not remove an available headline estimate. Saved HDI endpoints are not guaranteed percentiles.",
+        "Missing historical artefact is incorrectly used to deny the requested available headline median."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "unnecessary",
+          "rationale": "Model identifier and read scope already supplied; refused discovery does not advance this task.",
+          "unauthorised_attempt": true,
+          "actual_read": false
+        },
+        {
+          "index": 1,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": false
+    },
+    {
+      "trial_index": 84,
+      "case": "result_overlap_value_dataset_1",
+      "view": "candidate",
+      "repetition": 1,
+      "answer_sha256": "d803da0c3615c8dd5ea7db1a92caad19470aa04615e1e77dd6f3b0f0a63caeb8",
+      "claims": "unsupported",
+      "supported_content_and_exceptions": [
+        "Returned Overlap number and non-channel status are supported when retrieved. GBP units are not supported: contributions are KPI-space quantities. Media-interaction interpretation exceeds reconciliation evidence."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": false
+    },
+    {
+      "trial_index": 85,
+      "case": "result_overlap_value_dataset_1",
+      "view": "baseline",
+      "repetition": 1,
+      "answer_sha256": "b9d9ef9445a6f36763879b059472e64532ed8a3bc7d15d753cc2925cc531927b",
+      "claims": "unsupported",
+      "supported_content_and_exceptions": [
+        "Returned Overlap number and non-channel status are supported when retrieved. GBP units are not supported: contributions are KPI-space quantities. Media-interaction interpretation exceeds reconciliation evidence.",
+        "The model hash and results-read permission were already supplied. The answer incorrectly asks for both and does not answer."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "unnecessary",
+          "rationale": "Model identifier and read scope already supplied; refused discovery does not advance this task.",
+          "unauthorised_attempt": true,
+          "actual_read": false
+        },
+        {
+          "index": 1,
+          "verdict": "unnecessary",
+          "rationale": "Model identifier and read scope already supplied; refused discovery does not advance this task.",
+          "unauthorised_attempt": true,
+          "actual_read": false
+        }
+      ],
+      "supported_answer": false
+    },
+    {
+      "trial_index": 86,
+      "case": "result_prediction_unavailable_dataset_1",
+      "view": "candidate",
+      "repetition": 1,
+      "answer_sha256": "0b13fa2c01443eff7a87aa612b343434b7dce22a2f134b5348df5900c234f250",
+      "claims": "unsupported",
+      "supported_content_and_exceptions": [
+        "Explicit projection does not return prediction evidence. Assertions that no outputs were saved, that only channel_summary exists, or that fitting/storage history is known are unsupported. No-fit statements agree with the trajectory."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": false
+    },
+    {
+      "trial_index": 87,
+      "case": "result_prediction_unavailable_dataset_1",
+      "view": "baseline",
+      "repetition": 1,
+      "answer_sha256": "03a8bf72605a2a1f4858bd5aba916c9667d48db1411a1cbc7472269d1e8d22fe",
+      "claims": "unsupported",
+      "supported_content_and_exceptions": [
+        "Explicit projection does not return prediction evidence. Assertions that no outputs were saved, that only channel_summary exists, or that fitting/storage history is known are unsupported. No-fit statements agree with the trajectory."
+      ],
+      "numerical_checks": [],
+      "calls": [
+        {
+          "index": 0,
+          "verdict": "unnecessary",
+          "rationale": "Unrelated summary/configuration or repeated prediction request adds no availability evidence.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        },
+        {
+          "index": 1,
+          "verdict": "necessary",
+          "rationale": "Retrieves relevant evidence or recovers from a preceding unsupported synthetic capability.",
+          "unauthorised_attempt": false,
+          "actual_read": true
+        }
+      ],
+      "supported_answer": false
+    }
+  ]
+}
