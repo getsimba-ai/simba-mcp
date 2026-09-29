@@ -5,12 +5,16 @@ SONNET = "claude-sonnet-5-5"
 GROK = "grok-4.7"
 
 
-def model_configuration(model=MODEL):
+def model_configuration(model=MODEL, reasoning_effort=None):
     """Explicit request and accounting settings, frozen with each experiment.
 
     Preserve historical Haiku cache overestimates. Sonnet uses a conservative
     one-hour cache-write rate; these synthetic requests do not enable caching.
     """
+    if reasoning_effort is not None and (
+        model != GROK or reasoning_effort not in ("low", "medium", "high", "xhigh")
+    ):
+        raise ValueError("Reasoning override requires a supported xAI effort level")
     if model == MODEL:
         return {
             "request": {"model": model, "max_tokens": 1200, "temperature": 0},
@@ -31,7 +35,7 @@ def model_configuration(model=MODEL):
             "request": {
                 "model": model,
                 "max_output_tokens": 4096,
-                "reasoning": {"effort": "medium"},
+                "reasoning": {"effort": reasoning_effort or "medium"},
                 "store": False,
             },
             "rates_per_million": {"input": 2, "output": 6, "cache_read": 0.5, "cache_write": 0},

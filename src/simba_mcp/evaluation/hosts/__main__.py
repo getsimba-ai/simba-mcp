@@ -37,7 +37,12 @@ from .scenarios import SyntheticDispatch, answer, role_tasks, tasks
 async def run(args):
     if args.output.exists():
         raise ValueError("Refusing to overwrite evidence; carry prior spend into a new run")
-    budget = Budget(args.cap_usd, args.prior_usd, model=getattr(args, "model", MODEL))
+    budget = Budget(
+        args.cap_usd,
+        args.prior_usd,
+        model=getattr(args, "model", MODEL),
+        reasoning_effort=getattr(args, "reasoning_effort", None),
+    )
     host_client, host_definitions, host_session = client, definitions, session
     key_name = "ANTHROPIC_API_KEY"
     if budget.model == GROK:
@@ -152,7 +157,7 @@ async def run(args):
             "results_selection_validation": selection_validation,
             "results_acceptance_packet": packet,
             "model": budget.model,
-            "model_configuration": model_configuration(budget.model),
+            "model_configuration": model_configuration(budget.model, budget.reasoning_effort),
             "results_model_diagnostic": diagnostic,
             "validation_seed": validation_seed,
             "validation_datasets": dataset_count,
@@ -417,6 +422,11 @@ def main():
     parser.add_argument("--prior-usd", type=float, default=0)
     parser.add_argument("--samples", type=int, default=2)
     parser.add_argument("--model", choices=(MODEL, SONNET, GROK), default=MODEL)
+    parser.add_argument(
+        "--reasoning-effort",
+        choices=("low", "medium", "high", "xhigh"),
+        help="xAI reasoning profile; low is the fast option, default medium",
+    )
     parser.add_argument(
         "--results-model-diagnostic",
         action="store_true",

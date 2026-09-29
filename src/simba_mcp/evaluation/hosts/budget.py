@@ -16,9 +16,10 @@ class Budget:
     charged: float = 0.0
     reserved: float = 0.0
     model: str = MODEL
+    reasoning_effort: str | None = None
 
     def __post_init__(self):
-        model_configuration(self.model)
+        model_configuration(self.model, self.reasoning_effort)
         if any(
             not math.isfinite(x) or x < 0
             for x in (self.cap, self.prior, self.charged, self.reserved)
@@ -28,7 +29,7 @@ class Budget:
     def reserve(self, request):
         if request.get("model", self.model) != self.model:
             raise ValueError("Request model does not match budget pricing")
-        config = model_configuration(self.model)
+        config = model_configuration(self.model, self.reasoning_effort)
         output_limit = request.get("max_tokens", request.get("max_output_tokens"))
         if type(output_limit) is not int or output_limit <= 0:
             raise ValueError("A positive output-token limit is required before reservation")

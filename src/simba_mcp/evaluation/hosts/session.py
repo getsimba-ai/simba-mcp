@@ -18,7 +18,7 @@ async def run_session(
     started = perf_counter()
     system = SYSTEM + ("\n\n" + system_context if system_context else "")
     for _ in range(max_turns):
-        request = codec.request(history, tools, system, budget.model)
+        request = codec.request(history, tools, system, budget)
         reservation = budget.reserve(request)
         checkpoint(record)
         response = await client.post(codec.endpoint, json=request)

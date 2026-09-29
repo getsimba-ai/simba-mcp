@@ -35,9 +35,9 @@ def definitions(tools, mode):
 class Messages:
     endpoint = "https://api.anthropic.com/v1/messages"
 
-    def request(self, history, tools, system, model):
+    def request(self, history, tools, system, budget):
         return {
-            **model_configuration(model)["request"],
+            **model_configuration(budget.model, budget.reasoning_effort)["request"],
             "system": system,
             "tools": tools,
             "messages": history,

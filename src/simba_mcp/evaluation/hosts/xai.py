@@ -26,11 +26,11 @@ def definitions(tools, mode):
 class Responses:
     endpoint = "https://api.x.ai/v1/responses"
 
-    def request(self, history, tools, system, model):
-        if model != GROK:
+    def request(self, history, tools, system, budget):
+        if budget.model != GROK:
             raise ValueError("xAI adapter requires its explicitly configured model")
         return {
-            **model_configuration(model)["request"],
+            **model_configuration(budget.model, budget.reasoning_effort)["request"],
             "instructions": system,
             "tools": tools,
             "input": history,

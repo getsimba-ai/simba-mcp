@@ -32,6 +32,16 @@ reasoning twice. Missing usage/billing retains the reservation and stops the run
 [pricing](https://docs.x.ai/developers/pricing),
 [cost accounting](https://docs.x.ai/developers/cost-tracking).
 
+## Fast profile
+
+The owner requested a faster option. `--model grok-4.7 --reasoning-effort low`
+selects low reasoning on the same real model; the default remains medium. The
+setting is frozen in each report and tested separately for quality, cost and
+latency. This is not the separately branded Grok 4.7 Fast service, which the
+official pricing page limits to Cursor and Grok Build rather than the public API.
+There is no claim of speed improvement until measured. Output limits, read
+authority, spend reservations and acceptance gates remain unchanged.
+
 The owner authorised **US$500 cumulative**, with **US$67.781696** already accounted
 for and zero reservations before integration. Each paid stage gets a smaller
 explicit ceiling. The first comparison uses exposed validation cases and the

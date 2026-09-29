@@ -7,7 +7,7 @@ import httpx
 import pytest
 
 from simba_mcp.evaluation.hosts.budget import Budget
-from simba_mcp.evaluation.hosts.models import GROK, model_configuration
+from simba_mcp.evaluation.hosts.models import GROK, SONNET, model_configuration
 from simba_mcp.evaluation.hosts.xai import definitions, session
 
 
@@ -63,10 +63,15 @@ def test_xai_actual_billing_and_unknown_usage_reservations():
         Budget(67.79, prior=67.781696, model=GROK).reserve(request)
     with pytest.raises(ValueError, match="limit"):
         budget.reserve({"model": GROK})
+    with pytest.raises(ValueError, match="override"):
+        Budget(2, model=SONNET, reasoning_effort="low")
+    with pytest.raises(ValueError, match="override"):
+        Budget(2, model=GROK, reasoning_effort="off")
 
 
 @pytest.mark.anyio
-async def test_xai_roundtrips_reasoning_and_all_local_tool_results():
+@pytest.mark.parametrize("effort", [None, "low"])
+async def test_xai_roundtrips_reasoning_and_all_local_tool_results(effort):
     thinking = {"type": "reasoning", "id": "r", "encrypted_content": "opaque-test-value"}
     calls = [
         {
@@ -92,13 +97,14 @@ async def test_xai_roundtrips_reasoning_and_all_local_tool_results():
         executed.append(args["index"])
         return {"value": args["index"]}, bool(args["index"])
 
-    budget = Budget(2, model=GROK)
+    budget = Budget(2, model=GROK, reasoning_effort=effort)
     async with httpx.AsyncClient(transport=httpx.MockTransport(transport)) as client:
         record = await session(client, [], "read", dispatch, budget, lambda _: None)
     assert executed == [0, 1]
     assert requests[1]["input"][1:4] == [thinking, *calls]
     assert [x["call_id"] for x in requests[1]["input"][-2:]] == ["0", "1"]
-    assert requests[0]["reasoning"] == {"effort": "medium"}
+    assert requests[0]["reasoning"] == {"effort": effort or "medium"}
+    assert requests[0]["model"] == GROK
     assert requests[0]["store"] is False
     assert record["final_text"] == "{}" and record["stop"] == "end_turn"
     assert record["cost_usd"] == pytest.approx(0.001)
@@ -184,6 +190,7 @@ async def test_xai_command_reuses_frozen_cases_and_selects_only_xai_key(
             mode="eager",
             case="v3_kpi_revenue_basis",
             model=GROK,
+            reasoning_effort="low",
             results_robust=True,
             results_acceptance=True,
             results_acceptance_packet="v3",
@@ -197,6 +204,9 @@ async def test_xai_command_reuses_frozen_cases_and_selects_only_xai_key(
     count = 2 if diagnostic else 4
     assert report["status"] == "complete" and len(requests) == count
     assert report["configuration"]["model"] == GROK
+    assert report["configuration"]["model_configuration"]["request"]["reasoning"] == {
+        "effort": "low"
+    }
     assert report["configuration"]["results_selection_validation"]
     assert all("combined Sales" in t["prompt"] for t in report["trials"])
     assert all(t["prompt_variant"] == "paraphrase" for t in report["trials"])
