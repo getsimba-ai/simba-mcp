@@ -413,7 +413,10 @@ class TestLifespan:
                 assert ctx.client is not None
         warnings = [r.message for r in caplog.records if "SIMBA_API_KEY" in r.message]
         assert len(warnings) == 1
-        assert "calendly.com" in warnings[0]
+        # Self-serve first (#938): the sign-up link comes before the demo link.
+        assert warnings[0].index("demo.simba-mmm.com/users/signup") < warnings[0].index(
+            "calendly.com"
+        )
 
 
 class TestRunOptimizerPayload:
