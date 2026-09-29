@@ -219,19 +219,22 @@ Set `SIMBA_API_REQUEST_POLICY_JSON` to a JSON object with all of these fields:
 positive integers; queue limits can be zero to refuse waiting. Caller ceilings
 cannot exceed process ceilings. Optional `operation_seconds` overrides totals for
 `read`, `write` and `upload`; upload means POST `/api/v1/ingest`. Values must be
-tuned from capacity measurements. Unset or empty configuration enables the initial
-server defaults: 180 seconds overall, 60 seconds per HTTP phase, 32 active requests
-per worker, eight active per caller, 128 queued per worker and 32 queued per caller.
-Queue waiting and retries share the overall budget. These are initial engineering
-settings, not measured production capacity or a latency improvement claim.
-Multiple workers multiply the process limits. Monitor overloads, deadline failures
-and queue latency when sizing a deployment.
+tuned from capacity measurements. Unset, empty and JSON `false` leave the
+deadline and admission policy disabled. The server then keeps the existing
+60-second HTTPX timeout and does not limit admission. A complete JSON object
+enables a policy for that process; invalid configuration fails startup.
+Cancellation cleanup and single-send mutations remain active either way.
+Direct Python users of `SimbaAPIClient` also keep admission disabled unless
+they pass `request_policy`.
 
-Set the variable to the JSON literal `false` and restart to disable the deadline
-and admission policy. Cancellation cleanup and single-send mutations remain active.
-A complete JSON object overrides the defaults; invalid configuration fails startup.
-These defaults apply to the MCP server runtime. Direct Python users of
-`SimbaAPIClient` retain explicit `request_policy` configuration.
+Figures of 180 seconds overall, 60 seconds per phase, 32 active requests,
+eight active per caller, 128 queued and 32 queued per caller were an
+engineering proposal, not a measured production size. No representative
+request trace, worker count or proxy timeout in this repository selects them.
+They are not applied when the variable is unset. Multiple workers would
+multiply any limits an operator explicitly enables. Monitor overloads,
+deadline failures and queue latency before treating an explicit policy as
+capacity guidance.
 
 With a policy enabled, the monotonic total includes admission waiting, all HTTP
 attempts, parsing and retry sleeps. Phase timeouts are capped by the remaining
@@ -286,3 +289,21 @@ backend contention penalty, so queueing trades latency for lower concurrency;
 it does not demonstrate a latency or cost improvement. The earlier aggressive
 comparison is retained as a distinct pre-fairness-fix development result rather
 than overwritten. Neither development run is final acceptance evidence.
+
+A 30 September 2026 comparison left those earlier arms sealed and did not add
+samples to them. It compared the disabled client with an explicitly constructed
+180-second, 32/8/128/32 policy on a mock transport. Both completed sequential
+and concurrent normal reads, 64 KiB responses and a 0.4-second upload, with no
+overload or deadline refusal. Normal-scenario p95 stayed within 20 ms of the
+disabled arm on that machine, including event-loop scheduling. The 24-request
+bursts peaked at 24 handler entries in both modes, so the proposal did not bound
+that burst. An explicit 161-request hold did bound the process at 32 active and
+128 queued, refused the excess request before a handler entry, and released
+every permit. A second caller entered ahead of a caller already holding eight
+permits. Cancelling a queued request did not send it. Mutations were not
+repeated, including after cancellation of a write that had already entered the
+handler. Tracemalloc peaks were scenario-local and are not a process RSS bound.
+No paid model call was made. This does not establish a production latency, cost
+or completion improvement, so the server does not enable a numeric policy by
+default.
+

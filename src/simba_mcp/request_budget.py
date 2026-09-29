@@ -93,19 +93,10 @@ class RequestPolicy:
 
 def policy_from_json(raw):
     if not raw or not raw.strip():
-        # Initial server defaults, configurable for each deployment's capacity.
-        # Retain the previous 60-second HTTP phase limits.
-        return RequestPolicy(
-            total_seconds=180,
-            connect_seconds=60,
-            read_seconds=60,
-            write_seconds=60,
-            pool_seconds=60,
-            max_active=32,
-            max_active_per_caller=8,
-            max_queued=128,
-            max_queued_per_caller=32,
-        )
+        # No host timeout, worker count, proxy timeout or request trace selects
+        # a numeric default. Unset configuration keeps the existing 60-second
+        # client timeout and does not add admission.
+        return None
     try:
         data = json.loads(raw)
         if data is False:

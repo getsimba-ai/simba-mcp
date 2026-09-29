@@ -372,7 +372,7 @@ How the key is supplied depends on where the server runs:
 | Environment Variable | Description | Default |
 |---------------------|-------------|---------|
 | `SIMBA_API_URL` | Simba API base URL | `http://localhost:5005` |
-| `SIMBA_API_REQUEST_POLICY_JSON` | Total/phase timeouts and process/caller admission policy; JSON `false` disables it; see [request budgets](docs/performance-design.md#request-budgets-and-admission-issue-48) | Enabled: 180s total, 32 active per worker / 8 per caller |
+| `SIMBA_API_REQUEST_POLICY_JSON` | Total/phase timeouts and process/caller admission policy. Unset disables it; a complete JSON object enables one deployment's values. See [request budgets](docs/performance-design.md#request-budgets-and-admission-issue-48) | Disabled |
 | `SIMBA_API_MAX_ENCODED_BYTES` | Optional maximum response entity bytes before decompression | Unset (uncapped for compatibility) |
 | `SIMBA_API_MAX_DECODED_BYTES` | Optional maximum response bytes supplied to JSON/CSV parsing | Unset (uncapped for compatibility) |
 | `SIMBA_API_KEY` | Your Simba API key (stdio mode only; HTTP callers send their own key as the bearer token) | (required for stdio) |
