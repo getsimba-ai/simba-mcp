@@ -204,3 +204,65 @@ Observed results and SDK-floor verification are recorded in the
 [initial baseline](performance-baseline.md). PERF-02 host selection, model trials
 and budget approval remain pending. A successful local report establishes neither
 host support for deferred discovery nor production performance.
+
+## Opt-in request budgets and admission (issue 48)
+
+The shared API client owns one admission queue and request budget, in accordance
+with `docs/engineering.md`. `request_budget.py` owns only configuration, deadline
+arithmetic and admission primitives; it does not dispatch tools, cache results or
+schedule backend jobs. Runtime constructs the policy once for its shared client.
+
+Set `SIMBA_API_REQUEST_POLICY_JSON` to a JSON object with all of these fields:
+`total_seconds`, `connect_seconds`, `read_seconds`, `write_seconds`,
+`pool_seconds`, `max_active`, `max_active_per_caller`, `max_queued` and
+`max_queued_per_caller`. Durations must be finite and positive; active limits are
+positive integers; queue limits can be zero to refuse waiting. Caller ceilings
+cannot exceed process ceilings. Optional `operation_seconds` overrides totals for
+`read`, `write` and `upload`; upload means POST `/api/v1/ingest`. Values must be
+selected from capacity measurements. No production values are prescribed here.
+Unset or empty configuration preserves the existing timeout and retry behaviour.
+Invalid configuration fails startup. Removing the setting and restarting restores
+the previous behaviour.
+
+With a policy enabled, the monotonic total includes admission waiting, all HTTP
+attempts, parsing and retry sleeps. Phase timeouts are capped by the remaining
+budget. Only existing retry-eligible reads retry. Backoff uses full jitter;
+Retry-After integer seconds and HTTP dates are honoured as a minimum delay. A
+retry is refused if that delay consumes the remaining budget. Each next attempt
+is clipped to the remaining budget, rather than receiving a new total allowance.
+A successful return is checked against the budget after parsing as well.
+
+Admission limits active operations and queued calls for the shared process client
+and each credential identity. Active operations retain their permit during
+backoff. Oldest eligible queued callers proceed first, so a saturated caller does
+not block another eligible caller. Identities are keyed digests with a random
+process-local secret, retained only while in use and never emitted in telemetry.
+They isolate credential generations, not people: different valid keys belonging
+to one person are distinct caller identities. No authentication or backend
+permission is inferred from admission. Multiple worker processes have separate
+limits; deployment capacity must account for their aggregate.
+
+A full queue returns structured 429 `request_overloaded` without sending. Overall
+expiry returns structured 504 `request_deadline_exceeded`. Cancellation propagates
+and releases queue entries, active permits and response streams. Neither expiry
+nor cancellation proves that a submitted backend job stopped. Existing error
+recovery guidance and exact submission keys remain authoritative; mutations are
+not automatically retried. Callers should reconcile uncertain writes before
+repeating them.
+
+The deadline is cooperative: Python parsing, synchronous work and event-loop
+scheduling may overshoot the wall-clock target. Reverse proxies and host tool
+timeouts must allow sufficient time for the configured operation budget plus
+scheduling and error delivery, or they may interrupt it first. No proxy timeout
+is changed by this configuration.
+
+A synthetic 24-request burst with six credential identities, mixed small/64 KiB
+responses and 15/150 ms backend delays compared uncapped admission with test
+values of four active, one active per caller, eight queued, two queued per caller
+and a 60 ms total. Baseline completed 24/24, peaked at 24 backend requests and had
+165 ms p95 latency. The bounded case completed 5/24, refused 12 as overload and
+expired seven; peak backend requests were four and p95 was 65 ms. Python traced
+peak allocations were approximately 832 KiB versus 296 KiB. This demonstrates a
+resource/latency bound with reduced completion under intentionally tight limits,
+not a quality or throughput improvement. It is one mock-transport burst, not
+production sizing evidence or a universal memory bound.
