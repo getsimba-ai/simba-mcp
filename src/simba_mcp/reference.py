@@ -23,6 +23,7 @@ DOCS = Path(__file__).resolve().parents[2] / "docs" / "tools.md"
 
 # Section order and headings, by the module that defines each tool.
 SECTIONS = {
+    "guidance": "Workflow guidance",
     "data": "Data and pipelines",
     "projects": "Projects",
     "models": "Models",

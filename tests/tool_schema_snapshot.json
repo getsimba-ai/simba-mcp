@@ -3871,5 +3871,21 @@
     ],
     "title": "import_incrementality_testsArguments",
     "type": "object"
+  },
+  "get_workflow_guidance": {
+    "properties": {
+      "topic": {
+        "default": "index",
+        "title": "Topic",
+        "type": "string"
+      },
+      "section": {
+        "default": "entrypoint",
+        "title": "Section",
+        "type": "string"
+      }
+    },
+    "title": "get_workflow_guidanceArguments",
+    "type": "object"
   }
 }

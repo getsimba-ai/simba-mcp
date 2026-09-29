@@ -43,6 +43,14 @@ jobs:
       - name: Test
         run: pytest -v
 
+      - name: Check generated native Skills
+        run: python -m simba_mcp.guidance --check
+
+      - name: Verify guidance in built wheel
+        run: |
+          python -m pip wheel . --no-deps --wheel-dir .codex/wheel
+          python -I tests/guidance/wheel_smoke.py .codex/wheel
+
       - name: Check generated reference
         run: python -m simba_mcp.reference --check
 

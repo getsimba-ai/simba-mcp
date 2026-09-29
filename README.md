@@ -129,20 +129,23 @@ Try these with any connected AI assistant:
 
 ## Agent Skills
 
-The [`skills/`](skills/) directory ships workflow skills in the
-[Agent Skills](https://agentskills.io) format (`SKILL.md` per skill) â€”
-install them into any skills-aware agent (e.g. Claude Code) alongside this
-MCP server:
+Workflow guidance is available as self-contained [native Skills](skills/) and through
+`get_workflow_guidance` for clients without native Skills. Both use the same versioned,
+packaged source. Connecting the MCP endpoint does **not** install native Skills.
 
-| Skill | Covers |
-|---|---|
-| [`simba-mmm-workflow`](skills/simba-mmm-workflow/SKILL.md) | Upload â†’ create â†’ poll â†’ reading results correctly (section semantics, channel naming, attribution/Overlap rules, context-size controls) |
-| [`simba-optimizer-runs`](skills/simba-optimizer-runs/SKILL.md) | Optimizer payload conventions, revenue vs profit, polling by run_id, decision- vs comparison-column semantics, run curation |
-| [`simba-prior-conventions`](skills/simba-prior-conventions/SKILL.md) | Prior-override payloads: smart-default merging, strict rejection, the half-saturation / half-marginal / half-life anchor families |
-| [`simba-var-workflow`](skills/simba-var-workflow/SKILL.md) | Long-term (VAR) modeling: create â†’ poll â†’ link â†’ long_run_rollup |
+| Skill | Task |
+| --- | --- |
+| [simba-mmm-workflow](skills/simba-mmm-workflow/SKILL.md) | Upload, create and recover a fit |
+| [simba-results-analysis](skills/simba-results-analysis/SKILL.md) | Saved results, channel identity, units, intervals and windows |
+| [simba-prior-conventions](skills/simba-prior-conventions/SKILL.md) | Media/control priors, anchor pairing and resolved settings |
+| [simba-optimizer-runs](skills/simba-optimizer-runs/SKILL.md) | Budget constraints, objectives and saved runs |
+| [simba-studies-workflow](skills/simba-studies-workflow/SKILL.md) | Drafts, immutable revisions, launch recovery and review |
+| [simba-var-workflow](skills/simba-var-workflow/SKILL.md) | VAR creation, linking and long-run rollups |
 
-The skills are documentation artifacts â€” they ride the repo, not the wire
-protocol.
+See [installation, fallback lookup and maintenance](docs/workflow-guidance.md).
+Existing-result questions can start with selected result sections directly; capability,
+schema and guidance discovery are conditional on the task. Backend validation and
+human approval remain authoritative.
 
 ## Gotchas & Tips
 
