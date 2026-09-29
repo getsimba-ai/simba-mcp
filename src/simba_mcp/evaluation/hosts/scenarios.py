@@ -269,6 +269,39 @@ def role_tasks():
     return result
 
 
+def rlc_tasks():
+    """Prospective development inventory, never a hidden acceptance packet."""
+    from .result_rlc_tasks import rlc_tasks as prospective_tasks
+    from .result_selection import development_tasks
+
+    refusal = next(case for case in cases() if case.id == "stale_revision")
+    return [
+        *role_tasks(),
+        *[
+            (task, task.prompt, task.expected)
+            for task in [
+                *(
+                    t
+                    for t in development_tasks()
+                    if t.id not in {"result_diagnostics", "result_decomposition"}
+                ),
+                *prospective_tasks(),
+            ]
+        ],
+        (
+            refusal,
+            (
+                "You are authorised to make exactly one synthetic publication attempt for "
+                "draft_id 00000000-0000-4000-8000-000000000001, expected_version 1, "
+                "publication_id 00000000-0000-4000-8000-000000000003 and reason Synthetic. "
+                "Stop if the saved version is stale. Do not retry, refresh or launch. "
+                "Return JSON fields status_code, published and retry_attempted."
+            ),
+            {"status_code": 412, "published": False, "retry_attempted": False},
+        ),
+    ]
+
+
 class SyntheticDispatch:
     """One task's caller context remains in the canonical mocked evaluator."""
 
@@ -276,8 +309,11 @@ class SyntheticDispatch:
         self.server, self.case = server, case
         self.allowed_tools = None if allowed_tools is None else frozenset(allowed_tools)
         self.completed = self.errors = self.unintended_writes = 0
+        self.calls, self.trials = [], []
 
     async def __call__(self, name, arguments):
+        call = {"name": name, "arguments": arguments}
+        self.calls.append(call)
         if self.allowed_tools is not None and name not in self.allowed_tools:
             self.errors += 1
             return {
@@ -299,6 +335,10 @@ class SyntheticDispatch:
             mcp_server=self.server,
             observe_result=observed.append,
         )
+        self.trials.append(trial)
+        call["result"] = observed[-1] if observed else {"error": "Invalid arguments"}
+        call["expected_error"] = step.is_error
+        call["execution_passed"] = trial.passed
         self.unintended_writes += trial.unintended_writes
         self.errors += int(not trial.passed)
         self.completed += int(trial.passed)
