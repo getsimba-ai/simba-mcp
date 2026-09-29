@@ -59,6 +59,7 @@ async def test_profile_registration_and_report(tmp_path, monkeypatch, profile):
     )
     report = json.loads(output.read_text())
     assert report["configuration"]["tool_profile"] == profile
+    assert report["trials"][0]["view"] == profile
     assert report["trials"][0]["passed"]
     assert report["assessment"]["accepted"] is False
 
