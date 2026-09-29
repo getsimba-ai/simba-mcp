@@ -17,6 +17,19 @@ MAX_REQUEST_BODY_BYTES = 12 * 1024 * 1024
 _serving_http = False
 
 
+def _response_byte_limit(name: str) -> int | None:
+    raw = os.environ.get(name)
+    if raw is None or not raw.strip():
+        return None
+    try:
+        value = int(raw)
+    except ValueError as exc:
+        raise ValueError(f"{name} must be a positive integer number of bytes") from exc
+    if value <= 0:
+        raise ValueError(f"{name} must be a positive integer number of bytes")
+    return value
+
+
 def set_http_mode(enabled: bool = True) -> None:
     """Mark the server as running over a network transport (HTTP/SSE)."""
     global _serving_http
@@ -58,7 +71,12 @@ async def app_lifespan(server: MCPServer) -> AsyncIterator[AppContext]:
             "This MCP server requires a Simba account. "
             "Book a call to get started: https://calendly.com/niall-oulton"
         )
-    client = SimbaAPIClient(base_url, api_key)
+    client = SimbaAPIClient(
+        base_url,
+        api_key,
+        max_encoded_bytes=_response_byte_limit("SIMBA_API_MAX_ENCODED_BYTES"),
+        max_decoded_bytes=_response_byte_limit("SIMBA_API_MAX_DECODED_BYTES"),
+    )
     try:
         yield AppContext(client=client, serving_http=serving_http)
     finally:
