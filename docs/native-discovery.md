@@ -100,18 +100,29 @@ the reason evidence was absent. Those answers remain failures. JSON in fences wa
 usable for fact grading, but no answer met strict bare-JSON formatting.
 
 Do not interpret the aggregate success count as proof that discovery is superior.
-It regressed on a write task, and the sample is small. Keep this integration
-experimental; retain eager mode and resolve the task-specific failures before any
+It regressed on a write task in this cohort, and the sample is small. Keep this integration
+experimental; retain eager mode and require broader acceptance before any
 rollout decision. Scientific correctness and native-client behaviour remain outside
 this test. Account/API availability does not imply task reliability.
+
+### Targeted bounds correction
+
+The compact optimiser description now states the required channel-to-lower/upper
+object shape explicitly. Both modes received the same clarification. A separate
+four-session rerun of the unchanged optimiser task passed 2/2 in each mode with
+zero unexpected errors or unintended writes. Cost: US$0.174264. This addresses the
+observed bounds failure without changing signatures, schemas or execution.
+The earlier failure and comparison figures above are preserved; the correction
+cohort is separate and does not turn earlier failures into passes or establish a
+fresh full-suite performance estimate. The eager combined-task answer weakness remains.
 
 The preliminary 12-session cohort is retained separately. It exposed ambiguous
 synthetic identifiers and unsupported answer claims. Identifiers and required final
 fields were clarified in both arms before the final cohort; its failures were not
 relabelled. The final combined task was a separate four-session cohort.
 
-This issue's experiments cost US$1.811123. Including previous experiments and the
-existing US$1 interrupted-request reserve, cumulative accounting is US$7.235924
+This issue's experiments cost US$1.985387. Including previous experiments and the
+existing US$1 interrupted-request reserve, cumulative accounting is US$7.410188
 against the authorised US$10 cap. This is provider-usage accounting, not an invoice.
 
 ## Verification boundaries

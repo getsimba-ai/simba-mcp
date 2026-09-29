@@ -103,7 +103,8 @@ uncertain writes through run history before resubmitting.
 Use exact ACTIVITY-COLUMN channel keys from channel_summary/get_scenario_template,
 not display names. total_budget is currency; bounds are percentages (0-100) of
 that total, not money. bounds, laydown_weights and period_cpm must name the same
-channels. Each laydown/CPM value is an array of length num_periods; CPMs are positive.
+channels. bounds maps each channel to {"lower": 20, "upper": 100}, not an array.
+Each laydown/CPM value is an array of length num_periods; CPMs are positive.
 gamma controls uncertainty aversion: zero maximises expected return.
 objective=revenue is default; profit needs a stored operating margin or
 forward_margin (scalar fraction). period_multiplier is a num_periods

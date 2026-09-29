@@ -6765,6 +6765,1647 @@
         "charged": 0.405849,
         "reserved": 0.0
       }
+    },
+    "bounds-correction": {
+      "schema_version": 1,
+      "status": "complete",
+      "provenance": {
+        "packages": {
+          "simba-mcp": "0.11.1",
+          "mcp": "2.2.0",
+          "httpx": "0.28.1",
+          "pydantic": "2.13.5",
+          "tiktoken": "0.14.0"
+        },
+        "python": "3.11.9",
+        "platform": "Windows",
+        "architecture": "AMD64",
+        "git_revision": "06f66b593e8b89707c1125ba67be509e14ea1aec",
+        "git_dirty": true,
+        "python_source_sha256": "a978b48c229ef0d8603ce22fc813d6f0434adb8f953d73c70bcaf1e890bdf30c"
+      },
+      "configuration": {
+        "mode": "both",
+        "samples": 2,
+        "case": "optimiser_setup"
+      },
+      "trials": [
+        {
+          "case": "optimiser_setup",
+          "mode": "eager",
+          "repetition": 0,
+          "definitions_sha256": "46037ea73182fd0e3a61b652fd2f32c4ff41264d89c14ae4953e6d7a3675dfe6",
+          "session": {
+            "responses": [
+              {
+                "model": "claude-haiku-4-5-20251001",
+                "type": "message",
+                "role": "assistant",
+                "content": [
+                  {
+                    "type": "tool_use",
+                    "id": "toolu_01D761T2rdwXQxNZjgbKMjQk",
+                    "name": "run_optimizer",
+                    "input": {
+                      "model_hash": "model-example",
+                      "total_budget": 1200,
+                      "num_periods": 2,
+                      "gamma": 0.1,
+                      "currency": "GBP",
+                      "objective": "profit",
+                      "forward_margin": 0.25,
+                      "bounds": {
+                        "search_clicks": {
+                          "lower": 20,
+                          "upper": 100
+                        }
+                      },
+                      "laydown_weights": {
+                        "search_clicks": [
+                          1,
+                          2
+                        ]
+                      },
+                      "period_cpm": {
+                        "search_clicks": [
+                          3,
+                          4
+                        ]
+                      }
+                    },
+                    "caller": {
+                      "type": "direct"
+                    }
+                  }
+                ],
+                "stop_reason": "tool_use",
+                "usage": {
+                  "input_tokens": 35936,
+                  "cache_creation_input_tokens": 0,
+                  "cache_read_input_tokens": 0,
+                  "cache_creation": {
+                    "ephemeral_5m_input_tokens": 0,
+                    "ephemeral_1h_input_tokens": 0
+                  },
+                  "output_tokens": 266,
+                  "service_tier": "standard",
+                  "inference_geo": "not_available"
+                }
+              },
+              {
+                "model": "claude-haiku-4-5-20251001",
+                "type": "message",
+                "role": "assistant",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "```json\n{\n  \"run_id\": \"optim-example\"\n}\n```"
+                  }
+                ],
+                "stop_reason": "end_turn",
+                "usage": {
+                  "input_tokens": 36225,
+                  "cache_creation_input_tokens": 0,
+                  "cache_read_input_tokens": 0,
+                  "cache_creation": {
+                    "ephemeral_5m_input_tokens": 0,
+                    "ephemeral_1h_input_tokens": 0
+                  },
+                  "output_tokens": 24,
+                  "service_tier": "standard",
+                  "inference_geo": "not_available"
+                }
+              }
+            ],
+            "calls": [
+              {
+                "name": "run_optimizer",
+                "arguments": {
+                  "model_hash": "model-example",
+                  "total_budget": 1200,
+                  "num_periods": 2,
+                  "gamma": 0.1,
+                  "currency": "GBP",
+                  "objective": "profit",
+                  "forward_margin": 0.25,
+                  "bounds": {
+                    "search_clicks": {
+                      "lower": 20,
+                      "upper": 100
+                    }
+                  },
+                  "laydown_weights": {
+                    "search_clicks": [
+                      1,
+                      2
+                    ]
+                  },
+                  "period_cpm": {
+                    "search_clicks": [
+                      3,
+                      4
+                    ]
+                  }
+                },
+                "error": false
+              }
+            ],
+            "cost_usd": 0.07361100000000001,
+            "stop": "end_turn",
+            "final_text": "```json\n{\n  \"run_id\": \"optim-example\"\n}\n```",
+            "seconds": 4.40275229999861
+          },
+          "strict_json": false,
+          "answer_correct": true,
+          "steps_completed": 1,
+          "unexpected_errors": 0,
+          "unintended_writes": 0,
+          "passed": true
+        },
+        {
+          "case": "optimiser_setup",
+          "mode": "deferred",
+          "repetition": 0,
+          "definitions_sha256": "e7faa25211fbff685225db8a7a764427ba6d5c0cf31fd7b7d0dc618e12c898d1",
+          "session": {
+            "responses": [
+              {
+                "model": "claude-haiku-4-5-20251001",
+                "type": "message",
+                "role": "assistant",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "I'll help you submit an optimiser run with those specifications. Let me first search for the appropriate tool to submit an optimiser run."
+                  },
+                  {
+                    "type": "server_tool_use",
+                    "id": "srvtoolu_01WBJhBPSfLFYmuM1gnynzQu",
+                    "name": "tool_search_tool_bm25",
+                    "input": {
+                      "query": "optimiser run submit",
+                      "limit": 5
+                    }
+                  },
+                  {
+                    "type": "tool_search_tool_result",
+                    "tool_use_id": "srvtoolu_01WBJhBPSfLFYmuM1gnynzQu",
+                    "content": {
+                      "type": "tool_search_tool_search_result",
+                      "tool_references": [
+                        {
+                          "type": "tool_reference",
+                          "tool_name": "evaluate_study_run"
+                        },
+                        {
+                          "type": "tool_reference",
+                          "tool_name": "get_scenario_results"
+                        },
+                        {
+                          "type": "tool_reference",
+                          "tool_name": "get_workflow_guidance"
+                        },
+                        {
+                          "type": "tool_reference",
+                          "tool_name": "run_optimizer"
+                        },
+                        {
+                          "type": "tool_reference",
+                          "tool_name": "run_scenario"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "text": "Perfect! I found the `run_optimizer` tool. Now I'll submit the optimiser run with your exact specifications:"
+                  },
+                  {
+                    "type": "tool_use",
+                    "id": "toolu_01H4Vm5eeRAFvBCYsVDtcFU6",
+                    "name": "run_optimizer",
+                    "input": {
+                      "model_hash": "model-example",
+                      "total_budget": 1200,
+                      "currency": "GBP",
+                      "num_periods": 2,
+                      "bounds": {
+                        "search_clicks": {
+                          "lower": 20,
+                          "upper": 100
+                        }
+                      },
+                      "laydown_weights": {
+                        "search_clicks": [
+                          1,
+                          2
+                        ]
+                      },
+                      "period_cpm": {
+                        "search_clicks": [
+                          3,
+                          4
+                        ]
+                      },
+                      "gamma": 0.1,
+                      "objective": "profit",
+                      "forward_margin": 0.25
+                    },
+                    "caller": {
+                      "type": "direct"
+                    }
+                  }
+                ],
+                "stop_reason": "tool_use",
+                "usage": {
+                  "input_tokens": 5807,
+                  "cache_creation_input_tokens": 0,
+                  "cache_read_input_tokens": 0,
+                  "cache_creation": {
+                    "ephemeral_5m_input_tokens": 0,
+                    "ephemeral_1h_input_tokens": 0
+                  },
+                  "output_tokens": 399,
+                  "service_tier": "standard",
+                  "inference_geo": "not_available",
+                  "server_tool_use": {
+                    "web_search_requests": 0,
+                    "web_fetch_requests": 0
+                  }
+                }
+              },
+              {
+                "model": "claude-haiku-4-5-20251001",
+                "type": "message",
+                "role": "assistant",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "```json\n{\n  \"run_id\": \"optim-example\"\n}\n```\n\nThe optimiser run has been successfully submitted with the following configuration:\n- **Model**: model-example\n- **Budget**: GBP 1200 over 2 periods\n- **Channel**: search_clicks with bounds 20-100%\n- **Laydown weights**: [1, 2]\n- **Period CPM**: [3, 4]\n- **Gamma**: 0.1\n- **Objective**: Profit with forward margin 0.25\n- **Other settings**: Default"
+                  }
+                ],
+                "stop_reason": "end_turn",
+                "usage": {
+                  "input_tokens": 5034,
+                  "cache_creation_input_tokens": 0,
+                  "cache_read_input_tokens": 0,
+                  "cache_creation": {
+                    "ephemeral_5m_input_tokens": 0,
+                    "ephemeral_1h_input_tokens": 0
+                  },
+                  "output_tokens": 137,
+                  "service_tier": "standard",
+                  "inference_geo": "not_available"
+                }
+              }
+            ],
+            "calls": [
+              {
+                "name": "run_optimizer",
+                "arguments": {
+                  "model_hash": "model-example",
+                  "total_budget": 1200,
+                  "currency": "GBP",
+                  "num_periods": 2,
+                  "bounds": {
+                    "search_clicks": {
+                      "lower": 20,
+                      "upper": 100
+                    }
+                  },
+                  "laydown_weights": {
+                    "search_clicks": [
+                      1,
+                      2
+                    ]
+                  },
+                  "period_cpm": {
+                    "search_clicks": [
+                      3,
+                      4
+                    ]
+                  },
+                  "gamma": 0.1,
+                  "objective": "profit",
+                  "forward_margin": 0.25
+                },
+                "error": false
+              }
+            ],
+            "cost_usd": 0.013521,
+            "stop": "end_turn",
+            "final_text": "```json\n{\n  \"run_id\": \"optim-example\"\n}\n```\n\nThe optimiser run has been successfully submitted with the following configuration:\n- **Model**: model-example\n- **Budget**: GBP 1200 over 2 periods\n- **Channel**: search_clicks with bounds 20-100%\n- **Laydown weights**: [1, 2]\n- **Period CPM**: [3, 4]\n- **Gamma**: 0.1\n- **Objective**: Profit with forward margin 0.25\n- **Other settings**: Default",
+            "seconds": 5.596825600001466
+          },
+          "strict_json": false,
+          "answer_correct": true,
+          "steps_completed": 1,
+          "unexpected_errors": 0,
+          "unintended_writes": 0,
+          "passed": true
+        },
+        {
+          "case": "optimiser_setup",
+          "mode": "deferred",
+          "repetition": 1,
+          "definitions_sha256": "e7faa25211fbff685225db8a7a764427ba6d5c0cf31fd7b7d0dc618e12c898d1",
+          "session": {
+            "responses": [
+              {
+                "model": "claude-haiku-4-5-20251001",
+                "type": "message",
+                "role": "assistant",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "I'll help you submit an optimiser run with those specifications. Let me first search for the appropriate tool to submit an optimiser run."
+                  },
+                  {
+                    "type": "server_tool_use",
+                    "id": "srvtoolu_01Wyr2ybyfMHrMh4XCbc6bcT",
+                    "name": "tool_search_tool_bm25",
+                    "input": {
+                      "query": "optimiser run submit",
+                      "limit": 5
+                    }
+                  },
+                  {
+                    "type": "tool_search_tool_result",
+                    "tool_use_id": "srvtoolu_01Wyr2ybyfMHrMh4XCbc6bcT",
+                    "content": {
+                      "type": "tool_search_tool_search_result",
+                      "tool_references": [
+                        {
+                          "type": "tool_reference",
+                          "tool_name": "evaluate_study_run"
+                        },
+                        {
+                          "type": "tool_reference",
+                          "tool_name": "get_scenario_results"
+                        },
+                        {
+                          "type": "tool_reference",
+                          "tool_name": "get_workflow_guidance"
+                        },
+                        {
+                          "type": "tool_reference",
+                          "tool_name": "run_optimizer"
+                        },
+                        {
+                          "type": "tool_reference",
+                          "tool_name": "run_scenario"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "text": "Perfect! I found the `run_optimizer` tool. Now I'll submit the optimiser run with your exact specifications:"
+                  },
+                  {
+                    "type": "tool_use",
+                    "id": "toolu_01CwG4xyQcWw8Xu6eSLnKp4W",
+                    "name": "run_optimizer",
+                    "input": {
+                      "model_hash": "model-example",
+                      "total_budget": 1200,
+                      "currency": "GBP",
+                      "num_periods": 2,
+                      "bounds": {
+                        "search_clicks": {
+                          "lower": 20,
+                          "upper": 100
+                        }
+                      },
+                      "laydown_weights": {
+                        "search_clicks": [
+                          1,
+                          2
+                        ]
+                      },
+                      "period_cpm": {
+                        "search_clicks": [
+                          3,
+                          4
+                        ]
+                      },
+                      "gamma": 0.1,
+                      "objective": "profit",
+                      "forward_margin": 0.25
+                    },
+                    "caller": {
+                      "type": "direct"
+                    }
+                  }
+                ],
+                "stop_reason": "tool_use",
+                "usage": {
+                  "input_tokens": 5807,
+                  "cache_creation_input_tokens": 0,
+                  "cache_read_input_tokens": 0,
+                  "cache_creation": {
+                    "ephemeral_5m_input_tokens": 0,
+                    "ephemeral_1h_input_tokens": 0
+                  },
+                  "output_tokens": 399,
+                  "service_tier": "standard",
+                  "inference_geo": "not_available",
+                  "server_tool_use": {
+                    "web_search_requests": 0,
+                    "web_fetch_requests": 0
+                  }
+                }
+              },
+              {
+                "model": "claude-haiku-4-5-20251001",
+                "type": "message",
+                "role": "assistant",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "```json\n{\n  \"run_id\": \"optim-example\"\n}\n```\n\nThe optimiser run has been successfully submitted with the following configuration:\n- **Model**: model-example\n- **Budget**: GBP 1200 over 2 periods\n- **Channel**: search_clicks with bounds 20-100%\n- **Laydown weights**: [1, 2]\n- **Period CPM**: [3, 4]\n- **Gamma**: 0.1\n- **Objective**: Profit with forward margin 0.25\n- **Other settings**: Default"
+                  }
+                ],
+                "stop_reason": "end_turn",
+                "usage": {
+                  "input_tokens": 5034,
+                  "cache_creation_input_tokens": 0,
+                  "cache_read_input_tokens": 0,
+                  "cache_creation": {
+                    "ephemeral_5m_input_tokens": 0,
+                    "ephemeral_1h_input_tokens": 0
+                  },
+                  "output_tokens": 137,
+                  "service_tier": "standard",
+                  "inference_geo": "not_available"
+                }
+              }
+            ],
+            "calls": [
+              {
+                "name": "run_optimizer",
+                "arguments": {
+                  "model_hash": "model-example",
+                  "total_budget": 1200,
+                  "currency": "GBP",
+                  "num_periods": 2,
+                  "bounds": {
+                    "search_clicks": {
+                      "lower": 20,
+                      "upper": 100
+                    }
+                  },
+                  "laydown_weights": {
+                    "search_clicks": [
+                      1,
+                      2
+                    ]
+                  },
+                  "period_cpm": {
+                    "search_clicks": [
+                      3,
+                      4
+                    ]
+                  },
+                  "gamma": 0.1,
+                  "objective": "profit",
+                  "forward_margin": 0.25
+                },
+                "error": false
+              }
+            ],
+            "cost_usd": 0.013521,
+            "stop": "end_turn",
+            "final_text": "```json\n{\n  \"run_id\": \"optim-example\"\n}\n```\n\nThe optimiser run has been successfully submitted with the following configuration:\n- **Model**: model-example\n- **Budget**: GBP 1200 over 2 periods\n- **Channel**: search_clicks with bounds 20-100%\n- **Laydown weights**: [1, 2]\n- **Period CPM**: [3, 4]\n- **Gamma**: 0.1\n- **Objective**: Profit with forward margin 0.25\n- **Other settings**: Default",
+            "seconds": 5.568101099999694
+          },
+          "strict_json": false,
+          "answer_correct": true,
+          "steps_completed": 1,
+          "unexpected_errors": 0,
+          "unintended_writes": 0,
+          "passed": true
+        },
+        {
+          "case": "optimiser_setup",
+          "mode": "eager",
+          "repetition": 1,
+          "definitions_sha256": "46037ea73182fd0e3a61b652fd2f32c4ff41264d89c14ae4953e6d7a3675dfe6",
+          "session": {
+            "responses": [
+              {
+                "model": "claude-haiku-4-5-20251001",
+                "type": "message",
+                "role": "assistant",
+                "content": [
+                  {
+                    "type": "tool_use",
+                    "id": "toolu_01YS3tiayhm9965M15cdZKp8",
+                    "name": "run_optimizer",
+                    "input": {
+                      "model_hash": "model-example",
+                      "total_budget": 1200,
+                      "num_periods": 2,
+                      "gamma": 0.1,
+                      "currency": "GBP",
+                      "objective": "profit",
+                      "forward_margin": 0.25,
+                      "bounds": {
+                        "search_clicks": {
+                          "lower": 20,
+                          "upper": 100
+                        }
+                      },
+                      "laydown_weights": {
+                        "search_clicks": [
+                          1,
+                          2
+                        ]
+                      },
+                      "period_cpm": {
+                        "search_clicks": [
+                          3,
+                          4
+                        ]
+                      }
+                    },
+                    "caller": {
+                      "type": "direct"
+                    }
+                  }
+                ],
+                "stop_reason": "tool_use",
+                "usage": {
+                  "input_tokens": 35936,
+                  "cache_creation_input_tokens": 0,
+                  "cache_read_input_tokens": 0,
+                  "cache_creation": {
+                    "ephemeral_5m_input_tokens": 0,
+                    "ephemeral_1h_input_tokens": 0
+                  },
+                  "output_tokens": 266,
+                  "service_tier": "standard",
+                  "inference_geo": "not_available"
+                }
+              },
+              {
+                "model": "claude-haiku-4-5-20251001",
+                "type": "message",
+                "role": "assistant",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "```json\n{\n  \"run_id\": \"optim-example\"\n}\n```"
+                  }
+                ],
+                "stop_reason": "end_turn",
+                "usage": {
+                  "input_tokens": 36225,
+                  "cache_creation_input_tokens": 0,
+                  "cache_read_input_tokens": 0,
+                  "cache_creation": {
+                    "ephemeral_5m_input_tokens": 0,
+                    "ephemeral_1h_input_tokens": 0
+                  },
+                  "output_tokens": 24,
+                  "service_tier": "standard",
+                  "inference_geo": "not_available"
+                }
+              }
+            ],
+            "calls": [
+              {
+                "name": "run_optimizer",
+                "arguments": {
+                  "model_hash": "model-example",
+                  "total_budget": 1200,
+                  "num_periods": 2,
+                  "gamma": 0.1,
+                  "currency": "GBP",
+                  "objective": "profit",
+                  "forward_margin": 0.25,
+                  "bounds": {
+                    "search_clicks": {
+                      "lower": 20,
+                      "upper": 100
+                    }
+                  },
+                  "laydown_weights": {
+                    "search_clicks": [
+                      1,
+                      2
+                    ]
+                  },
+                  "period_cpm": {
+                    "search_clicks": [
+                      3,
+                      4
+                    ]
+                  }
+                },
+                "error": false
+              }
+            ],
+            "cost_usd": 0.07361100000000001,
+            "stop": "end_turn",
+            "final_text": "```json\n{\n  \"run_id\": \"optim-example\"\n}\n```",
+            "seconds": 3.872993499999211
+          },
+          "strict_json": false,
+          "answer_correct": true,
+          "steps_completed": 1,
+          "unexpected_errors": 0,
+          "unintended_writes": 0,
+          "passed": true
+        }
+      ],
+      "catalogue": [
+        {
+          "name": "create_recipe_draft",
+          "definition_sha256": "a1845312944aaf1c3dcde6da1dec3c484503917908d06fedd3c98485619b562b",
+          "annotations": {
+            "title": null,
+            "read_only_hint": false,
+            "destructive_hint": false,
+            "idempotent_hint": true,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "get_recipe_draft",
+          "definition_sha256": "63b1d643b1fdd8de25b155ab90ecdf745163761ddc28f8946b2c95d58175a9ee",
+          "annotations": {
+            "title": null,
+            "read_only_hint": true,
+            "destructive_hint": false,
+            "idempotent_hint": true,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "get_recipe_draft_template",
+          "definition_sha256": "8d88aa8dadd14639c084e0084887fc28aa7be7bc5c6685c97df4a3098c3e0450",
+          "annotations": {
+            "title": null,
+            "read_only_hint": true,
+            "destructive_hint": false,
+            "idempotent_hint": true,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "publish_recipe_draft",
+          "definition_sha256": "09667184e81b64693927ff5a3b6b30d00cea3ceb5a88c6469afba83837343bac",
+          "annotations": {
+            "title": null,
+            "read_only_hint": false,
+            "destructive_hint": false,
+            "idempotent_hint": true,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "get_recipe_revision_authoring",
+          "definition_sha256": "0024cf08ec75843b32e40ef3758066ed79dccff9f0422a5ef8920ddaa8f91300",
+          "annotations": {
+            "title": null,
+            "read_only_hint": true,
+            "destructive_hint": false,
+            "idempotent_hint": true,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "list_recipe_drafts",
+          "definition_sha256": "2a52d6c70be08fa58b286cdc20596324cb7b612266aeff52e8f26754663ddb91",
+          "annotations": {
+            "title": null,
+            "read_only_hint": true,
+            "destructive_hint": false,
+            "idempotent_hint": true,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "update_recipe_draft",
+          "definition_sha256": "10e760adfa54301d566e75c315155b7466ca9629bb5441afc03edb56ebf6bc71",
+          "annotations": {
+            "title": null,
+            "read_only_hint": false,
+            "destructive_hint": true,
+            "idempotent_hint": true,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "get_backend_capabilities",
+          "definition_sha256": "7ec74d77bac47a059ef6e6175828a4f9b8fd245e99e93013ee5a67e62c369756",
+          "annotations": {
+            "title": null,
+            "read_only_hint": true,
+            "destructive_hint": false,
+            "idempotent_hint": true,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "get_data_schema",
+          "definition_sha256": "45763c7c305fbe79a482bbedbaeb3afbe03240e107e49a59efaedb157268dbbe",
+          "annotations": {
+            "title": null,
+            "read_only_hint": true,
+            "destructive_hint": false,
+            "idempotent_hint": true,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "get_data_report",
+          "definition_sha256": "48b382e6687370e6314e9b25d127c2c775710dfe7ed2587df70d9158b3ce3c21",
+          "annotations": {
+            "title": null,
+            "read_only_hint": true,
+            "destructive_hint": false,
+            "idempotent_hint": true,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "upload_data",
+          "definition_sha256": "353563c3f5d8fa0a75dc6c089599c95286fc3d918d57e50002544c5fdd0d4d86",
+          "annotations": {
+            "title": null,
+            "read_only_hint": false,
+            "destructive_hint": false,
+            "idempotent_hint": false,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "list_pipeline_versions",
+          "definition_sha256": "29df9fe1ff82e136b8320f6dc32486a32b4411947992317f076d375a5f3625ba",
+          "annotations": {
+            "title": null,
+            "read_only_hint": true,
+            "destructive_hint": false,
+            "idempotent_hint": true,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "list_pipelines",
+          "definition_sha256": "686bc81261c2e1cebc395e4cc113a353c99aecea70e1dd3050f8ce15b82a3d11",
+          "annotations": {
+            "title": null,
+            "read_only_hint": true,
+            "destructive_hint": false,
+            "idempotent_hint": true,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "run_pipeline",
+          "definition_sha256": "4cbb379c74d35f1b1c5d2160261bd4d22c2f7df137a5e0a553af9b27d4ae69ce",
+          "annotations": {
+            "title": null,
+            "read_only_hint": false,
+            "destructive_hint": false,
+            "idempotent_hint": false,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "get_pipeline_run",
+          "definition_sha256": "c7dc4a9fe25349061a3f8f88e070089d79d5b4471c402a73a0e1feb71ac7052d",
+          "annotations": {
+            "title": null,
+            "read_only_hint": true,
+            "destructive_hint": false,
+            "idempotent_hint": true,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "set_pipeline_schedule",
+          "definition_sha256": "1dfffd79bfc253fc2ac88c0a5d557603f404c4c02d458e89b28d768b37b95d3a",
+          "annotations": {
+            "title": null,
+            "read_only_hint": false,
+            "destructive_hint": true,
+            "idempotent_hint": true,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "list_incrementality_tests",
+          "definition_sha256": "0f638319dcd0e01544bac2fc0efc2a64f620512c1461cae40094150e88b38758",
+          "annotations": {
+            "title": null,
+            "read_only_hint": true,
+            "destructive_hint": false,
+            "idempotent_hint": true,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "get_incrementality_test",
+          "definition_sha256": "468cc4310f11bec61e163748dbecf5272095510222b361eca7d5c23d1560fd69",
+          "annotations": {
+            "title": null,
+            "read_only_hint": true,
+            "destructive_hint": false,
+            "idempotent_hint": true,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "create_incrementality_test",
+          "definition_sha256": "2ecfb84d8053360e857c7f6d063b23571445c7a8e1b63793a9559f30192f8ecd",
+          "annotations": {
+            "title": null,
+            "read_only_hint": false,
+            "destructive_hint": false,
+            "idempotent_hint": false,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "import_incrementality_tests",
+          "definition_sha256": "7f677dc3ab156446bc6b95262a1e13540779b2963917e8e0402a466748396f98",
+          "annotations": {
+            "title": null,
+            "read_only_hint": false,
+            "destructive_hint": false,
+            "idempotent_hint": false,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "list_uploads",
+          "definition_sha256": "a08fe144c29ad862ce1ba1daaad1fb561f2e8fbce569041fe012d4b209d13aa4",
+          "annotations": {
+            "title": null,
+            "read_only_hint": true,
+            "destructive_hint": false,
+            "idempotent_hint": true,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "get_upload",
+          "definition_sha256": "eb24bda9ce13b3569f331dc652eaf8e79f03d058f1baa39408f1b99ff6bde92c",
+          "annotations": {
+            "title": null,
+            "read_only_hint": true,
+            "destructive_hint": false,
+            "idempotent_hint": true,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "list_models",
+          "definition_sha256": "d65797c865019bf3bef4ddda077ee43e5b378330873eecc84d3b8d60af645ccc",
+          "annotations": {
+            "title": null,
+            "read_only_hint": true,
+            "destructive_hint": false,
+            "idempotent_hint": true,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "create_model",
+          "definition_sha256": "95413d51a28718fda460597d72e85f93426df0aa107f2d28143a19b291267f3d",
+          "annotations": {
+            "title": null,
+            "read_only_hint": false,
+            "destructive_hint": false,
+            "idempotent_hint": false,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "create_var_model",
+          "definition_sha256": "0e1b5514d9ea129de79dfde5b01a2ce684b2a9c3b1f6313fd15c1c2654f6c969",
+          "annotations": {
+            "title": null,
+            "read_only_hint": false,
+            "destructive_hint": false,
+            "idempotent_hint": false,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "link_var_model",
+          "definition_sha256": "1401e7bf5a7aac94e89e9edf80d87b9bdd0ac17c37ba4a2eb6ecd26819cc008a",
+          "annotations": {
+            "title": null,
+            "read_only_hint": false,
+            "destructive_hint": true,
+            "idempotent_hint": false,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "unlink_var_model",
+          "definition_sha256": "9cfb6ac1a31a7cf44567eeeddbaafc7bb81acd6748a76a07a605df6b425d7a89",
+          "annotations": {
+            "title": null,
+            "read_only_hint": false,
+            "destructive_hint": true,
+            "idempotent_hint": true,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "set_contribution_groups",
+          "definition_sha256": "a07e8ad68cbde69a419dd04909f6610ef3da7e34a62faa39915a516d6b1ccc6f",
+          "annotations": {
+            "title": null,
+            "read_only_hint": false,
+            "destructive_hint": true,
+            "idempotent_hint": true,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "get_contribution_groups",
+          "definition_sha256": "737532478c9764e162b6b10cd9d9decc3ec882d7d6a48723f8cd73befb697122",
+          "annotations": {
+            "title": null,
+            "read_only_hint": true,
+            "destructive_hint": false,
+            "idempotent_hint": true,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "rename_model",
+          "definition_sha256": "58a0c238df61d8b7cbad0a175dc8609cc4e3e3f7dbbc82a50dcac6e84580765a",
+          "annotations": {
+            "title": null,
+            "read_only_hint": false,
+            "destructive_hint": true,
+            "idempotent_hint": true,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "save_model",
+          "definition_sha256": "d7f81e17619d363a4caf2b1ff81b3fa91989b3ef55b89cbf48f64e66b298a2d7",
+          "annotations": {
+            "title": null,
+            "read_only_hint": false,
+            "destructive_hint": true,
+            "idempotent_hint": false,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "unsave_model",
+          "definition_sha256": "5491b512d8cf5f5257d4ec3a4288c58d7bcd1cd4d55e7b9ffb4d97a1f1460f20",
+          "annotations": {
+            "title": null,
+            "read_only_hint": false,
+            "destructive_hint": true,
+            "idempotent_hint": false,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "list_projects",
+          "definition_sha256": "1a5230a9d123420adfbee19c37643ecec931c83019cc7ba1fb528f2b71c0010d",
+          "annotations": {
+            "title": null,
+            "read_only_hint": true,
+            "destructive_hint": false,
+            "idempotent_hint": true,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "create_project",
+          "definition_sha256": "fa05648f518a8089c14eebf16ae3a73ab6ed4c1af383233a1e3b1de513f5e522",
+          "annotations": {
+            "title": null,
+            "read_only_hint": false,
+            "destructive_hint": false,
+            "idempotent_hint": false,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "rename_project",
+          "definition_sha256": "d91599e3c777d29f7bcf34437386113668b9c5c05375e60723d0d996bd89b2b4",
+          "annotations": {
+            "title": null,
+            "read_only_hint": false,
+            "destructive_hint": true,
+            "idempotent_hint": true,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "get_model",
+          "definition_sha256": "89b399d7722150b9e39e95465b06905662848916f9f4916ddb182ae4e254a9d2",
+          "annotations": {
+            "title": null,
+            "read_only_hint": true,
+            "destructive_hint": false,
+            "idempotent_hint": true,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "delete_model",
+          "definition_sha256": "06c77e707db28b359efa963ac2b3de0c394da5ba350b59b68315eac04535720f",
+          "annotations": {
+            "title": null,
+            "read_only_hint": false,
+            "destructive_hint": true,
+            "idempotent_hint": true,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "get_model_status",
+          "definition_sha256": "d1b4faea9237e680bf1f5ed78e08a977a8bcb5940d0c4c9037264c89a0482d03",
+          "annotations": {
+            "title": null,
+            "read_only_hint": true,
+            "destructive_hint": false,
+            "idempotent_hint": true,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "get_model_results",
+          "definition_sha256": "a0fffcd37f8302a17cc4cd4685ad6924779894abbf74ed21abd08dd76fbb7ee2",
+          "annotations": {
+            "title": null,
+            "read_only_hint": false,
+            "destructive_hint": false,
+            "idempotent_hint": false,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "run_optimizer",
+          "definition_sha256": "f1e4756be4fb8ee1a0c4f054cb7ab8178a984561b36ca8e7e322d4c41e334339",
+          "annotations": {
+            "title": null,
+            "read_only_hint": false,
+            "destructive_hint": false,
+            "idempotent_hint": false,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "get_optimizer_results",
+          "definition_sha256": "fa72df7b016914e770be120d92c087a7b2dd745f1ccb114d87c9bdf3d2d915b7",
+          "annotations": {
+            "title": null,
+            "read_only_hint": true,
+            "destructive_hint": false,
+            "idempotent_hint": true,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "get_scenario_template",
+          "definition_sha256": "e1834a8aa9dabc0d449b02b755783ff9f8810580e704c90a95744c509af9051b",
+          "annotations": {
+            "title": null,
+            "read_only_hint": true,
+            "destructive_hint": false,
+            "idempotent_hint": true,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "run_scenario",
+          "definition_sha256": "dac64900d75cfefaaddd5db0bf19e1375679ca55057d88b2c0479c933cd56be6",
+          "annotations": {
+            "title": null,
+            "read_only_hint": false,
+            "destructive_hint": false,
+            "idempotent_hint": false,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "get_scenario_results",
+          "definition_sha256": "67680e7ccf4ebd610ad26c47c6def3e0eb09627242241985195d973fd799470e",
+          "annotations": {
+            "title": null,
+            "read_only_hint": true,
+            "destructive_hint": false,
+            "idempotent_hint": true,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "update_run",
+          "definition_sha256": "39d33885d131a48aed651dc866469b8cfd8c5858e49773518ace852642bc4fed",
+          "annotations": {
+            "title": null,
+            "read_only_hint": false,
+            "destructive_hint": true,
+            "idempotent_hint": false,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "set_run_pinned",
+          "definition_sha256": "ea90aec42e3fc28d070dddff56ccac5a01ad1767ab8ffdcf2d815ba2a62e1a21",
+          "annotations": {
+            "title": null,
+            "read_only_hint": false,
+            "destructive_hint": true,
+            "idempotent_hint": true,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "list_runs",
+          "definition_sha256": "756291684acd30bb489a43b5956822eb8a52e0a931c71bdbe6f15c4a2c9be690",
+          "annotations": {
+            "title": null,
+            "read_only_hint": true,
+            "destructive_hint": false,
+            "idempotent_hint": true,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "list_studies",
+          "definition_sha256": "a6ccc9aaa3cf092e7db49093f872e413409559255a7ffe382cea055ee98d1357",
+          "annotations": {
+            "title": null,
+            "read_only_hint": true,
+            "destructive_hint": false,
+            "idempotent_hint": true,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "create_study",
+          "definition_sha256": "9fc8a2a605a83bc34a60d304907661d3cde124953068e5b2f8963d10c0df29a3",
+          "annotations": {
+            "title": null,
+            "read_only_hint": false,
+            "destructive_hint": false,
+            "idempotent_hint": false,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "get_study",
+          "definition_sha256": "4cc2190bf2923cff5d35df6f8855c700bd8d20b3f01f257ab45b8c0cf63f6b23",
+          "annotations": {
+            "title": null,
+            "read_only_hint": true,
+            "destructive_hint": false,
+            "idempotent_hint": true,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "get_launch_eligibility",
+          "definition_sha256": "5944b7e96cf9577160b96a28bb1a0a6272dba36effee09dceaf40138d193d0e1",
+          "annotations": {
+            "title": null,
+            "read_only_hint": true,
+            "destructive_hint": false,
+            "idempotent_hint": true,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "get_study_overview",
+          "definition_sha256": "04a6b81d2e38f76aad59ae71c2e61dd17e87a4b3a86d926adf937485aa55c505",
+          "annotations": {
+            "title": null,
+            "read_only_hint": true,
+            "destructive_hint": false,
+            "idempotent_hint": true,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "update_study",
+          "definition_sha256": "1ba4562518ef3f80815c5dba7791d78cd0cce4f4e820eacc547678996889f037",
+          "annotations": {
+            "title": null,
+            "read_only_hint": false,
+            "destructive_hint": true,
+            "idempotent_hint": false,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "list_study_recipes",
+          "definition_sha256": "83f106c10528f6e0bfcf86febfcf72642cb1bed9d55c4015c726fe3e000b01f5",
+          "annotations": {
+            "title": null,
+            "read_only_hint": true,
+            "destructive_hint": false,
+            "idempotent_hint": true,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "create_study_recipe",
+          "definition_sha256": "aaa661db2a797797963c6b7e4b2ec5f47d79d10df0d78a1f109eee0c99eff7d9",
+          "annotations": {
+            "title": null,
+            "read_only_hint": false,
+            "destructive_hint": false,
+            "idempotent_hint": false,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "revise_study_recipe",
+          "definition_sha256": "8ddd126b84a83956be0c9ef18e90011268e20cda5e986670064e45868beadd14",
+          "annotations": {
+            "title": null,
+            "read_only_hint": false,
+            "destructive_hint": false,
+            "idempotent_hint": false,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "get_recipe_revision",
+          "definition_sha256": "6c302840427eb0de4bb0d29c505f8afec01a62742b7e623a0677af334c84a421",
+          "annotations": {
+            "title": null,
+            "read_only_hint": true,
+            "destructive_hint": false,
+            "idempotent_hint": true,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "diff_recipe_revisions",
+          "definition_sha256": "4c9931259124f0eafa7fc28956ad4013c51b77eff1f917ae6764edb22b0efd2f",
+          "annotations": {
+            "title": null,
+            "read_only_hint": true,
+            "destructive_hint": false,
+            "idempotent_hint": true,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "refreeze_recipe_revision",
+          "definition_sha256": "a3572d20212e867d2294863aca9364d5f28af9332c6bb65c51277bbb3733e349",
+          "annotations": {
+            "title": null,
+            "read_only_hint": false,
+            "destructive_hint": false,
+            "idempotent_hint": false,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "validate_study_recipe",
+          "definition_sha256": "67a84bf99ba36ef84195ca07757fbf0118597987ba09fbe13727a20adb802004",
+          "annotations": {
+            "title": null,
+            "read_only_hint": true,
+            "destructive_hint": false,
+            "idempotent_hint": true,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "launch_study_run",
+          "definition_sha256": "5b40b3bfdea922074975bd048e81dad337c8a7abd88ba7adc4641aa33b2a4d7a",
+          "annotations": {
+            "title": null,
+            "read_only_hint": false,
+            "destructive_hint": false,
+            "idempotent_hint": true,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "list_study_runs",
+          "definition_sha256": "4d4f6880bcd8e6ffb662f1018555dfe0f5891665b91ec7895302586a2cead622",
+          "annotations": {
+            "title": null,
+            "read_only_hint": true,
+            "destructive_hint": false,
+            "idempotent_hint": true,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "get_study_run",
+          "definition_sha256": "06d704ae34582950c39bbfbc7f2d5661a18ddc79abd9c6269f6b4d3edff5d146",
+          "annotations": {
+            "title": null,
+            "read_only_hint": true,
+            "destructive_hint": false,
+            "idempotent_hint": true,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "cancel_study_run",
+          "definition_sha256": "bb1fda4c039b8437453bcb48d008acfdf7030fe2d445e201d20570025199db4b",
+          "annotations": {
+            "title": null,
+            "read_only_hint": false,
+            "destructive_hint": true,
+            "idempotent_hint": false,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "list_quality_policies",
+          "definition_sha256": "424f51c5ff64883fc2691c07a8fbc057cbe6d6f40e08322de2080cae442249ea",
+          "annotations": {
+            "title": null,
+            "read_only_hint": true,
+            "destructive_hint": false,
+            "idempotent_hint": true,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "diff_quality_policies",
+          "definition_sha256": "339a82f04aa7131767c53a2738439a4f12de6534bb5ffbba7d80fdf1b62eecd3",
+          "annotations": {
+            "title": null,
+            "read_only_hint": true,
+            "destructive_hint": false,
+            "idempotent_hint": true,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "get_quality_policy",
+          "definition_sha256": "c5da427576a75c44740f219504fb376110acd732433ba32350cb057e25be6784",
+          "annotations": {
+            "title": null,
+            "read_only_hint": true,
+            "destructive_hint": false,
+            "idempotent_hint": true,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "create_quality_policy",
+          "definition_sha256": "d3d7465bf5ed674da2b2543d2fd41181b14e137be1a2230e223412c56d5d8cb3",
+          "annotations": {
+            "title": null,
+            "read_only_hint": false,
+            "destructive_hint": false,
+            "idempotent_hint": false,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "retire_quality_policy",
+          "definition_sha256": "e32fff9b4dcc55a370d9d9bf3d8208b987dcdf2bcd739277dc7c027038ec85d1",
+          "annotations": {
+            "title": null,
+            "read_only_hint": false,
+            "destructive_hint": true,
+            "idempotent_hint": true,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "evaluate_study_run",
+          "definition_sha256": "9507bf28b689db4bf47486552ebbc36111697595a5bf9fa3f32b610f2016ac14",
+          "annotations": {
+            "title": null,
+            "read_only_hint": false,
+            "destructive_hint": false,
+            "idempotent_hint": false,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "list_study_evaluations",
+          "definition_sha256": "8f15bff371076433db77c069333461858a93fbd76b74fc9d81cbf252c491a333",
+          "annotations": {
+            "title": null,
+            "read_only_hint": false,
+            "destructive_hint": false,
+            "idempotent_hint": false,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "list_study_decisions",
+          "definition_sha256": "1092c35277e13a2d56e9d3882763dda14cbedffe1977ac3583a62c34732c107f",
+          "annotations": {
+            "title": null,
+            "read_only_hint": true,
+            "destructive_hint": false,
+            "idempotent_hint": true,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "get_study_champion",
+          "definition_sha256": "500aff24c361d4c27927dc3a93ce6b8f583ad718f0be59fec7b5fff4f68f9266",
+          "annotations": {
+            "title": null,
+            "read_only_hint": true,
+            "destructive_hint": false,
+            "idempotent_hint": true,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "get_study_prediction_access",
+          "definition_sha256": "aeaecf0de925116735b76b35d2719d9f7b80e74a9b49cb5c4830bf94172c8f5d",
+          "annotations": {
+            "title": null,
+            "read_only_hint": true,
+            "destructive_hint": false,
+            "idempotent_hint": true,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "get_study_validation_resolutions",
+          "definition_sha256": "160c35fe72e082efc4a24dcf7096442421527e182c3c6940b0aacd18e5d1f8b2",
+          "annotations": {
+            "title": null,
+            "read_only_hint": true,
+            "destructive_hint": false,
+            "idempotent_hint": true,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "declare_study_holdout_use",
+          "definition_sha256": "59511411c7d462b6f5dda9ba1c451df48d1af8e1625b7faf75a351937a25b3e8",
+          "annotations": {
+            "title": null,
+            "read_only_hint": false,
+            "destructive_hint": false,
+            "idempotent_hint": true,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "assess_study_validation_pair",
+          "definition_sha256": "22884e5ffb6d0d2fbbc6c7b0a6189469394b058140a4eda52bd19ff14fe4281b",
+          "annotations": {
+            "title": null,
+            "read_only_hint": false,
+            "destructive_hint": false,
+            "idempotent_hint": false,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "recommend_study_run",
+          "definition_sha256": "0b5e718632ba220c2d452e9394aab314185226a3c99319ebe26df6cd3b517f88",
+          "annotations": {
+            "title": null,
+            "read_only_hint": false,
+            "destructive_hint": false,
+            "idempotent_hint": false,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "adopt_model_into_study",
+          "definition_sha256": "1055c8c37f3d150a4dcbd9ca2fc2bd68c6de241ebe1acdd19000284565450909",
+          "annotations": {
+            "title": null,
+            "read_only_hint": false,
+            "destructive_hint": false,
+            "idempotent_hint": false,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "compare_study_runs",
+          "definition_sha256": "fe37e8f8f4d12636b063c3a3479dc391dbe07b335453d74fe06c9e0bf98f0ab7",
+          "annotations": {
+            "title": null,
+            "read_only_hint": false,
+            "destructive_hint": false,
+            "idempotent_hint": false,
+            "open_world_hint": true
+          }
+        },
+        {
+          "name": "get_workflow_guidance",
+          "definition_sha256": "0cd4edeed479bd8bd8c654a2d588fbc4b5260a06d230beca13e7c65314500cc4",
+          "annotations": {
+            "title": null,
+            "read_only_hint": true,
+            "destructive_hint": false,
+            "idempotent_hint": true,
+            "open_world_hint": false
+          }
+        }
+      ],
+      "tasks": [
+        {
+          "case": {
+            "id": "optimiser_setup",
+            "purpose": "Preserve budget currency, exact keys, bounds and objective",
+            "steps": [
+              {
+                "tool": "run_optimizer",
+                "arguments": {
+                  "model_hash": "model-example",
+                  "total_budget": 1200.0,
+                  "num_periods": 2,
+                  "gamma": 0.1,
+                  "currency": "GBP",
+                  "bounds": {
+                    "search_clicks": {
+                      "lower": 20,
+                      "upper": 100
+                    }
+                  },
+                  "laydown_weights": {
+                    "search_clicks": [
+                      1,
+                      2
+                    ]
+                  },
+                  "period_cpm": {
+                    "search_clicks": [
+                      3,
+                      4
+                    ]
+                  },
+                  "objective": "profit",
+                  "forward_margin": 0.25
+                },
+                "exchanges": [
+                  {
+                    "method": "POST",
+                    "path": "/api/v1/models/model-example/optimize",
+                    "query": {},
+                    "body": {
+                      "total_budget": 1200.0,
+                      "num_periods": 2,
+                      "gamma": 0.1,
+                      "currency": "GBP",
+                      "bounds": {
+                        "search_clicks": {
+                          "lower": 20,
+                          "upper": 100
+                        }
+                      },
+                      "laydown_weights": {
+                        "search_clicks": [
+                          1,
+                          2
+                        ]
+                      },
+                      "period_cpm": {
+                        "search_clicks": [
+                          3,
+                          4
+                        ]
+                      },
+                      "objective": "profit",
+                      "forward_margin": 0.25
+                    },
+                    "status": 200,
+                    "response": {
+                      "run_id": "optim-example"
+                    },
+                    "fault": null
+                  }
+                ],
+                "expected": {
+                  "run_id": "optim-example"
+                },
+                "is_error": false,
+                "cancelled": false,
+                "tool_error": null
+              }
+            ]
+          },
+          "prompt": "The exact model_hash is model-example (preserve the entire string). It is complete and capabilities/preflights are checked. Submit one optimiser run, no polling. Channel search_clicks, GBP1200 over two periods, bounds 20 to 100 percent, laydown weights [1,2], period CPM [3,4], gamma 0.1. Profit objective, forward margin 0.25, other settings default. Return run_id.",
+          "expected": {
+            "run_id": "optim-example"
+          }
+        }
+      ],
+      "budget": {
+        "cap": 10.0,
+        "prior": 7.235924,
+        "charged": 0.17426400000000003,
+        "reserved": 0.0
+      }
     }
   },
   "limitations": [
