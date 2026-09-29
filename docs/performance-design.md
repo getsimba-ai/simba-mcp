@@ -266,3 +266,14 @@ peak allocations were approximately 832 KiB versus 296 KiB. This demonstrates a
 resource/latency bound with reduced completion under intentionally tight limits,
 not a quality or throughput improvement. It is one mock-transport burst, not
 production sizing evidence or a universal memory bound.
+
+A separate exposed development comparison retained all 24 tasks, with a one-second
+budget, four active operations, one active per caller and enough queue capacity
+for the burst. Both baseline and bounded modes completed 24/24 without overload
+or deadline failures. Peak backend requests fell from 24 to four, while p95
+latency increased from 164 ms to 326 ms and maximum latency from 164 ms to 405 ms.
+Python traced peaks were 854,776 and 820,771 bytes. This workload has no simulated
+backend contention penalty, so queueing trades latency for lower concurrency;
+it does not demonstrate a latency or cost improvement. The earlier aggressive
+comparison is retained as a distinct pre-fairness-fix development result rather
+than overwritten. Neither development run is final acceptance evidence.

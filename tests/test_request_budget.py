@@ -342,3 +342,25 @@ async def test_fake_clock_retry_loop_cannot_reset_overall_budget(monkeypatch):
         assert instance._admission.active == 0
     finally:
         await instance.close()
+
+
+@pytest.mark.anyio
+async def test_full_ineligible_caller_queue_does_not_refuse_free_slot():
+    admission = RequestAdmission(policy(max_queued=1, max_queued_per_caller=1))
+    first, second = admission.identity("first"), admission.identity("second")
+
+    async def queued():
+        async with admission.enter(first):
+            pass
+
+    async with admission.enter(first):
+        waiting = asyncio.create_task(queued())
+        await asyncio.sleep(0)
+        assert len(admission.waiters) == 1
+        async with admission.enter(second):
+            assert admission.active == 2
+        waiting.cancel()
+        with pytest.raises(asyncio.CancelledError):
+            await waiting
+    assert admission.active == 0
+    assert not admission.callers and not admission.waiters
