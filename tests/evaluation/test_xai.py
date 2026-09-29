@@ -154,9 +154,19 @@ async def test_xai_errors_never_dispatch_or_retry(fault):
 
 
 @pytest.mark.anyio
-@pytest.mark.parametrize("diagnostic", [False, True])
+@pytest.mark.parametrize(
+    "diagnostic,trial_filter",
+    [
+        (False, None),
+        (True, None),
+        (False, ["baseline:1"]),
+        (False, ["candidate:9"]),
+        (True, ["candidate:0"]),
+        (False, ["baseline:1", "baseline:1"]),
+    ],
+)
 async def test_xai_command_reuses_frozen_cases_and_selects_only_xai_key(
-    tmp_path, monkeypatch, diagnostic
+    tmp_path, monkeypatch, diagnostic, trial_filter
 ):
     from simba_mcp.evaluation.hosts import __main__ as command
     from simba_mcp.evaluation.hosts import xai
@@ -190,7 +200,7 @@ async def test_xai_command_reuses_frozen_cases_and_selects_only_xai_key(
         )
     )
     output = tmp_path / "comparison.json"
-    await command.run(
+    operation = command.run(
         SimpleNamespace(
             output=output,
             cap_usd=10,
@@ -207,10 +217,17 @@ async def test_xai_command_reuses_frozen_cases_and_selects_only_xai_key(
             results_model_diagnostic=diagnostic,
             results_prompt="paraphrase",
             results_baseline=baseline,
+            results_trial=trial_filter,
         )
     )
+    if trial_filter and (diagnostic or trial_filter != ["baseline:1"]):
+        with pytest.raises(ValueError, match="Trial selection"):
+            await operation
+        assert not requests and not output.exists()
+        return
+    await operation
     report = json.loads(output.read_text())
-    count = 2 if diagnostic else 4
+    count = 1 if trial_filter else 2 if diagnostic else 4
     assert report["status"] == "complete" and len(requests) == count
     assert report["configuration"]["model"] == GROK
     assert report["configuration"]["model_configuration"]["request"]["reasoning"] == {
@@ -221,6 +238,11 @@ async def test_xai_command_reuses_frozen_cases_and_selects_only_xai_key(
     assert all(t["prompt_variant"] == "paraphrase" for t in report["trials"])
     assert report["budget"]["charged"] == pytest.approx(count * 0.0005)
     assert report["budget"]["reserved"] == 0
+    if trial_filter:
+        assert [(t["view"], t["repetition"]) for t in report["trials"]] == [("baseline", 1)]
+        assert report["configuration"]["results_trial"] == trial_filter
+        assert report["assessment"]["status"] == "invalid"
+        assert not report["assessment"]["accepted"]
     if diagnostic:
         assert not report["assessment"]["accepted"]
         assert {t["view"] for t in report["trials"]} == {"candidate"}

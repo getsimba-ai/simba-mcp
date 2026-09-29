@@ -141,6 +141,20 @@ async def run(args):
         selected = [task for task in selected if task[0].id in ROLE_CASES[role]]
     if not selected:
         raise ValueError("No tasks match the requested comparison")
+    trial_filter = getattr(args, "results_trial", None)
+    if trial_filter:
+        allowed_trials = {
+            f"{view}:{rep}" for view in (guidance_arms or {}) for rep in range(args.samples)
+        }
+        if (
+            not selection_validation
+            or diagnostic
+            or args.case is None
+            or not baseline_path
+            or len(set(trial_filter)) != len(trial_filter)
+            or not set(trial_filter) <= allowed_trials
+        ):
+            raise ValueError("Trial selection requires a valid paired single-case validation")
     report = {
         "schema_version": 1,
         "status": "running",
@@ -194,6 +208,8 @@ async def run(args):
     }
     if guidance_arms:
         report["guidance"] = guidance_arms
+    if trial_filter:
+        report["configuration"]["results_trial"] = list(trial_filter)
     if robust:
         report["calibration"] = calibrate()
         report["experiment_inputs"] = {
@@ -257,6 +273,8 @@ async def run(args):
                         if rep % 2:
                             arms.reverse()
                     for mode, view in arms:
+                        if trial_filter and f"{view}:{rep}" not in trial_filter:
+                            continue
                         arm_server = (
                             server
                             if view == "full" or guidance_arms
@@ -421,6 +439,11 @@ def main():
     parser.add_argument("--cap-usd", type=float, required=True)
     parser.add_argument("--prior-usd", type=float, default=0)
     parser.add_argument("--samples", type=int, default=2)
+    parser.add_argument(
+        "--results-trial",
+        action="append",
+        help="Run only VIEW:REPETITION for one selection-validation case; never grants paired acceptance",
+    )
     parser.add_argument("--model", choices=(MODEL, SONNET, GROK), default=MODEL)
     parser.add_argument(
         "--reasoning-effort",

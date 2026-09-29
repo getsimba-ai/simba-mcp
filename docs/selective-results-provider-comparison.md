@@ -125,3 +125,13 @@ that different aggregation formulas can yield equal numbers. Its next bounded
 validation compares V14 with V15 on three exposed families: aggregate windows,
 channel comparison and restricted historical totals. This is not acceptance;
 V4 remains unopened and no failure is rescored.
+
+The owner subsequently stopped Sonnet testing. Its later partial paid response
+remains preserved. Cumulative accounted spend at that stop was US$78.071698,
+including US$2.672954 of retained unknown allowances across interrupted attempts.
+After the owner confirmed the xAI key limit was corrected, continuation is Grok
+only. The host's explicit `--results-trial VIEW:REPETITION` option selects missing
+trials for one exposed validation case. It refuses invalid or duplicate identities
+and cannot be used for final acceptance. A filtered report remains an incomplete
+paired comparison; completing one selected trial does not turn it into acceptance.
+Earlier completed trials and their original scores are not replayed or overwritten.
