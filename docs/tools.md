@@ -1010,7 +1010,7 @@ IMPORTANT: channel naming. Results are keyed by the channel's ACTIVITY
 COLUMN name (e.g. "search_activity"), not by the `channels[].name` passed
 to create_model. When relating a user-facing channel name to a result or
 activity key, retrieve channel_map and use its explicit mapping; do not infer identity from spelling.
-A display name and its activity-column key are both valid once that
+A display name and its activity-column key are both valid in narrative answers once that
 explicit mapping is in evidence.
 Reuse a sufficient channel_map already returned for the same model.
 Otherwise request channel_map, channel_summary and the other needed

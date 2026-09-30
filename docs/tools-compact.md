@@ -782,7 +782,7 @@ retrieve channel_map and use its explicit mapping; do not infer identity from sp
 Reuse a sufficient channel_map already returned for the same model. Otherwise
 request channel_map, channel_summary and the needed sections together; sections
 accepts a comma-separated list. A mapped display name and its activity-column
-key are both valid once that map is in evidence. Result keys used in
+key are both valid in narrative answers once that map is in evidence. Result keys used in
 optimiser/scenario inputs are exact, case-sensitive ACTIVITY-COLUMN names, not
 channels[].name. contributions is KPI units; coefficients is per-period revenue
 space; channel_summary provides aggregated revenue/spend/ROI. Never equate largest
