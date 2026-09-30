@@ -171,10 +171,14 @@ async def test_disconnect_mid_read_closes_stream_retries_get_and_reuses_client(m
         return httpx.Response(200, json={"ok": True})
 
     instance = client(handler)
+    shared = instance._client
     try:
         assert await instance.get_schema() == {"ok": True}
+        assert instance._client is shared and not shared.is_closed
         assert sum(item.method == "GET" for item in calls) == 2
         assert disconnected[0].closed
+        assert instance._admission.active == 0
+        assert not instance._admission.callers
         calls.clear()
         result = await instance.create_model({"submission_key": "exact"})
         assert result["_status_code"] >= 400
@@ -183,6 +187,7 @@ async def test_disconnect_mid_read_closes_stream_retries_get_and_reuses_client(m
         assert disconnected[1].closed
         assert instance._admission.active == 0
         assert await instance.get_schema() == {"ok": True}
+        assert instance._client is shared and not shared.is_closed
         assert sum(item.method == "GET" for item in calls) == 1
     finally:
         await instance.close()
@@ -190,36 +195,49 @@ async def test_disconnect_mid_read_closes_stream_retries_get_and_reuses_client(m
 
 @pytest.mark.anyio
 async def test_cooperative_cancel_at_parse_boundary_releases_permit_without_retry(monkeypatch):
-    """Cancellation at an awaitable parse boundary releases admission and does not retry.
+    """Cancellation after the real parser, at its await boundary, releases admission.
 
-    The test replaces ``_parse_response`` with an await point. It does not interrupt
-    synchronous ``json.loads``. Parsing runs inside the request deadline, but a
-    synchronous parser is not itself cancellable, so a large body can overshoot that
-    deadline until the next await. The deadline then returns ``request_deadline_exceeded``
-    rather than cutting the parser mid-call.
+    The wrapper runs ``_parse_response`` and then waits. Cancellation must not
+    return the parsed payload, retry the read, close the shared client, or leave
+    the response stream open. A synchronous ``json.loads`` is still not itself
+    cancellable; this locks the await that follows it.
     """
     entered = asyncio.Event()
     calls = []
+    seen = {}
 
     def handler(request):
         calls.append(request)
         return httpx.Response(200, json={"ok": True})
 
+    original = SimbaAPIClient._parse_response
+
     async def parsing(self, response, body=None):
+        seen["parsed"] = await original(self, response, body)
+        seen["response"] = response
         entered.set()
         await asyncio.Event().wait()
+        return seen["parsed"]
 
     monkeypatch.setattr(SimbaAPIClient, "_parse_response", parsing)
     instance = client(handler, total_seconds=10)
+    shared = instance._client
     task = asyncio.create_task(instance.get_schema())
     try:
         await asyncio.wait_for(entered.wait(), timeout=1)
+        assert seen["parsed"] == {"ok": True}
         task.cancel()
         with pytest.raises(asyncio.CancelledError):
             await asyncio.wait_for(task, timeout=1)
         assert len(calls) == 1
+        assert seen["response"].is_closed
+        assert instance._client is shared and not shared.is_closed
         assert instance._admission.active == 0
         assert not instance._admission.callers
+        monkeypatch.setattr(SimbaAPIClient, "_parse_response", original)
+        assert await instance.get_schema() == {"ok": True}
+        assert len(calls) == 2
+        assert instance._client is shared
     finally:
         await instance.close()
 
