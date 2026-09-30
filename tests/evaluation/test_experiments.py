@@ -26,7 +26,7 @@ def test_calibration_has_positive_negative_and_claim_review_labels():
 def test_calibration_detects_broken_grader(monkeypatch):
     from simba_mcp.evaluation.hosts import result_calibration
 
-    monkeypatch.setattr(result_calibration, "semantic_facts", lambda *_: True)
+    monkeypatch.setattr(result_calibration, "semantic_facts", lambda *_, **__: True)
     assert not result_calibration.calibrate()["passed"]
 
 

@@ -125,10 +125,10 @@ def semantic_facts(task, facts, supported_sections, *, grader_version=17):
             "diagnostics were not returned",
         }
     aliases = {"Search Activity": "Search", "TV_activity": "TV"}
-    if grader_version == 18:
-        from ..result_cases import saved_results
-
-        mapping = (task.fixture or saved_results()).get("results", {}).get("channel_map", [])
+    if grader_version == 18 and task.fixture is not None:
+        # Generic identities come only from the explicit prospective contract.
+        # Historical tasks without a fixture retain their fixed aliases above.
+        mapping = task.fixture.get("results", {}).get("channel_map", [])
         candidates = [
             row
             for row in mapping

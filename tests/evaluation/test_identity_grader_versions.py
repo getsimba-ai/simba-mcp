@@ -176,3 +176,11 @@ def test_invalid_versions_are_rejected(version):
 def test_version17_calibration_matches_pre_repair_snapshot():
     digest = hashlib.sha256(json.dumps(calibrate(), sort_keys=True).encode()).hexdigest()
     assert digest == "ee5aa61455bdabf4ab6496e780f9959e4dc2174b3f85292c8b17289c18e7d491"
+
+
+def test_version18_default_aliases_do_not_fill_an_explicit_empty_fixture():
+    task = next(t for t in rlc_development_tasks() if t.id == "result_roi")
+    task = replace(task, fixture=None)
+    facts = {**task.expected, "channel": "Search"}
+    assert semantic_facts(task, facts, {"channel_map"}, grader_version=18)
+    assert not semantic_facts(replace(task, fixture={}), facts, {"channel_map"}, grader_version=18)
