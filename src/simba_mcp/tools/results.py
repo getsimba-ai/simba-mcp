@@ -230,6 +230,9 @@ async def get_model_results(
 ) -> APIResult:
     """Get results from a completed model.
 
+    Use a supplied model_hash directly; call list_models only to find an unknown
+    identifier. No get_model preflight is required for a result read.
+
     Available sections:
     - channel_summary: per-channel aggregates {Channel, Sales, Spend, Revenue, ROI}.
     - contributions: per-period decomposition (Date, one column per channel, plus

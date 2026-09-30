@@ -24,13 +24,13 @@ Get Workflow Guidance · **reads**
 
 Read versioned Simba workflow guidance when native Skills are unavailable.
 
-Use index to list allowed topic/section IDs, then request the relevant section.
+Use index only when the required topic/section is unknown.
 Topics: mmm, results, priors, optimiser, studies, var. The default section is
 entrypoint; it names detailed sections and when they are needed. Arguments are
 identifiers, never paths. Returns a complete section within a 24,000-byte structured-payload
 limit or a refusal, never truncated instructions. This local read makes no
 backend request. Guidance does not authorise writes or replace validation.
-Lookup is optional when the caller already has the relevant versioned guidance.
+Reuse relevant guidance already supplied in context; request only missing sections.
 
 | Parameter | Type | Required | Default |
 |---|---|---|---|
@@ -666,6 +666,7 @@ Get Model · **reads**
 Get a model's metadata and configuration echo — works for EVERY status,
 including failed models (unlike get_model_results, which needs 'complete').
 
+This is not a preflight check for reading an existing model result.
 Use this to inspect what a model was configured with, why it failed, or
 where it lives. Returns: id, model_hash, name, status, model_type
 ("mmm"/"var"), hierarchy_value, periodicity, is_saved, project_id/name,
@@ -752,8 +753,9 @@ List all Marketing Mix Models for the authenticated user.
 Returns model name, hash, status (pending/under way/complete/failed),
 type (mmm/var), hierarchy value, and timestamps.
 
-NOTE: All other model endpoints use model_hash (string, e.g. "f835671a25")
-as the identifier. Use the model_hash from this response.
+Use this when the model identifier is unknown or the user asks to browse models.
+If a model_hash is already supplied, use it directly with the relevant model
+tool; listing is not a prerequisite. Model endpoints use model_hash, not numeric id.
 
 Args:
     include_unsaved: Include draft/unsaved models (default false).
@@ -885,6 +887,9 @@ Returns: {model_hash, is_saved: false, freed_project_id}.
 Get Model Results · **writes**
 
 Get results from a completed model.
+
+Use a supplied model_hash directly; call list_models only to find an unknown
+identifier. No get_model preflight is required for a result read.
 
 Available sections:
 - channel_summary: per-channel aggregates {Channel, Sales, Spend, Revenue, ROI}.

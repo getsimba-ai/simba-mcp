@@ -58,7 +58,10 @@ Full guidance: get_workflow_guidance(topic=mmm, section=tool-reference).""",
         "mmm",
     ),
     "get_model_results": Description(
-        """Read selected results from a completed model. Request sections as a comma-separated
+        """Read selected results from a completed model.
+Use a supplied model_hash directly; call list_models only to find an unknown
+identifier. No get_model preflight is required for a result read.
+Request sections as a comma-separated
 string; use channels, max_grid_points and max_response_bytes to bound output.
 The byte cap is checked after backend download, not a transport download limit.
 Existing-result questions need no mandatory capability/schema discovery. A missing

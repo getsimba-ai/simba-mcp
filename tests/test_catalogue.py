@@ -96,3 +96,23 @@ def test_legacy_is_default_and_full_contracts_are_preserved():
     assert reference.DOCS.with_name("tools-compact.md").read_text(
         encoding="utf-8"
     ) == reference.current("compact")
+
+
+@pytest.mark.parametrize("mode", ["legacy", "compact"])
+def test_known_identifier_and_supplied_guidance_routing(mode):
+    tools = {tool.name: tool for tool in anyio.run(create_server(mode).list_tools)}
+    assert "listing is not a prerequisite" in tools["list_models"].description
+    assert "not a preflight check" in tools["get_model"].description
+    assert "Use a supplied model_hash directly" in tools["get_model_results"].description
+    assert "No get_model preflight" in tools["get_model_results"].description
+    assert "request only missing sections" in tools["get_workflow_guidance"].description
+    assert "Use index only when" in tools["get_workflow_guidance"].description
+
+
+def test_results_entrypoint_reuses_supplied_interpretation():
+    from simba_mcp.guidance import read_guidance
+
+    guidance = read_guidance("results", "entrypoint")
+    assert guidance["guidance_version"] == "3"
+    assert "Use list_models only when the model identifier is unknown" in guidance["content"]
+    assert "Retrieve it only when absent" in guidance["content"]

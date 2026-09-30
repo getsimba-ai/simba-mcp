@@ -21,8 +21,9 @@ async def list_models(
     Returns model name, hash, status (pending/under way/complete/failed),
     type (mmm/var), hierarchy value, and timestamps.
 
-    NOTE: All other model endpoints use model_hash (string, e.g. "f835671a25")
-    as the identifier. Use the model_hash from this response.
+    Use this when the model identifier is unknown or the user asks to browse models.
+    If a model_hash is already supplied, use it directly with the relevant model
+    tool; listing is not a prerequisite. Model endpoints use model_hash, not numeric id.
 
     Args:
         include_unsaved: Include draft/unsaved models (default false).
@@ -576,6 +577,7 @@ async def get_model(
     """Get a model's metadata and configuration echo — works for EVERY status,
     including failed models (unlike get_model_results, which needs 'complete').
 
+    This is not a preflight check for reading an existing model result.
     Use this to inspect what a model was configured with, why it failed, or
     where it lives. Returns: id, model_hash, name, status, model_type
     ("mmm"/"var"), hierarchy_value, periodicity, is_saved, project_id/name,
