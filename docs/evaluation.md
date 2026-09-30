@@ -1,5 +1,10 @@
 # Workflow contract evaluations
 
+For proposed speed, cost and reliability trade-offs and fixed stopping rules, see
+the [performance acceptance matrix](performance-acceptance-matrix.md). Select a
+profile before a future experiment; these examples are not executable defaults
+and do not alter historical experiment decisions.
+
 Run the deterministic suite from an installed checkout:
 
 ```sh
