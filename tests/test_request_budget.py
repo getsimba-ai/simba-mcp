@@ -134,40 +134,70 @@ async def test_read_faults_retry_but_mutations_send_once(fault, monkeypatch):
 
 
 class _DisconnectingStream(httpx.AsyncByteStream):
+    def __init__(self):
+        self.closed = False
+
     async def __aiter__(self):
         yield b'{"partial":'
         raise httpx.ReadError("synthetic disconnect")
 
+    async def aclose(self):
+        self.closed = True
+
 
 @pytest.mark.anyio
-async def test_disconnect_mid_read_retries_get_and_sends_mutation_once(monkeypatch):
+async def test_disconnect_mid_read_closes_stream_retries_get_and_reuses_client(monkeypatch):
+    """A mid-body disconnect closes that stream, retries a safe read, and leaves the client usable.
+
+    The final read is a new call after the recovered GET and the single-send mutation
+    failure. It is not the automatic retry of the disconnected GET.
+    """
     monkeypatch.setattr("simba_mcp.api_client.random.uniform", lambda *_: 0)
     calls = []
+    disconnected = []
+    seen = {"GET": 0, "POST": 0}
 
     def handler(request):
         calls.append(request)
-        if request.method == "GET" and sum(item.method == "GET" for item in calls) == 1:
-            return httpx.Response(200, stream=_DisconnectingStream())
-        if request.method == "POST":
-            return httpx.Response(200, stream=_DisconnectingStream())
+        seen[request.method] = seen.get(request.method, 0) + 1
+        if request.method == "GET" and seen["GET"] == 1:
+            stream = _DisconnectingStream()
+            disconnected.append(stream)
+            return httpx.Response(200, stream=stream)
+        if request.method == "POST" and seen["POST"] == 1:
+            stream = _DisconnectingStream()
+            disconnected.append(stream)
+            return httpx.Response(200, stream=stream)
         return httpx.Response(200, json={"ok": True})
 
     instance = client(handler)
     try:
         assert await instance.get_schema() == {"ok": True}
         assert sum(item.method == "GET" for item in calls) == 2
+        assert disconnected[0].closed
         calls.clear()
         result = await instance.create_model({"submission_key": "exact"})
         assert result["_status_code"] >= 400
         assert len(calls) == 1
         assert "reconcile" in result["_next_action"].lower()
+        assert disconnected[1].closed
         assert instance._admission.active == 0
+        assert await instance.get_schema() == {"ok": True}
+        assert sum(item.method == "GET" for item in calls) == 1
     finally:
         await instance.close()
 
 
 @pytest.mark.anyio
-async def test_cancel_during_parse_releases_permit_without_retry(monkeypatch):
+async def test_cooperative_cancel_at_parse_boundary_releases_permit_without_retry(monkeypatch):
+    """Cancellation at an awaitable parse boundary releases admission and does not retry.
+
+    The test replaces ``_parse_response`` with an await point. It does not interrupt
+    synchronous ``json.loads``. Parsing runs inside the request deadline, but a
+    synchronous parser is not itself cancellable, so a large body can overshoot that
+    deadline until the next await. The deadline then returns ``request_deadline_exceeded``
+    rather than cutting the parser mid-call.
+    """
     entered = asyncio.Event()
     calls = []
 
@@ -182,11 +212,11 @@ async def test_cancel_during_parse_releases_permit_without_retry(monkeypatch):
     monkeypatch.setattr(SimbaAPIClient, "_parse_response", parsing)
     instance = client(handler, total_seconds=10)
     task = asyncio.create_task(instance.get_schema())
-    await entered.wait()
-    task.cancel()
     try:
+        await asyncio.wait_for(entered.wait(), timeout=1)
+        task.cancel()
         with pytest.raises(asyncio.CancelledError):
-            await task
+            await asyncio.wait_for(task, timeout=1)
         assert len(calls) == 1
         assert instance._admission.active == 0
         assert not instance._admission.callers
