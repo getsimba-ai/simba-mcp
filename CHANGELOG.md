@@ -9,6 +9,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ### Added
 - Configuration inventory and a non-sensitive operator check (`python -m simba_mcp.configuration`). It reports the effective process combination and its source without printing credentials. No application settings UI is added. Request-policy and byte ceilings remain opt-in; no numeric production default is selected.
 
+### Changed
+- `get_model_results` channel filtering treats a display name and its activity column as one identifier when the section provides `activity_column`. Callers relating a user-facing name to a result key use `channel_map`; they do not infer identity from spelling.
+- Explicit JSON channel and grid filters copy the containers they change, disclose `_mcp_selection`, and refuse a reserved backend `_mcp_selection` key. Unfiltered and CSV results are unchanged. Local filtering still does not bound the backend download.
+
 ## 0.12.0 (2026-09-29)
 
 ### Added
