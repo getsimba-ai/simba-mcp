@@ -1,9 +1,9 @@
 # Proposed 0.13.0 release scorecard
 
-This is a proposed release, not a released or deployed version. Current selection
-has not demonstrated an accepted quality, latency or cost improvement. The routing
-correction passed its small development check in both arms; a new
-selection comparison is being prepared with explicit model identifiers.
+This is a proposed release, not a released or deployed version. No accepted
+quality, latency or cost improvement is established. Selection02 is on a validity
+hold after 24 sessions: a monthly-bucket evidence-recognition defect in the frozen
+grader was independently diagnosed. The remaining eight sessions were not run.
 
 ## Scope and defaults
 
@@ -28,6 +28,7 @@ release. Their continuing availability is not a new performance claim.
 | Historical Grok role-profile comparison, 24 sessions | Full supported 12/12; Reviewer supported 11/12. Point cost saving 17.9%, confidence interval -10.9% to 34.1%; p95 latency increased 33.7%. Rejected. |
 | Stopped selective-result comparison, first four sessions | All four failed the frozen zero-discovery policy. Numerical answers were supported; no unsupported material claims or unauthorised actual effects. The prompt did not explicitly distinguish a model name from its hash, so those discovery calls are not proven product defects. Cost US$0.431480; remaining sessions were not run. |
 | Routing development comparison, four sessions | Both control and candidate passed 2/2. Each used one bounded result read; one control also retrieved supplied guidance. Cost US$0.326834. This exposed-case check establishes no comparative reliability or performance improvement and inherits the identifier wording limitation. |
+| Selection02, 24 completed sessions | The first 20 passed automatic grading and independent review. The next four failed automatic required-evidence checks despite independently supported correct answers; review diagnosed a monthly-bucket evidence-recognition defect. Original grades remain unchanged. Eight sessions were not run. This is a validity hold, not a runtime regression or an accepted comparison. |
 | Synthetic request admission, non-overload case | Both configurations completed 24/24 requests. Peak backend concurrency fell from 24 to 4, while p95 increased from about 164 ms to 326 ms. This supports an explicit reliability trade-off, not a latency improvement claim. |
 | Server checks | The routing correction at `e92bea9` passed 650 local tests. Final source CI, independent review and installed-artifact verification remain required. |
 | Application integration checks | The staging-based application change passed 16 focused Python tests, five UI tests and TypeScript checking. Actual canonical API-key and OAuth resolvers, SQLite preference persistence and an in-process MCP SDK bridge verify per-user listing and excluded-call refusal. These are separate application-source tests, not deployed-server evidence. |
