@@ -82,7 +82,19 @@ response = client.beta.messages.create(
     tools=[{"type": "mcp_toolset", "mcp_server_name": "simba"}],
     betas=["mcp-client-2025-11-20"],
 )
+
+## Configuration
+
+Operator settings, defaults and the non-sensitive effective check are in
+[docs/configuration.md](docs/configuration.md). Inspect the current process without
+printing credentials:
+
+```bash
+python -m simba_mcp.configuration
 ```
+
+A development `.env` configures only the process that loads it. It does not configure
+a remote server or every MCP host. This release does not add an application settings UI.
 
 ## Available Tools
 

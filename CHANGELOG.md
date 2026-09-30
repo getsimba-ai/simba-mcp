@@ -4,6 +4,11 @@ All notable changes to the SIMBA MCP Server will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## Unreleased
+
+### Added
+- Configuration inventory and a non-sensitive operator check (`python -m simba_mcp.configuration`). It reports the effective process combination and its source without printing credentials. No application settings UI is added. Request-policy and byte ceilings remain opt-in; no numeric production default is selected.
+
 ## 0.12.0 (2026-09-29)
 
 ### Added

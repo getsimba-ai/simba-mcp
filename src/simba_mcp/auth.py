@@ -17,6 +17,22 @@ def _http_mode(ctx=None) -> bool:
     return runtime._serving_http
 
 
+def local_files_effective(raw: str | None, serving_http: bool) -> tuple[bool, str]:
+    """Return whether csv_path is allowed and which rule decided it.
+
+    Unrecognised values follow the transport default. They do not become an
+    implicit allow on a network transport.
+    """
+    env = ("" if raw is None else raw).strip().lower()
+    if env in ("1", "true", "yes"):
+        return True, "explicit"
+    if env in ("0", "false", "no"):
+        return False, "explicit"
+    if serving_http:
+        return False, "network-default"
+    return True, "stdio-default"
+
+
 def _local_files_allowed(ctx=None) -> bool:
     return _local_files_denial_reason(ctx) is None
 
@@ -27,23 +43,22 @@ def _local_files_denial_reason(ctx=None) -> str | None:
     Distinguishes an explicit SIMBA_MCP_ALLOW_LOCAL_FILES=0 from the default
     HTTP/SSE disable, so callers get accurate remediation guidance.
     """
-    env = os.environ.get("SIMBA_MCP_ALLOW_LOCAL_FILES", "").strip().lower()
-    if env in ("1", "true", "yes"):
+    raw = os.environ.get("SIMBA_MCP_ALLOW_LOCAL_FILES", "")
+    allowed, source = local_files_effective(raw, _http_mode(ctx))
+    if allowed:
         return None
-    if env in ("0", "false", "no"):
+    if source == "explicit":
         return (
             "csv_path is disabled because SIMBA_MCP_ALLOW_LOCAL_FILES is set "
-            f"to {env!r}. Pass csv_content instead, or set "
+            f"to {raw.strip().lower()!r}. Pass csv_content instead, or set "
             "SIMBA_MCP_ALLOW_LOCAL_FILES=1 to allow local file reads."
         )
-    if _http_mode(ctx):
-        return (
-            "csv_path is disabled on network transports (HTTP/SSE) because "
-            "it reads the server host's filesystem, not yours. Pass "
-            "csv_content instead, or set SIMBA_MCP_ALLOW_LOCAL_FILES=1 "
-            "on the server if this is intentional."
-        )
-    return None
+    return (
+        "csv_path is disabled on network transports (HTTP/SSE) because "
+        "it reads the server host's filesystem, not yours. Pass "
+        "csv_content instead, or set SIMBA_MCP_ALLOW_LOCAL_FILES=1 "
+        "on the server if this is intentional."
+    )
 
 
 def _bearer_token(ctx: Context[runtime.AppContext, Any]) -> str:

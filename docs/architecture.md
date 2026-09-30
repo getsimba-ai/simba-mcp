@@ -9,6 +9,8 @@ hosted request's bearer token and enforces local-file restrictions. `api_client.
 owns the shared HTTP pool and request/retry handling. `errors.py` describes safe
 transport failures; `schemas/` describes wire objects. `tools/` groups data,
 projects, models, results, optimizer/scenarios, studies, recipes and quality.
+`configuration.py` records those shipped controls and prints the effective combination
+without secrets. It does not replace runtime resolution or add an MCP admin tool.
 
 ```mermaid
 flowchart LR
