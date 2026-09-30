@@ -66,6 +66,7 @@ class ResultTask:
     allowed_result_sections: frozenset[str] | None = None
     forbidden_result_sections: frozenset[str] = frozenset()
     summary_granularity_independent: bool = False
+    period_evidence_granularity: str = "native"
 
     def evidence_sets(self):
         return self.evidence_options or (self.required_sections,)
@@ -279,8 +280,17 @@ class ResultSelectionDispatch:
     """Per-session fixture authority, compatible with hosts.anthropic.session."""
 
     def __init__(self, server, task, *, guidance=None, grader_version=17):
-        if type(grader_version) is not int or grader_version not in (17, 18):
+        if type(grader_version) is not int or grader_version not in (17, 18, 19):
             raise ValueError("Unsupported result grader version")
+        if task.period_evidence_granularity not in ("native", "month"):
+            raise ValueError("Unsupported period evidence granularity")
+        if task.period_evidence_granularity != "native" and grader_version < 19:
+            raise ValueError("Monthly period contract requires grader19")
+        if task.period_evidence_granularity == "month":
+            from .result_period_evidence import complete_month_window
+
+            if not task.fixture or not complete_month_window(task.evidence_window or {}):
+                raise ValueError("Monthly period evidence requires a fixture and complete months")
         self.grader_version = grader_version
         self.server, self.task = server, task
         self.guidance = guidance
@@ -296,6 +306,8 @@ class ResultSelectionDispatch:
         self.recoverable_errors = 0
         self.result_rows = {"coefficients": [], "contributions": [], "channel_map": []}
         self.period_summary_rows = []
+        self.monthly_period_rows = []
+        self.monthly_evidence_conflicts = []
         self.summary_rows = {}
         self.media_identities = set()
 
@@ -417,6 +429,7 @@ class ResultSelectionDispatch:
         self.calls[-1].update(error=not trial.passed, result=result)
         if trial.passed:
             previous_evidence = set(self.supported_sections)
+            previous_period_atoms = len(self.monthly_period_rows)
             self.observed_sections.update(result.get("results", {}))
             evidence_sections = set().union(*self.task.evidence_sets())
             expected_display = next(
@@ -502,7 +515,30 @@ class ResultSelectionDispatch:
                 and required_media <= self.media_identities
             ):
                 self.supported_sections.add("verified_media_identity")
-            if "period_revenue_rows" in evidence_sections:
+            if (
+                "period_revenue_rows" in evidence_sections
+                and self.task.period_evidence_granularity == "month"
+            ):
+                from .result_period_evidence import monthly_evidence
+
+                wanted, observed = monthly_evidence(
+                    self.task, result, window, conflicts=self.monthly_evidence_conflicts
+                )
+                for atom in observed:
+                    if atom not in self.monthly_period_rows:
+                        self.monthly_period_rows.append(atom)
+                if self.monthly_evidence_conflicts:
+                    self.supported_sections.discard("period_revenue_rows")
+                if (
+                    not self.monthly_evidence_conflicts
+                    and wanted
+                    and all(
+                        any(_row_matches(row, target) for row in self.monthly_period_rows)
+                        for target in wanted
+                    )
+                ):
+                    self.supported_sections.add("period_revenue_rows")
+            elif "period_revenue_rows" in evidence_sections:
                 wanted_rows = [
                     {
                         key: row[key]
@@ -610,7 +646,13 @@ class ResultSelectionDispatch:
                     valid = contains(actual, expected)
                 if valid:
                     self.supported_sections.add(section)
-            self.noncontributing_result_calls += int(self.supported_sections == previous_evidence)
+            new_period_atoms = max(0, len(self.monthly_period_rows) - previous_period_atoms)
+            self.noncontributing_result_calls += int(
+                self.supported_sections == previous_evidence and not new_period_atoms
+            )
+            if self.grader_version >= 19 and self.task.period_evidence_granularity == "month":
+                self.calls[-1]["added_period_evidence_atoms"] = new_period_atoms
+                self.calls[-1]["period_evidence_conflict"] = bool(self.monthly_evidence_conflicts)
             self.calls[-1]["added_evidence"] = sorted(self.supported_sections - previous_evidence)
         return result, not trial.passed
 

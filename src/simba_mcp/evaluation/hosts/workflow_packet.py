@@ -51,9 +51,17 @@ class ResultContract(StrictModel):
     allowed_result_sections: list[str] | None = None
     forbidden_result_sections: list[str] = Field(default_factory=list)
     summary_granularity_independent: bool = False
+    period_evidence_granularity: Literal["native", "month"] = "native"
 
     @model_validator(mode="after")
     def fixture_contract(self):
+        if self.period_evidence_granularity == "month":
+            from .result_period_evidence import complete_month_window
+
+            if self.evidence_window is None or not complete_month_window(
+                self.evidence_window.model_dump()
+            ):
+                raise ValueError("Monthly period evidence requires complete calendar months")
         if not isinstance(self.fixture.get("results"), dict):
             raise ValueError("Result fixture must supply its own results object")  # noqa: TRY004
         model_hash = self.fixture.get("model_hash")

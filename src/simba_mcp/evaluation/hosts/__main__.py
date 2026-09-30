@@ -65,7 +65,7 @@ async def run(args):
     if tool_profile != "full" and getattr(args, "workflow_suite", None) != "rlc01":
         raise ValueError("Explicit tool profiles require the prospective RLC suite")
     grader_version = getattr(args, "grader_version", GRADER_VERSION)
-    if type(grader_version) is not int or grader_version not in (17, 18):
+    if type(grader_version) is not int or grader_version not in (17, 18, 19):
         raise ValueError("Unsupported result grader version")
     if grader_version != 17 and not (
         getattr(args, "workflow_suite", None) == "rlc01" or getattr(args, "workflow_packet", None)
@@ -254,6 +254,11 @@ async def run(args):
                     **(
                         {"forbidden_result_sections": sorted(c.forbidden_result_sections)}
                         if c.forbidden_result_sections
+                        else {}
+                    ),
+                    **(
+                        {"period_evidence_granularity": c.period_evidence_granularity}
+                        if c.period_evidence_granularity != "native"
                         else {}
                     ),
                     "max_response_bytes": c.max_response_bytes,
@@ -702,7 +707,7 @@ def main():
     parser.add_argument(
         "--grader-version",
         type=int,
-        choices=(17, 18),
+        choices=(17, 18, 19),
         default=17,
         help="17 preserves historical semantics; 18 enables canonical identity for prospective workflows",
     )

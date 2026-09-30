@@ -87,7 +87,7 @@ def semantic_facts(task, facts, supported_sections, *, grader_version=17):
     never coerce integers/strings. Unsupported explanations remain outside this
     structured-fact metric and require separate claim review.
     """
-    if type(grader_version) is not int or grader_version not in (17, 18):
+    if type(grader_version) is not int or grader_version not in (17, 18, 19):
         raise ValueError("Unsupported result grader version")
     facts, _ = _rlc_normalise(task, facts)
     if not isinstance(facts, dict):
@@ -125,7 +125,7 @@ def semantic_facts(task, facts, supported_sections, *, grader_version=17):
             "diagnostics were not returned",
         }
     aliases = {"Search Activity": "Search", "TV_activity": "TV"}
-    if grader_version == 18 and task.fixture is not None:
+    if grader_version >= 18 and task.fixture is not None:
         # Generic identities come only from the explicit prospective contract.
         # Historical tasks without a fixture retain their fixed aliases above.
         mapping = task.fixture.get("results", {}).get("channel_map", [])

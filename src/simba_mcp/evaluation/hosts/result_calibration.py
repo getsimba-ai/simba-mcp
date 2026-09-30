@@ -14,7 +14,7 @@ GRADER_VERSION = 17
 
 
 def calibration_cases(*, grader_version=17):
-    if type(grader_version) is not int or grader_version not in (17, 18):
+    if type(grader_version) is not int or grader_version not in (17, 18, 19):
         raise ValueError("Unsupported result grader version")
     roi, diagnostic, marginal, decomposition, old = result_tasks()
     cases = [
@@ -321,12 +321,12 @@ def calibration_cases(*, grader_version=17):
             ),
         ]
     )
-    if grader_version == 18:
+    if grader_version >= 18:
         cases.extend(canonical_identity_cases())
     return [
         {
             "id": name,
-            "task": asdict(task),
+            "task": {k: v for k, v in asdict(task).items() if k != "period_evidence_granularity"},
             "facts": facts,
             "supported_sections": sorted(evidence),
             "expected_facts": correct,
@@ -420,9 +420,15 @@ def calibrate(*, grader_version=17):
                 and verdict == expected_verdict,
             }
         )
+    period_rows = []
+    if grader_version >= 19:
+        from .result_period_calibration import calibrate_periods
+
+        period_rows = calibrate_periods()
     return {
+        **({"period_evidence_cases": period_rows} if grader_version >= 19 else {}),
         "grader_version": grader_version,
-        "passed": all(r["passed"] for r in rows),
+        "passed": all(r["passed"] for r in rows + period_rows),
         "label_review": "engineering_labels_pending_independent_review",
         "cases": rows,
     }

@@ -108,7 +108,10 @@ async def test_dispatch_requires_returned_mapping_not_hidden_fixture(
 
 
 @pytest.mark.anyio
-async def test_grader_version_frozen_and_continuation_cannot_switch(tmp_path, monkeypatch):
+@pytest.mark.parametrize("selected_version", [18, 19])
+async def test_grader_version_frozen_and_continuation_cannot_switch(
+    tmp_path, monkeypatch, selected_version
+):
     args = SimpleNamespace(
         output=tmp_path / "original.json",
         cap_usd=2,
@@ -119,7 +122,7 @@ async def test_grader_version_frozen_and_continuation_cannot_switch(tmp_path, mo
         workflow_suite="rlc01",
         model="grok-4.7",
         reasoning_effort="low",
-        grader_version=18,
+        grader_version=selected_version,
     )
     calls = []
 
@@ -134,9 +137,9 @@ async def test_grader_version_frozen_and_continuation_cannot_switch(tmp_path, mo
     with pytest.raises(RuntimeError, match="Synthetic interruption"):
         await command.run(args)
     report = json.loads(args.output.read_text())
-    assert report["configuration"]["grader_version"] == 18
-    assert report["calibration"]["grader_version"] == 18
-    assert report["trials"][0]["grader_version"] == 18
+    assert report["configuration"]["grader_version"] == selected_version
+    assert report["calibration"]["grader_version"] == selected_version
+    assert report["trials"][0]["grader_version"] == selected_version
     args.continue_from = args.output
     args.output = tmp_path / "continued.json"
     args.grader_version = 17
@@ -167,7 +170,7 @@ def test_version18_does_not_fill_missing_identity_when_mapping_is_ambiguous():
     )
 
 
-@pytest.mark.parametrize("version", [True, 17.0, 19, None])
+@pytest.mark.parametrize("version", [True, 17.0, 20, None])
 def test_invalid_versions_are_rejected(version):
     with pytest.raises(ValueError, match="grader version"):
         calibrate(grader_version=version)
