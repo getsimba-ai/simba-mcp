@@ -94,7 +94,11 @@ python -m simba_mcp.configuration
 ```
 
 A development `.env` configures only the process that loads it. It does not configure
-a remote server or every MCP host. This release does not add an application settings UI.
+a remote server or every MCP host. For a hosted connection, choose a tool profile in
+the application's **Profile > Agent connections** settings, then reconnect your MCP
+host. The profile narrows the operator's catalogue and does not grant permissions.
+The application and MCP must both support the new preferences endpoint; lookup
+failures refuse listing and tool calls. Local stdio uses its configured server profile.
 
 ## Available Tools
 

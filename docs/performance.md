@@ -2,6 +2,9 @@
 
 The commands below inspect the local installed server and use synthetic data.
 They do not call the Simba backend, fit a model or call a model provider.
+Offline surface capture refuses to run with `MCP_OAUTH_ENABLED` enabled so that
+the synthetic bearer cannot reach a live verifier. Run it in a separate local
+process with OAuth disabled. The operator profile is retained in the report.
 The [design and evaluation handover](performance-design.md) defines the boundaries.
 The [initial baseline](performance-baseline.md) records verified measurements and their limits.
 
@@ -14,7 +17,9 @@ python -m simba_mcp.performance --output-dir .codex/performance
 ```
 
 This starts the real HTTP app in memory, captures `initialize` and `tools/list`,
-and writes `surface.json` and `surface.md`. It records the exact local HTTP JSON
+and writes `surface.json` and `surface.md`. The preference middleware uses a
+synthetic full-profile response from an instance-local client. The report records
+that exchange separately; its timing is not hosted backend latency. It records the exact local HTTP JSON
 response body, public tool fields and instructions, registration order, package
 versions, source digest, Git revision and dirty state. Byte counts exclude HTTP
 headers and compression. Results from an installed wheel can have a null Git
@@ -52,6 +57,9 @@ makes truncation explicit. Unknown tools or routes use `other`.
 Backend attempt duration includes body download, but excludes retry backoff and
 subsequent JSON parsing. Total tool duration includes validation, retries and SDK
 conversion. It excludes the additional metric result serialisation and sink work.
+It also excludes the hosted profile lookup that runs before tool dispatch. Measure
+the entire MCP request to include that lookup, and do not treat tool-only telemetry
+as total user latency. Each hosted listing and call adds one preference request.
 `measurement_serialisation_seconds` describes this additional serialisation only.
 `content_json_bytes` counts the content array; `call_tool_result_json_bytes` counts
 the whole result including structured/text duplication. Neither includes the

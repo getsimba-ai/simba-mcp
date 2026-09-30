@@ -2,7 +2,8 @@
 
 Choose a starting view for the job. `full` is the default. `data_scientist` is an
 alias for full, including the entire Studies lifecycle and any future tools.
-Profiles select tools at server startup; they never grant backend permissions.
+Operator profiles select tools at server startup. Hosted connections also apply
+the authenticated user's application preference. Neither grants backend permissions.
 
 | Profile | Current tools | Intended work |
 | --- | ---: | --- |
@@ -19,8 +20,21 @@ promote a model, and a title does not confer analyst sign-off rights.
 
 ## Configure a connection
 
-The same setting works for stdio, HTTP and SSE. Existing authentication setup is
-unchanged. For a local stdio connection:
+For a hosted HTTP or SSE connection, open **Profile > Agent connections** in Simba,
+save a profile and reconnect the MCP host to refresh its tool list. The preference
+applies only to your authenticated account. Each listing and call fetches it again;
+there is no shared preference cache. The effective catalogue is the intersection
+of your preference and the operator's registered tools. Full cannot restore tools
+the operator excluded.
+
+The application and MCP versions must be upgraded together. The backend must serve
+`GET /api/v1/mcp/preferences` with schema version 1. Missing endpoints, failed
+lookups and invalid responses refuse the request rather than choosing another
+profile. Each lookup is a single request with a five-second deadline and adds a
+backend exchange to listing and calls. Account settings can only be changed through
+the authenticated application session with its CSRF protection, not by an MCP tool.
+
+For a local stdio connection, configure the server directly:
 
 ```shell
 simba-mcp --profile marketer
@@ -48,20 +62,22 @@ Hosted callers still supply their own bearer credentials. Do not create a shared
 identity merely because several users choose the same profile.
 
 The CLI flag overrides a valid environment selection. Invalid environment values
-fail during module import, even if a CLI override was supplied. Unknown CLI values
+fail when the server is constructed, even if a CLI override was supplied. Unknown CLI values
 fail before serving. Names are exact and case-sensitive. Restart/reconnect after a
 configuration change so the client refreshes its tool catalogue.
 
 ## Full fallback and rollback
 
-For a task needing omitted tools, configure a new full connection or restart the
+For a hosted task needing omitted tools, save full in Agent connections and reconnect.
+The operator must also allow those tools. For local stdio, configure a new full connection or restart the
 current server with `--profile full`. Environment-only deployments can unset
 `SIMBA_TOOL_PROFILE` or set it to `full`. Keep the user's backend permissions and
 credentials appropriate to the task. Reconcile any uncertain write before retrying
 after a switch; reconnecting does not cancel or undo a backend operation.
 
-There is no tool that changes the server's profile during a conversation. An omitted
-tool is not registered and cannot be called by guessing its name. To offer several
+There is no tool that changes the server's profile during a conversation. An operator-excluded
+tool is not registered; a user-excluded tool is rejected before dispatch. Neither can
+be called by guessing its name. To offer several local
 views, configure separate server instances/connections, with a full connection
 available for mixed jobs. Do not expose every view to the same conversation by
 default, which would duplicate definitions and undermine the saving.

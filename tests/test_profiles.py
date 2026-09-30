@@ -139,10 +139,21 @@ async def test_mixed_transport_instances_and_callers_do_not_share_mode_or_creden
 
 
 @pytest.mark.parametrize("profile", ["marketer", "reviewer", "full"])
-def test_http_wire_profile_and_explicit_full_reconnection(profile):
+def test_http_wire_profile_and_explicit_full_reconnection(profile, monkeypatch):
+    from simba_mcp.api_client import SimbaAPIClient
+
+    async def preference(self, method, path, **kwargs):
+        assert path == "/api/v1/mcp/preferences"
+        assert CALLER_API_KEY.get() == "synthetic-wire"
+        return {"schema_version": 1, "profile": "full"}
+
+    monkeypatch.setattr(SimbaAPIClient, "_request", preference)
     instance = create_server("compact", profile=profile)
     with TestClient(runtime.create_app(instance)) as client:
-        headers = {"Accept": "application/json, text/event-stream"}
+        headers = {
+            "Accept": "application/json, text/event-stream",
+            "Authorization": "Bearer synthetic-wire",
+        }
         response = client.post(
             "/",
             headers=headers,

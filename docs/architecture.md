@@ -6,7 +6,10 @@
 standard MCP titles and effect hints. `runtime.py` owns environment configuration,
 lifespan and ASGI construction; the CLI selects transports. `auth.py` binds each
 hosted request's bearer token and enforces local-file restrictions. `api_client.py`
-owns the shared HTTP pool and request/retry handling. `errors.py` describes safe
+owns the shared HTTP pool and request/retry handling. `user_profiles.py` resolves
+the hosted caller's persisted profile through SDK middleware, filters each listing
+response and rejects excluded calls without mutating the shared catalogue.
+`errors.py` describes safe
 transport failures; `schemas/` describes wire objects. `tools/` groups data,
 projects, models, results, optimizer/scenarios, studies, recipes and quality.
 `configuration.py` records those shipped controls and prints the effective combination
@@ -27,9 +30,9 @@ in MCP files. Backend services enforce permission, revision, subscription, budge
 and scientific validation. Annotation hints never authorize actions. There is no
 second job engine, business validator or model mathematics here.
 
-The SDK is MCP Python >=2.1,<3. The inspected 2.2.0 `MCPServer.add_tool` supports
-`title`, `ToolAnnotations` and structured outputs. Tests also exercise the 2.1.0
-floor. The [MCP tools specification](https://modelcontextprotocol.io/specification/2025-11-25/server/tools)
+The current package pins MCP Python >=2.1.1,<2.2. The inspected 2.1.1 SDK supports
+`title`, `ToolAnnotations`, structured outputs and request middleware.
+The [MCP tools specification](https://modelcontextprotocol.io/specification/2025-11-25/server/tools)
 requires structured outputs to match their advertised schema and describes
 annotations as hints. Official specification and installed SDK source inspected
 19 September 2026; web access to the SDK v2 migration site was unavailable.
@@ -53,10 +56,17 @@ cancellation: a request to stop is distinct from confirmed completion.
 
 The server never issues credentials. It authenticates each HTTP request with the caller's own bearer and forwards that bearer to the backend unchanged.
 
-- **Bring-your-own-key (default).** `Authorization: Bearer simba_sk_…` per request; no server-side shared key; `initialize` and `tools/list` answer without a bearer.
+- **Bring-your-own-key (default).** `Authorization: Bearer simba_sk_…` per request; no server-side shared key. `initialize` answers without a bearer. Both `tools/list` and `tools/call` require a bearer and a successful preferences lookup.
 - **OAuth resource-server mode (`MCP_OAUTH_ENABLED=1`, from 0.12.0).** The SDK's resource-server mode (`mcp` 2.1.1, the MCP authorization specification it implements): the server serves `/.well-known/oauth-protected-resource/mcp` naming the backend as the authorization server, and answers 401 with `WWW-Authenticate: Bearer resource_metadata=…` to any request without a verified bearer, including `initialize` and `tools/list`. Each bearer is verified by `GET {SIMBA_API_URL}/api/v1/auth/token-info` **with that same bearer**; the server holds no secret. OAuth access tokens and API keys both verify. A positive answer is cached for at most 60 seconds under a SHA-256 of the token, never the token; a negative answer is not cached; a backend timeout or 5xx is a 401, never a crash. Scopes are not enforced at this boundary; the backend enforces them per route, as it does for keys. The MCP and the API are one protected resource with one audience, so forwarding is passthrough to the same resource. `SIMBA_PUBLIC_URL` names the issuer and the resource.
 
 ## Compatibility
+
+The new hosted profile contract requires the matching application release and its
+`/api/v1/mcp/preferences` endpoint. There is no older-backend fallback. The application
+must authenticate the supplied bearer on this endpoint as well as tool routes.
+The current application preference implementation supports API keys and application
+sessions; it does not introduce an OAuth verifier. An OAuth deployment needs that
+backend integration verified before being declared supported for this release.
 
 All 50 previous tool names, required parameters and default payloads remain.
 Existing Python tool imports from `simba_mcp.server` and the CLI/ASGI entry points
@@ -105,4 +115,8 @@ fallback, caller isolation, retry behavior, log safety, local-file restrictions,
 CLI transport options, ASGI calls and an actual stdio handshake. Test mocks are not
 live backend or scientific-model acceptance. Reverting the MCP commits restores
 the previous adapter; additive backend advertisements can remain or be reverted
-independently. No persisted state migration is involved.
+independently for adapter-only changes. This release also adds the application's
+persisted user profile column. Apply its migration before serving the new contract.
+Keep the additive column during code rollback to preserve saved preferences;
+downgrading the migration removes them. Reconnect clients after changing a profile
+or restoring the previous deployment. Reconnection does not undo submitted writes.

@@ -34,6 +34,9 @@ def _call(client, tool, arguments, key="synthetic-test-key"):
 @pytest.mark.parametrize("scenario", ["refused_with_code", "refused_legacy", "ok"])
 def test_refusals_set_is_error_and_keep_the_payload(monkeypatch, scenario):
     def handle(request):
+        if request.url.path == "/api/v1/mcp/preferences":
+            assert request.headers.get("authorization", "").startswith("Bearer ")
+            return httpx.Response(200, json={"schema_version": 1, "profile": "full"})
         assert request.url.path == "/api/v1/studies/s/quality-policies/p"
         if scenario == "refused_with_code":
             return httpx.Response(
@@ -82,11 +85,18 @@ def test_refusals_set_is_error_and_keep_the_payload(monkeypatch, scenario):
 def test_keyless_call_is_an_error_on_the_wire(monkeypatch):
     monkeypatch.setattr(runtime, "_serving_http", runtime._serving_http)
     with TestClient(server._create_app()) as client:
-        result = _call(client, "list_studies", {"project_id": 1}, key="")
-    assert result["isError"] is True
-    content = result["structuredContent"]
-    assert content["_status_code"] == 401
-    assert content["_error_code"] == "authentication_required"
+        response = client.post(
+            "/",
+            headers={"Accept": "application/json, text/event-stream"},
+            json={
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "tools/call",
+                "params": {"name": "list_studies", "arguments": {"project_id": 1}},
+            },
+        ).json()
+    assert response["error"]["code"] == -32000
+    assert "Authentication required" in response["error"]["message"]
 
 
 def _tool_error_text(result):
@@ -99,6 +109,9 @@ def test_argument_validation_refusals_carry_the_envelope(monkeypatch):
     reached = []
 
     def handle(request):
+        if request.url.path == "/api/v1/mcp/preferences":
+            assert request.headers.get("authorization", "").startswith("Bearer ")
+            return httpx.Response(200, json={"schema_version": 1, "profile": "full"})
         reached.append(request.url.path)
         return httpx.Response(200, json={"ok": True})
 
@@ -130,6 +143,20 @@ def test_argument_validation_refusals_carry_the_envelope(monkeypatch):
 
 
 def test_other_tool_errors_are_unchanged(monkeypatch):
+    async def get_client(self):
+        if self._client is None:
+
+            def handle(request):
+                assert request.url.path == "/api/v1/mcp/preferences"
+                assert request.headers["authorization"] == "Bearer synthetic-test-key"
+                return httpx.Response(200, json={"schema_version": 1, "profile": "full"})
+
+            self._client = httpx.AsyncClient(
+                base_url="https://example.test", transport=httpx.MockTransport(handle)
+            )
+        return self._client
+
+    monkeypatch.setattr(SimbaAPIClient, "_get_client", get_client)
     monkeypatch.setattr(runtime, "_serving_http", runtime._serving_http)
     with TestClient(server._create_app()) as client:
         result = _call(client, "no_such_tool", {})

@@ -159,6 +159,9 @@ def test_structured_wire_outputs_preserve_unknown_fields_and_input_objects(monke
     }
 
     def handle(req):
+        if req.url.path == "/api/v1/mcp/preferences":
+            assert req.headers["authorization"] == "Bearer caller"
+            return httpx.Response(200, json={"schema_version": 1, "profile": "full"})
         captured.append(json.loads(req.content))
         return httpx.Response(200, json=response)
 

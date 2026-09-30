@@ -23,10 +23,15 @@ def anyio_backend():
 
 
 def install_backend(monkeypatch, handler):
+    def with_preferences(request):
+        if request.method == "GET" and request.url.path == "/api/v1/mcp/preferences":
+            return httpx.Response(200, json={"schema_version": 1, "profile": "full"})
+        return handler(request)
+
     async def get_client(self):
         if self._client is None:
             self._client = httpx.AsyncClient(
-                base_url="https://example.test", transport=httpx.MockTransport(handler)
+                base_url="https://example.test", transport=httpx.MockTransport(with_preferences)
             )
         return self._client
 
@@ -76,6 +81,11 @@ def test_surface_matches_real_wire_and_never_calls_backend(monkeypatch, tmp_path
     assert "outputSchema" in report["tools"][0]["fields"]
     assert report["tools_list_http_body"]["estimated_tokens"] is None
     assert report["provider_usage"]["input_tokens"] is None
+    preference = report["capture"]["synthetic_preference_exchange"]
+    assert preference["requests"] == 1 and preference["synthetic"] is True
+    assert preference["schema_version"] == 1 and preference["profile"] == "full"
+    assert 0 <= preference["seconds"] <= report["capture"]["seconds"]
+    assert "excludes that lookup" in report["capture"]["timing_boundary"]
     assert report["server_instructions"]["utf8_bytes"] == len(
         performance.compact(json.loads(initial)["result"]["instructions"]).encode("utf-8")
     )
@@ -83,6 +93,37 @@ def test_surface_matches_real_wire_and_never_calls_backend(monkeypatch, tmp_path
     assert performance.main(["--output-dir", str(tmp_path)]) == 0
     assert json.loads((tmp_path / "surface.json").read_text())["tool_count"] == len(tools)
     assert "not model usage or billing" in (tmp_path / "surface.md").read_text()
+
+
+@pytest.mark.parametrize("flag", ["1", "true", " YES "])
+@pytest.mark.parametrize("entrypoint", [performance.capture_surface, performance.surface_report])
+def test_offline_surface_rejects_oauth_before_verifier(monkeypatch, flag, entrypoint):
+    from simba_mcp.oauth import BackendTokenVerifier
+
+    calls = []
+
+    def forbidden(*args, **kwargs):
+        calls.append("verifier")
+        pytest.fail("offline capture must not construct or invoke a verifier")
+
+    monkeypatch.setenv("MCP_OAUTH_ENABLED", flag)
+    monkeypatch.setattr(BackendTokenVerifier, "__init__", forbidden)
+    monkeypatch.setattr(BackendTokenVerifier, "verify_token", forbidden)
+    with pytest.raises(ValueError, match="MCP_OAUTH_ENABLED"):
+        entrypoint()
+    assert calls == []
+
+
+def test_surface_preserves_configured_operator_profile(monkeypatch):
+    from simba_mcp.profiles import select_tools
+
+    monkeypatch.setenv("SIMBA_TOOL_PROFILE", "reviewer")
+    report = performance.surface_report()
+    assert report["operator_profile"] == "reviewer"
+    assert report["tool_count"] == len(select_tools(server.TOOLS, "reviewer"))
+    assert report["tool_count"] < len(server.TOOLS)
+    assert report["capture"]["synthetic_preference_exchange"]["profile"] == "full"
+    assert "Operator profile: `reviewer`" in performance.render_report(report)
 
 
 def test_tokenizer_is_explicit_and_fields_remain_independent(monkeypatch):

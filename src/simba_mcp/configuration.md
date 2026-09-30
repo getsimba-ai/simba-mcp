@@ -9,11 +9,14 @@ report the same controls without becoming a second settings framework or an MCP 
 
 ## Product decision
 
-This release does not add an application settings UI. Connection credentials
-stay in the MCP host configuration. Operator ceilings stay in the server process
+Choose your hosted tool profile in the application's Profile > Agent connections settings.
+The preference belongs to the authenticated user and defaults to full. The new application
+and MCP versions must be deployed together: hosted listing and calls require the
+schema-version-1 preferences endpoint. Lookup failures refuse the request.
+Connection credentials stay in the MCP host configuration. Operator ceilings stay in the server process
 environment or launch arguments. Agents choose documented per-call tool arguments
 and cannot raise server ceilings, change the shared catalogue or expand permissions.
-A UI is not required for this release. Concise-versus-detailed preferences remain
+Local stdio uses its server profile. Concise-versus-detailed user preferences remain
 unimplemented proposals, not settings.
 
 A development `.env` configures only the process that loads it. It does not
@@ -36,6 +39,8 @@ not prove a hosted deployment.
 1. Server constants and operator process settings bound every caller.
 2. `--profile` overrides `SIMBA_TOOL_PROFILE` for the CLI process only.
 3. HTTP/SSE ignores `SIMBA_API_KEY` and uses the request bearer.
+   Its per-user profile further restricts the operator catalogue, never expands it.
+   Reconnect after saving a profile so your MCP host refreshes its tool list.
 4. Per-call arguments can select evidence or impose a tighter content cap.
    They cannot raise byte ceilings, disable admission or enable server filesystem reads.
 5. Backend authorisation remains definitive.
@@ -56,6 +61,7 @@ policy from this document; none is recommended here.
 
 | Identity | Kind | Owner module | Owner | Scope | State |
 | --- | --- | --- | --- | --- | --- |
+| `mcp_tool_profile` | application preference | `simba_mcp.user_profiles (consumer); application preferences API (store)` | authenticated user through application session settings | user account, resolved independently on each hosted listing and call | full by default; data_scientist, marketer and reviewer available |
 | `SIMBA_API_URL` | environment | `simba_mcp.runtime` | operator | process | default http://localhost:5005 |
 | `SIMBA_API_KEY` | environment | `simba_mcp.runtime` | operator for stdio; authenticated caller for HTTP/SSE | process on stdio; request on HTTP/SSE | absent until set; never a shared fallback on HTTP/SSE |
 | `SIMBA_API_REQUEST_POLICY_JSON` | environment | `simba_mcp.request_budget` | operator | process | disabled unless set; JSON false also disables it |
@@ -74,6 +80,14 @@ policy from this document; none is recommended here.
 | `MAX_UPLOAD_BYTES` | constant | `simba_mcp.runtime` | maintainer | build | 10485760 bytes |
 | `MAX_REQUEST_BODY_BYTES` | constant | `simba_mcp.runtime` | maintainer | build | 12582912 bytes |
 | `DEFAULT_TIMEOUT` | constant | `simba_mcp.api_client` | maintainer | build | 60.0 seconds; up to 3 read attempts |
+
+### `mcp_tool_profile`
+
+- Purpose: Narrow the hosted tool catalogue to the authenticated user's chosen profile.
+- Lifecycle: Persisted in the application. Save in Profile > Agent connections and reconnect the MCP host. Local stdio does not read it.
+- Resolution: Intersection with the operator catalogue. Mandatory schema-version-1 endpoint; failed lookup refuses the request. No older-backend fallback.
+- Authority: Session-only CSRF-protected update. Bearer reads use the caller's identity. Profiles never grant permissions or raise limits.
+- Evidence: Synthetic wire isolation and failure tests. One single-send lookup per request, bounded to five seconds. Hosted latency remains unmeasured.
 
 ### `SIMBA_API_URL`
 

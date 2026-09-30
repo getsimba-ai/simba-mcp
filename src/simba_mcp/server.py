@@ -125,6 +125,7 @@ from .tools.studies import (
     list_study_runs,
     update_study,
 )
+from .user_profiles import UserProfileMiddleware
 
 
 def _argument_refusal(tool: str, exc: ValidationError) -> CallToolResult:
@@ -226,6 +227,7 @@ _SERVER_OPTIONS = {
         "Writes are not automatically retried; reconcile before repeating them."
     ),
     "lifespan": app_lifespan,
+    "middleware": [UserProfileMiddleware()],
 }
 
 TOOLS = (

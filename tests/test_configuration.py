@@ -200,3 +200,14 @@ def test_public_package_exports_remain_available():
 
     assert mcp is singleton
     assert SimbaAPIClient.__name__ == "SimbaAPIClient"
+
+
+def test_asgi_rejects_cli_only_profile_override(monkeypatch, capsys):
+    monkeypatch.setenv("SIMBA_TOOL_PROFILE", "marketer")
+    report = effective_configuration(Args(deployment="asgi"))
+    assert report["profile"] == {"value": "marketer", "source": "environment"}
+    assert main(["--deployment", "asgi", "--profile", "reviewer"]) == 2
+    assert (
+        "--profile applies only to --deployment cli" in json.loads(capsys.readouterr().out)["error"]
+    )
+    assert report["bind"] == {"host": None, "port": None, "source": "not-applicable"}

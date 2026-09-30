@@ -59,6 +59,9 @@ def _recorder(status, body):
     seen = {}
 
     def handle(request):
+        if request.url.path == "/api/v1/mcp/preferences":
+            assert request.headers.get("authorization", "").startswith("Bearer ")
+            return httpx.Response(200, json={"schema_version": 1, "profile": "full"})
         seen["method"] = request.method
         seen["path"] = request.url.path
         seen["body"] = json.loads(request.content) if request.content else None

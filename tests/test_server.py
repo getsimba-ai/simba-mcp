@@ -275,7 +275,24 @@ class TestAsgiApp:
     asserted by nothing but the staging deploy."""
 
     def test_lazy_app_serves_stateless_json_at_root(self, monkeypatch):
+        import httpx
         from starlette.testclient import TestClient
+
+        from simba_mcp.api_client import SimbaAPIClient
+
+        def handle(request):
+            assert request.url.path == "/api/v1/mcp/preferences"
+            assert request.headers["authorization"] == "Bearer synthetic-list"
+            return httpx.Response(200, json={"schema_version": 1, "profile": "full"})
+
+        async def get_client(self):
+            if self._client is None:
+                self._client = httpx.AsyncClient(
+                    base_url="http://test", transport=httpx.MockTransport(handle)
+                )
+            return self._client
+
+        monkeypatch.setattr(SimbaAPIClient, "_get_client", get_client)
 
         import simba_mcp.server as srv
 
@@ -289,6 +306,7 @@ class TestAsgiApp:
         headers = {
             "Accept": "application/json, text/event-stream",
             "Content-Type": "application/json",
+            "Authorization": "Bearer synthetic-list",
         }
         with TestClient(app) as client:
             init = client.post(
@@ -1179,6 +1197,8 @@ class TestBringYourOwnKey:
             async def handle_async_request(self, request):
                 await request.aread()
                 recorded.append(dict(request.headers))
+                if request.url.path == "/api/v1/mcp/preferences":
+                    return httpx.Response(200, json={"schema_version": 1, "profile": "full"})
                 return httpx.Response(200, json={"ok": True})
 
         async def fake_get_client(self):
@@ -1218,10 +1238,9 @@ class TestBringYourOwnKey:
         }
         with TestClient(app) as client:
             client.post("/", json=init, headers=base_headers)
-            # keyless: guidance payload, zero backend requests
+            # Keyless requests fail before any backend request.
             r = client.post("/", json=call, headers=base_headers)
-            text = r.json()["result"]["content"][0]["text"]
-            assert "No API key on this request" in text
+            assert "Authentication required" in r.json()["error"]["message"]
             assert recorded == []
             # with a caller token: it reaches the backend, env key never does
             r2 = client.post(
@@ -1230,7 +1249,8 @@ class TestBringYourOwnKey:
                 headers={**base_headers, "Authorization": "Bearer simba_sk_caller99"},
             )
             assert '"ok": true' in r2.json()["result"]["content"][0]["text"].lower()
-            assert recorded[0]["authorization"] == "Bearer simba_sk_caller99"
+            assert len(recorded) == 2  # preference lookup, then requested tool
+            assert all(row["authorization"] == "Bearer simba_sk_caller99" for row in recorded)
             assert "should_never_appear" not in str(recorded)
 
     @pytest.mark.anyio

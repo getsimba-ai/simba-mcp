@@ -27,6 +27,9 @@ def test_list_runs_preserves_budget_and_older_backend_responses(monkeypatch, wit
         }
 
     def handle(request):
+        if request.url.path == "/api/v1/mcp/preferences":
+            assert request.headers.get("authorization", "").startswith("Bearer ")
+            return httpx.Response(200, json={"schema_version": 1, "profile": "full"})
         assert request.method == "GET"
         assert request.url.path.endswith("/studies/study-a/runs")
         return httpx.Response(200, json=response)

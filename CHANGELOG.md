@@ -7,7 +7,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ## Unreleased
 
 ### Added
-- Configuration inventory and a non-sensitive operator check (`python -m simba_mcp.configuration`). It reports the effective process combination and its source without printing credentials. No application settings UI is added. Request-policy and byte ceilings remain opt-in; no numeric production default is selected.
+- Configuration inventory and a non-sensitive operator check (`python -m simba_mcp.configuration`). It reports the effective process combination and its source without printing credentials. Request-policy and byte ceilings remain opt-in; no numeric production default is selected.
+- Hosted tool profiles use the authenticated user's application preference, intersected with the operator catalogue. Set the preference in Profile > Agent connections and reconnect the MCP host. The new application preferences endpoint is required; lookup failures refuse requests. Profiles do not grant backend permissions and reviewer is not read-only. Local stdio retains its server profile.
 
 ### Changed
 - `get_model_results` channel filtering treats a display name and its activity column as one identifier when the section provides `activity_column`. Callers relating a user-facing name to a result key use `channel_map`; they do not infer identity from spelling.

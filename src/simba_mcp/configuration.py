@@ -48,6 +48,19 @@ def controls():
     """Every shipped server control. Evaluation and benchmark commands are separate."""
     return (
         {
+            "identity": "mcp_tool_profile",
+            "kind": "application preference",
+            "owner_module": "simba_mcp.user_profiles (consumer); application preferences API (store)",
+            "purpose": "Narrow the hosted tool catalogue to the authenticated user's chosen profile.",
+            "owner": "authenticated user through application session settings",
+            "scope": "user account, resolved independently on each hosted listing and call",
+            "state": "full by default; data_scientist, marketer and reviewer available",
+            "lifecycle": "Persisted in the application. Save in Profile > Agent connections and reconnect the MCP host. Local stdio does not read it.",
+            "precedence": "Intersection with the operator catalogue. Mandatory schema-version-1 endpoint; failed lookup refuses the request. No older-backend fallback.",
+            "authority": "Session-only CSRF-protected update. Bearer reads use the caller's identity. Profiles never grant permissions or raise limits.",
+            "evidence": "Synthetic wire isolation and failure tests. One single-send lookup per request, bounded to five seconds. Hosted latency remains unmeasured.",
+        },
+        {
             "identity": "SIMBA_API_URL",
             "kind": "environment",
             "owner_module": "simba_mcp.runtime",
@@ -378,6 +391,10 @@ def effective_configuration(argv: argparse.Namespace | None = None) -> dict:
         raise _reject("--deployment")
     if args.transport not in TRANSPORTS:
         raise _reject("--transport")
+    if args.deployment == "asgi" and args.profile is not None:
+        raise ConfigurationError(
+            "--profile applies only to --deployment cli; ASGI uses SIMBA_TOOL_PROFILE"
+        )
     serving_http = args.deployment == "asgi" or args.transport != "stdio"
     warnings = []
 
@@ -536,11 +553,14 @@ def render_docs() -> str:
             "",
             "## Product decision",
             "",
-            "This release does not add an application settings UI. Connection credentials",
-            "stay in the MCP host configuration. Operator ceilings stay in the server process",
+            "Choose your hosted tool profile in the application's Profile > Agent connections settings.",
+            "The preference belongs to the authenticated user and defaults to full. The new application",
+            "and MCP versions must be deployed together: hosted listing and calls require the",
+            "schema-version-1 preferences endpoint. Lookup failures refuse the request.",
+            "Connection credentials stay in the MCP host configuration. Operator ceilings stay in the server process",
             "environment or launch arguments. Agents choose documented per-call tool arguments",
             "and cannot raise server ceilings, change the shared catalogue or expand permissions.",
-            "A UI is not required for this release. Concise-versus-detailed preferences remain",
+            "Local stdio uses its server profile. Concise-versus-detailed user preferences remain",
             "unimplemented proposals, not settings.",
             "",
             "A development `.env` configures only the process that loads it. It does not",
@@ -563,6 +583,8 @@ def render_docs() -> str:
             "1. Server constants and operator process settings bound every caller.",
             "2. `--profile` overrides `SIMBA_TOOL_PROFILE` for the CLI process only.",
             "3. HTTP/SSE ignores `SIMBA_API_KEY` and uses the request bearer.",
+            "   Its per-user profile further restricts the operator catalogue, never expands it.",
+            "   Reconnect after saving a profile so your MCP host refreshes its tool list.",
             "4. Per-call arguments can select evidence or impose a tighter content cap.",
             "   They cannot raise byte ceilings, disable admission or enable server filesystem reads.",
             "5. Backend authorisation remains definitive.",
