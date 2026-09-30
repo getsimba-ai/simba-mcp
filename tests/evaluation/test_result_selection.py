@@ -2,7 +2,12 @@
 
 import pytest
 
-from simba_mcp.evaluation.hosts.result_selection import ResultSelectionDispatch, result_tasks
+from simba_mcp.evaluation.hosts.result_selection import (
+    ResultSelectionDispatch,
+    advertised_result_tools,
+    prompt_names_model,
+    result_tasks,
+)
 from simba_mcp.evaluation.result_cases import result_cases, saved_results
 from simba_mcp.evaluation.runner import run_case
 from simba_mcp.server import create_server
@@ -30,6 +35,34 @@ def test_roi_oracle_and_reconciliation():
         sum(row[k] for k in ("Search Activity", "TV_activity", "Base", "price", "Overlap"))
         == row["Model"]
     )
+
+
+def test_named_hash_hides_tools_the_result_host_refuses():
+    from types import SimpleNamespace
+
+    tools = [
+        SimpleNamespace(name=name)
+        for name in (
+            "list_models",
+            "get_model",
+            "get_model_results",
+            "get_workflow_guidance",
+            "create_model",
+        )
+    ]
+    named = advertised_result_tools(
+        tools,
+        "In synthetic_v4_gallery there is no Overlap column.",
+        "synthetic_v4_gallery",
+    )
+    assert [tool.name for tool in named] == ["get_model_results", "get_workflow_guidance"]
+    unknown = advertised_result_tools(tools, "Which saved model should I read?", "synthetic_v4_gallery")
+    assert [tool.name for tool in unknown] == [tool.name for tool in tools]
+    assert not prompt_names_model("not-synthetic_v4_gallery-extra", "synthetic_v4_gallery")
+    assert prompt_names_model("The completed saved model is result-example.", "result-example")
+    assert not prompt_names_model("result-example-extra", "result-example")
+    assert not prompt_names_model("", "result-example")
+
 
 
 @pytest.mark.anyio
@@ -227,6 +260,10 @@ async def test_guidance_comparison_freezes_arms_and_uses_real_dispatch(
         "baseline",
     ]
     assert all(t["passed"] for t in report["trials"])
+    named = {"get_model_results", "get_workflow_guidance"}
+    assert all(set(t["tool_names"]) == named for t in report["trials"])
+    assert all(t["result_tool_exposure"] == "named_hash" for t in report["trials"])
+    assert all({tool["name"] for tool in request["tools"]} == named for request in seen)
     assert len({t["definitions_sha256"] for t in report["trials"]}) == 1
     assert "Frozen baseline marker" in seen[0]["system"]
     assert "Frozen baseline marker" not in seen[2]["system"]

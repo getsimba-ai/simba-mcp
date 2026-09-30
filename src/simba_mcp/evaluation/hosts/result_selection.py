@@ -5,6 +5,7 @@ inferring scientific correctness. All execution still uses the canonical runner.
 """
 
 import json
+import re
 from copy import deepcopy
 from dataclasses import dataclass, replace
 from datetime import UTC, datetime, timedelta
@@ -274,6 +275,27 @@ def validation_tasks(seed, datasets):
                 )
             )
     return suite
+
+
+NAMED_RESULT_TOOLS = frozenset({"get_model_results", "get_workflow_guidance"})
+
+
+def prompt_names_model(prompt, model_hash):
+    """True when the sent prompt already identifies this exact model hash."""
+    if not isinstance(prompt, str) or not isinstance(model_hash, str) or not model_hash:
+        return False
+    return re.search(rf"(?<![\w-]){re.escape(model_hash)}(?![\w-])", prompt) is not None
+
+
+def advertised_result_tools(tools, prompt, model_hash):
+    """Omit tools the result dispatch will refuse once the prompt names the hash.
+
+    A prompt that does not name the hash keeps the catalogue, including list_models.
+    Calling a tool outside the authorised pair still fails the session.
+    """
+    if not prompt_names_model(prompt, model_hash):
+        return list(tools)
+    return [tool for tool in tools if getattr(tool, "name", None) in NAMED_RESULT_TOOLS]
 
 
 class ResultSelectionDispatch:

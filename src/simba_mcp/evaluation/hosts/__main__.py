@@ -34,7 +34,9 @@ from .result_grading import claims_in_scope, fact_verdict, literal_fields, struc
 from .result_selection import (
     ResultSelectionDispatch,
     ResultTask,
+    advertised_result_tools,
     development_tasks,
+    prompt_names_model,
     result_tasks,
     validation_tasks,
 )
@@ -501,22 +503,33 @@ async def run(args):
                             context = "\n\n".join(
                                 guidance[s]["content"] for s in ("entrypoint", "interpretation")
                             )
-                        definitions_sent = host_definitions(visible, mode)
+                        paraphrased = bool(guidance_arms) and (
+                            rep >= 3 or getattr(args, "results_prompt", "mixed") == "paraphrase"
+                        )
+                        session_prompt = (case.paraphrase or prompt) if paraphrased else prompt
+                        offered = visible
+                        if result_case and prompt_names_model(session_prompt, dispatch.model_hash):
+                            offered = advertised_result_tools(
+                                visible, session_prompt, dispatch.model_hash
+                            )
+                        definitions_sent = host_definitions(offered, mode)
                         row = {
                             "case": case.id,
                             "mode": mode,
                             "view": view,
-                            "tool_names": [t.name for t in visible],
+                            "tool_names": [t.name for t in offered],
                             "repetition": rep,
                             "definitions_sha256": hashlib.sha256(
                                 json.dumps(definitions_sent, sort_keys=True).encode()
                             ).hexdigest(),
                         }
+                        if result_case:
+                            row["result_tool_exposure"] = (
+                                "named_hash"
+                                if prompt_names_model(session_prompt, dispatch.model_hash)
+                                else "catalogue"
+                            )
                         report["trials"].append(row)
-                        paraphrased = bool(guidance_arms) and (
-                            rep >= 3 or getattr(args, "results_prompt", "mixed") == "paraphrase"
-                        )
-                        session_prompt = (case.paraphrase or prompt) if paraphrased else prompt
                         if guidance_arms or rlc:
                             row["prompt"] = session_prompt
                             row["prompt_variant"] = "paraphrase" if paraphrased else "original"
