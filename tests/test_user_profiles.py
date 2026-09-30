@@ -163,6 +163,7 @@ def test_real_http_middleware_concurrent_profiles_and_dispatch(monkeypatch):
         assert "create_model" in names(second)
         refused = request("one", "tools/call", {"name": "create_model", "arguments": {}})
         assert "outside your selected profile" in str(refused)
+        assert "Profile > Connected apps" in str(refused)
         assert all(path == "/api/v1/mcp/preferences" for _, _, path in seen)
         with ThreadPoolExecutor(max_workers=2) as pool:
             results = list(

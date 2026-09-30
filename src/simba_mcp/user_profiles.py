@@ -59,7 +59,7 @@ class UserProfileMiddleware:
         ):
             raise MCPError(
                 -32000,
-                "Tool is outside your selected profile; change Agent connections settings and reconnect",
+                "Tool is outside your selected profile; change Profile > Connected apps settings and reconnect",
             )
         result = await call_next(ctx)
         if ctx.method == "tools/list" and allowed is not None:
