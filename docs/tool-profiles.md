@@ -33,8 +33,21 @@ lookups and invalid responses refuse the request rather than choosing another
 profile. Each lookup is a single request with a five-second deadline and adds a
 backend exchange to listing and calls. Account settings can only be changed through
 the authenticated application session with its CSRF protection, not by an MCP tool.
-The current application endpoint accepts Simba API keys. OAuth access tokens for
-the combined preferences and tool path have not been verified.
+The matching application endpoint uses the canonical bearer resolver for both
+Simba API keys and OAuth access tokens. Local integration checks cover session
+preference persistence, both bearer types selecting the saved catalogue, refusal
+of excluded calls before backend dispatch, and another user's unaffected Full
+catalogue. Local application checks also reject expired or revoked tokens, revoked
+OAuth clients and inactive accounts. These checks use synthetic SQLite records and
+an in-process HTTP transport; they do not establish deployed-host verification.
+
+For the coordinated 0.13.0 release, publish and verify the distribution before
+updating the application's `simba-mcp` dependency pin to `0.13.0`. The application
+and MCP service use the same image. Apply the additive preference migration before
+starting the matching application and MCP versions, then verify the combined
+image and an authorised hosted canary. Do not deploy the new settings with the
+previous `0.12.0` MCP pin. Publication, production deployment and hosted canary
+verification are separate release gates; local checks do not authorise them.
 
 For a local stdio connection, configure the server directly:
 
@@ -70,7 +83,7 @@ configuration change so the client refreshes its tool catalogue.
 
 ## Full fallback and rollback
 
-For a hosted task needing omitted tools, save full in Agent connections and reconnect.
+For a hosted task needing omitted tools, save full in Profile > Connected apps and reconnect.
 The operator must also allow those tools. For local stdio, configure a new full connection or restart the
 current server with `--profile full`. Environment-only deployments can unset
 `SIMBA_TOOL_PROFILE` or set it to `full`. Keep the user's backend permissions and

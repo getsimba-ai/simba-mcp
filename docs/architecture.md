@@ -64,9 +64,13 @@ The server never issues credentials. It authenticates each HTTP request with the
 The new hosted profile contract requires the matching application release and its
 `/api/v1/mcp/preferences` endpoint. There is no older-backend fallback. The application
 must authenticate the supplied bearer on this endpoint as well as tool routes.
-The current application preference implementation supports API keys and application
-sessions; it does not introduce an OAuth verifier. An OAuth deployment needs that
-backend integration verified before being declared supported for this release.
+The matching application uses its existing canonical resolver for API keys and
+OAuth access tokens, and supports session-only preference updates protected by
+CSRF. Local synthetic SQLite and in-process HTTP integration checks verify both
+bearer paths through preference lookup, per-user tool listing and excluded-call
+refusal. They do not establish deployed-host acceptance. See the coordinated
+publication, application dependency pin, migration and canary gates in
+[tool profiles](tool-profiles.md#configure-a-connection).
 
 All 50 previous tool names, required parameters and default payloads remain.
 Existing Python tool imports from `simba_mcp.server` and the CLI/ASGI entry points
