@@ -278,7 +278,10 @@ def validation_tasks(seed, datasets):
 class ResultSelectionDispatch:
     """Per-session fixture authority, compatible with hosts.anthropic.session."""
 
-    def __init__(self, server, task, *, guidance=None):
+    def __init__(self, server, task, *, guidance=None, grader_version=17):
+        if type(grader_version) is not int or grader_version not in (17, 18):
+            raise ValueError("Unsupported result grader version")
+        self.grader_version = grader_version
         self.server, self.task = server, task
         self.guidance = guidance
         self.model_hash = (task.fixture or saved_results()).get("model_hash", "result-example")
@@ -614,7 +617,9 @@ class ResultSelectionDispatch:
     def grade(self, facts):
         """Facts and evidence gates are separate from provider formatting checks."""
         return {
-            "facts": semantic_facts(self.task, facts, self.supported_sections),
+            "facts": semantic_facts(
+                self.task, facts, self.supported_sections, grader_version=self.grader_version
+            ),
             "claims_in_scope": claims_in_scope(self.task, facts),
             "required_evidence": any(
                 option <= self.supported_sections for option in self.task.evidence_sets()

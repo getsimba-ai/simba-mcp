@@ -64,6 +64,16 @@ async def run(args):
     tool_profile = getattr(args, "tool_profile", "full")
     if tool_profile != "full" and getattr(args, "workflow_suite", None) != "rlc01":
         raise ValueError("Explicit tool profiles require the prospective RLC suite")
+    grader_version = getattr(args, "grader_version", GRADER_VERSION)
+    if type(grader_version) is not int or grader_version not in (17, 18):
+        raise ValueError("Unsupported result grader version")
+    if grader_version != 17 and not (
+        getattr(args, "workflow_suite", None) == "rlc01" or getattr(args, "workflow_packet", None)
+    ):
+        raise ValueError("Grader 18 requires an explicitly prospective workflow")
+    grading_calibration = (
+        calibrate() if grader_version == 17 else calibrate(grader_version=grader_version)
+    )
     server = create_server("compact", profile=tool_profile)
     tools = await server.list_tools()
     role = getattr(args, "role_comparison", None)
@@ -263,6 +273,8 @@ async def run(args):
             for c, p, e in selected
         ],
     }
+    if grader_version != 17:
+        report["configuration"]["grader_version"] = grader_version
     if rlc:
         from .result_rlc_tasks import RLC_TASK_VERSION
 
@@ -318,7 +330,7 @@ async def run(args):
             previous.get("status") != "stopped"
             or previous_config != report["configuration"]
             or any(previous[key] != report[key] for key in ("tasks", "guidance", "catalogue"))
-            or previous["calibration"] != calibrate()
+            or previous["calibration"] != grading_calibration
             or fingerprint(previous["calibration"])
             != previous["frozen_experiment"]["calibration_sha256"]
             or any(
@@ -368,7 +380,7 @@ async def run(args):
             "policy": "Preserve completed trials; restart incomplete trials as separately billed attempts",
         }
     if robust or rlc:
-        report["calibration"] = calibrate()
+        report["calibration"] = grading_calibration
         report["experiment_inputs"] = {
             "purpose": "development_smoke"
             if rlc and args.samples == 1
@@ -412,7 +424,9 @@ async def run(args):
         if stop_file and stop_file.exists():
             raise RuntimeError("Operator requested stop; checkpoint and reservations retained")
         if robust or rlc:
-            verify_experiment(report["frozen_experiment"], report["experiment_inputs"], calibrate())
+            verify_experiment(
+                report["frozen_experiment"], report["experiment_inputs"], grading_calibration
+            )
         if (
             continue_from
             and hashlib.sha256(continue_from.read_bytes()).hexdigest() != continuation_hash
@@ -476,7 +490,9 @@ async def run(args):
                                 if guidance_arms
                                 else report["guidance"]["current"]
                             )
-                            dispatch = ResultSelectionDispatch(arm_server, case, guidance=guidance)
+                            dispatch = ResultSelectionDispatch(
+                                arm_server, case, guidance=guidance, grader_version=grader_version
+                            )
                             context = "\n\n".join(
                                 guidance[s]["content"] for s in ("entrypoint", "interpretation")
                             )
@@ -499,7 +515,7 @@ async def run(args):
                         if guidance_arms or rlc:
                             row["prompt"] = session_prompt
                             row["prompt_variant"] = "paraphrase" if paraphrased else "original"
-                            row["grader_version"] = GRADER_VERSION
+                            row["grader_version"] = grader_version
 
                         def checkpoint(record, row=row):
                             row["session"] = record
@@ -542,7 +558,9 @@ async def run(args):
                         )
                         if rlc and not result_case:
                             contract = ResultTask(case.id, prompt, frozenset(), expected)
-                            row["fact_verdict"] = fact_verdict(contract, actual, set())
+                            row["fact_verdict"] = fact_verdict(
+                                contract, actual, set(), grader_version=grader_version
+                            )
                             row["claim_review_required"] = (
                                 not claims_in_scope(contract, actual)
                                 or not structured_answer_only(result.get("final_text", ""))
@@ -576,7 +594,10 @@ async def run(args):
                             row["assertions"] = dispatch.grade(actual)
                             if robust or rlc:
                                 row["fact_verdict"] = fact_verdict(
-                                    case, actual, dispatch.supported_sections
+                                    case,
+                                    actual,
+                                    dispatch.supported_sections,
+                                    grader_version=grader_version,
                                 )
                                 row["claim_review_required"] = (
                                     not row["assertions"]["claims_in_scope"]
@@ -678,6 +699,13 @@ def main():
     parser.add_argument("--cap-usd", type=float, required=True)
     parser.add_argument("--prior-usd", type=float, default=0)
     parser.add_argument("--samples", type=int, default=2)
+    parser.add_argument(
+        "--grader-version",
+        type=int,
+        choices=(17, 18),
+        default=17,
+        help="17 preserves historical semantics; 18 enables canonical identity for prospective workflows",
+    )
     parser.add_argument("--tool-profile", choices=PROFILE_NAMES, default="full")
     parser.add_argument(
         "--workflow-packet",

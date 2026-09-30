@@ -80,13 +80,15 @@ def literal_fields(task, facts):
     return isinstance(facts, dict) and all(facts.get(k) == v for k, v in task.expected.items())
 
 
-def semantic_facts(task, facts, supported_sections):
+def semantic_facts(task, facts, supported_sections, *, grader_version=17):
     """Bounded equivalences, not a general language judge or fuzzy numeric scorer.
 
     Display names require the returned canonical map. Boolean evidence states
     never coerce integers/strings. Unsupported explanations remain outside this
     structured-fact metric and require separate claim review.
     """
+    if type(grader_version) is not int or grader_version not in (17, 18):
+        raise ValueError("Unsupported result grader version")
     facts, _ = _rlc_normalise(task, facts)
     if not isinstance(facts, dict):
         return False
@@ -123,8 +125,29 @@ def semantic_facts(task, facts, supported_sections):
             "diagnostics were not returned",
         }
     aliases = {"Search Activity": "Search", "TV_activity": "TV"}
+    if grader_version == 18:
+        from ..result_cases import saved_results
+
+        mapping = (task.fixture or saved_results()).get("results", {}).get("channel_map", [])
+        candidates = [
+            row
+            for row in mapping
+            if isinstance(row, dict) and row.get("activity_column") == task.channel
+        ]
+        # A single canonical identity is required. Evidence below must already
+        # establish this mapping, not merely contain a similarly spelled key.
+        aliases = {}
+        if len(candidates) == 1 and isinstance(candidates[0].get("channel"), str):
+            display = candidates[0]["channel"]
+            if (
+                display
+                and sum(isinstance(row, dict) and row.get("channel") == display for row in mapping)
+                == 1
+            ):
+                aliases[task.channel] = display
     if (
-        facts.get("channel") == aliases.get(task.channel)
+        (grader_version == 17 or isinstance(aliases.get(task.channel), str))
+        and facts.get("channel") == aliases.get(task.channel)
         and {"channel_map", "verified_channel_identity"} & supported_sections
     ):
         facts["channel"] = task.channel
@@ -161,13 +184,13 @@ def claims_in_scope(task, facts):
     return set(facts) <= allowed
 
 
-def fact_verdict(task, facts, supported_sections):
+def fact_verdict(task, facts, supported_sections, *, grader_version=17):
     """Separate definite structured mismatches from explanations needing review.
 
     A correct unknown-convergence state with an unfamiliar reason is not a
     proven false claim. Its explanation needs independent semantic review.
     """
-    if semantic_facts(task, facts, supported_sections):
+    if semantic_facts(task, facts, supported_sections, grader_version=grader_version):
         return "pass"
     facts, _ = _rlc_normalise(task, facts)
     if _missing_diagnostic_task(task) and isinstance(facts, dict):

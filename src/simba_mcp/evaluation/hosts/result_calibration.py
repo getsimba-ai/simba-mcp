@@ -4,16 +4,18 @@ Labels are engineering expectations for review, not human-approved ground truth.
 Original provider evidence is never overwritten or silently rescored.
 """
 
-from dataclasses import asdict
+from dataclasses import asdict, replace
 
 from .result_grading import claims_in_scope, fact_verdict, semantic_facts
 from .result_rlc_tasks import rlc_tasks
-from .result_selection import result_tasks
+from .result_selection import ResultTask, result_tasks
 
 GRADER_VERSION = 17
 
 
-def calibration_cases():
+def calibration_cases(*, grader_version=17):
+    if type(grader_version) is not int or grader_version not in (17, 18):
+        raise ValueError("Unsupported result grader version")
     roi, diagnostic, marginal, decomposition, old = result_tasks()
     cases = [
         (
@@ -319,6 +321,8 @@ def calibration_cases():
             ),
         ]
     )
+    if grader_version == 18:
+        cases.extend(canonical_identity_cases())
     return [
         {
             "id": name,
@@ -332,14 +336,66 @@ def calibration_cases():
     ]
 
 
-def calibrate():
-    tasks = {t.id: t for t in [*result_tasks(), *rlc_tasks()]}
+def canonical_identity_cases():
+    """Prospective labels only; historical version 17 rows remain unchanged."""
+    roi = result_tasks()[0]
+    mapping = {
+        "channel": "Paid Discovery",
+        "activity_column": "Discovery_units",
+        "spend_column": "Discovery_cost",
+    }
+    task = replace(
+        roi,
+        id="canonical_identity_calibration",
+        channel="Discovery_units",
+        expected={**roi.expected, "channel": "Discovery_units"},
+        fixture={"model_hash": "synthetic-calibration", "results": {"channel_map": [mapping]}},
+    )
+    answer = {**task.expected, "channel": "Paid Discovery"}
+    ambiguous = replace(
+        task,
+        fixture={
+            "model_hash": "synthetic-calibration",
+            "results": {"channel_map": [mapping, {**mapping, "activity_column": "Other_units"}]},
+        },
+    )
+    wrong = replace(
+        task,
+        fixture={
+            "model_hash": "synthetic-calibration",
+            "results": {"channel_map": [{**mapping, "channel": "Different channel"}]},
+        },
+    )
+    return [
+        ("generic_mapped_display", task, answer, {"channel_map"}, True, True),
+        ("generic_inline_identity", task, answer, {"verified_channel_identity"}, True, True),
+        ("generic_activity_key", task, task.expected, {"channel_map"}, True, True),
+        ("generic_missing_mapping", task, answer, {"channel_summary"}, False, True),
+        ("generic_wrong_mapping", wrong, answer, {"channel_map"}, False, True),
+        ("generic_ambiguous_mapping", ambiguous, answer, {"channel_map"}, False, True),
+        (
+            "generic_spelling_guess",
+            task,
+            {**answer, "channel": "paid discovery"},
+            {"channel_map"},
+            False,
+            True,
+        ),
+        ("generic_wrong_roi", task, {**answer, "roi": 9}, {"channel_map"}, False, True),
+    ]
+
+
+def calibrate(*, grader_version=17):
     rows = []
-    for case in calibration_cases():
-        task = tasks[case["task"]["id"]]
-        actual = semantic_facts(task, case["facts"], set(case["supported_sections"]))
+    for case in calibration_cases(grader_version=grader_version):
+        task = ResultTask(**case["task"])
+        actual = semantic_facts(
+            task, case["facts"], set(case["supported_sections"]), grader_version=grader_version
+        )
         bounded = claims_in_scope(task, case["facts"])
-        verdict = fact_verdict(task, case["facts"], set(case["supported_sections"]))
+        verdict = fact_verdict(
+            task, case["facts"], set(case["supported_sections"]), grader_version=grader_version
+        )
         expected_verdict = (
             "review"
             if case["id"] in ("unknown_with_failure_claim", "valid_explanation_for_review")
@@ -365,7 +421,7 @@ def calibrate():
             }
         )
     return {
-        "grader_version": GRADER_VERSION,
+        "grader_version": grader_version,
         "passed": all(r["passed"] for r in rows),
         "label_review": "engineering_labels_pending_independent_review",
         "cases": rows,
