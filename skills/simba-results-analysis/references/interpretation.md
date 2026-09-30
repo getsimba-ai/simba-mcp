@@ -1,8 +1,9 @@
 ## 4. Read results correctly
 
 - **Channel naming**: results are keyed by ACTIVITY-COLUMN name, not
-  `channels[].name`. Always read `channel_summary` (or `channel_map`, the
-  canonical join table) before quoting or re-using channel keys.
+  `channels[].name`. Use `channel_summary` for exact result keys. When relating
+  a user-facing channel name to a result or activity key, retrieve `channel_map`
+  and use its explicit mapping; do not infer identity from spelling.
 - **Context size**: a full pull is huge. Request only needed `sections`,
   pass `channels=[...]` and `max_grid_points=20` in conversational use.
 - **Section semantics** (the docstring's per-section list is the API doc):
