@@ -283,3 +283,37 @@ async def test_prediction_payload_passes_through_without_adding_requests():
     assert result["results"] == source["results"]
     assert result["audit"] == source["audit"]
     assert client.get_model_results.await_count == 1
+
+
+@pytest.mark.parametrize("section,key", [("mroi_summary", "channels"), ("mroi_periods", "rows")])
+@pytest.mark.parametrize("query", ["Retail audio", "shelf_signal_9"])
+def test_mroi_explicit_display_and_activity_identifiers(section, key, query):
+    from simba_mcp.tools.results import _filter_results
+
+    row = {"channel": "Retail audio", "activity_column": "shelf_signal_9", "mroi": 2}
+    source = {"results": {section: {key: [row, {"channel": "Other", "mroi": 3}]}}}
+    before = deepcopy(source)
+    result = _filter_results(source, [query], None)
+    assert result["results"][section][key] == [row]
+    assert result["_mcp_selection"]["unmatched_channel_aliases"] == []
+    assert result["_mcp_selection"]["ambiguous_channel_aliases"] == {}
+    assert source == before
+
+
+@pytest.mark.parametrize("section,key", [("mroi_summary", "channels"), ("mroi_periods", "rows")])
+def test_mroi_shared_explicit_alias_retains_collision(section, key):
+    from simba_mcp.tools.results import _filter_results
+
+    rows = [
+        {"channel": "Retail audio", "activity_column": "shelf_signal_9", "mroi": 2},
+        {"channel": "shelf_signal_9", "activity_column": "other_signal_8", "mroi": 3},
+    ]
+    source = {"results": {section: {key: rows}}}
+    before = deepcopy(source)
+    result = _filter_results(source, ["shelf_signal_9"], None)
+    assert result["results"][section][key] == rows
+    assert result["_mcp_selection"]["ambiguous_channel_aliases"] == {
+        "shelf_signal_9": ["other_signal_8", "shelf_signal_9"]
+    }
+    assert result["_mcp_selection"]["unmatched_channel_aliases"] == []
+    assert source == before

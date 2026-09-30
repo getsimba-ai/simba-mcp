@@ -110,7 +110,9 @@ def _filter_results(payload: dict, channels: list | None, max_grid_points: int |
             mroi = dict(mroi)
             target["mroi_summary"] = mroi
             mroi["channels"] = [
-                r for r in mroi["channels"] if _norm_channel(r.get("channel", "")) in wanted
+                r
+                for r in mroi["channels"]
+                if any(_norm_channel(name) in wanted for name in _mroi_names(r))
             ]
         # Per-period series (#591): channels x periods rows. The largest
         # per-channel section, so the filter matters most here.
@@ -119,14 +121,25 @@ def _filter_results(payload: dict, channels: list | None, max_grid_points: int |
             periods = dict(periods)
             target["mroi_periods"] = periods
             periods["rows"] = [
-                r for r in periods["rows"] if _norm_channel(r.get("channel", "")) in wanted
+                r
+                for r in periods["rows"]
+                if any(_norm_channel(name) in wanted for name in _mroi_names(r))
             ]
     names = _filterable_channel_names(original)
     aliases = {}
     for name in sorted(names):
-        aliases.setdefault(_norm_channel(name), []).append(name)
+        aliases.setdefault(_norm_channel(name), set()).add(name)
+    for section, key in (("mroi_summary", "channels"), ("mroi_periods", "rows")):
+        item = original.get(section)
+        if isinstance(item, dict) and isinstance(item.get(key), list):
+            for row in item[key]:
+                row_names = _mroi_names(row)
+                if row_names:
+                    canonical = row_names[-1]
+                    for name in row_names:
+                        aliases.setdefault(_norm_channel(name), set()).add(canonical)
     ambiguous = {
-        key: values
+        key: sorted(values)
         for key, values in aliases.items()
         if wanted and key in wanted and len(values) > 1
     }
@@ -166,6 +179,15 @@ def _filter_results(payload: dict, channels: list | None, max_grid_points: int |
     return payload
 
 
+def _mroi_names(row: dict) -> list[str]:
+    """Explicit row identifiers, with the canonical activity column last."""
+    return [
+        row[key]
+        for key in ("channel", "activity_column")
+        if isinstance(row.get(key), str) and row[key].strip()
+    ]
+
+
 def _filterable_channel_names(target: dict) -> set[str]:
     """Discover exact names only in the sections where local filtering is supported."""
     names = set()
@@ -185,16 +207,6 @@ def _filterable_channel_names(target: dict) -> set[str]:
         rows = target.get(section)
         if isinstance(rows, list):
             names.update(row[key] for row in rows if isinstance(row.get(key), str))
-    for section, key in (("mroi_summary", "channels"), ("mroi_periods", "rows")):
-        item = target.get(section)
-        if isinstance(item, dict) and isinstance(item.get(key), list):
-            # A display name and its activity column are one identifier here.
-            # Register the activity column when present so they are not a collision.
-            names.update(
-                row.get("activity_column") or row["channel"]
-                for row in item[key]
-                if isinstance(row.get("channel"), str)
-            )
     decay = target.get("decay_curves")
     if isinstance(decay, dict):
         names.update(decay)
