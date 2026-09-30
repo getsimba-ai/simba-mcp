@@ -9,7 +9,7 @@ report the same controls without becoming a second settings framework or an MCP 
 
 ## Product decision
 
-Choose your hosted tool profile in the application's Profile > Agent connections settings.
+Choose your hosted tool profile in the application's Profile > Connected apps settings.
 The preference belongs to the authenticated user and defaults to full. The new application
 and MCP versions must be deployed together: hosted listing and calls require the
 schema-version-1 preferences endpoint. Lookup failures refuse the request.
@@ -84,7 +84,7 @@ policy from this document; none is recommended here.
 ### `mcp_tool_profile`
 
 - Purpose: Narrow the hosted tool catalogue to the authenticated user's chosen profile.
-- Lifecycle: Persisted in the application. Save in Profile > Agent connections and reconnect the MCP host. Local stdio does not read it.
+- Lifecycle: Persisted in the application. Save in Profile > Connected apps and reconnect the MCP host. Local stdio does not read it.
 - Resolution: Intersection with the operator catalogue. Mandatory schema-version-1 endpoint; failed lookup refuses the request. No older-backend fallback.
 - Authority: Session-only CSRF-protected update. Bearer reads use the caller's identity. Profiles never grant permissions or raise limits.
 - Evidence: Synthetic wire isolation and failure tests. One single-send lookup per request, bounded to five seconds. Hosted latency remains unmeasured.

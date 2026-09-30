@@ -20,7 +20,7 @@ promote a model, and a title does not confer analyst sign-off rights.
 
 ## Configure a connection
 
-For a hosted HTTP or SSE connection, open **Profile > Agent connections** in Simba,
+For a hosted HTTP or SSE connection, open **Profile > Connected apps** in Simba,
 save a profile and reconnect the MCP host to refresh its tool list. The preference
 applies only to your authenticated account. Each listing and call fetches it again;
 there is no shared preference cache. The effective catalogue is the intersection
