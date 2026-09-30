@@ -33,6 +33,8 @@ lookups and invalid responses refuse the request rather than choosing another
 profile. Each lookup is a single request with a five-second deadline and adds a
 backend exchange to listing and calls. Account settings can only be changed through
 the authenticated application session with its CSRF protection, not by an MCP tool.
+The current application endpoint accepts Simba API keys. OAuth access tokens for
+the combined preferences and tool path have not been verified.
 
 For a local stdio connection, configure the server directly:
 
@@ -111,6 +113,9 @@ The [paired evaluation](workflow-profile-evaluation.md) ran 110 synthetic provid
 sessions. These results support the opt-in implementation; they are not production
 latency guarantees or scientific MMM validation. Data scientist and full expose
 identical definitions; marketer/reviewer definitions match their evaluated subsets.
+These are historical model-specific development measurements. They do not establish
+a current Grok quality, cost or latency improvement and exclude the new hosted
+preference exchange. No Grok optimisation benefit is accepted for this candidate.
 
 Automated acceptance includes real SDK stdio sessions, HTTP wire listing/calls,
 invalid startup, excluded-tool refusal, full fallback, registered role workflows,
@@ -119,8 +124,8 @@ transport/caller isolation. Backend exchanges are mocked. Named desktop clients,
 live backend workflows and production deployment remain separate rollout checks.
 
 The design uses standard [MCP tools/list and tools/call](https://modelcontextprotocol.io/specification/2025-11-25/server/tools)
-(checked 29 September 2026), with SDK 2.2.0 inspected locally and the supported SDK
-minimum checked in CI. There is no custom discovery protocol. Following the
+(checked 29 September 2026). This release uses MCP Python >=2.1.1,<2.2 and CI
+exercises the supported floor. There is no custom discovery protocol. Following the
 [engineering objective](engineering.md), `profiles.py` owns membership and selection;
 registration and the existing evaluation host share it. Domain handlers and backend
 policy remain in their existing owners.

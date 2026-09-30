@@ -116,7 +116,8 @@ CLI transport options, ASGI calls and an actual stdio handshake. Test mocks are 
 live backend or scientific-model acceptance. Reverting the MCP commits restores
 the previous adapter; additive backend advertisements can remain or be reverted
 independently for adapter-only changes. This release also adds the application's
-persisted user profile column. Apply its migration before serving the new contract.
+persisted user profile column. Apply the companion application's migration
+`mcp_tool_profile_001` before starting the new application and MCP together.
 Keep the additive column during code rollback to preserve saved preferences;
 downgrading the migration removes them. Reconnect clients after changing a profile
 or restoring the previous deployment. Reconnection does not undo submitted writes.

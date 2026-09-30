@@ -105,10 +105,10 @@ trials and reviewed budgets before subsequent optimisations change defaults.
 
 ## CI evidence
 
-CI runs the current SDK on Python 3.11, 3.12 and 3.13, plus the supported MCP 2.1.0
+CI runs the current SDK on Python 3.11, 3.12 and 3.13, plus the supported MCP 2.1.1
 floor on Python 3.11. Both Python 3.11 configurations produce the surface and
 synthetic overhead reports as workflow artifacts, named `performance-current`
-and `performance-2.1.0`, retained for 90 days. These artifacts identify their
+and `performance-2.1.1`, retained for 90 days. These artifacts identify their
 checked-out revision and fixture digest. They are measurement records, not
 performance pass/fail thresholds. Preserve any release evidence beyond artifact
 expiry as part of PERF-02.

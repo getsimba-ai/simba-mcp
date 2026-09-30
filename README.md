@@ -99,6 +99,8 @@ the application's **Profile > Agent connections** settings, then reconnect your 
 host. The profile narrows the operator's catalogue and does not grant permissions.
 The application and MCP must both support the new preferences endpoint; lookup
 failures refuse listing and tool calls. Local stdio uses its configured server profile.
+See [profile setup](docs/tool-profiles.md) and the coordinated
+[migration and rollback requirements](docs/architecture.md#acceptance-and-rollback).
 
 ## Available Tools
 
