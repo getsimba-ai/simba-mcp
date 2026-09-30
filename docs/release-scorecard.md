@@ -38,8 +38,8 @@ Independent task review requires future known-identifier prompts to state `model
 Historical experiments retain their original grades, source versions and limits.
 They are not pooled across providers or relabelled as final acceptance. The custom
 Grok Responses host exercises real tool dispatch against synthetic backends. The
-historical Haiku Messages discovery pilot certifies only its recorded host/model
-combination. Claude desktop, Claude Code and other remote clients are not certified
+historical Haiku Messages discovery pilot records observed behaviour for its
+recorded host/model combination. Claude desktop, Claude Code and other remote clients are not certified
 by those experiments. No authenticated deployed canary has been performed here.
 
 See [native discovery support](native-discovery.md#support-matrix),
@@ -71,5 +71,8 @@ See [native discovery support](native-discovery.md#support-matrix),
 
 Package publication, application deployment and epic closure are distinct gates.
 The release is not operationally accepted until the authorised canary and rollback
-exercise succeed. Scientific MMM validation requires a separate follow-up decision; engineering
-fixtures do not establish it.
+exercise succeed. Scientific MMM benchmarking is outside this engineering campaign's implementation
+scope. Scientific workflow planning and any separately authorised execution remain
+a separate programme. Deterministic scientific-evidence checks and modelling-domain
+review remain release requirements; engineering fixtures do not establish MMM
+scientific accuracy.
