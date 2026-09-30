@@ -45,6 +45,9 @@ def test_results_identity_requires_channel_map_not_spelling(mode):
     description = tools["get_model_results"].description
     assert "retrieve channel_map" in description
     assert "do not infer identity from spelling" in description
+    assert "Reuse a sufficient channel_map" in description
+    assert "comma-separated list" in description
+    assert "Always read channel_summary first" not in description
     assert "Start with channel_summary or channel_map" not in description
 
 

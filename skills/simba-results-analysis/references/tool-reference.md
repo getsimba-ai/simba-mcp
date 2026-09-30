@@ -124,15 +124,17 @@ Available sections:
 The response envelope includes `sections_available` — trust it over any
 hardcoded list if the server is newer than these docs.
 
-IMPORTANT — channel naming: results are keyed by the channel's ACTIVITY
-COLUMN name (e.g. "search_activity"), not by the `channels[].name` passed to
-create_model. Use channel_summary for exact result keys. When relating a
-user-facing channel name to a result or activity key, retrieve channel_map
-and use its explicit mapping; do not infer identity from spelling. Request
-channel_map with the needed result sections when possible. These exact keys
-(case- and space-sensitive) must be used in run_optimizer bounds,
-laydown_weights, and period_cpm. Always read channel_summary first to get the
-exact keys.
+IMPORTANT: channel naming. Results are keyed by the channel's ACTIVITY
+COLUMN name (e.g. "search_activity"), not by the `channels[].name` passed
+to create_model. When relating a user-facing channel name to a result or
+activity key, retrieve channel_map and use its explicit mapping; do not infer identity from spelling.
+A display name and its activity-column key are both valid once that
+explicit mapping is in evidence.
+Reuse a sufficient channel_map already returned for the same model.
+Otherwise request channel_map, channel_summary and the other needed
+sections in one get_model_results call; sections accepts a comma-separated list.
+These exact activity-column keys (case- and space-sensitive) must be used
+in run_optimizer bounds, laydown_weights, and period_cpm.
 
 NOTE: Date values in contributions/coefficients records are millisecond
 epoch integers.

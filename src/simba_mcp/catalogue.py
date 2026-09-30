@@ -64,13 +64,15 @@ The byte cap is checked after backend download, not a transport download limit.
 Existing-result questions need no mandatory capability/schema discovery. A missing
 artifact is unavailable evidence, not zero or a passing diagnostic.
 
-Use channel_summary for exact result keys. When relating a user-facing channel
-name to a result or activity key, retrieve channel_map and use its explicit
-mapping; do not infer identity from spelling. Request channel_map with the needed
-result sections when possible. Result keys are exact, case-sensitive
-ACTIVITY-COLUMN names, not channels[].name. Use these keys in optimiser/scenario
-inputs. contributions is KPI units; coefficients is per-period revenue space;
-channel_summary provides aggregated revenue/spend/ROI. Never equate largest
+When relating a user-facing channel name to a result or activity key,
+retrieve channel_map and use its explicit mapping; do not infer identity from spelling.
+Reuse a sufficient channel_map already returned for the same model. Otherwise
+request channel_map, channel_summary and the needed sections together; sections
+accepts a comma-separated list. A mapped display name and its activity-column
+key are both valid once that map is in evidence. Result keys used in
+optimiser/scenario inputs are exact, case-sensitive ACTIVITY-COLUMN names, not
+channels[].name. contributions is KPI units; coefficients is per-period revenue
+space; channel_summary provides aggregated revenue/spend/ROI. Never equate largest
 contribution with highest ROI. posterior and posterior_transforms use 94% HDIs
 (hdi_3%/hdi_97%); actual_vs_model has its own 50%/95% bands. model_stats gives fit
 diagnostics; r_hat covers all posterior variables, including transforms. Interpret
