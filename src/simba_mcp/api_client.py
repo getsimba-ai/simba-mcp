@@ -67,6 +67,14 @@ class ResponseReadError(Exception):
         self.limit_name = limit_name
 
 
+def effective_response_limits(encoded: int | None, decoded: int | None):
+    """A single configured ceiling bounds both encoded and decoded bodies."""
+    return (
+        encoded if encoded is not None else decoded,
+        decoded if decoded is not None else encoded,
+    )
+
+
 class SimbaAPIClient:
     """Thin async wrapper around Simba's API v1 endpoints."""
 
@@ -94,11 +102,8 @@ class SimbaAPIClient:
         ):
             if value is not None and (type(value) is not int or value <= 0):
                 raise ValueError(f"{name} must be a positive integer or None")
-        self.max_encoded_bytes = (
-            max_encoded_bytes if max_encoded_bytes is not None else max_decoded_bytes
-        )
-        self.max_decoded_bytes = (
-            max_decoded_bytes if max_decoded_bytes is not None else max_encoded_bytes
+        self.max_encoded_bytes, self.max_decoded_bytes = effective_response_limits(
+            max_encoded_bytes, max_decoded_bytes
         )
 
     async def _get_client(self) -> httpx.AsyncClient:

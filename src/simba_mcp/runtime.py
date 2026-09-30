@@ -18,6 +18,15 @@ MAX_REQUEST_BODY_BYTES = 12 * 1024 * 1024
 _serving_http = False
 
 
+DESCRIPTION_MODES = ("legacy", "compact")
+
+
+def description_mode(value: str) -> str:
+    if value not in DESCRIPTION_MODES:
+        raise ValueError("SIMBA_TOOL_DESCRIPTIONS must be legacy or compact")
+    return value
+
+
 def _response_byte_limit(name: str) -> int | None:
     raw = os.environ.get(name)
     if raw is None or not raw.strip():

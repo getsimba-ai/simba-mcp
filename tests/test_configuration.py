@@ -147,3 +147,56 @@ def test_local_file_decision_keeps_the_existing_messages(monkeypatch):
 
 def test_inventory_covers_server_code_and_generated_docs():
     assert coverage_errors() == []
+
+
+@pytest.mark.parametrize(
+    "name", ["SIMBA_TOOL_DESCRIPTIONS", "SIMBA_TOOL_PROFILE", "SIMBA_API_REQUEST_POLICY_JSON"]
+)
+def test_invalid_configuration_subprocess_is_structured_and_secret_free(name):
+    import os
+    import subprocess
+    import sys
+
+    env = os.environ.copy()
+    env[name] = "synthetic-secret-invalid"
+    result = subprocess.run(
+        [sys.executable, "-m", "simba_mcp.configuration"],
+        env=env,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 2
+    assert name in json.loads(result.stdout)["error"]
+    assert "synthetic-secret-invalid" not in result.stdout + result.stderr
+    assert "Traceback" not in result.stderr
+
+
+@pytest.mark.parametrize("name", ["SIMBA_API_MAX_ENCODED_BYTES", "SIMBA_API_MAX_DECODED_BYTES"])
+def test_single_byte_limit_reports_both_effective_ceilings(monkeypatch, name):
+    from simba_mcp.api_client import effective_response_limits
+
+    monkeypatch.setenv(name, "2048")
+    report = effective_configuration(Args())
+    assert (
+        report["max_encoded_bytes"]["value"],
+        report["max_decoded_bytes"]["value"],
+    ) == effective_response_limits(2048, None)
+    assert sorted(
+        [report["max_encoded_bytes"]["source"], report["max_decoded_bytes"]["source"]]
+    ) == ["environment", "fallback"]
+
+
+@pytest.mark.parametrize("value", ["", " full ", "invalid"])
+def test_invalid_profile_environment_blocks_override_like_server(monkeypatch, value):
+    monkeypatch.setenv("SIMBA_TOOL_PROFILE", value)
+    with pytest.raises(ConfigurationError):
+        effective_configuration(Args(profile="full"))
+
+
+def test_public_package_exports_remain_available():
+    from simba_mcp import SimbaAPIClient, mcp
+    from simba_mcp.server import mcp as singleton
+
+    assert mcp is singleton
+    assert SimbaAPIClient.__name__ == "SimbaAPIClient"

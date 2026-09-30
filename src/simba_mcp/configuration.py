@@ -17,18 +17,24 @@ import re
 from pathlib import Path
 from urllib.parse import urlsplit, urlunsplit
 
-from .api_client import DEFAULT_TIMEOUT, MAX_RETRIES
+from .api_client import DEFAULT_TIMEOUT, MAX_RETRIES, effective_response_limits
 from .auth import local_files_effective
 from .oauth import CACHE_TTL_SECONDS, oauth_enabled, public_url
-from .profiles import PROFILE_NAMES
+from .profiles import PROFILE_NAMES, validate_profile
 from .request_budget import policy_from_json
-from .runtime import MAX_REQUEST_BODY_BYTES, MAX_UPLOAD_BYTES, _response_byte_limit
+from .runtime import (
+    DESCRIPTION_MODES,  # noqa: F401 - preserve the public configuration constant
+    MAX_REQUEST_BODY_BYTES,
+    MAX_UPLOAD_BYTES,
+    _response_byte_limit,
+    description_mode,
+)
 
-DESCRIPTION_MODES = ("legacy", "compact")
 TRANSPORTS = ("stdio", "streamable-http", "sse")
 METRICS_VALUE = "stderr"
 DOCS = Path(__file__).resolve().parents[2] / "docs" / "configuration.md"
 PACKAGE = Path(__file__).resolve().parent
+PACKAGED_DOCS = PACKAGE / "configuration.md"
 
 _ENV_NAME = re.compile(r"""["']((?:SIMBA_|MCP_)[A-Z0-9_]+)["']""")
 _FLAG = re.compile(r"""add_argument\(\s*["'](--[a-z0-9-]+)["']""")
@@ -87,7 +93,7 @@ def controls():
             "purpose": "Optional encoded response ceiling.",
             "owner": "operator",
             "scope": "process",
-            "state": "unset means no local encoded ceiling",
+            "state": "unset inherits the decoded ceiling; neither set means no local ceiling",
             "lifecycle": "Restart to change. Rollback is unsetting it.",
             "precedence": "A positive integer, or unset. A caller max_response_bytes cannot raise it.",
             "authority": "Operator ceiling. It bounds the backend download, not MCP display alone.",
@@ -100,7 +106,7 @@ def controls():
             "purpose": "Optional decoded response ceiling.",
             "owner": "operator",
             "scope": "process",
-            "state": "unset means no local decoded ceiling",
+            "state": "unset inherits the encoded ceiling; neither set means no local ceiling",
             "lifecycle": "Restart to change. Rollback is unsetting it.",
             "precedence": "A positive integer, or unset. Either byte setting fills the other when only one is set.",
             "authority": "Operator ceiling.",
@@ -128,7 +134,7 @@ def controls():
             "scope": "process catalogue",
             "state": "default full",
             "lifecycle": "Read at server construction unless --profile is passed. Reconnect after changing it.",
-            "precedence": "--profile overrides this variable. Unknown names are rejected.",
+            "precedence": "--profile overrides a valid environment value. Invalid or empty environment values fail server import before the override.",
             "authority": "A profile hides tools. It does not grant backend permissions.",
             "evidence": "Shipped profiles are full, data_scientist, marketer and reviewer.",
         },
@@ -375,20 +381,27 @@ def effective_configuration(argv: argparse.Namespace | None = None) -> dict:
     serving_http = args.deployment == "asgi" or args.transport != "stdio"
     warnings = []
 
-    profile_env = os.environ.get("SIMBA_TOOL_PROFILE")
-    if args.profile is not None:
-        profile, profile_source = args.profile, "argument"
-    elif profile_env is not None and profile_env.strip():
-        profile, profile_source = profile_env.strip(), "environment"
-    else:
-        profile, profile_source = "full", "default"
-    if profile not in PROFILE_NAMES:
-        raise _reject("SIMBA_TOOL_PROFILE")
+    profile_env = os.environ.get("SIMBA_TOOL_PROFILE", "full")
+    try:
+        # The server singleton validates the environment before the CLI override.
+        validate_profile(profile_env)
+        profile = validate_profile(args.profile) if args.profile is not None else profile_env
+    except ValueError as exc:
+        raise _reject("SIMBA_TOOL_PROFILE") from exc
+    profile_source = (
+        "argument"
+        if args.profile is not None
+        else "environment"
+        if "SIMBA_TOOL_PROFILE" in os.environ
+        else "default"
+    )
 
     description = os.environ.get("SIMBA_TOOL_DESCRIPTIONS", "legacy")
     description_source = "default" if "SIMBA_TOOL_DESCRIPTIONS" not in os.environ else "environment"
-    if description not in DESCRIPTION_MODES:
-        raise _reject("SIMBA_TOOL_DESCRIPTIONS")
+    try:
+        description_mode(description)
+    except ValueError as exc:
+        raise _reject("SIMBA_TOOL_DESCRIPTIONS") from exc
 
     api_url_raw = os.environ.get("SIMBA_API_URL", "http://localhost:5005")
     api_url, api_url_sensitive = _public_base(api_url_raw)
@@ -431,6 +444,15 @@ def effective_configuration(argv: argparse.Namespace | None = None) -> dict:
         if not oauth:
             warnings.append("SIMBA_PUBLIC_URL is unused while MCP_OAUTH_ENABLED is off")
 
+    encoded = _limit_report("SIMBA_API_MAX_ENCODED_BYTES")
+    decoded = _limit_report("SIMBA_API_MAX_DECODED_BYTES")
+    limits = effective_response_limits(encoded["value"], decoded["value"])
+    for item, value, other in (
+        (encoded, limits[0], "SIMBA_API_MAX_DECODED_BYTES"),
+        (decoded, limits[1], "SIMBA_API_MAX_ENCODED_BYTES"),
+    ):
+        if item["value"] is None and value is not None:
+            item.update(value=value, source="fallback", inherited_from=other)
     network = serving_http and args.deployment == "cli"
     return {
         "deployment": args.deployment,
@@ -453,8 +475,8 @@ def effective_configuration(argv: argparse.Namespace | None = None) -> dict:
         },
         "api_key": key,
         "request_policy": _policy_report(os.environ.get("SIMBA_API_REQUEST_POLICY_JSON")),
-        "max_encoded_bytes": _limit_report("SIMBA_API_MAX_ENCODED_BYTES"),
-        "max_decoded_bytes": _limit_report("SIMBA_API_MAX_DECODED_BYTES"),
+        "max_encoded_bytes": encoded,
+        "max_decoded_bytes": decoded,
         "local_files": {"allowed": files_allowed, "source": files_source},
         "metrics": {
             "enabled": metrics_enabled,
@@ -507,6 +529,7 @@ def render_docs() -> str:
             "",
             "Generated from `simba_mcp.configuration`. Do not edit this page by hand.",
             "Check it with `python -m simba_mcp.configuration --check`.",
+            "The installed wheel includes this reference. Source checkouts also check docs/configuration.md.",
             "",
             "Runtime owns resolution. This page and `python -m simba_mcp.configuration`",
             "report the same controls without becoming a second settings framework or an MCP tool.",
@@ -593,7 +616,14 @@ def coverage_errors() -> list[str]:
     unexpected = [item for item in dynamic if item.split(":", 1)[0] not in allowed_dynamic]
     if unexpected:
         errors.append("unexpected dynamic environment lookups: " + ", ".join(unexpected))
-    if not DOCS.is_file() or DOCS.read_text(encoding="utf-8") != render_docs():
+    if (
+        not PACKAGED_DOCS.is_file()
+        or PACKAGED_DOCS.read_text(encoding="utf-8") != render_docs()
+        or (
+            DOCS.parent.is_dir()
+            and (not DOCS.is_file() or DOCS.read_text(encoding="utf-8") != render_docs())
+        )
+    ):
         errors.append(
             "docs/configuration.md is stale; run python -m simba_mcp.configuration --write-docs"
         )
@@ -611,7 +641,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--write-docs", action="store_true")
     args = parser.parse_args(argv)
     if args.write_docs:
-        DOCS.write_text(render_docs(), encoding="utf-8", newline="\n")
+        PACKAGED_DOCS.write_text(render_docs(), encoding="utf-8", newline="\n")
+        if DOCS.parent.is_dir():
+            DOCS.write_text(render_docs(), encoding="utf-8", newline="\n")
     if args.check or args.write_docs:
         errors = coverage_errors()
         if errors:

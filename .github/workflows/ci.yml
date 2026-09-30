@@ -50,6 +50,7 @@ jobs:
         run: |
           python -m pip wheel . --no-deps --wheel-dir .codex/wheel
           python -I tests/guidance/wheel_smoke.py .codex/wheel
+          python -I tests/configuration_wheel_smoke.py .codex/wheel
 
       - name: Check generated reference
         run: python -m simba_mcp.reference --check

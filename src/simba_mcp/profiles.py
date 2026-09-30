@@ -69,12 +69,18 @@ def _name(tool):
     return tool.__name__ if callable(tool) else tool.name
 
 
+def validate_profile(role):
+    """Validate the exact startup value without normalising invalid settings."""
+    if role not in PROFILE_NAMES:
+        raise ValueError(f"Unknown tool profile: {role}")
+    return role
+
+
 def select_tools(tools, role):
     """Filter actual definitions without copying contracts or mutating registration."""
+    validate_profile(role)
     if role in ("full", "data_scientist"):
         return list(tools)
-    if role not in PROFILES:
-        raise ValueError(f"Unknown tool profile: {role}")
     names = PROFILES[role]
     missing = names - {_name(tool) for tool in tools}
     if missing:
