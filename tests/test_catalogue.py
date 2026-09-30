@@ -38,6 +38,7 @@ def test_invalid_mode_is_not_silently_accepted():
     with pytest.raises(ValueError):
         create_server("typo")
 
+
 @pytest.mark.parametrize("mode", ["legacy", "compact"])
 def test_results_identity_requires_channel_map_not_spelling(mode):
     tools = {tool.name: tool for tool in anyio.run(create_server(mode).list_tools)}
