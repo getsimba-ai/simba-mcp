@@ -24,6 +24,10 @@ def test_contracts_and_rendering_have_no_execution_dependencies():
     package = Path(contracts.__file__).parent
     for module in (package / "runner.py", package.parent / "benchmark.py"):
         assert not any("benchmark" in name or "performance" in name for name in imports(module))
+    assert set(imports(package / "hosts" / "result_grading.py")) <= {"json", "re"}
+    assert not any(
+        "hosts" in name or "runner" in name for name in imports(package / "experiments.py")
+    )
 
 
 def test_cli_still_exposes_the_same_command():

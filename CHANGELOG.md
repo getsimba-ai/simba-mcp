@@ -4,6 +4,11 @@ All notable changes to the SIMBA MCP Server will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## Unreleased
+
+### Added
+- Evaluation harness for selective result tasks: shared session deadlines, result grading, and an xAI host adapter. Frozen task modules remain reproducible definitions for old experiments. They are not release acceptance, and this change does not alter server transport, profiles or defaults.
+
 ## 0.12.0 (2026-09-29)
 
 ### Added
