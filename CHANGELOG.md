@@ -7,10 +7,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ## Unreleased
 
 ### Added
+- Opt-in encoded and decoded response byte ceilings bound streamed backend responses and return safe oversized-result errors. Default response compression remains compatible; local result filtering does not replace download bounds.
+- Opt-in request deadlines and admission budgets, including caller fairness, cancellation cleanup and bounded read retries. Mutations remain single-send and are not automatically retried. Reduced concurrency can increase latency; no numerical production policy is enabled by this release.
+- Extended privacy-safe request observations for streaming, parsing and filtering, plus cancellation/disconnect regression coverage. Metrics remain disabled by default and exclude the separate hosted preference lookup.
 - Configuration inventory and a non-sensitive operator check (`python -m simba_mcp.configuration`). It reports the effective process combination and its source without printing credentials. Request-policy and byte ceilings remain opt-in; no numeric production default is selected.
 - Hosted tool profiles use the authenticated user's application preference, intersected with the operator catalogue. Set the preference in Profile > Connected apps and reconnect the MCP host. The new application preferences endpoint is required; lookup failures refuse requests. Profiles do not grant backend permissions and reviewer is not read-only. Local stdio retains its server profile.
 
 ### Changed
+- Known-model result questions can read the required sections directly, batching canonical channel mapping with result evidence and reusing guidance already supplied. Unrelated capability or schema discovery is conditional on the task. This routing correction is awaiting prospective evaluation, not an accepted performance gain.
+- Hosted `tools/list` and `tools/call` now require authenticated per-user preference lookup even with OAuth mode disabled. Deploy the matching application endpoint and MCP package together; there is no older-backend fallback. The additive preference migration is intentional. See the [proposed release scorecard and coordinated migration](docs/release-scorecard.md).
 - `get_model_results` channel filtering treats a display name and its activity column as one identifier when the section provides `activity_column`. Callers relating a user-facing name to a result key use `channel_map`; they do not infer identity from spelling.
 - Explicit JSON channel and grid filters copy the containers they change, disclose `_mcp_selection`, and refuse a reserved backend `_mcp_selection` key. Unfiltered and CSV results are unchanged. Local filtering still does not bound the backend download.
 
