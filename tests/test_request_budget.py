@@ -95,7 +95,17 @@ async def test_retry_after_outside_budget_refuses_without_second_send():
 
 @pytest.mark.anyio
 @pytest.mark.parametrize(
-    "fault", [httpx.ConnectTimeout, httpx.PoolTimeout, httpx.ReadTimeout, 429, 500, 503]
+    "fault",
+    [
+        httpx.ConnectTimeout,
+        httpx.PoolTimeout,
+        httpx.ReadTimeout,
+        httpx.ReadError,
+        httpx.RemoteProtocolError,
+        429,
+        500,
+        503,
+    ],
 )
 async def test_read_faults_retry_but_mutations_send_once(fault, monkeypatch):
     monkeypatch.setattr("simba_mcp.api_client.random.uniform", lambda *_: 0)
@@ -119,6 +129,67 @@ async def test_read_faults_retry_but_mutations_send_once(fault, monkeypatch):
         assert len(calls) == 1
         assert json.loads(calls[0].content) == {"submission_key": "exact"}
         assert "reconcile" in result["_next_action"].lower()
+    finally:
+        await instance.close()
+
+
+class _DisconnectingStream(httpx.AsyncByteStream):
+    async def __aiter__(self):
+        yield b'{"partial":'
+        raise httpx.ReadError("synthetic disconnect")
+
+
+@pytest.mark.anyio
+async def test_disconnect_mid_read_retries_get_and_sends_mutation_once(monkeypatch):
+    monkeypatch.setattr("simba_mcp.api_client.random.uniform", lambda *_: 0)
+    calls = []
+
+    def handler(request):
+        calls.append(request)
+        if request.method == "GET" and sum(item.method == "GET" for item in calls) == 1:
+            return httpx.Response(200, stream=_DisconnectingStream())
+        if request.method == "POST":
+            return httpx.Response(200, stream=_DisconnectingStream())
+        return httpx.Response(200, json={"ok": True})
+
+    instance = client(handler)
+    try:
+        assert await instance.get_schema() == {"ok": True}
+        assert sum(item.method == "GET" for item in calls) == 2
+        calls.clear()
+        result = await instance.create_model({"submission_key": "exact"})
+        assert result["_status_code"] >= 400
+        assert len(calls) == 1
+        assert "reconcile" in result["_next_action"].lower()
+        assert instance._admission.active == 0
+    finally:
+        await instance.close()
+
+
+@pytest.mark.anyio
+async def test_cancel_during_parse_releases_permit_without_retry(monkeypatch):
+    entered = asyncio.Event()
+    calls = []
+
+    def handler(request):
+        calls.append(request)
+        return httpx.Response(200, json={"ok": True})
+
+    async def parsing(self, response, body=None):
+        entered.set()
+        await asyncio.Event().wait()
+
+    monkeypatch.setattr(SimbaAPIClient, "_parse_response", parsing)
+    instance = client(handler, total_seconds=10)
+    task = asyncio.create_task(instance.get_schema())
+    await entered.wait()
+    task.cancel()
+    try:
+        with pytest.raises(asyncio.CancelledError):
+            await task
+        assert len(calls) == 1
+        assert instance._admission.active == 0
+        assert not instance._admission.callers
     finally:
         await instance.close()
 
