@@ -253,6 +253,7 @@ CONTRACT = {
         "level": "recommend_campaign_budgets.level",
         "max_step_fraction": "recommend_campaign_budgets.max_step_fraction",
         "bounds": "recommend_campaign_budgets.bounds",
+        "expected_context_key": "recommend_campaign_budgets.expected_context_key",
     },
     "PUT /api/v1/campaigns/map": {
         "model": "set_campaign_mapping.model_hash",

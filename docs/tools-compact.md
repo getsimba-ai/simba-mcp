@@ -2002,6 +2002,9 @@ Args:
     bounds: Optional rows keyed by full identity {platform, account_id, campaign_id,
         adset_id}, with min and/or max amounts in daily currency units. Use null adset_id
         at campaign grain. No platform floor is invented; the server validates bounds.
+    expected_context_key: Optional context_key returned by get_campaign_marginal_returns.
+        A changed model, facts, mapping or attribution basis refuses with 409 instead of
+        calculating against evidence different from the scenario you reviewed.
 
 Returns {channels: [{channel, status, total_daily_budget, rows, explanation, assumptions,
 reason, feasible_range}], ...provenance}. Ready rows include current and recommended
@@ -2020,6 +2023,7 @@ equality of marginal returns. Missing marginal uncertainty remains explicitly un
 | `level` | "campaign" \\| "adset" |  | `"campaign"` |
 | `max_step_fraction` | number |  | `0.2` |
 | `bounds` | list of object (optional) |  | `null` |
+| `expected_context_key` | string (optional) |  | `null` |
 
 ### `set_campaign_mapping`
 

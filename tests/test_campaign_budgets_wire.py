@@ -103,6 +103,7 @@ def test_calculation_forwards_exact_source_and_identity(monkeypatch, source):
         "observation_window": {"start": "2026-09-01", "end": "2026-09-28"},
         "currency": "GBP",
         "max_step_fraction": 0.1,
+        "expected_context_key": "a" * 64,
         "level": "adset",
         "bounds": [
             {

@@ -59,6 +59,7 @@ async def recommend_campaign_budgets(
     level: Literal["campaign", "adset"] = "campaign",
     max_step_fraction: float = 0.2,
     bounds: list[dict[str, Any]] | None = None,
+    expected_context_key: str | None = None,
     ctx: Context[AppContext, Any] = None,
 ) -> APIResult:
     """Calculate campaign budget suggestions without applying them. Requires read:models.
@@ -82,6 +83,9 @@ async def recommend_campaign_budgets(
         bounds: Optional rows keyed by full identity {platform, account_id, campaign_id,
             adset_id}, with min and/or max amounts in daily currency units. Use null adset_id
             at campaign grain. No platform floor is invented; the server validates bounds.
+        expected_context_key: Optional context_key returned by get_campaign_marginal_returns.
+            A changed model, facts, mapping or attribution basis refuses with 409 instead of
+            calculating against evidence different from the scenario you reviewed.
 
     Returns {channels: [{channel, status, total_daily_budget, rows, explanation, assumptions,
     reason, feasible_range}], ...provenance}. Ready rows include current and recommended
@@ -103,6 +107,8 @@ async def recommend_campaign_budgets(
         body["optimizer_run_id"] = optimizer_run_id
     if bounds is not None:
         body["bounds"] = bounds
+    if expected_context_key is not None:
+        body["expected_context_key"] = expected_context_key
     return await _client(ctx).workflow_request("POST", "/campaigns/daily-budgets", body)
 
 

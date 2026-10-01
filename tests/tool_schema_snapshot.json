@@ -4279,6 +4279,18 @@
         ],
         "default": null,
         "title": "Bounds"
+      },
+      "expected_context_key": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Expected Context Key"
       }
     },
     "required": [
