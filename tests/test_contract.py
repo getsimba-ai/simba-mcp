@@ -212,6 +212,31 @@ CONTRACT = {
         "weekday": "set_pipeline_schedule.weekday",
         "enabled": "set_pipeline_schedule.enabled",
     },
+    "GET /api/v1/campaigns": {
+        "model": "list_campaigns.model_hash",
+        "platform": "list_campaigns.platform",
+        "unmapped_only": "list_campaigns.unmapped_only",
+        "start": "list_campaigns.start",
+        "end": "list_campaigns.end",
+        "limit": "list_campaigns.limit",
+        "cursor": "list_campaigns.cursor",
+    },
+    "GET /api/v1/campaigns/report": {
+        "model": "get_campaign_report.model_hash",
+        "start": "get_campaign_report.start",
+        "end": "get_campaign_report.end",
+        "granularity": "get_campaign_report.granularity",
+        "group_by": "get_campaign_report.group_by",
+        "platform": "get_campaign_report.platform",
+        "channel": "get_campaign_report.channel",
+        "campaign_id": "get_campaign_report.campaign_id",
+        "metrics": "get_campaign_report.metrics",
+    },
+    "PUT /api/v1/campaigns/map": {
+        "model": "set_campaign_mapping.model_hash",
+        "rows": "set_campaign_mapping.rows",
+        "tolerance": "set_campaign_mapping.tolerance",
+    },
     "GET /api/v1/projects/{id}/incrementality-tests": {
         "project_id": "list_incrementality_tests.project_id",
         "type": "list_incrementality_tests.type",
@@ -247,6 +272,12 @@ CONTRACT = {
 
 # api_param -> reason it is intentionally unreachable via MCP
 EXCLUDED_BY_DESIGN = {
+    "PUT /api/v1/campaigns/source": "Registering a pipeline as the campaign facts source binds "
+    "data whose credentials the agent cannot see; a human registers it in the app.",
+    "DELETE /api/v1/campaigns/source/{pipeline}": "See PUT /api/v1/campaigns/source.",
+    "GET /api/v1/campaigns/source": "See PUT /api/v1/campaigns/source.",
+    "GET /api/v1/campaigns/map": "set_campaign_mapping returns the same report, and "
+    "list_campaigns carries each campaign's channel and suggestion.",
     "POST /api/v1/keys": "API-key management is session-auth only; an MCP tool "
     "holding one key must not mint or revoke keys.",
     "GET /api/v1/keys": "See POST /api/v1/keys.",

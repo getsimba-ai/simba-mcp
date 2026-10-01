@@ -101,6 +101,9 @@ EXPECTED_TOOLS = [
     "get_scenario_results",
     "update_run",
     "set_run_pinned",
+    "list_campaigns",
+    "get_campaign_report",
+    "set_campaign_mapping",
 ]
 
 
@@ -1364,7 +1367,7 @@ class TestImportEditArchitecture:
 
     def test_registered_tools_with_the_diff_read_only(self):
         tools = self._tools()
-        assert len(tools) == 81
+        assert len(tools) == 84
         diff = tools["diff_recipe_revisions"]
         assert diff.annotations.read_only_hint
         assert set(diff.input_schema["required"]) == {"recipe_id", "base", "other"}

@@ -31,6 +31,8 @@ EVIDENCE = frozenset(
         "compare_study_runs",
         "list_incrementality_tests",
         "get_incrementality_test",
+        "list_campaigns",
+        "get_campaign_report",
         "list_runs",
         "get_optimizer_results",
         "get_scenario_results",
@@ -47,6 +49,7 @@ PROFILES = {
             "set_run_pinned",
             "create_incrementality_test",
             "import_incrementality_tests",
+            "set_campaign_mapping",
         ]
     ),
     "reviewer": EVIDENCE
