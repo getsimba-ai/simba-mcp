@@ -162,3 +162,70 @@ async def set_campaign_mapping(
         {"rows": rows, "tolerance": tolerance},
         params={"model": model_hash},
     )
+
+
+async def get_campaign_incrementality(
+    model_hash: str,
+    start: str | None = None,
+    end: str | None = None,
+    level: Literal["campaign", "adset"] = "campaign",
+    ctx: Context[AppContext, Any] = None,
+) -> APIResult:
+    """Incremental ROAS per campaign (or ad set), beside the platform's own ROAS and last-click
+    ROAS, by pushing the model's channel incrementality down through the platform's attribution.
+
+    THE ASSUMPTION, FIRST. Simba measures incrementality at channel grain. For each model channel
+    over the window, the incrementality factor = the channel's MMM incremental revenue (the
+    model's per-period rows, under its fitted attribution convention) / the platform-attributed
+    value of the campaigns mapped to that channel. Each campaign's incremental ROAS is that
+    factor x its platform ROAS, so campaign incremental revenue sums to the channel's. This
+    assumes the platform over-credits every campaign in a channel equally. It does not:
+    retargeting and brand search are over-credited more, so one factor flatters them. The
+    response warns when such campaigns share a channel with prospecting
+    (`retargeting_shares_channel_factor`); the remedies are to map them to their own model
+    channel (set_campaign_mapping) or to calibrate the factor with an incrementality test.
+    Nothing here is a causal per-campaign measurement; every row says how it was made.
+
+    Per row, `method` is "attribution_scaled" or, when a channel's campaigns carry no platform
+    value, "spend_share" (the channel's incremental revenue shared by spend). A campaign without
+    platform value in a channel that has some gets `iroas: null` and is named
+    (`platform_value_missing`); it is never given a share. `factor_source` is "mmm" or "test":
+    a completed incrementality test in the model's project that names the channel and overlaps
+    the window replaces the model's factor (lift in revenue units / the channel's platform value
+    during the test); `factor_mmm` stays beside it.
+
+    `interval` is "pending" (the 94% bands come from the model's posterior draws, computed by a
+    background job the first time a window is asked for; ask again in a few minutes), "ready"
+    (`factor_interval` per channel, `iroas_hdi` and `incremental_revenue_hdi` per row) or
+    "unavailable" (`interval_reason` says why; point estimates stand, no band is invented).
+    `uninformative` warns when a channel's band spans zero.
+
+    Returns {model_hash, window: {start, end}, level, currency, interval, interval_reason,
+    channels: [{channel, factor, factor_source, factor_mmm, factor_interval, revenue_interval,
+    factor_draws_mean, method, mmm_revenue, platform_value, spend, campaigns, test, warnings}],
+    rows: [{platform, account_id, campaign_id, campaign_name, adset_id, channel, spend,
+    platform_value, last_click_value, days, platform_roas, last_click_roas, incremental_revenue,
+    iroas, incremental_revenue_hdi, iroas_hdi, method, factor_source}], unmapped: [{..., spend,
+    platform_roas, last_click_roas}], warnings: [{code, message, channel?, campaigns?,
+    reason?}], provenance: {source_versions, as_of, map_version, attribution_convention, link}}.
+    Warning codes: retargeting_shares_channel_factor, platform_value_missing, kpi_not_revenue,
+    currency_mismatch, uninformative, unmapped_spend, interval_unavailable,
+    test_override_skipped.
+
+    Args:
+        model_hash: A fitted MMM with a campaign map (set_campaign_mapping).
+        start, end: Optional ISO dates (YYYY-MM-DD), inclusive. Default: the overlap of the
+            model's data and the campaign facts.
+        level: "campaign" (default) or "adset"; ad-set rows inherit their campaign's channel
+            and factor and sum to the campaign row.
+
+    Errors carry a code: model_not_found (404), campaign_facts_empty (404: no facts, or none in
+    the window), invalid_window (400: empty or reversed; the body gives both spans),
+    model_not_mmm (400: a VAR model has no channel revenue rows), model_incomplete (400).
+    """
+    params: dict = {"model": model_hash, "level": level or "campaign"}
+    if start:
+        params["start"] = start
+    if end:
+        params["end"] = end
+    return await _client(ctx).workflow_request("GET", "/campaigns/incrementality", params=params)

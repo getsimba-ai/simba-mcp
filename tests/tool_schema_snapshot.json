@@ -4101,6 +4101,52 @@
     "title": "get_campaign_reportArguments",
     "type": "object"
   },
+  "get_campaign_incrementality": {
+    "properties": {
+      "model_hash": {
+        "title": "Model Hash",
+        "type": "string"
+      },
+      "start": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Start"
+      },
+      "end": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "End"
+      },
+      "level": {
+        "default": "campaign",
+        "enum": [
+          "campaign",
+          "adset"
+        ],
+        "title": "Level",
+        "type": "string"
+      }
+    },
+    "required": [
+      "model_hash"
+    ],
+    "title": "get_campaign_incrementalityArguments",
+    "type": "object"
+  },
   "set_campaign_mapping": {
     "properties": {
       "model_hash": {

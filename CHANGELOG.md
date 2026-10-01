@@ -4,6 +4,12 @@ All notable changes to the SIMBA MCP Server will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.14.0 (2026-10-01)
+
+### Added
+
+- `get_campaign_incrementality(model_hash, start, end, level)` (read-only): incremental ROAS per campaign or ad set beside the platform's own ROAS and last-click ROAS. Each model channel's incrementality factor (MMM incremental revenue over the platform-attributed value of its mapped campaigns) scales the platform's own split, so campaign incremental revenue sums to the channel's. The assumption is stated first and warned about: one factor per channel flatters retargeting and brand. Channels without platform value share revenue by spend (`method: spend_share`); a completed incrementality test can replace a channel's factor (`factor_source: test`); 94% bands come from the model's posterior draws through a background job (`interval: pending | ready | unavailable`), never invented. 85 tools.
+
 ## 0.13.0 (2026-10-01)
 
 ### Added
