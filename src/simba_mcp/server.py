@@ -26,8 +26,10 @@ from .runtime import (
 )
 from .tools.campaigns import (
     get_campaign_incrementality,
+    get_campaign_marginal_returns,
     get_campaign_report,
     list_campaigns,
+    recommend_campaign_budgets,
     set_campaign_mapping,
 )
 from .tools.data import (
@@ -254,6 +256,8 @@ TOOLS = (
     list_campaigns,
     get_campaign_report,
     get_campaign_incrementality,
+    get_campaign_marginal_returns,
+    recommend_campaign_budgets,
     set_campaign_mapping,
     list_incrementality_tests,
     get_incrementality_test,
@@ -428,6 +432,7 @@ __all__ = [
     "diff_quality_policies",
     "evaluate_study_run",
     "get_campaign_incrementality",
+    "get_campaign_marginal_returns",
     "get_campaign_report",
     "get_contribution_groups",
     "get_data_report",
@@ -467,6 +472,7 @@ __all__ = [
     "list_study_recipes",
     "list_study_runs",
     "list_uploads",
+    "recommend_campaign_budgets",
     "recommend_study_run",
     "refreeze_recipe_revision",
     "rename_model",

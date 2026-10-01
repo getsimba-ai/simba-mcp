@@ -34,6 +34,8 @@ EVIDENCE = frozenset(
         "list_campaigns",
         "get_campaign_report",
         "get_campaign_incrementality",
+        "get_campaign_marginal_returns",
+        "recommend_campaign_budgets",
         "list_runs",
         "get_optimizer_results",
         "get_scenario_results",
