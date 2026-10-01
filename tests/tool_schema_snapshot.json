@@ -3887,5 +3887,245 @@
     },
     "title": "get_workflow_guidanceArguments",
     "type": "object"
+  },
+  "list_campaigns": {
+    "properties": {
+      "model_hash": {
+        "title": "Model Hash",
+        "type": "string"
+      },
+      "platform": {
+        "anyOf": [
+          {
+            "enum": [
+              "meta",
+              "google_ads",
+              "tiktok",
+              "other"
+            ],
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Platform"
+      },
+      "unmapped_only": {
+        "default": false,
+        "title": "Unmapped Only",
+        "type": "boolean"
+      },
+      "start": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Start"
+      },
+      "end": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "End"
+      },
+      "limit": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Limit"
+      },
+      "cursor": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Cursor"
+      }
+    },
+    "required": [
+      "model_hash"
+    ],
+    "title": "list_campaignsArguments",
+    "type": "object"
+  },
+  "get_campaign_report": {
+    "properties": {
+      "model_hash": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Model Hash"
+      },
+      "start": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Start"
+      },
+      "end": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "End"
+      },
+      "granularity": {
+        "default": "native",
+        "enum": [
+          "native",
+          "week",
+          "month",
+          "quarter",
+          "year"
+        ],
+        "title": "Granularity",
+        "type": "string"
+      },
+      "group_by": {
+        "anyOf": [
+          {
+            "enum": [
+              "platform",
+              "channel",
+              "campaign",
+              "adset"
+            ],
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Group By"
+      },
+      "platform": {
+        "anyOf": [
+          {
+            "enum": [
+              "meta",
+              "google_ads",
+              "tiktok",
+              "other"
+            ],
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Platform"
+      },
+      "channel": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Channel"
+      },
+      "campaign_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Campaign Id"
+      },
+      "metrics": {
+        "anyOf": [
+          {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Metrics"
+      }
+    },
+    "title": "get_campaign_reportArguments",
+    "type": "object"
+  },
+  "set_campaign_mapping": {
+    "properties": {
+      "model_hash": {
+        "title": "Model Hash",
+        "type": "string"
+      },
+      "rows": {
+        "items": {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        "title": "Rows",
+        "type": "array"
+      },
+      "tolerance": {
+        "default": 0.05,
+        "title": "Tolerance",
+        "type": "number"
+      }
+    },
+    "required": [
+      "model_hash",
+      "rows"
+    ],
+    "title": "set_campaign_mappingArguments",
+    "type": "object"
   }
 }

@@ -24,6 +24,7 @@ from .runtime import (
     app_lifespan,
     set_http_mode,
 )
+from .tools.campaigns import get_campaign_report, list_campaigns, set_campaign_mapping
 from .tools.data import (
     get_backend_capabilities,
     get_data_report,
@@ -245,6 +246,9 @@ TOOLS = (
     run_pipeline,
     get_pipeline_run,
     set_pipeline_schedule,
+    list_campaigns,
+    get_campaign_report,
+    set_campaign_mapping,
     list_incrementality_tests,
     get_incrementality_test,
     create_incrementality_test,
@@ -417,6 +421,7 @@ __all__ = [
     "delete_model",
     "diff_quality_policies",
     "evaluate_study_run",
+    "get_campaign_report",
     "get_contribution_groups",
     "get_data_report",
     "get_data_schema",
@@ -441,6 +446,7 @@ __all__ = [
     "import_incrementality_tests",
     "launch_study_run",
     "link_var_model",
+    "list_campaigns",
     "list_incrementality_tests",
     "list_models",
     "list_pipeline_versions",
@@ -464,6 +470,7 @@ __all__ = [
     "run_pipeline",
     "run_scenario",
     "save_model",
+    "set_campaign_mapping",
     "set_contribution_groups",
     "set_http_mode",
     "set_pipeline_schedule",

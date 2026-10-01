@@ -4,6 +4,19 @@ All notable changes to the SIMBA MCP Server will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.13.0 (2026-10-01)
+
+### Added
+
+- `list_campaigns(model_hash, platform, unmapped_only, start, end, limit, cursor)` (read-only): the campaigns in the campaign facts with their totals and the model channel each counts towards under the model's declared map; unmapped campaigns are listed with their spend and a suggestion, never guessed into a channel.
+- `get_campaign_report(model_hash, start, end, granularity, group_by, platform, channel, campaign_id, metrics)` (read-only): the data-report engine over the campaign facts (spend, impressions, clicks, the platforms' own conversions and value), by platform, model channel, campaign or ad set; unmapped spend is its own group.
+- `set_campaign_mapping(model_hash, rows, tolerance)`: replaces the model's campaign → channel map (exact id or name pattern, effective-dated); refuses a campaign that would count towards two channels on any date, and returns the unmapped list and spend drift per channel as a warning. 84 tools.
+- Registering a pipeline as the campaign facts source stays in the app (excluded by design: it binds data whose credentials the agent cannot see).
+
+### Changed
+
+- Server request reliability policy (bounded responses, #62) is on by default; request budgets (#65) stay off unless `SIMBA_API_REQUEST_POLICY_JSON` is set.
+
 ## 0.12.0 (2026-09-29)
 
 ### Added
