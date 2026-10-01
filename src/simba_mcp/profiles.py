@@ -33,6 +33,7 @@ EVIDENCE = frozenset(
         "get_incrementality_test",
         "list_campaigns",
         "get_campaign_report",
+        "get_campaign_incrementality",
         "list_runs",
         "get_optimizer_results",
         "get_scenario_results",

@@ -40,6 +40,7 @@ READ_ONLY = frozenset(
         "get_pipeline_run",
         "list_campaigns",
         "get_campaign_report",
+        "get_campaign_incrementality",
         "list_incrementality_tests",
         "get_incrementality_test",
         "list_study_decisions",

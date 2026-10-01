@@ -232,6 +232,12 @@ CONTRACT = {
         "campaign_id": "get_campaign_report.campaign_id",
         "metrics": "get_campaign_report.metrics",
     },
+    "GET /api/v1/campaigns/incrementality": {
+        "model": "get_campaign_incrementality.model_hash",
+        "start": "get_campaign_incrementality.start",
+        "end": "get_campaign_incrementality.end",
+        "level": "get_campaign_incrementality.level",
+    },
     "PUT /api/v1/campaigns/map": {
         "model": "set_campaign_mapping.model_hash",
         "rows": "set_campaign_mapping.rows",
