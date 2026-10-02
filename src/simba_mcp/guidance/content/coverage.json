@@ -1,0 +1,503 @@
+[
+  {
+    "family": "visuals_marketer_reviewer",
+    "tools": [
+      "show_response_curves",
+      "show_decomposition",
+      "show_optimizer_allocation"
+    ],
+    "roles": [
+      "marketer",
+      "reviewer"
+    ],
+    "reason": "Both roles inspect authoritative result JSON; charts preserve gaps and have JSON/text fallback. No prediction access or new calculation.",
+    "guidance": [
+      "results",
+      "optimiser"
+    ],
+    "examples": [
+      "role_native_results",
+      "role_saved_allocation"
+    ]
+  },
+  {
+    "family": "drafts_full_only",
+    "tools": [
+      "create_recipe_draft",
+      "get_recipe_draft",
+      "get_recipe_draft_template",
+      "publish_recipe_draft",
+      "list_recipe_drafts",
+      "update_recipe_draft"
+    ],
+    "roles": [],
+    "reason": "Recipe authoring and draft lifecycle belong to full. Reviewer additionally reads published authoring provenance; marketer inspects published evidence instead.",
+    "guidance": [
+      "studies"
+    ],
+    "examples": [],
+    "example_limitation": "Existing canonical domain guidance and domain-wire/full-lifecycle fixtures cover this family. No separate role job is introduced; omitted operations require explicit full fallback."
+  },
+  {
+    "family": "drafts_reviewer",
+    "tools": [
+      "get_recipe_revision_authoring"
+    ],
+    "roles": [
+      "reviewer"
+    ],
+    "reason": "Recipe authoring and draft lifecycle belong to full. Reviewer additionally reads published authoring provenance; marketer inspects published evidence instead.",
+    "guidance": [
+      "studies"
+    ],
+    "examples": [],
+    "example_limitation": "Existing canonical domain guidance and domain-wire/full-lifecycle fixtures cover this family. No separate role job is introduced; omitted operations require explicit full fallback."
+  },
+  {
+    "family": "capability_discovery_marketer_reviewer",
+    "tools": [
+      "get_backend_capabilities"
+    ],
+    "roles": [
+      "marketer",
+      "reviewer"
+    ],
+    "reason": "Expose operation-specific capability inspection for safe cross-domain planning; absent advertisements stay unknown and confer no permission.",
+    "guidance": [
+      "mmm",
+      "studies"
+    ],
+    "examples": [],
+    "example_limitation": "Existing canonical domain guidance and domain-wire/full-lifecycle fixtures cover this family. No separate role job is introduced; omitted operations require explicit full fallback."
+  },
+  {
+    "family": "dataset_reporting_marketer_reviewer",
+    "tools": [
+      "get_data_schema",
+      "get_data_report",
+      "list_uploads",
+      "get_upload"
+    ],
+    "roles": [
+      "marketer",
+      "reviewer"
+    ],
+    "reason": "Existing actual-data reporting needs dataset discovery, exact columns and declared-role schema. Include only these read dependencies; no upload, refresh or fit.",
+    "guidance": [
+      "reporting"
+    ],
+    "examples": [
+      "role_actual_data",
+      "role_report_recovery"
+    ]
+  },
+  {
+    "family": "data_full_only",
+    "tools": [
+      "upload_data",
+      "list_pipeline_versions",
+      "list_pipelines",
+      "run_pipeline",
+      "get_pipeline_run",
+      "set_pipeline_schedule"
+    ],
+    "roles": [],
+    "reason": "Pipeline inspection, refresh and schedule/upload administration belong to full authoring; list_uploads already identifies all stored reporting datasets.",
+    "guidance": [
+      "mmm"
+    ],
+    "examples": [],
+    "example_limitation": "Existing canonical domain guidance and domain-wire/full-lifecycle fixtures cover this family. No separate role job is introduced; omitted operations require explicit full fallback."
+  },
+  {
+    "family": "campaigns_marketer_reviewer",
+    "tools": [
+      "list_campaigns",
+      "get_campaign_report",
+      "get_campaign_incrementality"
+    ],
+    "roles": [
+      "marketer",
+      "reviewer"
+    ],
+    "reason": "Both evidence roles need campaign identity, facts and channel-derived incremental evidence. Preserve unmapped spend and platform-versus-incremental attribution.",
+    "guidance": [
+      "campaigns"
+    ],
+    "examples": [
+      "role_campaign_facts",
+      "role_campaign_empty",
+      "role_campaign_mapping",
+      "role_mapping_uncertain"
+    ]
+  },
+  {
+    "family": "campaign_budgets_marketer_reviewer",
+    "tools": [
+      "get_campaign_marginal_returns",
+      "recommend_campaign_budgets"
+    ],
+    "roles": [
+      "marketer",
+      "reviewer"
+    ],
+    "reason": "Both evidence roles inspect marginal evidence and conditional read-only budget calculations. POST is read-only, not platform spend authority.",
+    "guidance": [
+      "campaigns"
+    ],
+    "examples": [
+      "role_campaign_budget",
+      "role_budget_stale"
+    ]
+  },
+  {
+    "family": "campaign_mapping_marketer",
+    "tools": [
+      "set_campaign_mapping"
+    ],
+    "roles": [
+      "marketer"
+    ],
+    "reason": "Marketer/full may replace a complete map only with explicit intent. Scientific reviewer inspects evidence and uses full for authoring; no inferred mapping.",
+    "guidance": [
+      "campaigns"
+    ],
+    "examples": [
+      "role_campaign_mapping",
+      "role_mapping_uncertain"
+    ]
+  },
+  {
+    "family": "incrementality_marketer_reviewer",
+    "tools": [
+      "list_incrementality_tests",
+      "get_incrementality_test"
+    ],
+    "roles": [
+      "marketer",
+      "reviewer"
+    ],
+    "reason": "Both roles read calibration evidence; marketer/full record or import explicitly authorised tests. Reviewer uses full for test-record authoring.",
+    "guidance": [
+      "campaigns",
+      "mmm"
+    ],
+    "examples": [],
+    "example_limitation": "Existing canonical domain guidance and domain-wire/full-lifecycle fixtures cover this family. No separate role job is introduced; omitted operations require explicit full fallback."
+  },
+  {
+    "family": "experiment_screening_marketer_reviewer",
+    "tools": [
+      "recommend_incrementality_tests"
+    ],
+    "roles": [
+      "marketer",
+      "reviewer"
+    ],
+    "reason": "Both evidence roles need inspectable screening and exclusions; scores are not test design, benefit or budget recommendations.",
+    "guidance": [
+      "campaigns"
+    ],
+    "examples": [
+      "role_experiment_priorities",
+      "role_experiment_unsupported"
+    ]
+  },
+  {
+    "family": "incrementality_marketer",
+    "tools": [
+      "create_incrementality_test",
+      "import_incrementality_tests"
+    ],
+    "roles": [
+      "marketer"
+    ],
+    "reason": "Both roles read calibration evidence; marketer/full record or import explicitly authorised tests. Reviewer uses full for test-record authoring.",
+    "guidance": [
+      "campaigns",
+      "mmm"
+    ],
+    "examples": [],
+    "example_limitation": "Existing canonical domain guidance and domain-wire/full-lifecycle fixtures cover this family. No separate role job is introduced; omitted operations require explicit full fallback."
+  },
+  {
+    "family": "models_marketer_reviewer",
+    "tools": [
+      "list_models",
+      "get_contribution_groups",
+      "get_model",
+      "get_model_status"
+    ],
+    "roles": [
+      "marketer",
+      "reviewer"
+    ],
+    "reason": "Both roles inspect saved model/status and contribution identity. Model creation, VAR links, grouping changes, deletion and model administration belong to full.",
+    "guidance": [
+      "mmm",
+      "results",
+      "var",
+      "priors"
+    ],
+    "examples": [
+      "create_mmm"
+    ]
+  },
+  {
+    "family": "models_full_only",
+    "tools": [
+      "create_model",
+      "create_var_model",
+      "link_var_model",
+      "unlink_var_model",
+      "set_contribution_groups",
+      "rename_model",
+      "save_model",
+      "unsave_model",
+      "delete_model"
+    ],
+    "roles": [],
+    "reason": "Both roles inspect saved model/status and contribution identity. Model creation, VAR links, grouping changes, deletion and model administration belong to full.",
+    "guidance": [
+      "mmm",
+      "results",
+      "var",
+      "priors"
+    ],
+    "examples": [
+      "create_mmm"
+    ]
+  },
+  {
+    "family": "projects_marketer_reviewer",
+    "tools": [
+      "list_projects"
+    ],
+    "roles": [
+      "marketer",
+      "reviewer"
+    ],
+    "reason": "Both roles discover existing project identity. Project creation/renaming are administration and require full.",
+    "guidance": [
+      "mmm",
+      "studies"
+    ],
+    "examples": [],
+    "example_limitation": "Existing canonical domain guidance and domain-wire/full-lifecycle fixtures cover this family. No separate role job is introduced; omitted operations require explicit full fallback."
+  },
+  {
+    "family": "projects_full_only",
+    "tools": [
+      "create_project",
+      "rename_project"
+    ],
+    "roles": [],
+    "reason": "Both roles discover existing project identity. Project creation/renaming are administration and require full.",
+    "guidance": [
+      "mmm",
+      "studies"
+    ],
+    "examples": [],
+    "example_limitation": "Existing canonical domain guidance and domain-wire/full-lifecycle fixtures cover this family. No separate role job is introduced; omitted operations require explicit full fallback."
+  },
+  {
+    "family": "results_marketer_reviewer",
+    "tools": [
+      "get_model_results"
+    ],
+    "roles": [
+      "marketer",
+      "reviewer"
+    ],
+    "reason": "Both roles need saved evidence and selection metadata; interpretation preserves units, attribution and missingness.",
+    "guidance": [
+      "results"
+    ],
+    "examples": [],
+    "example_limitation": "Existing canonical domain guidance and domain-wire/full-lifecycle fixtures cover this family. No separate role job is introduced; omitted operations require explicit full fallback."
+  },
+  {
+    "family": "scenarios_marketer",
+    "tools": [
+      "run_optimizer",
+      "run_scenario",
+      "update_run",
+      "set_run_pinned"
+    ],
+    "roles": [
+      "marketer"
+    ],
+    "reason": "Both roles inspect saved plans/templates/history. Marketer/full submit authorised plans and curate exact runs; reviewer uses full before planning writes.",
+    "guidance": [
+      "optimiser"
+    ],
+    "examples": [],
+    "example_limitation": "Existing canonical domain guidance and domain-wire/full-lifecycle fixtures cover this family. No separate role job is introduced; omitted operations require explicit full fallback."
+  },
+  {
+    "family": "scenarios_marketer_reviewer",
+    "tools": [
+      "get_optimizer_results",
+      "get_scenario_template",
+      "get_scenario_results",
+      "list_runs"
+    ],
+    "roles": [
+      "marketer",
+      "reviewer"
+    ],
+    "reason": "Both roles inspect saved plans/templates/history. Marketer/full submit authorised plans and curate exact runs; reviewer uses full before planning writes.",
+    "guidance": [
+      "optimiser"
+    ],
+    "examples": [],
+    "example_limitation": "Existing canonical domain guidance and domain-wire/full-lifecycle fixtures cover this family. No separate role job is introduced; omitted operations require explicit full fallback."
+  },
+  {
+    "family": "studies_marketer_reviewer",
+    "tools": [
+      "list_studies",
+      "get_study",
+      "get_study_overview",
+      "list_study_runs",
+      "get_study_run"
+    ],
+    "roles": [
+      "marketer",
+      "reviewer"
+    ],
+    "reason": "Both roles inspect saved Studies/runs. Governance, adoption, launch and cancellation belong to full authoring with independent budgets.",
+    "guidance": [
+      "studies"
+    ],
+    "examples": [],
+    "example_limitation": "Existing canonical domain guidance and domain-wire/full-lifecycle fixtures cover this family. No separate role job is introduced; omitted operations require explicit full fallback."
+  },
+  {
+    "family": "studies_full_only",
+    "tools": [
+      "create_study",
+      "get_launch_eligibility",
+      "update_study",
+      "launch_study_run",
+      "cancel_study_run",
+      "adopt_model_into_study"
+    ],
+    "roles": [],
+    "reason": "Both roles inspect saved Studies/runs. Governance, adoption, launch and cancellation belong to full authoring with independent budgets.",
+    "guidance": [
+      "studies"
+    ],
+    "examples": [],
+    "example_limitation": "Existing canonical domain guidance and domain-wire/full-lifecycle fixtures cover this family. No separate role job is introduced; omitted operations require explicit full fallback."
+  },
+  {
+    "family": "recipes_marketer_reviewer",
+    "tools": [
+      "list_study_recipes",
+      "get_recipe_revision",
+      "diff_recipe_revisions"
+    ],
+    "roles": [
+      "marketer",
+      "reviewer"
+    ],
+    "reason": "Both roles inspect immutable recipes and diffs. Revision/refreeze/validation and creation belong to full authoring with declared prerequisites.",
+    "guidance": [
+      "studies"
+    ],
+    "examples": [],
+    "example_limitation": "Existing canonical domain guidance and domain-wire/full-lifecycle fixtures cover this family. No separate role job is introduced; omitted operations require explicit full fallback."
+  },
+  {
+    "family": "recipes_full_only",
+    "tools": [
+      "create_study_recipe",
+      "revise_study_recipe",
+      "refreeze_recipe_revision",
+      "validate_study_recipe"
+    ],
+    "roles": [],
+    "reason": "Both roles inspect immutable recipes and diffs. Revision/refreeze/validation and creation belong to full authoring with declared prerequisites.",
+    "guidance": [
+      "studies"
+    ],
+    "examples": [],
+    "example_limitation": "Existing canonical domain guidance and domain-wire/full-lifecycle fixtures cover this family. No separate role job is introduced; omitted operations require explicit full fallback."
+  },
+  {
+    "family": "quality_marketer_reviewer",
+    "tools": [
+      "list_quality_policies",
+      "diff_quality_policies",
+      "get_quality_policy",
+      "list_study_evaluations",
+      "list_study_decisions",
+      "get_study_champion",
+      "get_study_prediction_access",
+      "get_study_validation_resolutions",
+      "compare_study_runs"
+    ],
+    "roles": [
+      "marketer",
+      "reviewer"
+    ],
+    "reason": "Both roles inspect policies, comparisons and saved evidence. Reviewer/full record authorised assessments, evidence-use declarations and recommendations; policy changes need full.",
+    "guidance": [
+      "studies"
+    ],
+    "examples": [
+      "study_review"
+    ]
+  },
+  {
+    "family": "quality_full_only",
+    "tools": [
+      "create_quality_policy",
+      "retire_quality_policy"
+    ],
+    "roles": [],
+    "reason": "Both roles inspect policies, comparisons and saved evidence. Reviewer/full record authorised assessments, evidence-use declarations and recommendations; policy changes need full.",
+    "guidance": [
+      "studies"
+    ],
+    "examples": [],
+    "example_limitation": "Existing canonical domain guidance and domain-wire/full-lifecycle fixtures cover this family. No separate role job is introduced; omitted operations require explicit full fallback."
+  },
+  {
+    "family": "quality_reviewer",
+    "tools": [
+      "evaluate_study_run",
+      "declare_study_holdout_use",
+      "assess_study_validation_pair",
+      "recommend_study_run"
+    ],
+    "roles": [
+      "reviewer"
+    ],
+    "reason": "Both roles inspect policies, comparisons and saved evidence. Reviewer/full record authorised assessments, evidence-use declarations and recommendations; policy changes need full.",
+    "guidance": [
+      "studies"
+    ],
+    "examples": [],
+    "example_limitation": "Existing canonical domain guidance and domain-wire/full-lifecycle fixtures cover this family. No separate role job is introduced; omitted operations require explicit full fallback."
+  },
+  {
+    "family": "guidance_marketer_reviewer",
+    "tools": [
+      "get_workflow_guidance"
+    ],
+    "roles": [
+      "marketer",
+      "reviewer"
+    ],
+    "reason": "Every role needs bounded packaged workflow guidance and explicit full fallback. Guidance does not authorise operations.",
+    "guidance": [
+      "mmm",
+      "results",
+      "studies"
+    ],
+    "examples": [],
+    "example_limitation": "Existing canonical domain guidance and domain-wire/full-lifecycle fixtures cover this family. No separate role job is introduced; omitted operations require explicit full fallback."
+  }
+]

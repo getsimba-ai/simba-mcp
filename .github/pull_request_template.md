@@ -20,9 +20,15 @@ standing engineering objective. State "no structural change" when applicable. --
 
 ## Verification
 
+For tool changes, record the role decision in packaged coverage.json, update canonical
+guidance and executable examples, then regenerate counts/Skills/references. Confirm
+backend capability and permission boundaries. Explain intentional exclusions and
+example limitations rather than automatically expanding every profile.
+
 - [ ] `pytest -v` passes
 - [ ] `ruff check src/ tests/` passes
 - [ ] `ruff format --check src/ tests/` passes
+- [ ] `python -m simba_mcp.guidance.coverage --check` passes
 
 ## Notes
 

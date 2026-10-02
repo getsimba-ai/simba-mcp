@@ -46,6 +46,9 @@ jobs:
       - name: Check generated native Skills
         run: python -m simba_mcp.guidance --check
 
+      - name: Check role coverage, counts and executable examples
+        run: python -m simba_mcp.guidance.coverage --check
+
       - name: Verify guidance in built wheel
         run: |
           python -m pip wheel . --no-deps --wheel-dir .codex/wheel
@@ -60,6 +63,7 @@ jobs:
 
       - name: Evaluate synthetic workflow contracts
         run: |
+          python -m simba_mcp.evaluation --roles --description-mode compact --output-dir .codex/evaluation/roles
           python -m simba_mcp.evaluation --samples 3 --description-mode legacy --output-dir .codex/evaluation/legacy
           python -m simba_mcp.evaluation --samples 3 --description-mode compact --output-dir .codex/evaluation/compact
 

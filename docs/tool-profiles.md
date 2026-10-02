@@ -4,12 +4,16 @@ Choose a starting view for the job. `full` is the default. `data_scientist` is a
 alias for full, including the entire Studies lifecycle and any future tools.
 Profiles select tools at server startup; they never grant backend permissions.
 
+<!-- current-role-coverage:start -->
+
 | Profile | Current tools | Intended work |
 | --- | ---: | --- |
-| `full` | 81 | Mixed jobs and explicit fallback |
-| `data_scientist` | 81 | All data, modelling, Studies, review and planning work |
-| `marketer` | 37 | Reporting, model/Studies evidence, comparisons, scenarios, optimisation, saved-run curation and incrementality records |
-| `reviewer` | 38 | Scientific evidence/provenance review, assessments, validation pairs, holdout-use declarations and evidence-bound recommendations |
+| `full` | 91 | Mixed jobs and explicit fallback |
+| `data_scientist` | 91 | All data, modelling, Studies, review and planning work |
+| `marketer` | 51 | Actual-data/campaign reporting, saved evidence, comparisons, authorised plans and run curation |
+| `reviewer` | 49 | Scientific evidence/provenance, assessments, declarations and evidence-bound recommendations |
+
+<!-- current-role-coverage:end -->
 
 A marketer who also builds models should choose full. A reviewer who authors
 recipes or changes quality-policy rules should choose full. The reviewer view can
@@ -94,7 +98,8 @@ for direct integrations that supply old contexts without lifespan mode metadata.
 The [paired evaluation](workflow-profile-evaluation.md) ran 110 synthetic provider
 sessions. These results support the opt-in implementation; they are not production
 latency guarantees or scientific MMM validation. Data scientist and full expose
-identical definitions; marketer/reviewer definitions match their evaluated subsets.
+identical definitions. The 81/37/38-tool comparison is historical evidence for its frozen
+29 September catalogue; it does not validate current expanded profiles.
 
 Automated acceptance includes real SDK stdio sessions, HTTP wire listing/calls,
 invalid startup, excluded-tool refusal, full fallback, registered role workflows,
@@ -108,3 +113,23 @@ minimum checked in CI. There is no custom discovery protocol. Following the
 [engineering objective](engineering.md), `profiles.py` owns membership and selection;
 registration and the existing evaluation host share it. Domain handlers and backend
 policy remain in their existing owners.
+
+## Current role coverage and examples
+
+The [complete tool decision matrix](role-coverage.md) records every tool, its role
+membership, guidance and example decision. Marketer and reviewer can find existing
+stored datasets with list_uploads/get_upload and report actual KPI/spend with
+get_data_schema/get_data_report. Pipeline outputs already appear as uploads, so
+pipeline inspection/execution, upload and schedules remain full-only. Required
+backend scopes still apply independently of role visibility.
+
+Use [workflow guidance](workflow-guidance.md) for canonical independently installable
+Skills and executable synthetic examples. Current role regression evidence covers
+exact backend requests and recovery, including no automatic replay of uncertain
+mapping writes. It does not establish model-assisted competence or native-client
+rendering. See [candidate acceptance](role-candidate-acceptance.md) for exact status.
+
+Counts, this decision matrix and example calls are maintained by
+`python -m simba_mcp.guidance.coverage`; use `--check` in CI. Change coverage.json
+only after making an explicit role and workflow decision, not to conceal a missing
+dependency. Registration and profiles.py remain the runtime source of truth.
