@@ -23,6 +23,7 @@ EXPECTED_TOOLS = [
     "show_response_curves",
     "show_decomposition",
     "show_optimizer_allocation",
+    "recommend_incrementality_tests",
     "get_workflow_guidance",
     "publish_recipe_draft",
     "get_recipe_revision_authoring",

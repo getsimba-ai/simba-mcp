@@ -60,6 +60,7 @@ from .tools.incrementality import (
     get_incrementality_test,
     import_incrementality_tests,
     list_incrementality_tests,
+    recommend_incrementality_tests,
 )
 from .tools.models import (
     create_model,
@@ -265,6 +266,7 @@ TOOLS = (
     recommend_campaign_budgets,
     set_campaign_mapping,
     list_incrementality_tests,
+    recommend_incrementality_tests,
     get_incrementality_test,
     create_incrementality_test,
     import_incrementality_tests,
@@ -480,6 +482,7 @@ __all__ = [
     "list_study_runs",
     "list_uploads",
     "recommend_campaign_budgets",
+    "recommend_incrementality_tests",
     "recommend_study_run",
     "refreeze_recipe_revision",
     "rename_model",

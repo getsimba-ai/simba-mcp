@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## Unreleased
 
+## 0.16.0 (2026-10-02)
+
+### Added
+
+- Three read-only native result views for response curves, decomposition and saved optimiser allocations in compatible MCP Apps hosts. The bundled view preserves served values, missing-data gaps and uncertainty metadata, with exact-value tables and text fallback. No fit, forecast or optimiser run is started. Native-client compatibility must be checked in the intended host; synthetic iframe checks are not host acceptance.
+- `recommend_incrementality_tests` reads an inspectable channel screening score from a supporting backend. It exposes the local normal-approximation perfect-information basis and exclusions, with qualified variance diagnostics. It does not create experiments, change budgets or infer compatible test history. Requires backend support for the test-priorities route.
+
 ## 0.15.0 (2026-10-02)
 
 ### Added
