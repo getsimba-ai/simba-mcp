@@ -27,7 +27,8 @@ async def recommend_incrementality_tests(
 ) -> APIResult:
     """Rank channels for experiment investigation using stored posterior marginal returns. Read-only: no fit, test creation or budget changes. Returns {method, basis, score_unit, currency, budget, hurdle, spend_basis, period, approximation_warnings, items, excluded}. Each item carries channel, score, components (mean, sigma, stake, spend_share, crossing_probability, optional contraction), reason_codes, last_test_end, hypothesis and an unavailable design_hint. The score is a normal-approximation local binary perfect-information value, not expected test benefit, experiment budget, portfolio value or forecast lift. budget is a positive exposure scale (default sum of current spend); weights are the mean-active-period spend mix, which need not represent one common calendar period. hurdle is the non-negative marginal-return alternative (default 1). limit is 1-50. Missing posterior means or intervals are explicitly excluded. Cross-channel dependence is not modelled. Requires read:results. Test history is unavailable because stored registry records do not establish compatible model/geographical coverage. Requires backend support for test-priorities."""
     return await _client(ctx).workflow_request(
-        "GET", f"/models/{model_hash}/test-priorities",
+        "GET",
+        f"/models/{model_hash}/test-priorities",
         params={"budget": budget, "hurdle": hurdle, "limit": limit},
     )
 
