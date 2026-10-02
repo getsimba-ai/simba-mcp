@@ -76,3 +76,51 @@ def test_native_views_render_served_values_and_gaps():
         assert frame.locator("rect").count() == 2
         assert not errors
         browser.close()
+
+
+@pytest.mark.parametrize(
+    ("planning_window", "expected_period"),
+    [
+        ({"start": "2026-01-05", "end": "2026-02-01"}, "2026-01-05 to 2026-02-01"),
+        (None, "not supplied to not supplied"),
+    ],
+)
+def test_allocation_period_uses_saved_planning_window(planning_window, expected_period):
+    html = files("simba_mcp").joinpath("ui/charts.html").read_text(encoding="utf-8")
+    with playwright.sync_playwright() as p:
+        browser = p.chromium.launch()
+        page = browser.new_page(viewport={"width": 1280, "height": 1000})
+        errors = []
+        page.on("pageerror", lambda error: errors.append(str(error)))
+        page.on(
+            "console",
+            lambda message: errors.append(message.text) if message.type == "error" else None,
+        )
+        page.set_content('<iframe style="width:1280px;height:900px;border:0"></iframe>')
+        page.locator("iframe").evaluate("(frame, html) => frame.srcdoc = html", html)
+        frame = page.frame_locator("iframe")
+        frame.get_by_text("Waiting for result data").wait_for()
+        inputs = {
+            "currency": "GBP",
+            "start_date": "1999-01-01",
+            "end_date": "1999-12-31",
+        }
+        if planning_window is not None:
+            inputs["planning_window"] = planning_window
+        page.evaluate(
+            "data => document.querySelector('iframe').contentWindow.postMessage({jsonrpc:'2.0',method:'ui/notifications/tool-result',params:{structuredContent:data}}, '*')",
+            {
+                "status": "complete",
+                "run_id": "synthetic-dated-allocation",
+                "inputs": inputs,
+                "results": [{"Channel": "Search", "OptimalSpend": 120}],
+            },
+        )
+        frame.get_by_text("Inspect the budget decision").wait_for()
+        text = frame.locator("main").inner_text()
+        assert f"Period: {expected_period}." in text
+        assert "1999" not in text
+        assert "Currency: GBP." in text
+        assert page.locator("iframe").evaluate("frame => frame.contentWindow.innerWidth") == 1280
+        assert not errors
+        browser.close()
