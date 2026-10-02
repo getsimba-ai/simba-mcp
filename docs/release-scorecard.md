@@ -1,6 +1,8 @@
-# Proposed 0.13.0 release scorecard
+# Proposed reliability and configuration release scorecard
 
-This is a proposed release, not a released or deployed version. No accepted
+This candidate is reconciled with released 0.16.0 source. Its additional reliability,
+configuration and hosted-profile changes remain proposed, not released or deployed.
+The eventual release version has not been selected. No accepted
 quality, latency or cost improvement is established. Selection02 is on a validity
 hold after 24 sessions: a monthly-bucket evidence-recognition defect in the frozen
 grader was independently diagnosed. The remaining eight sessions were not run.
@@ -51,9 +53,10 @@ See [native discovery support](native-discovery.md#support-matrix),
 
 1. Complete prospective evaluation, independent reviews, current-head CI and the
    clean installed-package checks. Finalise this scorecard against the release commit.
-2. Publish and verify the 0.13.0 distribution, including packaged guidance and
-   configuration resources. Then update the application's dependency pin from
-   0.12.0 to 0.13.0 and validate the shared application/MCP image.
+2. Select a new release version after acceptance and publish that distribution,
+   including packaged guidance and configuration resources. Update the matching
+   application dependency pin and validate the shared application/MCP image.
+   Do not reuse the already released 0.13.0 or 0.16.0 versions for this candidate.
 3. The matching application and MCP contract requires an additive user-preference
    migration and the new endpoint. Hosted `tools/list` and `tools/call` require a
    bearer and the schema-version-1 preferences endpoint even when OAuth mode is
@@ -66,7 +69,7 @@ See [native discovery support](native-discovery.md#support-matrix),
    rejection and whole-request latency. Local tests do not satisfy this gate.
 5. Prepare rollback to a previously verified matching application and MCP image.
    Retain the additive preference column and saved choices; do not automatically
-   run its down migration. A rollback to 0.12.0 restores the previous catalogue
+   run its down migration. A rollback to a verified pre-preference image restores its catalogue
    behaviour and does not enforce saved user profiles. Reconnecting does not undo
    submitted operations.
 

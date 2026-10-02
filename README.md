@@ -82,6 +82,7 @@ response = client.beta.messages.create(
     tools=[{"type": "mcp_toolset", "mcp_server_name": "simba"}],
     betas=["mcp-client-2025-11-20"],
 )
+```
 
 ## Configuration
 
@@ -101,6 +102,10 @@ The application and MCP must both support the new preferences endpoint; lookup
 failures refuse listing and tool calls. Local stdio uses its configured server profile.
 See [profile setup](docs/tool-profiles.md) and the coordinated
 [migration and rollback requirements](docs/architecture.md#acceptance-and-rollback).
+
+## Native result charts
+
+Three read-only [native chart tools](docs/native-charts.md) present response curves, decomposition and saved allocations through MCP Apps. Structured and text results remain available without visual support. The compatibility page distinguishes fixture tests from actual client acceptance.
 
 ## Available Tools
 
@@ -609,4 +614,8 @@ Release note: these tools require the corresponding MCP package release and upda
 
 ## Proposed release acceptance
 
-The [0.13.0 release scorecard](docs/release-scorecard.md) records defaults, opt-in controls, current failed and pending evaluation, host limitations and the coordinated application upgrade. It is not a claim of release or deployed verification.
+The [proposed release scorecard](docs/release-scorecard.md) records defaults, opt-in controls, current failed and pending evaluation, host limitations and the coordinated application upgrade. It is not a claim of release or deployed verification.
+
+### Experiment priorities
+
+See [What to test next](docs/experiment-priorities.md) for the read-only experiment screening tool, its inputs, approximation and limitations. Requires compatible backend support.
