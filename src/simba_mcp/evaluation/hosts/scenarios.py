@@ -269,6 +269,20 @@ def role_tasks():
     return result
 
 
+def current_role_tasks():
+    """Prospective current workflow definitions; no provider run is implied."""
+    from ..role_workflows import role_workflows
+
+    return [
+        (
+            item.case,
+            f"{item.intent} Prerequisites: {item.preconditions} Limits: {item.limits}",
+            item.case.steps[-1].expected,
+        )
+        for item in role_workflows()
+    ]
+
+
 def rlc_tasks():
     """Prospective development inventory, never a hidden acceptance packet."""
     from .result_rlc_tasks import rlc_development_tasks

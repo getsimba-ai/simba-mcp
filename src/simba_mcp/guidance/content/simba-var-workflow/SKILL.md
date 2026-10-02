@@ -2,7 +2,7 @@
 name: simba-var-workflow
 description: Build and inspect Simba VAR models and linked long-run MMM results. Use for long-term effects, VAR fit recovery and long-run rollup interpretation.
 metadata:
-  version: "2"
+  version: "22"
 ---
 
 # Work with VAR models
@@ -13,3 +13,5 @@ metadata:
 4. On failure inspect get_model; on an uncertain write reconcile existing state before repeating it.
 5. Link only the intended compatible saved models. Feature-detect the long-run rollup and preserve exact channel identity.
 6. A missing rollup is a reported state, not a zero long-term effect. MMM quality policies do not establish VAR scientific acceptance.
+
+Role availability: VAR creation/linking requires full/data_scientist. Narrow profiles may read served long-run model results but must reconnect with full before authoring. Preserve linked model identity and missing long-run evidence; do not infer availability or fit to repair a read.

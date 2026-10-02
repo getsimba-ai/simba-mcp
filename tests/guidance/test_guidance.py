@@ -102,7 +102,8 @@ def test_referenced_tools_resolve_in_current_catalogue():
     known = {tool.__name__ for tool in TOOLS}
     pattern = (
         r"`((?:get|list|run|create|update|publish|launch|cancel|upload|save|rename|delete|"
-        r"adopt|refreeze|revise|validate|diff|evaluate|set|import|link|unlink)_[a-z_]+)(?:`|\()"
+        r"adopt|refreeze|revise|validate|diff|evaluate|set|import|link|unlink|recommend|show|"
+        r"assess|declare|compare|retire|unsave)_[a-z_]+)(?:`|\()"
     )
     for entry in guidance.MANIFEST["topics"].values():
         for path in entry["sections"].values():

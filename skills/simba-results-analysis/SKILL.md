@@ -2,7 +2,7 @@
 name: simba-results-analysis
 description: Read saved Simba results, ROI and diagnostics.
 metadata:
-  version: "21"
+  version: "22"
 ---
 
 # Analyse saved results
@@ -47,3 +47,5 @@ including refused attempts; never reconstruct motives.
 
 Apply [interpretation](references/interpretation.md); consult the
 [full contract](references/tool-reference.md) for other sections/parameters.
+
+Role availability: all profiles can inspect saved results and [native views with JSON fallback](references/visuals.md). [Executable view examples](references/visuals-examples.md) preserve missing points and KPI units. Campaign and actual-data reporting use their focused Skills or the campaigns/reporting guidance topics.

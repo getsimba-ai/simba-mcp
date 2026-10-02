@@ -2,7 +2,7 @@
 name: simba-studies-workflow
 description: Author, edit and review Simba Studies, recipes, policies and runs. Use for immutable publication, launch recovery, diagnostics and human handoff.
 metadata:
-  version: "2"
+  version: "22"
 ---
 
 # Work with Studies
@@ -13,3 +13,5 @@ metadata:
 4. Read [review](references/review.md) before evaluating or recommending. Bind conclusions to the policy, immutable revision and saved evidence.
 5. Missing diagnostics do not pass. In-sample fit does not establish holdout validation; declare validation requirements and provenance before using prediction evidence.
 6. A recommendation is a handoff to a person. No acceptable candidate is a valid conclusion. Guidance cannot authorise acceptance or bypass budgets.
+
+Role availability: all profiles inspect Studies evidence; reviewer/full can record authorised assessments/declarations/recommendations; authoring, policy changes and launches require full. [Missing-evidence example](references/review-examples.md) preserves not_evaluated and never claims promotion.

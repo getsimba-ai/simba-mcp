@@ -51,6 +51,7 @@ line-length = 100
 [project.optional-dependencies]
 performance = ["tiktoken>=0.12,<1"]
 dev = [
+    "jsonschema>=4.20,<5",
     "pytest>=8.0",
     "anyio>=4.0",
     "pytest-anyio>=0.0.0",

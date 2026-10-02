@@ -13,7 +13,16 @@ def main():
 
     assert ".whl" in guidance.__file__, guidance.__file__
     index = guidance.read_guidance()
-    assert len(index["topics"]) == 6
+    assert {
+        "mmm",
+        "results",
+        "priors",
+        "optimiser",
+        "studies",
+        "var",
+        "campaigns",
+        "reporting",
+    } == {topic["topic"] for topic in index["topics"]}
     with tempfile.TemporaryDirectory() as directory:
         target = Path(directory)
         export(target)
@@ -23,10 +32,26 @@ def main():
                 assert "content" in guidance.read_guidance(topic["topic"], section)
     from importlib.resources import files
 
+    import anyio
+
+    from simba_mcp.evaluation.role_workflows import role_workflows
+    from simba_mcp.evaluation.runner import run_case
+    from simba_mcp.server import create_server
+
+    example = next(item for item in role_workflows() if item.case.id == "role_actual_data")
+
+    async def verify_role():
+        server = create_server("compact", profile="marketer")
+        trial = await run_case(example.case, mcp_server=server)
+        assert trial.passed, trial.assertions
+        assert trial.unintended_writes == 0
+
+    anyio.run(verify_role)
+
     html = files("simba_mcp").joinpath("ui/charts.html").read_text(encoding="utf-8")
     assert "ui/initialize" in html
     assert len(html.encode("utf-8")) <= 30_000
-    print("Wheel guidance resources and standalone native export verified.")
+    print("Wheel guidance, standalone native export and registered marketer workflow verified.")
 
 
 if __name__ == "__main__":

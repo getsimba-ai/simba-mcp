@@ -10,7 +10,7 @@ class StrictModel(BaseModel):
 
 
 class Exchange(StrictModel):
-    method: Literal["GET", "POST", "PATCH", "DELETE"]
+    method: Literal["GET", "POST", "PUT", "PATCH", "DELETE"]
     path: str
     query: dict[str, str] = Field(default_factory=dict)
     body: dict | None = None

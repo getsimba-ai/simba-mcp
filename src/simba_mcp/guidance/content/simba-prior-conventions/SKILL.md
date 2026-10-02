@@ -2,7 +2,7 @@
 name: simba-prior-conventions
 description: Construct Simba media or control prior overrides. Use before changing carryover, saturation anchors, effect-at-average coordinates or explicit control transforms.
 metadata:
-  version: "2"
+  version: "22"
 ---
 
 # Configure prior overrides
@@ -13,3 +13,5 @@ metadata:
 4. Preserve smart defaults for omitted fields. Do not claim those defaults are externally validated evidence.
 5. Check capabilities for explicit control priors and retain all requested settings. Refused or unsupported requests must not silently fall back.
 6. After creation compare resolved priors and overridden_fields to the request. Unknown fields, wrong units or inactive parameters require correction, not a claim of success.
+
+Role availability: full/data_scientist can change priors during authorised model or recipe authoring. Narrow profiles may inspect existing evidence but stop before authoring and reconnect with full. Retain schema capability checks, exact coordinates and accepted-not-used semantics; never fit solely to repair missing prior evidence.

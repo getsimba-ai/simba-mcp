@@ -81,3 +81,30 @@ contracts. See [architecture](docs/architecture.md) for compatibility boundaries
 Run `python -m simba_mcp.evaluation --samples 3 --output-dir .codex/evaluation`
 for deterministic workflow contracts. The [evaluation guide](docs/evaluation.md)
 describes synthetic cases, measurements and separate model-evaluation gates.
+
+### Role, guidance and example maintenance
+
+Every tool change needs a job-based inclusion/exclusion decision for marketer and
+reviewer in packaged `guidance/content/coverage.json`. Runtime registration and
+`profiles.py` remain canonical; coverage is maintenance evidence, not another
+runtime registry. Record required dependencies, guidance topic and an executable
+example or an explicit reason no standalone example is needed. Roles never grant
+backend permissions; distinguish audit-producing reads and read-only POST calculations.
+
+Use existing Case/Step/Exchange contracts and run_case for synthetic examples in
+`evaluation/role_workflows.py`. Keep existing paid-trial definitions/reports frozen.
+Edit canonical guidance, increment its shared version and regenerate in this order:
+
+```shell
+python -m simba_mcp.reference
+python -m simba_mcp.guidance.coverage
+python -m simba_mcp.guidance
+python -m simba_mcp.guidance.coverage --check
+python -m simba_mcp.guidance --check
+python -m simba_mcp.evaluation --roles --description-mode compact --output-dir .codex/evaluation/roles
+```
+
+Coverage checks catch unclassified tools, stale current counts, role dependencies
+and invalid example schemas; focused negative tests also exercise broken links and
+forbidden writes. Historical counts stay dated. Include public synthetic evidence
+and exact release/client limitations, never customer data or credentials.
