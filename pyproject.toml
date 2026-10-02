@@ -21,7 +21,7 @@ dependencies = [
     # SDK v2 (MCPServer): 2.1 is the floor for the ToolError-only client
     # message semantics this server's docs assume. Brings opentelemetry-api
     # transitively (inert without an OTel SDK configured).
-    "mcp>=2.1.1,<2.2",
+    "mcp>=2.1.1,<2.3",
     "httpx>=0.27",
     "pydantic>=2.11,<3",
 ]
