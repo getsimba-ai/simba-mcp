@@ -1,5 +1,10 @@
 # Workflow contract evaluations
 
+For proposed speed, cost and reliability trade-offs and fixed stopping rules, see
+the [performance acceptance matrix](performance-acceptance-matrix.md). Select a
+profile before a future experiment; these examples are not executable defaults
+and do not alter historical experiment decisions.
+
 Run the deterministic suite from an installed checkout:
 
 ```sh
@@ -96,3 +101,32 @@ sample counts/variation, metric definitions, proposed tolerances, rationale,
 approver and review conditions. No thresholds are invented by this suite.
 Comparisons of future compact/discovery implementations run under #50 after those
 implementations exist. No runtime default changes here.
+
+
+## Prospective calendar-month evidence (grader 19)
+
+Select `--grader-version 19` and set the result contract's
+`period_evidence_granularity` to `"month"` only when the task asks for calendar-month
+aggregates. The default remains `"native"`; graders 17 and 18 retain their historical
+behaviour. A monthly contract requires an explicit evidence window in canonical
+`YYYY-MM-DD` form, beginning on the first day and ending on the last day of complete
+calendar months. A partial native month must not be widened to a calendar month.
+
+The monthly contract checks each requested channel/month against independent fixture
+aggregation. Complete native coefficient rows, exact monthly coefficient buckets and
+separate exact monthly-window summaries can establish the same monthly evidence.
+Every required month and the canonical channel identity still need evidence. An
+overall multi-month total cannot establish individual monthly values, and a monthly
+aggregate cannot establish individual native weekly values.
+
+Correct partial-month progress is recorded as contribution atoms, so retrieving the
+first requested month is useful before the final month completes the evidence section.
+Repeated evidence adds no atoms. Contradictory duplicate rows, unexpected dates or
+bucket boundaries, wrong values and conflicting later responses invalidate the
+monthly evidence for the session; a later correct response does not erase the conflict.
+
+This prospective repair addresses an evidence-grader false negative observed in a
+frozen selection run. That run's reports, scores and validity hold remain unchanged.
+New experiments must freeze the explicit task contract and grader version together.
+Calibration includes labelled positive and adversarial monthly evidence examples;
+passing calibration is not provider or release acceptance.
