@@ -4,6 +4,9 @@
 # Data scientists always get the canonical full catalogue, including future additions.
 EVIDENCE = frozenset(
     [
+        "show_response_curves",
+        "show_decomposition",
+        "show_optimizer_allocation",
         "get_workflow_guidance",
         "get_backend_capabilities",
         "list_projects",

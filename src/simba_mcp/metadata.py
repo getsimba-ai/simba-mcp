@@ -4,6 +4,9 @@ from mcp.types import ToolAnnotations
 
 READ_ONLY = frozenset(
     [
+        "show_response_curves",
+        "show_decomposition",
+        "show_optimizer_allocation",
         "get_workflow_guidance",
         "get_recipe_draft",
         "get_recipe_draft_template",

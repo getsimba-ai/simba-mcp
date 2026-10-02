@@ -21,6 +21,11 @@ def main():
         for topic in index["topics"]:
             for section in topic["sections"]:
                 assert "content" in guidance.read_guidance(topic["topic"], section)
+    from importlib.resources import files
+
+    html = files("simba_mcp").joinpath("ui/charts.html").read_text(encoding="utf-8")
+    assert "ui/initialize" in html
+    assert len(html.encode("utf-8")) <= 30_000
     print("Wheel guidance resources and standalone native export verified.")
 
 

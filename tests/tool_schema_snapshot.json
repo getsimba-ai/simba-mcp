@@ -4300,5 +4300,56 @@
     ],
     "title": "recommend_campaign_budgetsArguments",
     "type": "object"
+  },
+  "show_response_curves": {
+    "properties": {
+      "model_hash": {
+        "title": "Model Hash",
+        "type": "string"
+      }
+    },
+    "required": [
+      "model_hash"
+    ],
+    "title": "show_response_curvesArguments",
+    "type": "object"
+  },
+  "show_decomposition": {
+    "properties": {
+      "model_hash": {
+        "title": "Model Hash",
+        "type": "string"
+      }
+    },
+    "required": [
+      "model_hash"
+    ],
+    "title": "show_decompositionArguments",
+    "type": "object"
+  },
+  "show_optimizer_allocation": {
+    "properties": {
+      "model_hash": {
+        "title": "Model Hash",
+        "type": "string"
+      },
+      "run_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Run Id"
+      }
+    },
+    "required": [
+      "model_hash"
+    ],
+    "title": "show_optimizer_allocationArguments",
+    "type": "object"
   }
 }

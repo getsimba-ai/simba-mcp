@@ -20,6 +20,16 @@ from simba_mcp import server
 
 # endpoint -> {api_request_param: "tool_name.tool_param"}
 CONTRACT = {
+    "GET /api/v1/models/{model_hash}/results (native curves)": {
+        "model_hash": "show_response_curves.model_hash"
+    },
+    "GET /api/v1/models/{model_hash}/results (native decomposition)": {
+        "model_hash": "show_decomposition.model_hash"
+    },
+    "GET /api/v1/models/{model_hash}/optimizer (native allocation)": {
+        "model_hash": "show_optimizer_allocation.model_hash",
+        "run_id": "show_optimizer_allocation.run_id",
+    },
     "POST /api/v1/ingest": {
         "name": "upload_data.name",
         "filename": "upload_data.filename",

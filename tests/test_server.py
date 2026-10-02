@@ -20,6 +20,9 @@ def _list_tools():
 
 
 EXPECTED_TOOLS = [
+    "show_response_curves",
+    "show_decomposition",
+    "show_optimizer_allocation",
     "get_workflow_guidance",
     "publish_recipe_draft",
     "get_recipe_revision_authoring",
@@ -1370,7 +1373,7 @@ class TestImportEditArchitecture:
 
     def test_registered_tools_with_the_diff_read_only(self):
         tools = self._tools()
-        assert len(tools) == 87
+        assert len(tools) == len(EXPECTED_TOOLS)
         diff = tools["diff_recipe_revisions"]
         assert diff.annotations.read_only_hint
         assert set(diff.input_schema["required"]) == {"recipe_id", "base", "other"}

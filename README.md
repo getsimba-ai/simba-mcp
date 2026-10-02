@@ -84,6 +84,10 @@ response = client.beta.messages.create(
 )
 ```
 
+## Native result charts
+
+Three read-only [native chart tools](docs/native-charts.md) present response curves, decomposition and saved allocations through MCP Apps. Structured and text results remain available without visual support. The compatibility page distinguishes fixture tests from actual client acceptance.
+
 ## Available Tools
 
 The full, generated reference — every tool, whether it reads or writes, its description and its
