@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## Unreleased
 
+## 0.15.0 (2026-10-02)
+
 ### Added
 
 - `get_campaign_marginal_returns` reads channel-derived campaign or ad-set marginal returns. `recommend_campaign_budgets` calculates bounded daily-equivalent suggestions from explicit channel totals or a compatible saved optimiser run. Both require `read:models` and leave models, mappings and platform budgets unchanged. The backend validates currency, fact coverage and curve provenance; unsupported evidence stays unavailable. These require backend support for the campaign marginal and daily-budget routes.
