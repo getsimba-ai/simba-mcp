@@ -40,6 +40,18 @@ def test_invalid_mode_is_not_silently_accepted():
 
 
 @pytest.mark.parametrize("mode", ["legacy", "compact"])
+def test_results_identity_requires_channel_map_not_spelling(mode):
+    tools = {tool.name: tool for tool in anyio.run(create_server(mode).list_tools)}
+    description = tools["get_model_results"].description
+    assert "retrieve channel_map" in description
+    assert "do not infer identity from spelling" in description
+    assert "Reuse a sufficient channel_map" in description
+    assert "comma-separated list" in description
+    assert "Always read channel_summary first" not in description
+    assert "Start with channel_summary or channel_map" not in description
+
+
+@pytest.mark.parametrize("mode", ["legacy", "compact"])
 def test_every_registration_uses_the_original_wire_wrapper(monkeypatch, mode):
     from simba_mcp import server
 
