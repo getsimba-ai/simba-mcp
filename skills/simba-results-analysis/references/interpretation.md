@@ -5,8 +5,13 @@
   storage history nor unread contents. Discuss uncertainty only when relevant to
   the question, naming the exact quantity. Calculate it first when the supplied
   evidence suffices; distinguish a computed difference from an explicitly saved
-  field. For unknown quantities, leave the value
-  null and say "not established by these results". Do not assert or rule out a
+  field. For an unknown numeric quantity in returned evidence, leave the value
+  null and say "not established by these results". A requested section that is
+  absent is not unknown: availability is false and reason is not_returned,
+  unless the payload already gave a documented reason. Convergence is unknown
+  and reason is not_returned when the diagnostic sections were not returned.
+  Do not use null for those state fields. When the question names JSON fields,
+  the answer is only that JSON object. Do not assert or rule out a
   value, sign or equality. Avoid "is neither ... nor ..." and "is not zero":
   those exclude possibilities, whereas missing evidence does not.
 - Preserve units: contributions are KPI, coefficients revenue. Spend and revenue
@@ -27,9 +32,10 @@
   not establish distribution shape, tail behaviour or causes.
 - Apply the requested diagnostic rule. The r_hat section covers all posterior
   variables by contract, including transforms; coefficient-only summaries do not.
-  Use that declared scope without inventing missing variables. Missing diagnostics
-  prove neither
-  convergence nor failure; completion is not scientific acceptance.
+  A contrast between those artefacts requires both sections: request posterior
+  as well as r_hat, and do not describe the summary from r_hat names. Missing
+  diagnostics prove neither convergence nor failure; completion is not scientific
+  acceptance.
 - Overlap reconciles log-link removal_lift, can have either sign and is not media.
   Absence does not prove additivity. When the question concerns attribution or
   overlap, state the documented convention: removal_lift keeps Overlap as the
