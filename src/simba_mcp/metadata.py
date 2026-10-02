@@ -4,6 +4,9 @@ from mcp.types import ToolAnnotations
 
 READ_ONLY = frozenset(
     [
+        "show_response_curves",
+        "show_decomposition",
+        "show_optimizer_allocation",
         "get_workflow_guidance",
         "get_recipe_draft",
         "get_recipe_draft_template",
@@ -38,7 +41,13 @@ READ_ONLY = frozenset(
         "list_pipelines",
         "list_pipeline_versions",
         "get_pipeline_run",
+        "list_campaigns",
+        "get_campaign_report",
+        "get_campaign_incrementality",
+        "get_campaign_marginal_returns",
+        "recommend_campaign_budgets",
         "list_incrementality_tests",
+        "recommend_incrementality_tests",
         "get_incrementality_test",
         "list_study_decisions",
         "get_study_champion",
@@ -65,6 +74,7 @@ DESTRUCTIVE = frozenset(
         "cancel_study_run",
         "retire_quality_policy",
         "set_pipeline_schedule",
+        "set_campaign_mapping",
     ]
 )
 IDEMPOTENT_WRITES = frozenset(
@@ -82,6 +92,7 @@ IDEMPOTENT_WRITES = frozenset(
         "set_contribution_groups",
         "unlink_var_model",
         "set_pipeline_schedule",
+        "set_campaign_mapping",
     ]
 )
 ADDITIVE_WRITES = frozenset(
