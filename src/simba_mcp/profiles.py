@@ -4,6 +4,9 @@
 # Data scientists always get the canonical full catalogue, including future additions.
 EVIDENCE = frozenset(
     [
+        "show_response_curves",
+        "show_decomposition",
+        "show_optimizer_allocation",
         "get_workflow_guidance",
         "get_backend_capabilities",
         "list_projects",
@@ -30,6 +33,7 @@ EVIDENCE = frozenset(
         "get_study_validation_resolutions",
         "compare_study_runs",
         "list_incrementality_tests",
+        "recommend_incrementality_tests",
         "get_incrementality_test",
         "list_campaigns",
         "get_campaign_report",

@@ -60,6 +60,7 @@ from .tools.incrementality import (
     get_incrementality_test,
     import_incrementality_tests,
     list_incrementality_tests,
+    recommend_incrementality_tests,
 )
 from .tools.models import (
     create_model,
@@ -133,6 +134,8 @@ from .tools.studies import (
     list_study_runs,
     update_study,
 )
+from .tools.visuals import show_decomposition, show_optimizer_allocation, show_response_curves
+from .visuals import RESOURCE_URI, VISUAL_TOOLS, chart_apps
 
 
 def _argument_refusal(tool: str, exc: ValidationError) -> CallToolResult:
@@ -237,6 +240,9 @@ _SERVER_OPTIONS = {
 }
 
 TOOLS = (
+    show_response_curves,
+    show_decomposition,
+    show_optimizer_allocation,
     create_recipe_draft,
     get_recipe_draft,
     get_recipe_draft_template,
@@ -260,6 +266,7 @@ TOOLS = (
     recommend_campaign_budgets,
     set_campaign_mapping,
     list_incrementality_tests,
+    recommend_incrementality_tests,
     get_incrementality_test,
     create_incrementality_test,
     import_incrementality_tests,
@@ -375,6 +382,7 @@ def create_server(description_mode: str = "legacy", *, profile: str = "full") ->
     # Optional OAuth resource-server mode (#59): an empty dict with MCP_OAUTH_ENABLED off,
     # so the kwargs are byte-identical to today's.
     options.update(server_auth_options(os.environ.get("SIMBA_API_URL", "http://localhost:5005")))
+    options["extensions"] = [chart_apps()]
     instance = SimbaMCPServer(**options)
     for tool in selected:
         instance.add_tool(
@@ -382,6 +390,7 @@ def create_server(description_mode: str = "legacy", *, profile: str = "full") ->
             title=tool.__name__.replace("_", " ").title(),
             description=description_for(tool, description_mode),
             annotations=annotations_for(tool.__name__),
+            meta={"ui": {"resourceUri": RESOURCE_URI}} if tool.__name__ in VISUAL_TOOLS else None,
         )
     return instance
 
@@ -473,6 +482,7 @@ __all__ = [
     "list_study_runs",
     "list_uploads",
     "recommend_campaign_budgets",
+    "recommend_incrementality_tests",
     "recommend_study_run",
     "refreeze_recipe_revision",
     "rename_model",
