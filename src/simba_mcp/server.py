@@ -24,6 +24,14 @@ from .runtime import (
     app_lifespan,
     set_http_mode,
 )
+from .tools.campaigns import (
+    get_campaign_incrementality,
+    get_campaign_marginal_returns,
+    get_campaign_report,
+    list_campaigns,
+    recommend_campaign_budgets,
+    set_campaign_mapping,
+)
 from .tools.data import (
     get_backend_capabilities,
     get_data_report,
@@ -52,6 +60,7 @@ from .tools.incrementality import (
     get_incrementality_test,
     import_incrementality_tests,
     list_incrementality_tests,
+    recommend_incrementality_tests,
 )
 from .tools.models import (
     create_model,
@@ -125,6 +134,8 @@ from .tools.studies import (
     list_study_runs,
     update_study,
 )
+from .tools.visuals import show_decomposition, show_optimizer_allocation, show_response_curves
+from .visuals import RESOURCE_URI, VISUAL_TOOLS, chart_apps
 
 
 def _argument_refusal(tool: str, exc: ValidationError) -> CallToolResult:
@@ -229,6 +240,9 @@ _SERVER_OPTIONS = {
 }
 
 TOOLS = (
+    show_response_curves,
+    show_decomposition,
+    show_optimizer_allocation,
     create_recipe_draft,
     get_recipe_draft,
     get_recipe_draft_template,
@@ -245,7 +259,14 @@ TOOLS = (
     run_pipeline,
     get_pipeline_run,
     set_pipeline_schedule,
+    list_campaigns,
+    get_campaign_report,
+    get_campaign_incrementality,
+    get_campaign_marginal_returns,
+    recommend_campaign_budgets,
+    set_campaign_mapping,
     list_incrementality_tests,
+    recommend_incrementality_tests,
     get_incrementality_test,
     create_incrementality_test,
     import_incrementality_tests,
@@ -360,6 +381,7 @@ def create_server(description_mode: str = "legacy", *, profile: str = "full") ->
     # Optional OAuth resource-server mode (#59): an empty dict with MCP_OAUTH_ENABLED off,
     # so the kwargs are byte-identical to today's.
     options.update(server_auth_options(os.environ.get("SIMBA_API_URL", "http://localhost:5005")))
+    options["extensions"] = [chart_apps()]
     instance = SimbaMCPServer(**options)
     for tool in selected:
         instance.add_tool(
@@ -367,6 +389,7 @@ def create_server(description_mode: str = "legacy", *, profile: str = "full") ->
             title=tool.__name__.replace("_", " ").title(),
             description=description_for(tool, description_mode),
             annotations=annotations_for(tool.__name__),
+            meta={"ui": {"resourceUri": RESOURCE_URI}} if tool.__name__ in VISUAL_TOOLS else None,
         )
     return instance
 
@@ -416,6 +439,9 @@ __all__ = [
     "delete_model",
     "diff_quality_policies",
     "evaluate_study_run",
+    "get_campaign_incrementality",
+    "get_campaign_marginal_returns",
+    "get_campaign_report",
     "get_contribution_groups",
     "get_data_report",
     "get_data_schema",
@@ -440,6 +466,7 @@ __all__ = [
     "import_incrementality_tests",
     "launch_study_run",
     "link_var_model",
+    "list_campaigns",
     "list_incrementality_tests",
     "list_models",
     "list_pipeline_versions",
@@ -453,6 +480,8 @@ __all__ = [
     "list_study_recipes",
     "list_study_runs",
     "list_uploads",
+    "recommend_campaign_budgets",
+    "recommend_incrementality_tests",
     "recommend_study_run",
     "refreeze_recipe_revision",
     "rename_model",
@@ -463,6 +492,7 @@ __all__ = [
     "run_pipeline",
     "run_scenario",
     "save_model",
+    "set_campaign_mapping",
     "set_contribution_groups",
     "set_http_mode",
     "set_pipeline_schedule",
