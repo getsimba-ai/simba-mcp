@@ -57,7 +57,13 @@ def rlc_development_tasks():
     suite = []
     dated_roi = {"result_roi", "result_tv_roi", "result_total_roi", "result_period_roi"}
     for task in development_tasks():
-        if task.id in {"result_diagnostics", "result_decomposition"}:
+        # RLC task version 2 keeps its declared inventory. Later development
+        # probes remain in development_tasks without changing this schedule.
+        if task.id in {
+            "result_diagnostics",
+            "result_decomposition",
+            "result_diagnostic_contrast",
+        }:
             continue
         if task.id in dated_roi:
             task = replace(

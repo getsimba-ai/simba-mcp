@@ -10,6 +10,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - Opt-in evaluation grader 19 supports explicit calendar-month evidence contracts, complete native-row or exact monthly-summary alternatives, contribution atoms and persistent contradiction rejection. Historical grader 17/18 contracts and frozen reports remain unchanged.
 - Evaluation harness for selective result tasks: shared session deadlines, result grading, and an xAI host adapter. Frozen task modules remain reproducible definitions for old experiments. They are not release acceptance, and this change does not alter server transport, profiles or defaults.
 
+### Changed
+- Results guidance version 21 requests `posterior` as well as `r_hat` for a diagnostic contrast, reports an absent section as `not_returned` rather than a null unknown, includes `channel_map` in the same read when the answer names a channel, and uses the `week` granularity token. An unwindowed channel-summary task credits one dated read whose own rows contain the expected summary. Windows are not mixed. This does not add `get_model_summary` and does not change `get_model_results` defaults.
+
 ## 0.16.0 (2026-10-02)
 
 ### Added

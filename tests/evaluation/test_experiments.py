@@ -188,6 +188,41 @@ async def test_development_tasks_are_achievable_with_canonical_dispatch():
         assert all(dispatch.grade(task.expected).values()), task.id
 
 
+@pytest.mark.anyio
+@pytest.mark.parametrize("name", ("result_roi", "result_tv_roi", "result_total_roi"))
+async def test_dated_summary_counts_when_the_task_declares_no_window(name):
+    task = next(t for t in development_tasks() if t.id == name)
+    dispatch = ResultSelectionDispatch(create_server(), task)
+    _, error = await dispatch(
+        "get_model_results",
+        {
+            "model_hash": "result-example",
+            "sections": ",".join(sorted(task.required_sections)),
+            "start": "2025-01-01",
+            "end": "2025-02-28",
+        },
+    )
+    assert not error, name
+    assert dispatch.grade(task.expected)["required_evidence"], name
+
+
+@pytest.mark.anyio
+async def test_a_window_with_different_totals_is_not_credited():
+    task = next(t for t in development_tasks() if t.id == "result_roi")
+    dispatch = ResultSelectionDispatch(create_server(), task)
+    _, error = await dispatch(
+        "get_model_results",
+        {
+            "model_hash": "result-example",
+            "sections": "channel_summary,channel_map",
+            "start": "2025-01-01",
+            "end": "2025-01-01",
+        },
+    )
+    assert not error
+    assert not dispatch.grade(task.expected)["required_evidence"]
+
+
 @pytest.mark.parametrize(
     "text, expected",
     [
@@ -213,8 +248,8 @@ async def test_period_aggregation_accepts_either_sufficient_evidence_source(sect
 @pytest.mark.anyio
 async def test_generated_validation_has_new_truth_and_preserves_evidence_constraints():
     suite = validation_tasks(123456, 2)
-    assert len(suite) == 22
-    assert len({t.id for t in suite}) == 22
+    assert {t.id.rsplit("_dataset_", 1)[0] for t in suite} == {t.id for t in development_tasks()}
+    assert len({t.id for t in suite}) == len(suite)
     assert len({t.dataset for t in suite}) == 2
     search = [t for t in suite if t.id.startswith("result_roi_")]
     assert search[0].expected != search[1].expected
@@ -294,7 +329,7 @@ async def test_generated_validation_cli_freezes_fixture_and_excludes_oracle_from
         )
     )
     report = json.loads(output.read_text())
-    assert report["status"] == "complete" and len(seen) == 88
+    assert report["status"] == "complete" and len(seen) == len(report["trials"])
     assert all(t["passed"] for t in report["trials"])
     assert report["configuration"]["validation_seed"] is not None
     assert all(t["case"]["fixture"] for t in report["tasks"])
