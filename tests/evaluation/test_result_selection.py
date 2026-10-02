@@ -56,13 +56,14 @@ def test_named_hash_hides_tools_the_result_host_refuses():
         "synthetic_v4_gallery",
     )
     assert [tool.name for tool in named] == ["get_model_results", "get_workflow_guidance"]
-    unknown = advertised_result_tools(tools, "Which saved model should I read?", "synthetic_v4_gallery")
+    unknown = advertised_result_tools(
+        tools, "Which saved model should I read?", "synthetic_v4_gallery"
+    )
     assert [tool.name for tool in unknown] == [tool.name for tool in tools]
     assert not prompt_names_model("not-synthetic_v4_gallery-extra", "synthetic_v4_gallery")
     assert prompt_names_model("The completed saved model is result-example.", "result-example")
     assert not prompt_names_model("result-example-extra", "result-example")
     assert not prompt_names_model("", "result-example")
-
 
 
 @pytest.mark.anyio

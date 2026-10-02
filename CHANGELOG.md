@@ -10,6 +10,38 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - Opt-in evaluation grader 19 supports explicit calendar-month evidence contracts, complete native-row or exact monthly-summary alternatives, contribution atoms and persistent contradiction rejection. Historical grader 17/18 contracts and frozen reports remain unchanged.
 - Evaluation harness for selective result tasks: shared session deadlines, result grading, and an xAI host adapter. Frozen task modules remain reproducible definitions for old experiments. They are not release acceptance, and this change does not alter server transport, profiles or defaults.
 
+## 0.16.0 (2026-10-02)
+
+### Added
+
+- Three read-only native result views for response curves, decomposition and saved optimiser allocations in compatible MCP Apps hosts. The bundled view preserves served values, missing-data gaps and uncertainty metadata, with exact-value tables and text fallback. No fit, forecast or optimiser run is started. Native-client compatibility must be checked in the intended host; synthetic iframe checks are not host acceptance.
+- `recommend_incrementality_tests` reads an inspectable channel screening score from a supporting backend. It exposes the local normal-approximation perfect-information basis and exclusions, with qualified variance diagnostics. It does not create experiments, change budgets or infer compatible test history. Requires backend support for the test-priorities route.
+
+## 0.15.0 (2026-10-02)
+
+### Added
+
+- `get_campaign_marginal_returns` reads channel-derived campaign or ad-set marginal returns. `recommend_campaign_budgets` calculates bounded daily-equivalent suggestions from explicit channel totals or a compatible saved optimiser run. Both require `read:models` and leave models, mappings and platform budgets unchanged. The backend validates currency, fact coverage and curve provenance; unsupported evidence stays unavailable. These require backend support for the campaign marginal and daily-budget routes.
+
+## 0.14.0 (2026-10-01)
+
+### Added
+
+- `get_campaign_incrementality(model_hash, start, end, level)` (read-only): incremental ROAS per campaign or ad set beside the platform's own ROAS and last-click ROAS. Each model channel's incrementality factor (MMM incremental revenue over the platform-attributed value of its mapped campaigns) scales the platform's own split, so campaign incremental revenue sums to the channel's. The assumption is stated first and warned about: one factor per channel flatters retargeting and brand. Channels without platform value share revenue by spend (`method: spend_share`); a completed incrementality test can replace a channel's factor (`factor_source: test`); 94% bands come from the model's posterior draws through a background job (`interval: pending | ready | unavailable`), never invented. 85 tools.
+
+## 0.13.0 (2026-10-01)
+
+### Added
+
+- `list_campaigns(model_hash, platform, unmapped_only, start, end, limit, cursor)` (read-only): the campaigns in the campaign facts with their totals and the model channel each counts towards under the model's declared map; unmapped campaigns are listed with their spend and a suggestion, never guessed into a channel.
+- `get_campaign_report(model_hash, start, end, granularity, group_by, platform, channel, campaign_id, metrics)` (read-only): the data-report engine over the campaign facts (spend, impressions, clicks, the platforms' own conversions and value), by platform, model channel, campaign or ad set; unmapped spend is its own group.
+- `set_campaign_mapping(model_hash, rows, tolerance)`: replaces the model's campaign → channel map (exact id or name pattern, effective-dated); refuses a campaign that would count towards two channels on any date, and returns the unmapped list and spend drift per channel as a warning. 84 tools.
+- Registering a pipeline as the campaign facts source stays in the app (excluded by design: it binds data whose credentials the agent cannot see).
+
+### Changed
+
+- Server request reliability policy (bounded responses, #62) is on by default; request budgets (#65) stay off unless `SIMBA_API_REQUEST_POLICY_JSON` is set.
+
 ## 0.12.0 (2026-09-29)
 
 ### Added

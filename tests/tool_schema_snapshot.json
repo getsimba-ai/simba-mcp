@@ -3887,5 +3887,504 @@
     },
     "title": "get_workflow_guidanceArguments",
     "type": "object"
+  },
+  "list_campaigns": {
+    "properties": {
+      "model_hash": {
+        "title": "Model Hash",
+        "type": "string"
+      },
+      "platform": {
+        "anyOf": [
+          {
+            "enum": [
+              "meta",
+              "google_ads",
+              "tiktok",
+              "other"
+            ],
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Platform"
+      },
+      "unmapped_only": {
+        "default": false,
+        "title": "Unmapped Only",
+        "type": "boolean"
+      },
+      "start": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Start"
+      },
+      "end": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "End"
+      },
+      "limit": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Limit"
+      },
+      "cursor": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Cursor"
+      }
+    },
+    "required": [
+      "model_hash"
+    ],
+    "title": "list_campaignsArguments",
+    "type": "object"
+  },
+  "get_campaign_report": {
+    "properties": {
+      "model_hash": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Model Hash"
+      },
+      "start": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Start"
+      },
+      "end": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "End"
+      },
+      "granularity": {
+        "default": "native",
+        "enum": [
+          "native",
+          "week",
+          "month",
+          "quarter",
+          "year"
+        ],
+        "title": "Granularity",
+        "type": "string"
+      },
+      "group_by": {
+        "anyOf": [
+          {
+            "enum": [
+              "platform",
+              "channel",
+              "campaign",
+              "adset"
+            ],
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Group By"
+      },
+      "platform": {
+        "anyOf": [
+          {
+            "enum": [
+              "meta",
+              "google_ads",
+              "tiktok",
+              "other"
+            ],
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Platform"
+      },
+      "channel": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Channel"
+      },
+      "campaign_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Campaign Id"
+      },
+      "metrics": {
+        "anyOf": [
+          {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Metrics"
+      }
+    },
+    "title": "get_campaign_reportArguments",
+    "type": "object"
+  },
+  "get_campaign_incrementality": {
+    "properties": {
+      "model_hash": {
+        "title": "Model Hash",
+        "type": "string"
+      },
+      "start": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Start"
+      },
+      "end": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "End"
+      },
+      "level": {
+        "default": "campaign",
+        "enum": [
+          "campaign",
+          "adset"
+        ],
+        "title": "Level",
+        "type": "string"
+      }
+    },
+    "required": [
+      "model_hash"
+    ],
+    "title": "get_campaign_incrementalityArguments",
+    "type": "object"
+  },
+  "set_campaign_mapping": {
+    "properties": {
+      "model_hash": {
+        "title": "Model Hash",
+        "type": "string"
+      },
+      "rows": {
+        "items": {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        "title": "Rows",
+        "type": "array"
+      },
+      "tolerance": {
+        "default": 0.05,
+        "title": "Tolerance",
+        "type": "number"
+      }
+    },
+    "required": [
+      "model_hash",
+      "rows"
+    ],
+    "title": "set_campaign_mappingArguments",
+    "type": "object"
+  },
+  "get_campaign_marginal_returns": {
+    "properties": {
+      "model_hash": {
+        "title": "Model Hash",
+        "type": "string"
+      },
+      "start": {
+        "title": "Start",
+        "type": "string"
+      },
+      "end": {
+        "title": "End",
+        "type": "string"
+      },
+      "level": {
+        "default": "campaign",
+        "enum": [
+          "campaign",
+          "adset"
+        ],
+        "title": "Level",
+        "type": "string"
+      }
+    },
+    "required": [
+      "model_hash",
+      "start",
+      "end"
+    ],
+    "title": "get_campaign_marginal_returnsArguments",
+    "type": "object"
+  },
+  "recommend_campaign_budgets": {
+    "properties": {
+      "model_hash": {
+        "title": "Model Hash",
+        "type": "string"
+      },
+      "observation_window": {
+        "additionalProperties": {
+          "type": "string"
+        },
+        "title": "Observation Window",
+        "type": "object"
+      },
+      "currency": {
+        "title": "Currency",
+        "type": "string"
+      },
+      "channel_daily_budgets": {
+        "anyOf": [
+          {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Channel Daily Budgets"
+      },
+      "optimizer_run_id": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Optimizer Run Id"
+      },
+      "level": {
+        "default": "campaign",
+        "enum": [
+          "campaign",
+          "adset"
+        ],
+        "title": "Level",
+        "type": "string"
+      },
+      "max_step_fraction": {
+        "default": 0.2,
+        "title": "Max Step Fraction",
+        "type": "number"
+      },
+      "bounds": {
+        "anyOf": [
+          {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Bounds"
+      },
+      "expected_context_key": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Expected Context Key"
+      }
+    },
+    "required": [
+      "model_hash",
+      "observation_window",
+      "currency"
+    ],
+    "title": "recommend_campaign_budgetsArguments",
+    "type": "object"
+  },
+  "show_response_curves": {
+    "properties": {
+      "model_hash": {
+        "title": "Model Hash",
+        "type": "string"
+      }
+    },
+    "required": [
+      "model_hash"
+    ],
+    "title": "show_response_curvesArguments",
+    "type": "object"
+  },
+  "show_decomposition": {
+    "properties": {
+      "model_hash": {
+        "title": "Model Hash",
+        "type": "string"
+      }
+    },
+    "required": [
+      "model_hash"
+    ],
+    "title": "show_decompositionArguments",
+    "type": "object"
+  },
+  "show_optimizer_allocation": {
+    "properties": {
+      "model_hash": {
+        "title": "Model Hash",
+        "type": "string"
+      },
+      "run_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Run Id"
+      }
+    },
+    "required": [
+      "model_hash"
+    ],
+    "title": "show_optimizer_allocationArguments",
+    "type": "object"
+  },
+  "recommend_incrementality_tests": {
+    "properties": {
+      "model_hash": {
+        "title": "Model Hash",
+        "type": "string"
+      },
+      "budget": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Budget"
+      },
+      "hurdle": {
+        "default": 1.0,
+        "title": "Hurdle",
+        "type": "number"
+      },
+      "limit": {
+        "default": 5,
+        "title": "Limit",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "model_hash"
+    ],
+    "title": "recommend_incrementality_testsArguments",
+    "type": "object"
   }
 }
