@@ -17,6 +17,101 @@ from ..schemas import APIResult
 Platform = Literal["meta", "google_ads", "tiktok", "other"]
 
 
+async def get_campaign_marginal_returns(
+    model_hash: str,
+    start: str,
+    end: str,
+    level: Literal["campaign", "adset"] = "campaign",
+    ctx: Context[AppContext, Any] = None,
+) -> APIResult:
+    """Read channel-derived marginal returns for campaigns or ad sets. Requires read:models.
+
+    Campaign response shapes inherit the fitted channel shape, rescaled by observed spend
+    share and relative efficiency. These are not independently measured campaign saturation
+    curves or causal campaign effects. Daily spend is observed spend divided by inclusive
+    calendar days, not a configured platform budget or a daily revenue forecast.
+
+    Args:
+        model_hash: Owned, completed MMM with compatible curve provenance and campaign facts.
+        start, end: Inclusive observation-window ISO dates (YYYY-MM-DD).
+        level: campaign or adset; ad sets inherit the campaign's channel.
+
+    Returns {context_key, window, currency, minor_digits, channels: [{channel,
+    current_daily_spend, status, reason}], rows, provenance}. Rows carry composite identity,
+    method and marginal-return evidence. Missing or incompatible currency, curve basis or
+    fact coverage makes recommendations unavailable; do not substitute defaults. Missing
+    posterior marginal evidence means no uncertainty interval, not zero uncertainty.
+    This reads existing evidence only: no fit, posterior job or platform change is started.
+    """
+    return await _client(ctx).workflow_request(
+        "GET",
+        "/campaigns/marginal",
+        params={"model": model_hash, "start": start, "end": end, "level": level},
+    )
+
+
+async def recommend_campaign_budgets(
+    model_hash: str,
+    observation_window: dict[str, str],
+    currency: str,
+    channel_daily_budgets: dict[str, float] | None = None,
+    optimizer_run_id: int | None = None,
+    level: Literal["campaign", "adset"] = "campaign",
+    max_step_fraction: float = 0.2,
+    bounds: list[dict[str, Any]] | None = None,
+    expected_context_key: str | None = None,
+    ctx: Context[AppContext, Any] = None,
+) -> APIResult:
+    """Calculate campaign budget suggestions without applying them. Requires read:models.
+
+    Uses the same channel-derived marginal curves and bounded allocator as the web app.
+    This POST is a read-only calculation: it creates no saved run, starts no fit or posterior
+    job and does not change mappings or advertising-platform budgets. Results are conditional
+    scenarios, not independently fitted campaign response curves or a day-by-day forecast.
+
+    Args:
+        model_hash: Owned, completed MMM with verified curve and currency provenance.
+        observation_window: {start: YYYY-MM-DD, end: YYYY-MM-DD}, inclusive fact dates.
+        currency: Explicit currency matching the model and facts, for example GBP.
+        channel_daily_budgets: Exact channel keys mapped to daily totals in that currency.
+            Supply exactly one of this or optimizer_run_id. Preserve currency minor precision.
+        optimizer_run_id: Existing owned optimiser run for the same model, with verified
+            planning dates and currency. Its totals become flat daily equivalents, not a
+            daily schedule. The tool does not create or rerun an optimiser.
+        level: campaign or adset.
+        max_step_fraction: Maximum change from observed average daily spend; default 0.2.
+        bounds: Optional rows keyed by full identity {platform, account_id, campaign_id,
+            adset_id}, with min and/or max amounts in daily currency units. Use null adset_id
+            at campaign grain. No platform floor is invented; the server validates bounds.
+        expected_context_key: Optional context_key returned by get_campaign_marginal_returns.
+            A changed model, facts, mapping or attribution basis refuses with 409 instead of
+            calculating against evidence different from the scenario you reviewed.
+
+    Returns {channels: [{channel, status, total_daily_budget, rows, explanation, assumptions,
+    reason, feasible_range}], ...provenance}. Ready rows include current and recommended
+    budgets, the continuous solution, marginal returns and binding constraints. Refusals
+    retain their reasons and feasible ranges; never relax bounds or silently change a total.
+    Rounded amounts reconcile in integer currency minor units; rounding does not imply exact
+    equality of marginal returns. Missing marginal uncertainty remains explicitly unavailable.
+    """
+    body: dict[str, Any] = {
+        "model": model_hash,
+        "observation_window": observation_window,
+        "currency": currency,
+        "level": level,
+        "max_step_fraction": max_step_fraction,
+    }
+    if channel_daily_budgets is not None:
+        body["channel_daily_budgets"] = channel_daily_budgets
+    if optimizer_run_id is not None:
+        body["optimizer_run_id"] = optimizer_run_id
+    if bounds is not None:
+        body["bounds"] = bounds
+    if expected_context_key is not None:
+        body["expected_context_key"] = expected_context_key
+    return await _client(ctx).workflow_request("POST", "/campaigns/daily-budgets", body)
+
+
 async def list_campaigns(
     model_hash: str,
     platform: Platform | None = None,

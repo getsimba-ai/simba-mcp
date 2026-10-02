@@ -238,6 +238,23 @@ CONTRACT = {
         "end": "get_campaign_incrementality.end",
         "level": "get_campaign_incrementality.level",
     },
+    "GET /api/v1/campaigns/marginal": {
+        "model": "get_campaign_marginal_returns.model_hash",
+        "start": "get_campaign_marginal_returns.start",
+        "end": "get_campaign_marginal_returns.end",
+        "level": "get_campaign_marginal_returns.level",
+    },
+    "POST /api/v1/campaigns/daily-budgets": {
+        "model": "recommend_campaign_budgets.model_hash",
+        "observation_window": "recommend_campaign_budgets.observation_window",
+        "currency": "recommend_campaign_budgets.currency",
+        "channel_daily_budgets": "recommend_campaign_budgets.channel_daily_budgets",
+        "optimizer_run_id": "recommend_campaign_budgets.optimizer_run_id",
+        "level": "recommend_campaign_budgets.level",
+        "max_step_fraction": "recommend_campaign_budgets.max_step_fraction",
+        "bounds": "recommend_campaign_budgets.bounds",
+        "expected_context_key": "recommend_campaign_budgets.expected_context_key",
+    },
     "PUT /api/v1/campaigns/map": {
         "model": "set_campaign_mapping.model_hash",
         "rows": "set_campaign_mapping.rows",

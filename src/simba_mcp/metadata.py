@@ -41,6 +41,8 @@ READ_ONLY = frozenset(
         "list_campaigns",
         "get_campaign_report",
         "get_campaign_incrementality",
+        "get_campaign_marginal_returns",
+        "recommend_campaign_budgets",
         "list_incrementality_tests",
         "get_incrementality_test",
         "list_study_decisions",
