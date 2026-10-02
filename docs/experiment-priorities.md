@@ -65,6 +65,13 @@ time-varying coefficients and unmatched names yield `prior_unavailable`. Contrac
 only breaks ties, never multiplies the score. Recency is unavailable in this
 version, so it does not alter the ranking.
 
+Contraction is a variance comparison, not evidence that the prior dominates the
+result. Values from zero to below 0.1 receive `limited_variance_contraction`;
+negative values receive `posterior_variance_expanded`, because the posterior
+variance exceeds the prior variance. Neither reason changes the score or the
+existing contraction tie-break. The tool does not infer prior-data agreement,
+conflict or identification from this single diagnostic.
+
 Results describe one model. A recorded hierarchy identity can be a brand rather
 than a geographical market, so the tool does not infer geographical coverage or
 pool independent market fits. Registry history is unknown because its scope cannot
