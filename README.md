@@ -583,3 +583,8 @@ Replacement holdout preflight: `assess_study_validation_pair` returns `fresh_val
 When creating a derived recipe or draft, supply `source_revision_id` from the same study. `create_recipe_draft`, `create_study_recipe` and `revise_study_recipe` forward this optional field. Draft source linkage is immutable and survives full-editor publication; previous versions of a recipe inherit influence automatically. Unrecorded/off-platform copies remain outside recorded ancestry. Resolution does not transfer to new runs or descendants.
 
 Release note: these tools require the corresponding MCP package release and updated backend. Draft-branch tests do not establish package publication or application deployment.
+
+### Experiment priorities
+
+See [What to test next](docs/experiment-priorities.md) for the read-only experiment screening tool, its inputs, approximation and limitations. Requires compatible backend support.
+

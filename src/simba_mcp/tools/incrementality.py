@@ -18,6 +18,20 @@ ImportSource = Literal[
 ]
 
 
+async def recommend_incrementality_tests(
+    model_hash: str,
+    budget: float | None = None,
+    hurdle: float = 1.0,
+    limit: int = 5,
+    ctx: Context[AppContext, Any] = None,
+) -> APIResult:
+    """Rank channels for experiment investigation using stored posterior marginal returns. Read-only: no fit, test creation or budget changes. Returns {method, basis, score_unit, currency, budget, hurdle, spend_basis, period, approximation_warnings, items, excluded}. Each item carries channel, score, components (mean, sigma, stake, spend_share, crossing_probability, optional contraction), reason_codes, last_test_end, hypothesis and an unavailable design_hint. The score is a normal-approximation local binary perfect-information value, not expected test benefit, experiment budget, portfolio value or forecast lift. budget is a positive exposure scale (default sum of current spend); weights are the mean-active-period spend mix, which need not represent one common calendar period. hurdle is the non-negative marginal-return alternative (default 1). limit is 1-50. Missing posterior means or intervals are explicitly excluded. Cross-channel dependence is not modelled. Requires read:results; registry history is included only with read:models. Requires backend support for test-priorities."""
+    return await _client(ctx).workflow_request(
+        "GET", f"/models/{model_hash}/test-priorities",
+        params={"budget": budget, "hurdle": hurdle, "limit": limit},
+    )
+
+
 async def list_incrementality_tests(
     project_id: int,
     type: Literal["geo", "owned_media_ab", "platform_lift"] | None = None,

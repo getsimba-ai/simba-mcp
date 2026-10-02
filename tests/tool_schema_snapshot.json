@@ -4300,5 +4300,40 @@
     ],
     "title": "recommend_campaign_budgetsArguments",
     "type": "object"
+  },
+  "recommend_incrementality_tests": {
+    "properties": {
+      "model_hash": {
+        "title": "Model Hash",
+        "type": "string"
+      },
+      "budget": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Budget"
+      },
+      "hurdle": {
+        "default": 1.0,
+        "title": "Hurdle",
+        "type": "number"
+      },
+      "limit": {
+        "default": 5,
+        "title": "Limit",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "model_hash"
+    ],
+    "title": "recommend_incrementality_testsArguments",
+    "type": "object"
   }
 }

@@ -30,6 +30,7 @@ EVIDENCE = frozenset(
         "get_study_validation_resolutions",
         "compare_study_runs",
         "list_incrementality_tests",
+        "recommend_incrementality_tests",
         "get_incrementality_test",
         "list_campaigns",
         "get_campaign_report",

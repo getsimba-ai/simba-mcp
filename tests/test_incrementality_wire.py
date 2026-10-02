@@ -111,6 +111,30 @@ def test_list_filters_and_pages(monkeypatch):
     ]
 
 
+def test_priorities_passthrough_preserves_uncertainty_and_units(monkeypatch):
+    path = "/api/v1/models/synthetic/test-priorities"
+    body = {"method": "normal_binary_evpi_v1", "score_unit": "revenue_units",
+            "items": [{"channel": "social", "score": 12.345,
+                       "reason_codes": ["prior_unavailable", "normal_approximation"]}],
+            "excluded": [{"channel": "search", "reason": "posterior_mean_unavailable"}]}
+    seen, handle = _routes({path: (200, body)})
+    result = _call(monkeypatch, handle, "recommend_incrementality_tests",
+                   {"model_hash": "synthetic", "budget": 1000, "hurdle": 1.2, "limit": 3})
+    assert result["structuredContent"] == body
+    assert seen == [{"method": "GET", "path": path,
+                     "query": {"budget": "1000.0", "hurdle": "1.2", "limit": "3"},
+                     "body": None}]
+
+
+def test_priorities_refusal_preserved(monkeypatch):
+    path = "/api/v1/models/synthetic/test-priorities"
+    seen, handle = _routes({path: (422, {"error": "Stored summary unavailable",
+                                       "code": "test_priorities_unavailable"})})
+    result = _call(monkeypatch, handle, "recommend_incrementality_tests", {"model_hash": "synthetic"})
+    assert "test_priorities_unavailable" in json.dumps(result)
+    assert len(seen) == 1
+
+
 def test_get_without_a_model_reads_the_record_only(monkeypatch):
     seen, handle = _routes({f"/api/v1/incrementality-tests/{TEST_ID}": (200, DETAIL)})
     result = _call(monkeypatch, handle, "get_incrementality_test", {"test_id": TEST_ID})

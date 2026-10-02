@@ -20,6 +20,12 @@ from simba_mcp import server
 
 # endpoint -> {api_request_param: "tool_name.tool_param"}
 CONTRACT = {
+    "GET /api/v1/models/{hash}/test-priorities": {
+        "model_hash": "recommend_incrementality_tests.model_hash",
+        "budget": "recommend_incrementality_tests.budget",
+        "hurdle": "recommend_incrementality_tests.hurdle",
+        "limit": "recommend_incrementality_tests.limit",
+    },
     "POST /api/v1/ingest": {
         "name": "upload_data.name",
         "filename": "upload_data.filename",
