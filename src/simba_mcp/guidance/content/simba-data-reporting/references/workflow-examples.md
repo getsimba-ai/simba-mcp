@@ -103,7 +103,7 @@ Step 4:
   "arguments": {
     "dataset_id": 7,
     "start": "2026-09-01",
-    "end": "2026-09-28",
+    "end": "2026-09-30",
     "granularity": "month",
     "metrics": [
       "kpi",
@@ -191,7 +191,7 @@ Step 2:
   "arguments": {
     "dataset_id": 7,
     "start": "2026-09-01",
-    "end": "2026-09-28",
+    "end": "2026-09-30",
     "granularity": "month",
     "metrics": [
       "kpi",

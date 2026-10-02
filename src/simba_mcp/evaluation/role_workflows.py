@@ -21,6 +21,7 @@ def role_workflows() -> list[RoleWorkflow]:
     both = ("marketer", "reviewer", "data_scientist", "full")
     model = {"model_hash": "model-example"}
     window = {"start": "2026-09-01", "end": "2026-09-28"}
+    reporting_window = {"start": "2026-09-01", "end": "2026-09-30"}
 
     def step(tool, args, method, path, response, *, query=None, body=None, status=200, fault=None):
         return Step(
@@ -87,13 +88,13 @@ def role_workflows() -> list[RoleWorkflow]:
     }
     data_args = {
         "dataset_id": 7,
-        **window,
+        **reporting_window,
         "granularity": "month",
         "metrics": ["kpi", "spend"],
         "roles": {"units": "kpi"},
     }
     data_query = {
-        **window,
+        **reporting_window,
         "granularity": "month",
         "metrics": "kpi,spend",
         "roles": '{"units": "kpi"}',

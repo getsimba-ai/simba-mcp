@@ -25,6 +25,22 @@ async def test_current_role_jobs(role, workflow):
     assert trial.backend_attempts == sum(len(step.exchanges) for step in workflow.case.steps)
 
 
+def test_september_actual_reporting_requests_the_complete_calendar_month():
+    from calendar import monthrange
+    from datetime import date
+
+    workflow = next(item for item in role_workflows() if item.case.id == "role_actual_data")
+    reporting = next(step for step in workflow.case.steps if step.tool == "get_data_report")
+    first = date(2026, 9, 1).isoformat()
+    last = date(2026, 9, monthrange(2026, 9)[1]).isoformat()
+    assert reporting.arguments["start"] == reporting.exchanges[0].query["start"] == first
+    assert reporting.arguments["end"] == reporting.exchanges[0].query["end"] == last
+    assert all(
+        row["period_start"] == first and row["period_end"] == last
+        for row in reporting.expected["rows"]
+    )
+
+
 @pytest.mark.anyio
 async def test_missing_reporting_dependency_fails_complete_job(monkeypatch):
     from simba_mcp.profiles import PROFILES

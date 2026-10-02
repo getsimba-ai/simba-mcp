@@ -62,6 +62,17 @@ def test_removed_required_tool_fails_with_named_dependency():
         )
 
 
+def test_missing_guidance_decision_fails_and_explicit_limitation_is_accepted():
+    decisions = deepcopy(DECISIONS)
+    decisions[0]["guidance"] = []
+    with pytest.raises(AssertionError, match="Missing guidance decision"):
+        validate_coverage(tools(), PROFILES, decisions, role_workflows())
+    decisions[0]["guidance_limitation"] = (
+        "Intentional test-only exclusion: no standalone guidance; exact tool contract remains available."
+    )
+    validate_coverage(tools(), PROFILES, decisions, role_workflows())
+
+
 def test_required_profile_dependency_cannot_be_removed_silently():
     profiles = {**PROFILES, "marketer": PROFILES["marketer"] - {"get_data_report"}}
     with pytest.raises(AssertionError, match="marketer membership: get_data_report"):

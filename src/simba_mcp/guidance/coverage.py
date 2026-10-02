@@ -30,6 +30,9 @@ def validate_coverage(tools, profiles, decisions, workflows):
         assert family["examples"] or family.get("example_limitation", "").strip(), (
             f"Missing example decision: {family['family']}"
         )
+        assert family["guidance"] or family.get("guidance_limitation", "").strip(), (
+            f"Missing guidance decision: {family['family']}"
+        )
         for topic in family["guidance"]:
             assert topic in MANIFEST["topics"], f"Unknown guidance topic: {topic}"
         for example in family["examples"]:
@@ -111,7 +114,7 @@ def render_decisions(decisions):
     ]
     for family in decisions:
         names = ", ".join(f"`{name}`" for name in family["tools"])
-        topics = ", ".join(family["guidance"])
+        topics = ", ".join(family["guidance"]) or family["guidance_limitation"]
         out.append(
             f"| {family['family']}: {names} | "
             f"{'included' if 'marketer' in family['roles'] else 'excluded'} | "
