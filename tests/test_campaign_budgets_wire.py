@@ -16,6 +16,9 @@ def call(monkeypatch, tool, arguments, response, status=200):
     seen = []
 
     def handle(request):
+        if request.url.path == "/api/v1/mcp/preferences":
+            assert request.headers["authorization"] == "Bearer synthetic-test-key"
+            return httpx.Response(200, json={"schema_version": 1, "profile": "marketer"})
         seen.append(
             {
                 "method": request.method,

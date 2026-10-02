@@ -26,6 +26,9 @@ def test_policy_lifecycle_wire(monkeypatch, operation):
     }
 
     def handle(request):
+        if request.url.path == "/api/v1/mcp/preferences":
+            assert request.headers.get("authorization", "").startswith("Bearer ")
+            return httpx.Response(200, json={"schema_version": 1, "profile": "full"})
         assert request.method == "PATCH"
         assert request.url.path == "/api/v1/studies/s/quality-policies/p"
         assert json.loads(request.content) == {"retired": retired}

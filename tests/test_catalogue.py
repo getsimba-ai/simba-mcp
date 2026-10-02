@@ -40,6 +40,18 @@ def test_invalid_mode_is_not_silently_accepted():
 
 
 @pytest.mark.parametrize("mode", ["legacy", "compact"])
+def test_results_identity_requires_channel_map_not_spelling(mode):
+    tools = {tool.name: tool for tool in anyio.run(create_server(mode).list_tools)}
+    description = tools["get_model_results"].description
+    assert "retrieve channel_map" in description
+    assert "do not infer identity from spelling" in description
+    assert "Reuse a sufficient channel_map" in description
+    assert "comma-separated list" in description
+    assert "Always read channel_summary first" not in description
+    assert "Start with channel_summary or channel_map" not in description
+
+
+@pytest.mark.parametrize("mode", ["legacy", "compact"])
 def test_every_registration_uses_the_original_wire_wrapper(monkeypatch, mode):
     from simba_mcp import server
 
@@ -84,3 +96,23 @@ def test_legacy_is_default_and_full_contracts_are_preserved():
     assert reference.DOCS.with_name("tools-compact.md").read_text(
         encoding="utf-8"
     ) == reference.current("compact")
+
+
+@pytest.mark.parametrize("mode", ["legacy", "compact"])
+def test_known_identifier_and_supplied_guidance_routing(mode):
+    tools = {tool.name: tool for tool in anyio.run(create_server(mode).list_tools)}
+    assert "listing is not a prerequisite" in tools["list_models"].description
+    assert "not a preflight check" in tools["get_model"].description
+    assert "Use a supplied model_hash directly" in tools["get_model_results"].description
+    assert "No get_model preflight" in tools["get_model_results"].description
+    assert "request only missing sections" in tools["get_workflow_guidance"].description
+    assert "Use index only when" in tools["get_workflow_guidance"].description
+
+
+def test_results_entrypoint_reuses_supplied_interpretation():
+    from simba_mcp.guidance import read_guidance
+
+    guidance = read_guidance("results", "entrypoint")
+    assert guidance["guidance_version"] == "3"
+    assert "Use list_models only when the model identifier is unknown" in guidance["content"]
+    assert "Retrieve it only when absent" in guidance["content"]

@@ -32,6 +32,9 @@ def test_visual_wire_is_read_only_passthrough(monkeypatch, tool, section, status
 
     def handle(request):
         assert request.method == "GET"
+        if request.url.path == "/api/v1/mcp/preferences":
+            assert request.headers["authorization"] == "Bearer synthetic-test-key"
+            return httpx.Response(200, json={"schema_version": 1, "profile": "full"})
         assert "prediction_window" not in str(request.url)
         if section:
             assert request.url.params["sections"] == section

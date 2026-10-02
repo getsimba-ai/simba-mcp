@@ -77,6 +77,9 @@ def _routes(responses):
     seen = []
 
     def handle(request):
+        if request.url.path == "/api/v1/mcp/preferences":
+            assert request.headers.get("authorization", "").startswith("Bearer ")
+            return httpx.Response(200, json={"schema_version": 1, "profile": "full"})
         seen.append(
             {
                 "method": request.method,

@@ -175,6 +175,9 @@ def test_custom_quality_wire(monkeypatch, operation):
     }
 
     def handle(request):
+        if request.url.path == "/api/v1/mcp/preferences":
+            assert request.headers.get("authorization", "").startswith("Bearer ")
+            return httpx.Response(200, json={"schema_version": 1, "profile": "full"})
         assert request.method == (
             "GET"
             if operation in ("champion_read", "access_read", "resolution_read", "diff_read")

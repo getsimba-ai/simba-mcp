@@ -135,6 +135,7 @@ from .tools.studies import (
     update_study,
 )
 from .tools.visuals import show_decomposition, show_optimizer_allocation, show_response_curves
+from .user_profiles import UserProfileMiddleware
 from .visuals import RESOURCE_URI, VISUAL_TOOLS, chart_apps
 
 
@@ -237,6 +238,7 @@ _SERVER_OPTIONS = {
         "Writes are not automatically retried; reconcile before repeating them."
     ),
     "lifespan": app_lifespan,
+    "middleware": [UserProfileMiddleware()],
 }
 
 TOOLS = (
@@ -363,8 +365,7 @@ def _wire_errors(tool):
 
 def create_server(description_mode: str = "legacy", *, profile: str = "full") -> SimbaMCPServer:
     """Build an immutable catalogue using the same contracts and execution wrappers."""
-    if description_mode not in ("legacy", "compact"):
-        raise ValueError("SIMBA_TOOL_DESCRIPTIONS must be legacy or compact")
+    runtime.description_mode(description_mode)
     selected = select_tools(TOOLS, profile)
     options = dict(_SERVER_OPTIONS)
     if profile not in ("full", "data_scientist"):

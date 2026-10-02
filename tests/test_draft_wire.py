@@ -196,6 +196,9 @@ def test_authoring_snapshot_crosses_wire_without_losing_fields(monkeypatch, oper
         }
 
     def handle(request):
+        if request.url.path == "/api/v1/mcp/preferences":
+            assert request.headers.get("authorization", "").startswith("Bearer ")
+            return httpx.Response(200, json={"schema_version": 1, "profile": "full"})
         if operation == "create":
             body = json.loads(request.content)
             assert body["source_revision_id"] == "source-revision"

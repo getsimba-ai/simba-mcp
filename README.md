@@ -84,6 +84,25 @@ response = client.beta.messages.create(
 )
 ```
 
+## Configuration
+
+Operator settings, defaults and the non-sensitive effective check are in
+[docs/configuration.md](docs/configuration.md). Inspect the current process without
+printing credentials:
+
+```bash
+python -m simba_mcp.configuration
+```
+
+A development `.env` configures only the process that loads it. It does not configure
+a remote server or every MCP host. For a hosted connection, choose a tool profile in
+the application's **Profile > Connected apps** settings, then reconnect your MCP
+host. The profile narrows the operator's catalogue and does not grant permissions.
+The application and MCP must both support the new preferences endpoint; lookup
+failures refuse listing and tool calls. Local stdio uses its configured server profile.
+See [profile setup](docs/tool-profiles.md) and the coordinated
+[migration and rollback requirements](docs/architecture.md#acceptance-and-rollback).
+
 ## Native result charts
 
 Three read-only [native chart tools](docs/native-charts.md) present response curves, decomposition and saved allocations through MCP Apps. Structured and text results remain available without visual support. The compatibility page distinguishes fixture tests from actual client acceptance.
@@ -189,7 +208,12 @@ client are in the [product documentation](https://docs.simba-mmm.com/docs/integr
 
 Model results are keyed by the channel's **activity column** name (e.g. `"search_activity"`, `"TV_impressions"`), **not** by the `channels[].name` you passed to `create_model`. Keys can contain spaces and matching is **case-sensitive and space-sensitive** â€” the optimizer and scenario tools use them as dictionary keys.
 
-**Always** call `get_model_results` with `sections="channel_summary"` first to see exact channel keys, then use those verbatim in optimizer/scenario payloads.
+When relating a user-facing channel name to a result or activity key, request
+`channel_map` and use its explicit mapping, not spelling similarity. Batch it with
+the result sections needed for the question when possible. Reuse a mapping already
+returned for the model. Use exact activity-column keys in optimiser/scenario
+payloads. Known-model result questions can start with those result sections;
+capability, schema and guidance discovery are conditional on the task.
 
 ### Results sections
 
@@ -587,6 +611,10 @@ Replacement holdout preflight: `assess_study_validation_pair` returns `fresh_val
 When creating a derived recipe or draft, supply `source_revision_id` from the same study. `create_recipe_draft`, `create_study_recipe` and `revise_study_recipe` forward this optional field. Draft source linkage is immutable and survives full-editor publication; previous versions of a recipe inherit influence automatically. Unrecorded/off-platform copies remain outside recorded ancestry. Resolution does not transfer to new runs or descendants.
 
 Release note: these tools require the corresponding MCP package release and updated backend. Draft-branch tests do not establish package publication or application deployment.
+
+## Proposed release acceptance
+
+The [proposed release scorecard](docs/release-scorecard.md) records defaults, opt-in controls, current failed and pending evaluation, host limitations and the coordinated application upgrade. It is not a claim of release or deployed verification.
 
 ### Experiment priorities
 

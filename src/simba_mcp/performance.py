@@ -5,6 +5,8 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
+from contextlib import asynccontextmanager
 from pathlib import Path
 from time import perf_counter
 from typing import Any
@@ -12,54 +14,82 @@ from typing import Any
 from .measurements import compact, provenance
 
 
-def capture_surface(description_mode: str | None = None) -> tuple[bytes, bytes]:
-    """Exercise the real stateless app without opening a socket or calling a backend."""
+def capture_surface(
+    description_mode: str | None = None, *, preference_measurement: dict | None = None
+) -> tuple[bytes, bytes]:
+    """Exercise real HTTP middleware with an instance-local synthetic preference client."""
+    from .oauth import oauth_enabled
+
+    if oauth_enabled():
+        raise ValueError("Offline surface capture requires MCP_OAUTH_ENABLED to be disabled.")
+
     from starlette.testclient import TestClient
 
     from . import runtime, server
 
-    previous = runtime._serving_http
-    try:
-        app = (
-            server._create_app()
-            if description_mode is None
-            else runtime.create_app(server.create_server(description_mode))
+    measurements = preference_measurement if preference_measurement is not None else {}
+    measurements.update(requests=0, seconds=0.0, schema_version=1, profile="full", synthetic=True)
+
+    class OfflinePreferenceClient:
+        async def _request(self, method, path, **kwargs):
+            if (
+                method != "GET"
+                or path != "/api/v1/mcp/preferences"
+                or kwargs != {"retry_safe": False}
+            ):
+                raise RuntimeError(
+                    "Offline surface capture permits only the synthetic preference exchange"
+                )
+            started = perf_counter()
+            try:
+                measurements["requests"] += 1
+                return {"schema_version": 1, "profile": "full"}
+            finally:
+                measurements["seconds"] += perf_counter() - started
+
+    @asynccontextmanager
+    async def offline_lifespan(_server):
+        yield runtime.AppContext(client=OfflinePreferenceClient(), serving_http=True)
+
+    operator_profile = os.environ.get("SIMBA_TOOL_PROFILE", server.TOOL_PROFILE)
+    measurements["operator_profile"] = operator_profile
+    instance = server.create_server(
+        description_mode or server.TOOL_DESCRIPTION_MODE, profile=operator_profile
+    )
+    # SDK v2 owns the per-instance low-level lifespan. Keep the actual profile
+    # middleware and tool registrations; only its backend client is synthetic.
+    instance._lowlevel_server.lifespan = offline_lifespan
+    app = runtime.create_app(instance)
+    with TestClient(app) as client:
+        headers = {
+            "Accept": "application/json, text/event-stream",
+            "Authorization": "Bearer synthetic-surface-capture",
+        }
+        initial = client.post(
+            "/",
+            headers=headers,
+            json={
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "initialize",
+                "params": {
+                    "protocolVersion": "2025-11-25",
+                    "capabilities": {},
+                    "clientInfo": {"name": "simba-performance-report", "version": "1"},
+                },
+            },
         )
-        with TestClient(app) as client:
-            headers = {"Accept": "application/json, text/event-stream"}
-            initial = client.post(
-                "/",
-                headers=headers,
-                json={
-                    "jsonrpc": "2.0",
-                    "id": 1,
-                    "method": "initialize",
-                    "params": {
-                        "protocolVersion": "2025-11-25",
-                        "capabilities": {},
-                        "clientInfo": {"name": "simba-performance-report", "version": "1"},
-                    },
-                },
-            )
-            initial.raise_for_status()
-            listing = client.post(
-                "/",
-                headers=headers,
-                json={
-                    "jsonrpc": "2.0",
-                    "id": 2,
-                    "method": "tools/list",
-                    "params": {},
-                },
-            )
-            listing.raise_for_status()
-            return initial.content, listing.content
-    finally:
-        runtime.set_http_mode(previous)
+        initial.raise_for_status()
+        listing = client.post(
+            "/",
+            headers=headers,
+            json={"jsonrpc": "2.0", "id": 2, "method": "tools/list", "params": {}},
+        )
+        listing.raise_for_status()
+        return initial.content, listing.content
 
 
 def surface_report(encoding: str = "none", description_mode: str | None = None) -> dict:
-    from .server import TOOL_DESCRIPTION_MODE
 
     counter = None
     if encoding != "none":
@@ -69,7 +99,12 @@ def surface_report(encoding: str = "none", description_mode: str | None = None) 
             raise ValueError("Install simba-mcp[performance] to request tokenizer counts.") from exc
         counter = tiktoken.get_encoding(encoding)
     started = perf_counter()
-    initial_bytes, list_bytes = capture_surface(description_mode)
+    preference_measurement = {}
+    initial_bytes, list_bytes = capture_surface(
+        description_mode, preference_measurement=preference_measurement
+    )
+    from .server import TOOL_DESCRIPTION_MODE
+
     capture_seconds = perf_counter() - started
     initial, listing = json.loads(initial_bytes)["result"], json.loads(list_bytes)["result"]
     if listing.get("nextCursor"):
@@ -92,10 +127,13 @@ def surface_report(encoding: str = "none", description_mode: str | None = None) 
     return {
         "schema_version": 1,
         "description_mode": description_mode or TOOL_DESCRIPTION_MODE,
+        "operator_profile": preference_measurement["operator_profile"],
         "provenance": provenance(),
         "capture": {
             "transport": "in_memory_http_json_response",
             "backend_requests": 0,
+            "synthetic_preference_exchange": preference_measurement,
+            "timing_boundary": "Capture seconds include local middleware and synthetic preference lookup. Preference seconds measure the local stub only, not hosted network latency. Tool telemetry begins after preference middleware and excludes that lookup.",
             "seconds": capture_seconds,
             "condition": "first app lifecycle in this process; imports and OS caches not controlled",
         },
@@ -133,7 +171,7 @@ def render_report(report: dict) -> str:
         "",
         "Local HTTP wire measurements. Token counts estimate this JSON representation only; they are not model usage or billing.",
         "",
-        f"Tools: **{report['tool_count']}**. Encoding: `{report['tokenizer']['encoding']}`.",
+        f"Operator profile: `{report['operator_profile']}`. Tools: **{report['tool_count']}**. Encoding: `{report['tokenizer']['encoding']}`.",
         f"Revision: `{report['provenance']['git_revision']}`; dirty: `{report['provenance']['git_dirty']}`.",
         f"Python: `{report['provenance']['python']}`. Packages: `{compact(report['provenance']['packages'])}`.",
         "",
@@ -165,7 +203,8 @@ def render_report(report: dict) -> str:
             )
     rows += [
         "",
-        "Backend calls: zero. Provider usage: unavailable. HTTP headers, TLS and network compression are excluded.",
+        "Real backend calls: zero. The real preference middleware performs an instance-local synthetic schema-1/full preference exchange. Provider usage: unavailable. HTTP headers, TLS and network compression are excluded.",
+        "Capture timing includes the synthetic preference exchange, not a hosted lookup. Tool telemetry excludes preference middleware overhead; measure hosted lookup and end-to-end latency separately.",
         "",
     ]
     return "\n".join(rows)

@@ -69,6 +69,9 @@ def test_get_data_report_passes_every_parameter(monkeypatch):
     seen = {}
 
     def handle(request):
+        if request.url.path == "/api/v1/mcp/preferences":
+            assert request.headers.get("authorization", "").startswith("Bearer ")
+            return httpx.Response(200, json={"schema_version": 1, "profile": "full"})
         seen["path"] = request.url.path
         seen["params"] = dict(request.url.params)
         return httpx.Response(200, json=REPORT)
@@ -109,6 +112,9 @@ def test_get_data_report_defaults_send_only_granularity(monkeypatch):
     seen = {}
 
     def handle(request):
+        if request.url.path == "/api/v1/mcp/preferences":
+            assert request.headers.get("authorization", "").startswith("Bearer ")
+            return httpx.Response(200, json={"schema_version": 1, "profile": "full"})
         seen["params"] = dict(request.url.params)
         return httpx.Response(200, json=REPORT)
 
@@ -118,6 +124,9 @@ def test_get_data_report_defaults_send_only_granularity(monkeypatch):
 
 def test_get_data_report_errors_keep_the_backend_code(monkeypatch):
     def handle(request):
+        if request.url.path == "/api/v1/mcp/preferences":
+            assert request.headers.get("authorization", "").startswith("Bearer ")
+            return httpx.Response(200, json={"schema_version": 1, "profile": "full"})
         return httpx.Response(413, json={"error": "too many rows", "code": "report_too_large"})
 
     result = _call(monkeypatch, handle, "get_data_report", {"dataset_id": 7})
@@ -130,6 +139,9 @@ def test_upload_roles_travel_as_json(monkeypatch):
     seen = {}
 
     def handle(request):
+        if request.url.path == "/api/v1/mcp/preferences":
+            assert request.headers.get("authorization", "").startswith("Bearer ")
+            return httpx.Response(200, json={"schema_version": 1, "profile": "full"})
         seen["params"] = dict(request.url.params)
         return httpx.Response(201, json={"id": 9})
 
@@ -156,6 +168,9 @@ def test_model_results_window_parameters(monkeypatch, window, expected):
     seen = {}
 
     def handle(request):
+        if request.url.path == "/api/v1/mcp/preferences":
+            assert request.headers.get("authorization", "").startswith("Bearer ")
+            return httpx.Response(200, json={"schema_version": 1, "profile": "full"})
         seen["params"] = dict(request.url.params)
         return httpx.Response(
             200, json={"model_hash": "m1", "results": {}, "meta": {"window": expected}}

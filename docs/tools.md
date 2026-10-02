@@ -26,13 +26,13 @@ Get Workflow Guidance · **reads**
 
 Read versioned Simba workflow guidance when native Skills are unavailable.
 
-Use index to list allowed topic/section IDs, then request the relevant section.
+Use index only when the required topic/section is unknown.
 Topics: mmm, results, priors, optimiser, studies, var. The default section is
 entrypoint; it names detailed sections and when they are needed. Arguments are
 identifiers, never paths. Returns a complete section within a 24,000-byte structured-payload
 limit or a refusal, never truncated instructions. This local read makes no
 backend request. Guidance does not authorise writes or replace validation.
-Lookup is optional when the caller already has the relevant versioned guidance.
+Reuse relevant guidance already supplied in context; request only missing sections.
 
 | Parameter | Type | Required | Default |
 |---|---|---|---|
@@ -668,6 +668,7 @@ Get Model · **reads**
 Get a model's metadata and configuration echo — works for EVERY status,
 including failed models (unlike get_model_results, which needs 'complete').
 
+This is not a preflight check for reading an existing model result.
 Use this to inspect what a model was configured with, why it failed, or
 where it lives. Returns: id, model_hash, name, status, model_type
 ("mmm"/"var"), hierarchy_value, periodicity, is_saved, project_id/name,
@@ -754,8 +755,9 @@ List all Marketing Mix Models for the authenticated user.
 Returns model name, hash, status (pending/under way/complete/failed),
 type (mmm/var), hierarchy value, and timestamps.
 
-NOTE: All other model endpoints use model_hash (string, e.g. "f835671a25")
-as the identifier. Use the model_hash from this response.
+Use this when the model identifier is unknown or the user asks to browse models.
+If a model_hash is already supplied, use it directly with the relevant model
+tool; listing is not a prerequisite. Model endpoints use model_hash, not numeric id.
 
 Args:
     include_unsaved: Include draft/unsaved models (default false).
@@ -888,14 +890,17 @@ Get Model Results · **writes**
 
 Get results from a completed model.
 
+Use a supplied model_hash directly; call list_models only to find an unknown
+identifier. No get_model preflight is required for a result read.
+
 Available sections:
 - channel_summary: per-channel aggregates {Channel, Sales, Spend, Revenue, ROI}.
 - contributions: per-period decomposition (Date, one column per channel, plus
   Base, Seasonality, Event Effect, Model, Fit Actual, Actual). Values are in
   KPI/unit space — the multiplier is NOT applied. Use `coefficients` for
   per-period revenue. Multiplicative (link="log") models fitted with the
-  removal_lift attribution convention add an `Overlap` column: a negative
-  shared-synergy reconciliation term so that
+  removal_lift attribution convention add an `Overlap` column: a balancing
+  residual, which can have either sign when effects are signed, so that
   Base + components + Overlap = Model. Overlap is NOT a channel — never
   rank it, share it, or feed it to the optimizer/scenarios. Overlap
   requires BOTH link="log" AND attribution="removal_lift" (the API
@@ -932,9 +937,9 @@ Available sections:
   array. Channels with no active periods omit the spendweighted fields.
   Post-#629 fits also carry a *_mean beside every *_median (mroi_mean,
   mroi_profit_mean, pv_kernel_mass_mean, and the convention variants).
-  The median is what the product displays; the mean is the statistic that
-  reconciles with the marginal-revenue curve, since derivative and mean
-  commute and median does not. Absent on anything fitted before #629 —
+  Preserve the requested mean or median explicitly; they are not interchangeable.
+  The mean reconciles with the marginal-revenue curve, since derivative and
+  mean commute and median does not. Absent on anything fitted before #629 —
   there is no backfill, so feature-detect rather than assume.
 - mroi_periods: OPT-IN ONLY (#591) — never in the default payload;
   request it by name in `sections`. Per-period marginal ROI series:
@@ -1008,11 +1013,17 @@ Available sections:
 The response envelope includes `sections_available` — trust it over any
 hardcoded list if the server is newer than these docs.
 
-IMPORTANT — channel naming: results are keyed by the channel's ACTIVITY
-COLUMN name (e.g. "search_activity"), not by the `channels[].name` passed to
-create_model. These exact keys (case- and space-sensitive) must be used in
-run_optimizer bounds, laydown_weights, and period_cpm. Always read
-channel_summary first to get the exact keys.
+IMPORTANT: channel naming. Results are keyed by the channel's ACTIVITY
+COLUMN name (e.g. "search_activity"), not by the `channels[].name` passed
+to create_model. When relating a user-facing channel name to a result or
+activity key, retrieve channel_map and use its explicit mapping; do not infer identity from spelling.
+A display name and its activity-column key are both valid in narrative answers once that
+explicit mapping is in evidence.
+Reuse a sufficient channel_map already returned for the same model.
+Otherwise request channel_map, channel_summary and the other needed
+sections in one get_model_results call; sections accepts a comma-separated list.
+These exact activity-column keys (case- and space-sensitive) must be used
+in run_optimizer bounds, laydown_weights, and period_cpm.
 
 NOTE: Date values in contributions/coefficients records are millisecond
 epoch integers.
@@ -1034,6 +1045,14 @@ columns the model did not use) use get_data_report.
 CONTEXT-SIZE TIP: a full pull is very large (curve sections alone are 100
 grid points x channels x 5 band columns). In conversational use, request
 only the sections you need and pass channels=[...] and max_grid_points=20.
+
+Explicit JSON channel or grid requests add `_mcp_selection` metadata describing
+requested selection, changed sections, original and returned row counts and grid
+sampling. Backend metadata and warnings remain unchanged. Alias collisions
+retain every matching exact identifier and are disclosed; never combine them.
+Unmatched aliases refer only to filterable sections. Empty channels and grid
+limits below 2 retain existing no-op behaviour with a warning. Unfiltered and
+CSV results are unchanged. Local filtering does not bound backend downloads.
 
 Args:
     model_hash: The model hash.

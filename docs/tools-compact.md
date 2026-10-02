@@ -28,13 +28,13 @@ Get Workflow Guidance · **reads**
 
 Read versioned Simba workflow guidance when native Skills are unavailable.
 
-Use index to list allowed topic/section IDs, then request the relevant section.
+Use index only when the required topic/section is unknown.
 Topics: mmm, results, priors, optimiser, studies, var. The default section is
 entrypoint; it names detailed sections and when they are needed. Arguments are
 identifiers, never paths. Returns a complete section within a 24,000-byte structured-payload
 limit or a refusal, never truncated instructions. This local read makes no
 backend request. Guidance does not authorise writes or replace validation.
-Lookup is optional when the caller already has the relevant versioned guidance.
+Reuse relevant guidance already supplied in context; request only missing sections.
 
 | Parameter | Type | Required | Default |
 |---|---|---|---|
@@ -537,6 +537,7 @@ Get Model · **reads**
 Get a model's metadata and configuration echo — works for EVERY status,
 including failed models (unlike get_model_results, which needs 'complete').
 
+This is not a preflight check for reading an existing model result.
 Use this to inspect what a model was configured with, why it failed, or
 where it lives. Returns: id, model_hash, name, status, model_type
 ("mmm"/"var"), hierarchy_value, periodicity, is_saved, project_id/name,
@@ -629,8 +630,9 @@ List all Marketing Mix Models for the authenticated user.
 Returns model name, hash, status (pending/under way/complete/failed),
 type (mmm/var), hierarchy value, and timestamps.
 
-NOTE: All other model endpoints use model_hash (string, e.g. "f835671a25")
-as the identifier. Use the model_hash from this response.
+Use this when the model identifier is unknown or the user asks to browse models.
+If a model_hash is already supplied, use it directly with the relevant model
+tool; listing is not a prerequisite. Model endpoints use model_hash, not numeric id.
 
 Args:
     include_unsaved: Include draft/unsaved models (default false).
@@ -773,16 +775,24 @@ Returns: {model_hash, is_saved: false, freed_project_id}.
 
 Get Model Results · **writes**
 
-Read selected results from a completed model. Request sections as a comma-separated
+Read selected results from a completed model.
+Use a supplied model_hash directly; call list_models only to find an unknown
+identifier. No get_model preflight is required for a result read.
+Request sections as a comma-separated
 string; use channels, max_grid_points and max_response_bytes to bound output.
 The byte cap is checked after backend download, not a transport download limit.
 Existing-result questions need no mandatory capability/schema discovery. A missing
 artifact is unavailable evidence, not zero or a passing diagnostic.
 
-Start with channel_summary or channel_map: result keys are exact, case-sensitive
-ACTIVITY-COLUMN names, not channels[].name. Use these keys in optimiser/scenario
-inputs. contributions is KPI units; coefficients is per-period revenue space;
-channel_summary provides aggregated revenue/spend/ROI. Never equate largest
+When relating a user-facing channel name to a result or activity key,
+retrieve channel_map and use its explicit mapping; do not infer identity from spelling.
+Reuse a sufficient channel_map already returned for the same model. Otherwise
+request channel_map, channel_summary and the needed sections together; sections
+accepts a comma-separated list. A mapped display name and its activity-column
+key are both valid in narrative answers once that map is in evidence. Result keys used in
+optimiser/scenario inputs are exact, case-sensitive ACTIVITY-COLUMN names, not
+channels[].name. contributions is KPI units; coefficients is per-period revenue
+space; channel_summary provides aggregated revenue/spend/ROI. Never equate largest
 contribution with highest ROI. posterior and posterior_transforms use 94% HDIs
 (hdi_3%/hdi_97%); actual_vs_model has its own 50%/95% bands. model_stats gives fit
 diagnostics; r_hat covers all posterior variables, including transforms. Interpret
