@@ -11,9 +11,9 @@ Example with a synthetic model you can access:
 {"model_hash":"YOUR_SYNTHETIC_MODEL_HASH","budget":10000,"hurdle":1.0,"limit":5}
 ```
 
-The tool needs `read:results`. Optional recorded-test history also needs
-`read:models`. A results-only key receives `history_unavailable` rather than
-information about tests outside its scope.
+The tool needs `read:results`. Test history is explicitly unavailable: registry
+records do not establish compatible model and geographical coverage. No registry
+information is disclosed or inferred.
 
 ## Meaning of the score
 
@@ -62,12 +62,13 @@ Native scalar coefficient contraction is `1 - posterior variance / prior varianc
 when an exact parameter match and supported prior distribution exist. Half-normal
 and truncated-normal scales are converted to actual variance. Unsupported priors,
 time-varying coefficients and unmatched names yield `prior_unavailable`. Contraction
-and completed-test recency only break ties, never multiply the score.
+only breaks ties, never multiplies the score. Recency is unavailable in this
+version, so it does not alter the ranking.
 
 Results describe one model. A recorded hierarchy identity can be a brand rather
 than a geographical market, so the tool does not infer geographical coverage or
-pool independent market fits. Registry history is unknown when its scope cannot
-be matched. `design_hint.available` is false because valid experiment design
+pool independent market fits. Registry history is unknown because its scope cannot
+be established. `design_hint.available` is false because valid experiment design
 requires additional inputs; no minimum detectable effect is invented.
 
 ## Architecture
