@@ -300,6 +300,25 @@ CONTRACT = {
         "test_id": "get_incrementality_test.test_id",
         "version": "get_incrementality_test.version",
     },
+    "POST /api/v1/models/{hash}/test-designs": {
+        "model_hash": "design_incrementality_test.model_hash",
+        "submission_key": "design_incrementality_test.submission_key",
+        "channel": "design_incrementality_test.channel",
+        "design_type": "design_incrementality_test.design_type",
+        "intervention": "design_incrementality_test.intervention",
+        "inference": "design_incrementality_test.inference",
+        "geo": "design_incrementality_test.geo",
+    },
+    "GET /api/v1/models/{hash}/test-designs/{calculation_id}": {
+        "model_hash": "get_incrementality_test_design.model_hash",
+        "calculation_id": "get_incrementality_test_design.calculation_id",
+    },
+    "POST /api/v1/models/{hash}/test-designs/{calculation_id}/save": {
+        "model_hash": "save_incrementality_test_design.model_hash",
+        "calculation_id": "save_incrementality_test_design.calculation_id",
+        "project_id": "save_incrementality_test_design.project_id",
+        "name": "save_incrementality_test_design.name",
+    },
     "GET /api/v1/incrementality-tests/{id}/calibration": {
         "test_id": "get_incrementality_test.test_id",
         "model_hash": "get_incrementality_test.model_hash",
@@ -345,6 +364,14 @@ EXCLUDED_BY_DESIGN = {
     "POST /api/v1/incrementality-tests/preview": "The web wizard's preview for an "
     "unsaved model; agents derive through get_incrementality_test(model_hash=...) "
     "or create_model(calibration=...).",
+    "POST /api/v1/models/{hash}/test-designs/{calculation_id}/cancel": "An unpolled "
+    "test-design calculation completes on its own and saves nothing, so an agent has "
+    "no reason to cancel it; cancellation serves the web dialog. Study runs expose "
+    "cancel because a run holds a fit slot; this calculation does not.",
+    "GET /api/v1/models/{hash}/test-designs": "Not exposed in this version: the agent "
+    "holds the calculation_id it submitted and reads it with "
+    "get_incrementality_test_design; recovery after a lost response reuses the "
+    "submission_key.",
 }
 
 

@@ -35,6 +35,7 @@ EVIDENCE = frozenset(
         "list_incrementality_tests",
         "recommend_incrementality_tests",
         "get_incrementality_test",
+        "get_incrementality_test_design",
         "list_campaigns",
         "get_campaign_report",
         "get_campaign_incrementality",
@@ -56,6 +57,8 @@ PROFILES = {
             "set_run_pinned",
             "create_incrementality_test",
             "import_incrementality_tests",
+            "design_incrementality_test",
+            "save_incrementality_test_design",
             "set_campaign_mapping",
         ]
     ),

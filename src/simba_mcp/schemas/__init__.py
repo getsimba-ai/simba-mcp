@@ -412,10 +412,17 @@ IncrementalityTestRecord = Annotated[
                 "YYYY-MM-DD; measured_through is the end of the carryover window (default "
                 "end_date). result.lift_abs is the total lift in KPI units over the window; give "
                 "its interval (two-sided, level e.g. 0.9) and/or sd. Null and negative lifts are "
-                "valid. spend.incremental is the extra spend the test caused (signed)."
+                "valid. spend.incremental is the extra spend the test caused (signed). The "
+                "time_holdout type and block appear on records the server builds from a "
+                "test-design calculation (save_incrementality_test_design); they are read and "
+                "listed here but not accepted on create or import, and a status planned record "
+                "carries no result."
             ),
             "properties": {
-                "type": {"type": "string", "enum": ["geo", "owned_media_ab", "platform_lift"]},
+                "type": {
+                    "type": "string",
+                    "enum": ["geo", "owned_media_ab", "platform_lift", "time_holdout"],
+                },
                 "name": {"type": "string", "maxLength": 200},
                 "status": {
                     "type": "string",
@@ -510,6 +517,18 @@ IncrementalityTestRecord = Annotated[
                         "lift_metric": {"type": "string", "enum": ["conversions", "revenue"]},
                     },
                     "required": ["platform"],
+                },
+                "time_holdout": {
+                    "type": "object",
+                    "description": (
+                        "Server-built from a test design: the outcome in the holdout window is "
+                        "contrasted with the model's forecast."
+                    ),
+                    "properties": {
+                        "counterfactual": {"type": "string", "enum": ["model_forecast"]},
+                        "analysis_method": {"type": "string"},
+                        "carryover_periods": {"type": "integer", "minimum": 0},
+                    },
                 },
             },
             "required": ["type", "name", "status", "channel", "kpi", "start_date", "end_date"],

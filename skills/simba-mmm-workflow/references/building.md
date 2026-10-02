@@ -43,6 +43,18 @@
   fails the call with `calibration_refused` and a reason per test; nothing is
   created. New results: `create_incrementality_test`, or
   `import_incrementality_tests` (dry run first, then `dry_run=false`).
+- **Design a test before running one.** On a saved, complete model,
+  `design_incrementality_test(model_hash, submission_key, channel, design_type,
+  intervention)` queues a calculation and returns a `calculation_id`; poll
+  `get_incrementality_test_design` until `status` is `complete`, `failed` or
+  `cancelled`. Read the result by its own `state`: `available` carries the
+  detectable effect, the model-implied effect and posterior-averaged power per
+  candidate duration; `unsupported`, `insufficient_evidence` and
+  `no_feasible_design` are answers with `reasons`, not errors. Power assumes the
+  model is correctly specified; it is not the chance this experiment detects the
+  effect. `save_incrementality_test_design` records an available design as a
+  `planned` test (no measured lift, so it cannot calibrate a model); nothing here
+  launches an experiment or changes a budget.
 
 ## 3. Poll
 
