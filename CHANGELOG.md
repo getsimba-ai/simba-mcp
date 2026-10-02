@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## Unreleased
 
+### Added
+- Opt-in evaluation grader 19 supports explicit calendar-month evidence contracts, complete native-row or exact monthly-summary alternatives, contribution atoms and persistent contradiction rejection. Historical grader 17/18 contracts and frozen reports remain unchanged.
+- Evaluation harness for selective result tasks: shared session deadlines, result grading, and an xAI host adapter. Frozen task modules remain reproducible definitions for old experiments. They are not release acceptance, and this change does not alter server transport, profiles or defaults.
+
 ## 0.16.0 (2026-10-02)
 
 ### Added

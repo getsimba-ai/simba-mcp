@@ -123,12 +123,197 @@ def test_budget_carries_prior_and_unknown_usage():
     assert budget.reserved == reserved
 
 
+def test_sonnet_pricing_and_model_bound_reservation():
+    from simba_mcp.evaluation.hosts.anthropic import MODEL, SONNET, model_configuration
+
+    request = model_configuration(SONNET)["request"]
+    assert "temperature" not in request
+    budget = Budget(3, model=SONNET)
+    reserved = budget.reserve(request)
+    cost = budget.settle(
+        {
+            "input_tokens": 1000,
+            "output_tokens": 2000,
+            "cache_read_input_tokens": 100,
+            "cache_creation_input_tokens": 100,
+        },
+        reserved,
+    )
+    assert cost == pytest.approx(0.02242)
+    assert budget.reserved == 0
+    with pytest.raises(ValueError, match="pricing"):
+        budget.reserve({**request, "model": MODEL})
+    with pytest.raises(RuntimeError, match="exhausted"):
+        Budget(25.382478, prior=25.372478, model=SONNET).reserve(request)
+    with pytest.raises(ValueError, match="Unsupported"):
+        Budget(3, model="unknown")
+
+
+@pytest.mark.anyio
+@pytest.mark.parametrize("controls,case_id", [(False, None), (True, None), (False, "acceptance_h")])
+async def test_single_arm_model_diagnostic_freezes_ten_reused_cases(
+    tmp_path, monkeypatch, controls, case_id
+):
+    from simba_mcp.evaluation.hosts import __main__ as command
+    from simba_mcp.evaluation.hosts.anthropic import SONNET
+    from simba_mcp.guidance import read_guidance
+
+    requests = []
+
+    def respond(request):
+        requests.append(json.loads(request.content))
+        return httpx.Response(
+            200,
+            json={
+                "usage": {"input_tokens": 20, "output_tokens": 10},
+                "content": [{"type": "text", "text": "{}"}],
+                "stop_reason": "end_turn",
+            },
+        )
+
+    monkeypatch.setattr(
+        command, "client", lambda _: httpx.AsyncClient(transport=httpx.MockTransport(respond))
+    )
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "synthetic-key")
+    output = tmp_path / "diagnostic.json"
+    baseline = tmp_path / "baseline.json"
+    baseline.write_text(
+        json.dumps(
+            {
+                s: read_guidance("results", s)
+                for s in ("entrypoint", "interpretation", "tool-reference")
+            }
+        )
+    )
+    await command.run(
+        SimpleNamespace(
+            output=output,
+            cap_usd=3,
+            prior_usd=0,
+            samples=2,
+            mode="eager",
+            case=case_id,
+            results_robust=True,
+            results_model_diagnostic=True,
+            model=SONNET,
+            results_baseline=baseline if controls else None,
+        )
+    )
+    report = json.loads(output.read_text())
+    assert report["status"] == "complete"
+    count = 2 if case_id else 14 if controls else 10
+    assert len(report["trials"]) == len(requests) == count
+    assert {r["case"] for r in report["trials"]} == (
+        {case_id}
+        if case_id
+        else {
+            "acceptance_a",
+            "acceptance_d",
+            "acceptance_e",
+            "acceptance_f",
+            "acceptance_h",
+        }
+    )
+    assert sum(r["view"] == "candidate" for r in report["trials"]) == (2 if case_id else 10)
+    assert {r["case"] for r in report["trials"] if r["view"] == "baseline"} == (
+        {"acceptance_a", "acceptance_e"} if controls else set()
+    )
+    if controls:
+        for rep in (0, 1):
+            arms = [
+                r["view"]
+                for r in report["trials"]
+                if r["case"] == "acceptance_a" and r["repetition"] == rep
+            ]
+            assert arms == (["baseline", "candidate"] if rep == 0 else ["candidate", "baseline"])
+    assert all(r["thinking"] == {"type": "adaptive"} and "temperature" not in r for r in requests)
+    assert report["experiment_inputs"]["purpose"] == "model_selection_validation"
+    assert not report["assessment"]["accepted"]
+    assert report["budget"]["charged"] == pytest.approx(count * 0.00014)
+
+
 def test_format_failure_is_separate_from_correct_facts():
     assert answer('Here it is: ```json\n{"status":"pending"}\n```') == (
         {"status": "pending"},
         False,
     )
     assert answer('{"status":"pending"}') == ({"status": "pending"}, True)
+
+
+@pytest.mark.anyio
+@pytest.mark.parametrize("selection_validation", [False, True])
+@pytest.mark.parametrize("packet", ["fresh", "v2", "v3"])
+@pytest.mark.parametrize("order_seed", [None, 20260929])
+async def test_fresh_packet_runs_only_frozen_paired_fresh_cases(
+    tmp_path, monkeypatch, selection_validation, packet, order_seed
+):
+    from simba_mcp.evaluation.hosts import __main__ as command
+    from simba_mcp.evaluation.result_acceptance_fresh import fresh_acceptance_tasks
+    from simba_mcp.evaluation.result_acceptance_v2 import acceptance_v2_tasks
+    from simba_mcp.evaluation.result_acceptance_v3 import acceptance_v3_tasks
+    from simba_mcp.guidance import read_guidance
+
+    async def fake_session(*args, **kwargs):
+        return {"final_text": "{}", "cost_usd": 0, "calls": [], "stop": "end_turn"}
+
+    monkeypatch.setattr(command, "session", fake_session)
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "synthetic-key")
+    baseline = tmp_path / "baseline.json"
+    baseline.write_text(
+        json.dumps(
+            {
+                s: read_guidance("results", s)
+                for s in ("entrypoint", "interpretation", "tool-reference")
+            }
+        )
+    )
+    output = tmp_path / "fresh.json"
+    await command.run(
+        SimpleNamespace(
+            output=output,
+            cap_usd=0,
+            prior_usd=0,
+            samples=2,
+            mode="eager",
+            case=None,
+            results_robust=True,
+            results_acceptance=True,
+            results_acceptance_packet=packet,
+            results_selection_validation=selection_validation,
+            results_baseline=baseline,
+            case_review={"verified": True, "guidance_unchanged": True},
+            case_order_seed=order_seed,
+        )
+    )
+    report = json.loads(output.read_text())
+    tasks = {"fresh": fresh_acceptance_tasks, "v2": acceptance_v2_tasks, "v3": acceptance_v3_tasks}[
+        packet
+    ]()
+    assert len(report["trials"]) == 4 * len(tasks)
+    assert {r["case"] for r in report["trials"]} == {t.id for t in tasks}
+    assert report["configuration"]["results_acceptance_packet"] == packet
+    assert report["experiment_inputs"]["purpose"] == (
+        "model_selection_validation" if selection_validation else "candidate_acceptance"
+    )
+    assert not report["assessment"]["accepted"]
+    if order_seed is not None:
+        import random
+
+        rng = random.Random(order_seed)
+        expected_order = []
+        for rep in range(2):
+            case_ids = [t.id for t in tasks]
+            rng.shuffle(case_ids)
+            expected_order.append(case_ids)
+            actual = [r for r in report["trials"] if r["repetition"] == rep]
+            assert [r["case"] for r in actual[::2]] == case_ids
+            assert [r["view"] for r in actual[:2]] == (
+                ["baseline", "candidate"] if rep == 0 else ["candidate", "baseline"]
+            )
+        assert report["configuration"]["case_order"] == expected_order
+        assert expected_order[0] != [t.id for t in tasks]
+    else:
+        assert "case_order" not in report["configuration"]
 
 
 @pytest.mark.anyio
