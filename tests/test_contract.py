@@ -20,6 +20,22 @@ from simba_mcp import server
 
 # endpoint -> {api_request_param: "tool_name.tool_param"}
 CONTRACT = {
+    "GET /api/v1/models/{model_hash}/results (native curves)": {
+        "model_hash": "show_response_curves.model_hash"
+    },
+    "GET /api/v1/models/{model_hash}/results (native decomposition)": {
+        "model_hash": "show_decomposition.model_hash"
+    },
+    "GET /api/v1/models/{model_hash}/optimizer (native allocation)": {
+        "model_hash": "show_optimizer_allocation.model_hash",
+        "run_id": "show_optimizer_allocation.run_id",
+    },
+    "GET /api/v1/models/{hash}/test-priorities": {
+        "model_hash": "recommend_incrementality_tests.model_hash",
+        "budget": "recommend_incrementality_tests.budget",
+        "hurdle": "recommend_incrementality_tests.hurdle",
+        "limit": "recommend_incrementality_tests.limit",
+    },
     "POST /api/v1/ingest": {
         "name": "upload_data.name",
         "filename": "upload_data.filename",
@@ -212,6 +228,54 @@ CONTRACT = {
         "weekday": "set_pipeline_schedule.weekday",
         "enabled": "set_pipeline_schedule.enabled",
     },
+    "GET /api/v1/campaigns": {
+        "model": "list_campaigns.model_hash",
+        "platform": "list_campaigns.platform",
+        "unmapped_only": "list_campaigns.unmapped_only",
+        "start": "list_campaigns.start",
+        "end": "list_campaigns.end",
+        "limit": "list_campaigns.limit",
+        "cursor": "list_campaigns.cursor",
+    },
+    "GET /api/v1/campaigns/report": {
+        "model": "get_campaign_report.model_hash",
+        "start": "get_campaign_report.start",
+        "end": "get_campaign_report.end",
+        "granularity": "get_campaign_report.granularity",
+        "group_by": "get_campaign_report.group_by",
+        "platform": "get_campaign_report.platform",
+        "channel": "get_campaign_report.channel",
+        "campaign_id": "get_campaign_report.campaign_id",
+        "metrics": "get_campaign_report.metrics",
+    },
+    "GET /api/v1/campaigns/incrementality": {
+        "model": "get_campaign_incrementality.model_hash",
+        "start": "get_campaign_incrementality.start",
+        "end": "get_campaign_incrementality.end",
+        "level": "get_campaign_incrementality.level",
+    },
+    "GET /api/v1/campaigns/marginal": {
+        "model": "get_campaign_marginal_returns.model_hash",
+        "start": "get_campaign_marginal_returns.start",
+        "end": "get_campaign_marginal_returns.end",
+        "level": "get_campaign_marginal_returns.level",
+    },
+    "POST /api/v1/campaigns/daily-budgets": {
+        "model": "recommend_campaign_budgets.model_hash",
+        "observation_window": "recommend_campaign_budgets.observation_window",
+        "currency": "recommend_campaign_budgets.currency",
+        "channel_daily_budgets": "recommend_campaign_budgets.channel_daily_budgets",
+        "optimizer_run_id": "recommend_campaign_budgets.optimizer_run_id",
+        "level": "recommend_campaign_budgets.level",
+        "max_step_fraction": "recommend_campaign_budgets.max_step_fraction",
+        "bounds": "recommend_campaign_budgets.bounds",
+        "expected_context_key": "recommend_campaign_budgets.expected_context_key",
+    },
+    "PUT /api/v1/campaigns/map": {
+        "model": "set_campaign_mapping.model_hash",
+        "rows": "set_campaign_mapping.rows",
+        "tolerance": "set_campaign_mapping.tolerance",
+    },
     "GET /api/v1/projects/{id}/incrementality-tests": {
         "project_id": "list_incrementality_tests.project_id",
         "type": "list_incrementality_tests.type",
@@ -247,6 +311,12 @@ CONTRACT = {
 
 # api_param -> reason it is intentionally unreachable via MCP
 EXCLUDED_BY_DESIGN = {
+    "PUT /api/v1/campaigns/source": "Registering a pipeline as the campaign facts source binds "
+    "data whose credentials the agent cannot see; a human registers it in the app.",
+    "DELETE /api/v1/campaigns/source/{pipeline}": "See PUT /api/v1/campaigns/source.",
+    "GET /api/v1/campaigns/source": "See PUT /api/v1/campaigns/source.",
+    "GET /api/v1/campaigns/map": "set_campaign_mapping returns the same report, and "
+    "list_campaigns carries each campaign's channel and suggestion.",
     "POST /api/v1/keys": "API-key management is session-auth only; an MCP tool "
     "holding one key must not mint or revoke keys.",
     "GET /api/v1/keys": "See POST /api/v1/keys.",
