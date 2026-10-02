@@ -121,8 +121,8 @@ async def get_model_results(
       Base, Seasonality, Event Effect, Model, Fit Actual, Actual). Values are in
       KPI/unit space — the multiplier is NOT applied. Use `coefficients` for
       per-period revenue. Multiplicative (link="log") models fitted with the
-      removal_lift attribution convention add an `Overlap` column: a negative
-      shared-synergy reconciliation term so that
+      removal_lift attribution convention add an `Overlap` column: a balancing
+      residual, which can have either sign when effects are signed, so that
       Base + components + Overlap = Model. Overlap is NOT a channel — never
       rank it, share it, or feed it to the optimizer/scenarios. Overlap
       requires BOTH link="log" AND attribution="removal_lift" (the API
@@ -159,9 +159,9 @@ async def get_model_results(
       array. Channels with no active periods omit the spendweighted fields.
       Post-#629 fits also carry a *_mean beside every *_median (mroi_mean,
       mroi_profit_mean, pv_kernel_mass_mean, and the convention variants).
-      The median is what the product displays; the mean is the statistic that
-      reconciles with the marginal-revenue curve, since derivative and mean
-      commute and median does not. Absent on anything fitted before #629 —
+      Preserve the requested mean or median explicitly; they are not interchangeable.
+      The mean reconciles with the marginal-revenue curve, since derivative and
+      mean commute and median does not. Absent on anything fitted before #629 —
       there is no backfill, so feature-detect rather than assume.
     - mroi_periods: OPT-IN ONLY (#591) — never in the default payload;
       request it by name in `sections`. Per-period marginal ROI series:
