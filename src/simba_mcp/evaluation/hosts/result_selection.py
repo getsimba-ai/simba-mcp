@@ -47,6 +47,31 @@ def _row_matches(actual, expected):
     )
 
 
+def _summary_from_one_window(summary_rows, expected, task, expected_context, primary):
+    """Credit one dated read when the task declares no window.
+
+    The question may name dates. Those rows count only if that single window
+    contains every required summary row. Windows are not mixed.
+    """
+    wanted = expected
+    if task.channel:
+        wanted = [row for row in expected if row.get("Channel") == task.channel]
+
+    def covers(rows):
+        return (
+            bool(wanted)
+            and isinstance(rows, list)
+            and all(any(_row_matches(row, item) for row in rows) for item in wanted)
+        )
+
+    if covers(primary):
+        return primary
+    for context, rows in summary_rows.items():
+        if context != expected_context and covers(rows):
+            return rows
+    return primary
+
+
 @dataclass(frozen=True)
 class ResultTask:
     id: str
@@ -151,6 +176,23 @@ def result_tasks():
     ]
 
 
+def diagnostic_contrast_fixture():
+    """Public development fixture. A coefficient summary passes; a transform does not."""
+    payload = saved_results()
+    payload["results"]["r_hat"] = [
+        {"Parameter": "search_activity", "R_hat": 1.005},
+        {"Parameter": "search_activity_decay", "R_hat": 1.08},
+    ]
+    payload["results"]["posterior"] = [
+        {"variable": "search_activity", "mean": 0.4, "sd": 0.1, "r_hat": 1.005},
+    ]
+    payload["results"]["model_stats"] = [
+        {"Test Name": "Max R_hat", "Output": "1.08", "Status": "fail"},
+    ]
+    payload["sections_available"] = list(payload["results"])
+    return payload
+
+
 def development_tasks():
     """Public development cases, not hidden or independent acceptance evidence."""
     prefix = "The completed saved model is result-example. Revenue and spend are in GBP. Read existing evidence only. "
@@ -220,6 +262,24 @@ def development_tasks():
             {"available": False, "reason": "not_returned"},
             allow_prediction=True,
             family="result_prediction",
+        ),
+        ResultTask(
+            "result_diagnostic_contrast",
+            prefix
+            + "My screening rule is an R-hat of at most 1.01. Does every saved R-hat meet it? "
+            "Name any parameter that does not. Separately, would the posterior summary table, "
+            "which holds coefficient rows only, have given the same impression? Use JSON fields "
+            "passes_screen, parameter and summary_agrees. Do not describe a table you have not read.",
+            frozenset({"r_hat", "posterior"}),
+            {"passes_screen": False, "parameter": "search_activity_decay", "summary_agrees": False},
+            paraphrase=prefix
+            + "Check the stored R-hat values against a ceiling of 1.01 and identify any miss. "
+            "Then say whether the coefficient rows in the posterior summary would have looked "
+            "acceptable on their own. Use JSON fields passes_screen, parameter and summary_agrees.",
+            family="diagnostic_contrast",
+            channel="",
+            evidence_options=(frozenset({"r_hat", "posterior"}),),
+            fixture=diagnostic_contrast_fixture(),
         ),
     ]
 
@@ -327,6 +387,8 @@ class ResultSelectionDispatch:
         self.unauthorised_read_attempts = self.unauthorised_reads = 0
         self.recoverable_errors = 0
         self.result_rows = {"coefficients": [], "contributions": [], "channel_map": []}
+        if "actual_vs_model" in (task.section_windows or {}):
+            self.result_rows["actual_vs_model"] = []
         self.period_summary_rows = []
         self.monthly_period_rows = []
         self.monthly_evidence_conflicts = []
@@ -503,6 +565,19 @@ class ResultSelectionDispatch:
                     fixture=fixture,
                     **{**(self.task.evidence_window or {}), "granularity": bucket},
                 )["results"]["coefficients"]
+            aggregate_window = (self.task.section_windows or {}).get("actual_vs_model")
+            if (
+                aggregate_window
+                and "actual_vs_model" in oracle
+                and bucket in ("week", "month", "quarter")
+            ):
+                # Credit a bucket of the declared dates, never the caller's
+                # possibly larger window. Native rows use subset matching.
+                oracle["actual_vs_model"] = selected_payload(
+                    {"actual_vs_model"},
+                    fixture=fixture,
+                    **{**aggregate_window, "granularity": bucket},
+                )["results"]["actual_vs_model"]
             summary_context = tuple(
                 returned_window.get(key) or ("native" if key == "granularity" else None)
                 for key in ("start", "end", "granularity")
@@ -646,6 +721,14 @@ class ResultSelectionDispatch:
                             if context[:2] == expected_context[:2]
                             for row in rows
                         ]
+                    elif not self.task.evidence_window:
+                        actual = _summary_from_one_window(
+                            self.summary_rows,
+                            expected,
+                            self.task,
+                            expected_context,
+                            actual,
+                        )
                 if section in self.result_rows:
                     actual = self.result_rows[section]
                 if section == "coefficients" and self.task.channel:

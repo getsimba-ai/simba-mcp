@@ -52,7 +52,24 @@ def _filter_results(payload: dict, channels: list | None, max_grid_points: int |
     passed through untouched: its non-channel columns (controls, Base,
     Seasonality, ...) cannot be reliably told apart from unrequested channels.
     """
-    target = payload.get("results") if isinstance(payload.get("results"), dict) else payload
+    if "_mcp_selection" in payload:
+        return api_error(
+            502,
+            {
+                "error": (
+                    "Backend result uses reserved _mcp_selection metadata; "
+                    "request unfiltered results."
+                )
+            },
+        )
+    original = payload.get("results") if isinstance(payload.get("results"), dict) else payload
+    # Copy only containers we change; retained evidence and large arrays are not duplicated.
+    payload = dict(payload)
+    target = dict(original)
+    if isinstance(payload.get("results"), dict):
+        payload["results"] = target
+    else:
+        payload = target
     wanted = {_norm_channel(c) for c in channels} if channels else None
 
     for section in _CURVE_SECTIONS:
@@ -79,6 +96,8 @@ def _filter_results(payload: dict, channels: list | None, max_grid_points: int |
             if isinstance(sub, dict):
                 filtered = {k: v for k, v in sub.items() if _norm_channel(k) in wanted}
                 if section == "saturation":
+                    entry = dict(entry)
+                    target[section] = entry
                     entry["channels"] = filtered
                 else:
                     target[section] = filtered
@@ -88,17 +107,101 @@ def _filter_results(payload: dict, channels: list | None, max_grid_points: int |
                 target[section] = [r for r in recs if _norm_channel(r.get(key, "")) in wanted]
         mroi = target.get("mroi_summary")
         if isinstance(mroi, dict) and isinstance(mroi.get("channels"), list):
+            mroi = dict(mroi)
+            target["mroi_summary"] = mroi
             mroi["channels"] = [
                 r for r in mroi["channels"] if _norm_channel(r.get("channel", "")) in wanted
             ]
-        # Per-period series (#591): channels x periods rows — the largest
+        # Per-period series (#591): channels x periods rows. The largest
         # per-channel section, so the filter matters most here.
         periods = target.get("mroi_periods")
         if isinstance(periods, dict) and isinstance(periods.get("rows"), list):
+            periods = dict(periods)
+            target["mroi_periods"] = periods
             periods["rows"] = [
                 r for r in periods["rows"] if _norm_channel(r.get("channel", "")) in wanted
             ]
+    names = _filterable_channel_names(original)
+    aliases = {}
+    for name in sorted(names):
+        aliases.setdefault(_norm_channel(name), []).append(name)
+    ambiguous = {
+        key: values
+        for key, values in aliases.items()
+        if wanted and key in wanted and len(values) > 1
+    }
+    warnings = []
+    if max_grid_points is not None and max_grid_points < 2:
+        warnings.append(
+            "max_grid_points below 2 does not sample; first and last points are preserved."
+        )
+    if channels == []:
+        warnings.append("Empty channels retains all channels, matching existing behaviour.")
+    if ambiguous:
+        warnings.append(
+            "Ambiguous channel aliases retain all matching exact identifiers; do not combine them."
+        )
+    sections = {}
+    sampled = False
+    for section, before in original.items():
+        after = target[section]
+        detail = {"changed": before != after}
+        if isinstance(before, list) and isinstance(after, list):
+            detail.update(original_rows=len(before), returned_rows=len(after))
+            if section in _CURVE_SECTIONS and len(after) < len(before):
+                sampled = True
+                detail["sampling"] = "even_stride_including_endpoints"
+        sections[section] = detail
+    payload["_mcp_selection"] = {
+        "channels_requested": channels,
+        "max_grid_points_requested": max_grid_points,
+        "grid_sampling_applied": sampled,
+        "sections": sections,
+        "ambiguous_channel_aliases": ambiguous,
+        "unmatched_channel_aliases": sorted(wanted - aliases.keys()) if wanted else [],
+        "channel_match_scope": "filterable_sections_only",
+        "backend_download_bounded": False,
+        "warnings": warnings,
+    }
     return payload
+
+
+def _filterable_channel_names(target: dict) -> set[str]:
+    """Discover exact names only in the sections where local filtering is supported."""
+    names = set()
+    for section in _CURVE_SECTIONS:
+        rows = target.get(section)
+        if isinstance(rows, list):
+            for row in rows:
+                for name in row:
+                    if name == "Spend":
+                        continue
+                    for suffix in _BAND_SUFFIXES:
+                        if name.endswith(suffix):
+                            name = name[: -len(suffix)]
+                            break
+                    names.add(name)
+    for section, key in (("channel_summary", "Channel"), ("coefficients", "Channel")):
+        rows = target.get(section)
+        if isinstance(rows, list):
+            names.update(row[key] for row in rows if isinstance(row.get(key), str))
+    for section, key in (("mroi_summary", "channels"), ("mroi_periods", "rows")):
+        item = target.get(section)
+        if isinstance(item, dict) and isinstance(item.get(key), list):
+            # A display name and its activity column are one identifier here.
+            # Register the activity column when present so they are not a collision.
+            names.update(
+                row.get("activity_column") or row["channel"]
+                for row in item[key]
+                if isinstance(row.get("channel"), str)
+            )
+    decay = target.get("decay_curves")
+    if isinstance(decay, dict):
+        names.update(decay)
+    saturation = target.get("saturation")
+    if isinstance(saturation, dict) and isinstance(saturation.get("channels"), dict):
+        names.update(saturation["channels"])
+    return names
 
 
 async def get_model_results(
@@ -121,8 +224,8 @@ async def get_model_results(
       Base, Seasonality, Event Effect, Model, Fit Actual, Actual). Values are in
       KPI/unit space — the multiplier is NOT applied. Use `coefficients` for
       per-period revenue. Multiplicative (link="log") models fitted with the
-      removal_lift attribution convention add an `Overlap` column: a negative
-      shared-synergy reconciliation term so that
+      removal_lift attribution convention add an `Overlap` column: a balancing
+      residual, which can have either sign when effects are signed, so that
       Base + components + Overlap = Model. Overlap is NOT a channel — never
       rank it, share it, or feed it to the optimizer/scenarios. Overlap
       requires BOTH link="log" AND attribution="removal_lift" (the API
@@ -159,9 +262,9 @@ async def get_model_results(
       array. Channels with no active periods omit the spendweighted fields.
       Post-#629 fits also carry a *_mean beside every *_median (mroi_mean,
       mroi_profit_mean, pv_kernel_mass_mean, and the convention variants).
-      The median is what the product displays; the mean is the statistic that
-      reconciles with the marginal-revenue curve, since derivative and mean
-      commute and median does not. Absent on anything fitted before #629 —
+      Preserve the requested mean or median explicitly; they are not interchangeable.
+      The mean reconciles with the marginal-revenue curve, since derivative and
+      mean commute and median does not. Absent on anything fitted before #629 —
       there is no backfill, so feature-detect rather than assume.
     - mroi_periods: OPT-IN ONLY (#591) — never in the default payload;
       request it by name in `sections`. Per-period marginal ROI series:
@@ -261,6 +364,14 @@ async def get_model_results(
     CONTEXT-SIZE TIP: a full pull is very large (curve sections alone are 100
     grid points x channels x 5 band columns). In conversational use, request
     only the sections you need and pass channels=[...] and max_grid_points=20.
+
+    Explicit JSON channel or grid requests add `_mcp_selection` metadata describing
+    requested selection, changed sections, original and returned row counts and grid
+    sampling. Backend metadata and warnings remain unchanged. Alias collisions
+    retain every matching exact identifier and are disclosed; never combine them.
+    Unmatched aliases refer only to filterable sections. Empty channels and grid
+    limits below 2 retain existing no-op behaviour with a warning. Unfiltered and
+    CSV results are unchanged. Local filtering does not bound backend downloads.
 
     Args:
         model_hash: The model hash.
