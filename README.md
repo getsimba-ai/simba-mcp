@@ -84,6 +84,19 @@ response = client.beta.messages.create(
 )
 ```
 
+## Configuration
+
+Operator settings, defaults and the non-sensitive effective check are in
+[docs/configuration.md](docs/configuration.md). Inspect the current process without
+printing credentials:
+
+```bash
+python -m simba_mcp.configuration
+```
+
+A development `.env` configures only the process that loads it. It does not configure
+a remote server or every MCP host. This release does not add an application settings UI.
+
 ## Native result charts
 
 Three read-only [native chart tools](docs/native-charts.md) present response curves, decomposition and saved allocations through MCP Apps. Structured and text results remain available without visual support. The compatibility page distinguishes fixture tests from actual client acceptance.
