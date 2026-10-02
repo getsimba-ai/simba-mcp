@@ -34,6 +34,10 @@ opt out of (see `_create_app`).
 
 ## Running Tests
 
+For catalogue and synthetic request measurements, see
+[Measuring MCP performance](docs/performance.md). Metrics are opt-in and the
+offline commands require no Simba account or model-provider credentials.
+
 ```bash
 pytest -v
 ```
@@ -54,3 +58,26 @@ ruff check src/ tests/
 ## Code Style
 
 This project uses [Ruff](https://docs.astral.sh/ruff/) for linting, configured in `pyproject.toml` (Python 3.11+, 100-char line length). CI enforces this on every PR.
+
+
+### Module ownership and contract changes
+
+Every issue and PR must follow the [engineering objective](docs/engineering.md):
+record package ownership, reuse and dependency direction at pickup, and include an
+architecture note at review. For performance epic #38 this is a standing acceptance gate.
+
+Add plain async functions to a domain module in `src/simba_mcp/tools/`, export and
+register them in `server.py`, and explicitly classify their effects in
+`metadata.py`. Registration fails for an unclassified tool. Keep business rules
+and durable workflow state in the backend. Use permissive schema descriptions to
+preserve newer backend fields; do not copy backend validators into MCP.
+
+Update the input-schema snapshot only for intentional, documented contract
+changes. Test the actual MCP wire result as well as direct Python forwarding.
+Run `pytest`, `ruff check src/ tests/`, `ruff format --check src/ tests/`, and
+`uv build`. Verify the supported SDK floor separately when changing SDK-facing
+contracts. See [architecture](docs/architecture.md) for compatibility boundaries.
+
+Run `python -m simba_mcp.evaluation --samples 3 --output-dir .codex/evaluation`
+for deterministic workflow contracts. The [evaluation guide](docs/evaluation.md)
+describes synthetic cases, measurements and separate model-evaluation gates.
