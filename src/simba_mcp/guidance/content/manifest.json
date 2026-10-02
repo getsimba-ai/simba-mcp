@@ -1,0 +1,59 @@
+{
+  "version": "2",
+  "topics": {
+    "mmm": {
+      "skill": "simba-mmm-workflow",
+      "description": "Build a Simba MMM from uploaded or pipeline data. Use for data preparation, model creation and fit recovery; use results guidance for existing-model questions.",
+      "sections": {
+        "entrypoint": "simba-mmm-workflow/SKILL.md",
+        "building": "simba-mmm-workflow/references/building.md",
+        "priors": "simba-prior-conventions/references/conventions.md",
+        "tool-reference": "simba-mmm-workflow/references/tool-reference.md"
+      }
+    },
+    "results": {
+      "skill": "simba-results-analysis",
+      "description": "Read and interpret existing Simba MMM results, channel contribution, ROI, uncertainty and diagnostics. Use for results questions without loading model-building instructions.",
+      "sections": {
+        "entrypoint": "simba-results-analysis/SKILL.md",
+        "interpretation": "simba-results-analysis/references/interpretation.md",
+        "tool-reference": "simba-results-analysis/references/tool-reference.md"
+      }
+    },
+    "priors": {
+      "skill": "simba-prior-conventions",
+      "description": "Construct Simba media or control prior overrides. Use before changing carryover, saturation anchors, effect-at-average coordinates or explicit control transforms.",
+      "sections": {
+        "entrypoint": "simba-prior-conventions/SKILL.md",
+        "conventions": "simba-prior-conventions/references/conventions.md"
+      }
+    },
+    "optimiser": {
+      "skill": "simba-optimizer-runs",
+      "description": "Set up Simba budget optimisation and inspect saved optimiser or scenario runs. Use for channel bounds, laydown, margins and decision-versus-comparison interpretation.",
+      "sections": {
+        "entrypoint": "simba-optimizer-runs/SKILL.md",
+        "runs": "simba-optimizer-runs/references/runs.md",
+        "tool-reference": "simba-optimizer-runs/references/tool-reference.md"
+      }
+    },
+    "studies": {
+      "skill": "simba-studies-workflow",
+      "description": "Author, edit and review Simba Studies, recipes, policies and runs. Use for immutable publication, launch recovery, diagnostics and human handoff.",
+      "sections": {
+        "entrypoint": "simba-studies-workflow/SKILL.md",
+        "authoring": "simba-studies-workflow/references/authoring.md",
+        "recovery": "simba-studies-workflow/references/recovery.md",
+        "review": "simba-studies-workflow/references/review.md"
+      }
+    },
+    "var": {
+      "skill": "simba-var-workflow",
+      "description": "Build and inspect Simba VAR models and linked long-run MMM results. Use for long-term effects, VAR fit recovery and long-run rollup interpretation.",
+      "sections": {
+        "entrypoint": "simba-var-workflow/SKILL.md",
+        "workflow": "simba-var-workflow/references/workflow.md"
+      }
+    }
+  }
+}

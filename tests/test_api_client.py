@@ -308,7 +308,10 @@ class TestAPIClientErrorHandling:
         client, _ = client_with_error
         result = await client.create_model({"data_source": {"uploaded_file_id": 1}})
         assert result["_help"] == AUTH_HELP
-        assert "calendly.com" in result["_help"]
+        # Self-serve first (#938): the sign-up link comes before the demo link.
+        assert result["_help"].index("demo.simba-mmm.com/users/signup") < result["_help"].index(
+            "calendly.com"
+        )
 
     @pytest.mark.anyio
     async def test_401_includes_help(self):
@@ -337,7 +340,10 @@ class TestAPIClientErrorHandling:
         assert result["_status_code"] == 401
         assert "SIMBA_API_KEY is not set" in result["error"]
         assert result["_help"] == AUTH_HELP
-        assert "calendly.com" in result["_help"]
+        # Self-serve first (#938): the sign-up link comes before the demo link.
+        assert result["_help"].index("demo.simba-mmm.com/users/signup") < result["_help"].index(
+            "calendly.com"
+        )
 
 
 class TestAPIClientRetry:
@@ -352,6 +358,38 @@ class TestAPIClientRetry:
             transport=transport,
         )
         return api_client
+
+    @pytest.mark.anyio
+    @pytest.mark.parametrize("method, expected_calls", [("POST", 1), ("PATCH", 1), ("GET", 2)])
+    async def test_workflow_writes_are_not_automatically_repeated(self, method, expected_calls):
+        calls = []
+
+        async def respond(request):
+            calls.append(request)
+            return httpx.Response(502 if len(calls) == 1 else 200, json={"ok": len(calls) > 1})
+
+        client = self._make_client(httpx.MockTransport(respond))
+        with patch("asyncio.sleep", new_callable=AsyncMock):
+            await client.workflow_request(
+                method, "/studies/example", {"version": 1} if method != "GET" else None
+            )
+        assert len(calls) == expected_calls
+        await client.close()
+
+    @pytest.mark.anyio
+    async def test_workflow_launch_preserves_policy_and_retry_key(self, client_with_mock):
+        import json
+
+        client, requests = client_with_mock
+        payload = {
+            "revision_id": "revision",
+            "policy_id": "policy",
+            "submission_key": "same-attempt",
+        }
+        await client.workflow_request("POST", "/studies/study/runs", payload)
+        assert requests[0]["url"] == "http://test-simba:5005/api/v1/studies/study/runs"
+        assert json.loads(requests[0]["body"]) == payload
+        assert requests[0]["headers"]["authorization"] == "Bearer simba_sk_testkey123"
 
     @pytest.mark.anyio
     async def test_retries_on_server_error_then_succeeds(self):
@@ -443,7 +481,8 @@ class TestAPIClientRetry:
             result = await client.get_schema()
         assert result["_status_code"] == 503
         assert "unreachable" in result["error"]
-        assert "connection refused" in result["error"]
+        assert "connection refused" not in result["error"]
+        assert result["_error_code"] == "backend_unavailable"
 
     @pytest.mark.anyio
     async def test_non_retriable_status_not_retried(self):
