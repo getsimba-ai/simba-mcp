@@ -18,7 +18,7 @@ Replace these placeholders with authorised identifiers returned by `list_models`
 
 The view uses only returned values. Missing observations remain gaps. Legacy response grids with fewer than three finite points are disclosed rather than repaired or interpolated. Exact-value tables expose the supplied numbers. A current-spend marker is not an allocation recommendation. Response-curve reference levels and headline mROI can differ, so the view does not substitute one for the other.
 
-Decomposition values are KPI units, not revenue. `Overlap` is a reconciliation term, not a channel. Allocation `Revenue` and `ROI` are decision quantities; `OptimizedEvalRevenue`, `OptimizedEvalROI`, `HistoricalRevenue` and `HistoricalROI` are accounting comparison quantities. These are presented in separate tables without computing uplift.
+Decomposition values are KPI units, not revenue. `Overlap` is a reconciliation term, not a channel. Allocation `Revenue` and `ROI` are decision quantities; `OptimizedEvalRevenue`, `OptimizedEvalROI`, `HistoricalRevenue` and `HistoricalROI` are accounting comparison quantities. These are presented in separate tables without computing uplift. `HistoricalSpend` is the historical channel mix scaled to the saved budget, not actual observed spend.
 
 ## Compatibility and security
 
