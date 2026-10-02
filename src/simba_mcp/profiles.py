@@ -9,6 +9,10 @@ EVIDENCE = frozenset(
         "show_optimizer_allocation",
         "get_workflow_guidance",
         "get_backend_capabilities",
+        "get_data_schema",
+        "get_data_report",
+        "list_uploads",
+        "get_upload",
         "list_projects",
         "list_models",
         "get_model",
@@ -65,8 +69,6 @@ PROFILES = {
     "reviewer": EVIDENCE
     | frozenset(
         [
-            "get_data_schema",
-            "get_data_report",
             "get_recipe_revision_authoring",
             "evaluate_study_run",
             "assess_study_validation_pair",

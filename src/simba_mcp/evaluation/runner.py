@@ -172,3 +172,46 @@ async def evaluate(samples: int = 3, description_mode: str = "legacy") -> dict:
         "model_evaluation": "not_run",
         "performance_budgets": "pending_approval",
     }
+
+
+async def evaluate_roles(description_mode: str = "compact") -> dict:
+    """Current deterministic role jobs; frozen provider cohorts are not modified."""
+    from ..guidance import MANIFEST
+    from ..profiles import PROFILES
+    from .role_workflows import role_workflows
+
+    workflows = role_workflows()
+    trials = []
+    for workflow in workflows:
+        for role in workflow.roles:
+            trial = await run_case(
+                workflow.case,
+                mcp_server=server.create_server(description_mode, profile=role),
+            )
+            trials.append({"profile": role, **trial.model_dump()})
+    catalogue = await server.create_server(description_mode).list_tools()
+    return {
+        "schema_version": 1,
+        "execution_mode": "scripted_mock",
+        "workflow_version": 1,
+        "guidance_version": MANIFEST["version"],
+        "profile_counts": {
+            "full": len(catalogue),
+            "data_scientist": len(catalogue),
+            **{role: len(names) for role, names in PROFILES.items()},
+        },
+        "description_mode": description_mode,
+        "fixture_sha256": hashlib.sha256(
+            compact([workflow.case.model_dump() for workflow in workflows]).encode()
+        ).hexdigest(),
+        "catalogue_sha256": hashlib.sha256(
+            compact([tool.model_dump(mode="json") for tool in catalogue]).encode()
+        ).hexdigest(),
+        "provenance": provenance(),
+        "passed": all(trial["passed"] for trial in trials),
+        "trials": trials,
+        "model_assisted": "NOT RUN: owned by issue #40; method and budget required",
+        "named_clients": "NOT RUN: maintainer must declare supported release scope",
+        "deployment": "NOT RUN: source/package candidate is separate from hosting",
+        "historical_provider_reports": "unchanged; frozen 81/37/38 catalogue only",
+    }

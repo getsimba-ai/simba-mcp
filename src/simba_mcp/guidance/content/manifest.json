@@ -1,5 +1,5 @@
 {
-  "version": "2",
+  "version": "22",
   "topics": {
     "mmm": {
       "skill": "simba-mmm-workflow",
@@ -8,7 +8,8 @@
         "entrypoint": "simba-mmm-workflow/SKILL.md",
         "building": "simba-mmm-workflow/references/building.md",
         "priors": "simba-prior-conventions/references/conventions.md",
-        "tool-reference": "simba-mmm-workflow/references/tool-reference.md"
+        "tool-reference": "simba-mmm-workflow/references/tool-reference.md",
+        "building-examples": "simba-mmm-workflow/references/building-examples.md"
       }
     },
     "results": {
@@ -17,7 +18,9 @@
       "sections": {
         "entrypoint": "simba-results-analysis/SKILL.md",
         "interpretation": "simba-results-analysis/references/interpretation.md",
-        "tool-reference": "simba-results-analysis/references/tool-reference.md"
+        "tool-reference": "simba-results-analysis/references/tool-reference.md",
+        "visuals": "simba-results-analysis/references/visuals.md",
+        "visuals-examples": "simba-results-analysis/references/visuals-examples.md"
       }
     },
     "priors": {
@@ -34,7 +37,9 @@
       "sections": {
         "entrypoint": "simba-optimizer-runs/SKILL.md",
         "runs": "simba-optimizer-runs/references/runs.md",
-        "tool-reference": "simba-optimizer-runs/references/tool-reference.md"
+        "tool-reference": "simba-optimizer-runs/references/tool-reference.md",
+        "saved": "simba-optimizer-runs/references/saved.md",
+        "saved-examples": "simba-optimizer-runs/references/saved-examples.md"
       }
     },
     "studies": {
@@ -44,7 +49,8 @@
         "entrypoint": "simba-studies-workflow/SKILL.md",
         "authoring": "simba-studies-workflow/references/authoring.md",
         "recovery": "simba-studies-workflow/references/recovery.md",
-        "review": "simba-studies-workflow/references/review.md"
+        "review": "simba-studies-workflow/references/review.md",
+        "review-examples": "simba-studies-workflow/references/review-examples.md"
       }
     },
     "var": {
@@ -53,6 +59,30 @@
       "sections": {
         "entrypoint": "simba-var-workflow/SKILL.md",
         "workflow": "simba-var-workflow/references/workflow.md"
+      }
+    },
+    "campaigns": {
+      "skill": "simba-campaign-workflow",
+      "description": "Inspect campaign facts, mapping, incrementality, conditional budgets and experiment screening. Preserve platform versus incremental evidence and explicit write boundaries.",
+      "sections": {
+        "entrypoint": "simba-campaign-workflow/SKILL.md",
+        "workflow": "simba-campaign-workflow/references/workflow.md",
+        "mapping": "simba-campaign-workflow/references/mapping.md",
+        "budgets": "simba-campaign-workflow/references/budgets.md",
+        "experiments": "simba-campaign-workflow/references/experiments.md",
+        "workflow-examples": "simba-campaign-workflow/references/workflow-examples.md",
+        "mapping-examples": "simba-campaign-workflow/references/mapping-examples.md",
+        "budgets-examples": "simba-campaign-workflow/references/budgets-examples.md",
+        "experiments-examples": "simba-campaign-workflow/references/experiments-examples.md"
+      }
+    },
+    "reporting": {
+      "skill": "simba-data-reporting",
+      "description": "Find an existing dataset and report actual KPI and spend with declared roles, exact source identity and aggregation. No upload, refresh or fit.",
+      "sections": {
+        "entrypoint": "simba-data-reporting/SKILL.md",
+        "workflow": "simba-data-reporting/references/workflow.md",
+        "workflow-examples": "simba-data-reporting/references/workflow-examples.md"
       }
     }
   }

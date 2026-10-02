@@ -8,6 +8,13 @@
 
 ## Installation
 
+For job-specific startup catalogues, see [tool profiles](docs/tool-profiles.md).
+For independently installed native Skills or bounded MCP fallback, see
+[workflow guidance](docs/workflow-guidance.md). Connecting MCP does not install
+Skills. Current campaign, experiment-screening, chart and actual-data examples
+are packaged with that guidance; [candidate acceptance](docs/role-candidate-acceptance.md)
+records tested configurations and remaining rollout checks.
+
 ```bash
 pip install simba-mcp
 ```

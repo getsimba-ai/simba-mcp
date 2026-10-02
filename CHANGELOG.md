@@ -8,11 +8,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ### Added
 - Design an incrementality test from a saved model (#98). `design_incrementality_test(model_hash, submission_key, channel, design_type, intervention, inference, geo)` queues a bounded calculation that replays the saved posterior and returns a `calculation_id` at once; `get_incrementality_test_design` polls it and returns a result whose own state is `available`, `unsupported`, `insufficient_evidence` or `no_feasible_design` (none an error; only `available` carries the detectable effect, model-implied effect, posterior-averaged power and per-duration candidates); `save_incrementality_test_design` turns an available result into a planned registry record, idempotently per calculation. A planned record has no measured lift and cannot calibrate a model; nothing launches an experiment or changes a budget. Time-holdout records (`type: time_holdout`) are listed and read like any other but are created only through save. Submit and save require `create:models`; polling requires `read:results`. These require backend support for the test-designs routes. 94 tools.
+- Current role coverage decisions, generated catalogue counts and executable synthetic
+  workflow examples with negative drift gates. Guidance version 22 adds campaign facts,
+  mapping, conditional budgets, experiment screening, actual-data reporting and native
+  view/JSON fallback references. Existing Skills retain their names and section IDs.
 - Configuration inventory and a non-sensitive operator check (`python -m simba_mcp.configuration`). It reports the effective process combination and its source without printing credentials. No application settings UI is added. Request-policy and byte ceilings remain opt-in; no numeric production default is selected.
 - Opt-in evaluation grader 19 supports explicit calendar-month evidence contracts, complete native-row or exact monthly-summary alternatives, contribution atoms and persistent contradiction rejection. Historical grader 17/18 contracts and frozen reports remain unchanged.
 - Evaluation harness for selective result tasks: shared session deadlines, result grading, and an xAI host adapter. Frozen task modules remain reproducible definitions for old experiments. They are not release acceptance, and this change does not alter server transport, profiles or defaults.
 
 ### Changed
+- Marketer and reviewer include the read-only dataset discovery/reporting dependencies.
+  Current counts and decisions are generated in the role-profile documentation.
+  Historical 81/37/38-tool provider evidence remains frozen and explicitly historical.
 - Results guidance version 21 requests `posterior` as well as `r_hat` for a diagnostic contrast, reports an absent section as `not_returned` rather than a null unknown, includes `channel_map` in the same read when the answer names a channel, and uses the `week` granularity token. An unwindowed channel-summary task credits one dated read whose own rows contain the expected summary. Windows are not mixed. This does not add `get_model_summary` and does not change `get_model_results` defaults.
 
 ## 0.16.0 (2026-10-02)

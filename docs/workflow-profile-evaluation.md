@@ -1,8 +1,13 @@
 # Optional role views: scope and paired evaluation
 
+Historical scope: 29 September 2026, frozen 81/37/38-tool catalogues. This report
+does not validate the expanded current catalogues or guidance version 22. Current
+counts and deterministic evidence are in [tool profiles](tool-profiles.md) and
+[candidate acceptance](role-candidate-acceptance.md). Paid reports remain unchanged.
+
 Status: paired role evaluation complete; the owner chose implementation following
-these results. Optional [server profiles](tool-profiles.md) are now implemented on
-this PR, retaining full as the default and data scientist view. This supersedes the
+these results. Optional [server profiles](tool-profiles.md) were implemented following
+that comparison, retaining full as the default and data scientist view. This supersedes the
 earlier workflow-only deferral. Merge and production rollout remain separate.
 
 This records the evaluation for issue #44. The default server still exposes its
