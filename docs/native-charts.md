@@ -27,3 +27,15 @@ The server advertises `ui://simba/charts.html` with the MCP Apps MIME type `text
 The implementation follows the [MCP Apps lifecycle](https://apps.extensions.modelcontextprotocol.io/api/documents/Overview.html) and the [shared MCP Apps UI protocol supported by ChatGPT](https://developers.openai.com/plugins/build/chatgpt-ui). Documented protocol support is distinct from acceptance in a particular account or client version.
 
 Automated fixture rendering covers the three views and missing-data conventions. Actual native-host acceptance is recorded separately. Do not describe an ordinary browser fixture screenshot as a live client screenshot.
+
+## Synthetic browser examples
+
+These screenshots show the packaged view in a **local synthetic test host at a measured 1280-pixel viewport**. They are fixture evidence, not screenshots of native rendering in Claude or ChatGPT. Values are synthetic and do not represent a fitted customer model.
+
+![Response curves in the local synthetic test host](images/native-curves-synthetic.png)
+
+The response view keeps missing values as gaps and exposes the served numeric values.
+
+![Decomposition in the local synthetic test host](images/native-decomposition-synthetic.png)
+
+The decomposition view separates Overlap into a reconciliation panel rather than presenting it as a channel.
