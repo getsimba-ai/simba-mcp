@@ -4560,7 +4560,7 @@
         "anyOf": [
           {
             "additionalProperties": true,
-            "description": "Required for design_type geo_split, ignored otherwise. panel names the market-level dataset: {kind: uploaded_file | pipeline_version, id, sha256}; the sha256 must match the stored bytes (400 panel_mismatch otherwise). columns maps {date, market, outcome, spend?} to the panel's column names. eligible_markets restricts the markets considered. treatment_share is [low, high], the share of the panel the treatment group may hold (default [0.2, 0.5]). windows gives {matching, calibration, validation} lengths in periods (weekly defaults 26, 26, 13; scaled for daily and monthly).",
+            "description": "Required for design_type geo_split, ignored otherwise. panel names the market-level dataset: {kind: uploaded_file | pipeline_version, id, sha256}; the sha256 must match the stored bytes (400 panel_mismatch otherwise). columns maps {date, market, outcome, spend?} to the panel's column names. eligible_markets restricts the markets considered. treatment_share is [low, high], the share of the panel the treatment group may hold (default [0.2, 0.5]). windows gives {matching, calibration, validation} lengths in periods (defaults 26, 26, 26 at any cadence; validation is at least 26 periods).",
             "properties": {
               "panel": {
                 "properties": {
@@ -4632,7 +4632,7 @@
                     "type": "integer"
                   },
                   "validation": {
-                    "minimum": 1,
+                    "minimum": 26,
                     "type": "integer"
                   }
                 },

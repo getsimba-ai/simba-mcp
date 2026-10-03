@@ -107,8 +107,8 @@ DesignGeo = Annotated[
                 "{date, market, outcome, spend?} to the panel's column names. eligible_markets "
                 "restricts the markets considered. treatment_share is [low, high], the share of "
                 "the panel the treatment group may hold (default [0.2, 0.5]). windows gives "
-                "{matching, calibration, validation} lengths in periods (weekly defaults 26, 26, "
-                "13; scaled for daily and monthly)."
+                "{matching, calibration, validation} lengths in periods (defaults 26, 26, 26 at "
+                "any cadence; validation is at least 26 periods)."
             ),
             "properties": {
                 "panel": {
@@ -145,7 +145,7 @@ DesignGeo = Annotated[
                     "properties": {
                         "matching": {"type": "integer", "minimum": 1},
                         "calibration": {"type": "integer", "minimum": 1},
-                        "validation": {"type": "integer", "minimum": 1},
+                        "validation": {"type": "integer", "minimum": 26},
                     },
                 },
             },
