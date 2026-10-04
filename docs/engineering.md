@@ -70,3 +70,25 @@ Reference this objective and state:
 Reviewers should reject unexplained duplication, circular dependencies, misplaced
 responsibilities and avoidable folder sprawl. Apply this gate before merge, alongside
 behavioural tests. A performance improvement does not waive maintainability.
+
+## Secret protection
+
+GitHub secret scanning and repository push protection provide native detection for
+supported credential formats. The required `Gitleaks` CI check also scans all commits
+introduced by each pull request. Main-branch pushes and manual runs scan the available
+history. The workflow pins Gitleaks 8.30.1 and verifies the release archive's SHA256.
+Scanner output is redacted; do not publish unredacted findings.
+
+Before pushing, run the same scanner locally:
+
+```bash
+gitleaks git . --config .gitleaks.toml --redact --no-banner --log-opts="--all"
+```
+
+`.gitleaks.toml` retains the upstream rules and adds detection for Simba API keys
+and OAuth tokens with suffixes of at least 32 characters. Its exceptions apply only
+to an exact short dummy key in one verifier test and source-file digest lines in
+two historical synthetic evidence files. Keep exceptions narrow and justified;
+never exclude an entire test or documentation directory. If a real credential is
+found, revoke or rotate it, then remove it from the source. Deleting a committed
+credential does not undo its exposure.
