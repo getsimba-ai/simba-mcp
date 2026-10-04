@@ -11,6 +11,7 @@ from starlette.testclient import TestClient
 from simba_mcp import runtime, server
 from simba_mcp.api_client import SimbaAPIClient
 from simba_mcp.visuals import RESOURCE_URI, VISUAL_TOOLS
+from tests.hosted_backend import hosted_transport
 from tests.test_wire_errors import _call
 
 
@@ -42,7 +43,7 @@ def test_visual_wire_is_read_only_passthrough(monkeypatch, tool, section, status
     async def get_client(self):
         if self._client is None:
             self._client = httpx.AsyncClient(
-                base_url="https://example.test", transport=httpx.MockTransport(handle)
+                base_url="https://example.test", transport=hosted_transport(handle)
             )
         return self._client
 

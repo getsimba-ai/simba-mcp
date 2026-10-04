@@ -8,6 +8,7 @@ from starlette.testclient import TestClient
 
 from simba_mcp import runtime, server
 from simba_mcp.api_client import SimbaAPIClient
+from tests.hosted_backend import hosted_transport
 
 
 @pytest.mark.parametrize(
@@ -237,7 +238,7 @@ def test_authoring_snapshot_crosses_wire_without_losing_fields(monkeypatch, oper
     async def get_client(self):
         if self._client is None:
             self._client = httpx.AsyncClient(
-                base_url="http://test", transport=httpx.MockTransport(handle)
+                base_url="http://test", transport=hosted_transport(handle)
             )
         return self._client
 

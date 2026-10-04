@@ -13,6 +13,7 @@ from starlette.testclient import TestClient
 
 from simba_mcp import runtime, server
 from simba_mcp.api_client import SimbaAPIClient
+from tests.hosted_backend import hosted_transport
 
 
 def _call(client, tool, arguments, key="synthetic-test-key"):
@@ -50,7 +51,7 @@ def test_refusals_set_is_error_and_keep_the_payload(monkeypatch, scenario):
     async def get_client(self):
         if self._client is None:
             self._client = httpx.AsyncClient(
-                base_url="https://example.test", transport=httpx.MockTransport(handle)
+                base_url="https://example.test", transport=hosted_transport(handle)
             )
         return self._client
 
@@ -105,7 +106,7 @@ def test_argument_validation_refusals_carry_the_envelope(monkeypatch):
     async def get_client(self):
         if self._client is None:
             self._client = httpx.AsyncClient(
-                base_url="https://example.test", transport=httpx.MockTransport(handle)
+                base_url="https://example.test", transport=hosted_transport(handle)
             )
         return self._client
 

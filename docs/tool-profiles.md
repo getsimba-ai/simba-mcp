@@ -2,7 +2,8 @@
 
 Choose a starting view for the job. `full` is the default. `data_scientist` is an
 alias for full, including the entire Studies lifecycle and any future tools.
-Profiles select tools at server startup; they never grant backend permissions.
+Startup profiles select tools at server construction; hosted account preferences
+can narrow that view per caller. Neither grants backend permissions.
 
 <!-- current-role-coverage:start -->
 
@@ -56,6 +57,38 @@ fail during module import, even if a CLI override was supplied. Unknown CLI valu
 fail before serving. Names are exact and case-sensitive. Restart/reconnect after a
 configuration change so the client refreshes its tool catalogue.
 
+## Hosted connections: the account's profile
+
+With a supporting Simba backend, save Full, Data scientist, Marketer or Reviewer
+under Profile > Connected apps. This preference applies to every hosted connection
+authenticating as that account, including API keys and OAuth tokens. The MCP server
+reads `GET /api/v1/mcp/preferences` with that request's bearer credential. The
+endpoint's version-1 contract includes `schema_version: 1` and a valid `profile`.
+
+The account profile narrows the operator's startup catalogue. Choosing Full does
+not restore tools omitted by the operator and does not add any backend permission.
+An excluded tool call returns `profile_excluded` with instructions to change the
+choice. Registered definitions and other callers' catalogues remain unchanged.
+
+Successful preferences are cached for 30 seconds per bearer hash and backend
+identity, with at most 1,024 retained entries per process. Tokens are not stored in
+the cache or logged. Expired entries are removed on subsequent reads/insertion.
+After saving, wait up to a minute, then reconnect the assistant to refresh its tool
+list. Reconnection alone does not invalidate the server cache. Existing clients
+may retain their discovered tools until they reconnect.
+
+A preference lookup has a five-second overall deadline and is not retried.
+Timeout, unavailable/older backend (including 404/503), or an invalid preference
+contract retains the operator's catalogue; warnings are limited to one per minute
+per process. Authentication failures still reach the existing credential refusal
+when a tool uses the backend. Requests without a bearer retain existing key-less
+discovery and authentication guidance. Failures are not cached.
+
+This package provides the consumer. The preferences endpoint and Connected apps
+control require the corresponding backend rollout. Hosted wire tests use synthetic
+backend responses; live deployment and named-client acceptance are separate gates.
+Local stdio makes no account preference lookup and retains its launch controls.
+
 ## Full fallback and rollback
 
 For a task needing omitted tools, configure a new full connection or restart the
@@ -64,11 +97,11 @@ current server with `--profile full`. Environment-only deployments can unset
 credentials appropriate to the task. Reconcile any uncertain write before retrying
 after a switch; reconnecting does not cancel or undo a backend operation.
 
-There is no tool that changes the server's profile during a conversation. An omitted
-tool is not registered and cannot be called by guessing its name. To offer several
-views, configure separate server instances/connections, with a full connection
-available for mixed jobs. Do not expose every view to the same conversation by
-default, which would duplicate definitions and undermine the saving.
+There is no tool that changes the server's profile during a conversation. A tool
+omitted by the startup profile is not registered; a tool excluded by the hosted
+account profile is refused before dispatch. For local connections, several views
+require separate server instances, with a full connection available for mixed jobs.
+Do not expose duplicate views to the same conversation by default.
 
 ## Embedded use and isolation
 

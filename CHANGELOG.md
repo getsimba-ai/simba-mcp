@@ -4,6 +4,21 @@ All notable changes to the SIMBA MCP Server will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.18.0 (2026-10-04)
+
+### Added
+
+- Hosted account tool profiles, read from the Simba backend at
+  `GET /api/v1/mcp/preferences` using each caller's bearer. A supporting backend
+  provides the saved choice under Profile > Connected apps. Tool discovery and
+  dispatch use the intersection of the operator's catalogue and the caller's
+  profile; excluded calls return actionable `profile_excluded` errors. Successful
+  lookups are cached for 30 seconds using a bearer hash and backend identity,
+  with bounded retention. Lookup failures retain the operator's catalogue and
+  backend authorisation remains definitive. Local stdio controls, tool schemas
+  and profile membership are unchanged. Backend/UI rollout and named-client
+  acceptance are separate deployment checks.
+
 ## 0.17.0 (2026-10-04)
 
 ### Added

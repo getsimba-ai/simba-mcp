@@ -9,11 +9,12 @@ report the same controls without becoming a second settings framework or an MCP 
 
 ## Product decision
 
-This release does not add an application settings UI. Connection credentials
-stay in the MCP host configuration. Operator ceilings stay in the server process
+A supporting Simba backend lets an authenticated user choose the hosted tool
+profile under Profile > Connected apps. Connection credentials stay in the MCP
+host configuration. Operator ceilings stay in the server process
 environment or launch arguments. Agents choose documented per-call tool arguments
 and cannot raise server ceilings, change the shared catalogue or expand permissions.
-A UI is not required for this release. Concise-versus-detailed preferences remain
+Concise-versus-detailed preferences remain
 unimplemented proposals, not settings.
 
 A development `.env` configures only the process that loads it. It does not
@@ -63,6 +64,7 @@ policy from this document; none is recommended here.
 | `SIMBA_API_MAX_DECODED_BYTES` | environment | `simba_mcp.runtime` | operator | process | unset inherits the encoded ceiling; neither set means no local ceiling |
 | `SIMBA_TOOL_DESCRIPTIONS` | environment | `simba_mcp.server` | operator | process catalogue | default legacy; compact is opt-in |
 | `SIMBA_TOOL_PROFILE` | environment | `simba_mcp.server` | operator | process catalogue | default full |
+| `GET /api/v1/mcp/preferences` | account preference | `simba_mcp.user_profiles` | authenticated user; backend owns persistence | hosted caller | default full; requires a supporting backend |
 | `--profile` | argument | `simba_mcp.__main__` | operator | process | optional; absence leaves the environment or default |
 | `--transport` | argument | `simba_mcp.__main__` | operator | process | default stdio |
 | `--host` | argument | `simba_mcp.__main__` | operator | process | default 0.0.0.0; unused for stdio |
@@ -130,6 +132,14 @@ policy from this document; none is recommended here.
 - Resolution: --profile overrides a valid environment value. Invalid or empty environment values fail server import before the override.
 - Authority: A profile hides tools. It does not grant backend permissions.
 - Evidence: Shipped profiles are full, data_scientist, marketer and reviewer.
+
+### `GET /api/v1/mcp/preferences`
+
+- Purpose: Read the authenticated account's hosted tool profile from the Simba backend.
+- Lifecycle: Successful lookups are cached for 30 seconds per backend and bearer hash. Wait up to a minute after saving, then reconnect the assistant to refresh its tools.
+- Resolution: Operator catalogue first, account profile second; intersection only. Failed or invalid lookups retain the operator catalogue and are not cached. A 401 flows to existing tool authentication refusal. Stdio makes no lookup.
+- Authority: Hides tools; grants no backend permissions. The operator catalogue remains the upper bound.
+- Evidence: Change under Profile > Connected apps on a supporting backend. Package installation alone does not prove deployment or client acceptance.
 
 ### `--profile`
 
