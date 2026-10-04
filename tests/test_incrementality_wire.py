@@ -13,6 +13,7 @@ from starlette.testclient import TestClient
 
 from simba_mcp import runtime, server
 from simba_mcp.api_client import SimbaAPIClient
+from tests.hosted_backend import hosted_transport
 
 TEST_ID = "5b0e8f7a-0000-4000-8000-000000000001"
 RECORD = {
@@ -51,7 +52,7 @@ def _call(monkeypatch, handle, tool, arguments):
     async def get_client(self):
         if self._client is None:
             self._client = httpx.AsyncClient(
-                base_url="http://test", transport=httpx.MockTransport(handle)
+                base_url="http://test", transport=hosted_transport(handle)
             )
         return self._client
 

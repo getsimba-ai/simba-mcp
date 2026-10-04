@@ -174,6 +174,8 @@ descriptions for model creation, results and optimisation. Names, schemas and
 execution stay the same. See [configuration, rollback and comparison evidence](docs/compact-descriptions.md).
 
 Optional [tool profiles](docs/tool-profiles.md) provide marketer and reviewer views.
+On a supporting Simba backend, the account's choice under Profile > Connected apps
+also narrows hosted tool discovery and dispatch within the operator's catalogue.
 Use `simba-mcp --profile marketer` or `SIMBA_TOOL_PROFILE=reviewer` at startup.
 `full` remains the default; `data_scientist` includes every tool and the entire Studies
 lifecycle. Profiles are starting views, not backend permissions.

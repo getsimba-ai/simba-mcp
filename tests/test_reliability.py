@@ -15,6 +15,7 @@ from simba_mcp.api_client import SimbaAPIClient
 from simba_mcp.metadata import annotations_for
 from simba_mcp.tools.data import get_backend_capabilities
 from simba_mcp.tools.results import get_model_results
+from tests.hosted_backend import hosted_transport
 
 
 def context(client):
@@ -165,7 +166,7 @@ def test_structured_wire_outputs_preserve_unknown_fields_and_input_objects(monke
     async def get_client(self):
         if self._client is None:
             self._client = httpx.AsyncClient(
-                base_url="http://test", transport=httpx.MockTransport(handle)
+                base_url="http://test", transport=hosted_transport(handle)
             )
         return self._client
 

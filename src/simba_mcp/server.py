@@ -138,6 +138,7 @@ from .tools.studies import (
     update_study,
 )
 from .tools.visuals import show_decomposition, show_optimizer_allocation, show_response_curves
+from .user_profiles import UserProfileMiddleware
 from .visuals import RESOURCE_URI, VISUAL_TOOLS, chart_apps
 
 
@@ -240,6 +241,7 @@ _SERVER_OPTIONS = {
         "Writes are not automatically retried; reconcile before repeating them."
     ),
     "lifespan": app_lifespan,
+    "middleware": [UserProfileMiddleware()],
 }
 
 TOOLS = (

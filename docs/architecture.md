@@ -51,6 +51,14 @@ cancellation: a request to stop is distinct from confirmed completion.
 
 ## Authentication modes
 
+`user_profiles.py` reads the account preference from the Simba backend for hosted
+tool discovery and dispatch. It shares bearer parsing with `auth.py`, uses the
+task-local credential override only during its bounded lookup, and filters against
+canonical `profiles.py` membership without mutating server registrations. Successful
+preferences have a bounded 30-second cache keyed by backend identity and bearer
+hash. Lookup failure retains the operator's catalogue; backend authorisation remains
+definitive. Local stdio controls and server-wide instructions remain unchanged.
+
 The server never issues credentials. It authenticates each HTTP request with the caller's own bearer and forwards that bearer to the backend unchanged.
 
 - **Bring-your-own-key (default).** `Authorization: Bearer simba_sk_…` per request; no server-side shared key; `initialize` and `tools/list` answer without a bearer.
