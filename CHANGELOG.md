@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ## Unreleased
 
 ### Added
+- Design an incrementality test from a saved model (#98). `design_incrementality_test(model_hash, submission_key, channel, design_type, intervention, inference, geo)` queues a bounded calculation that replays the saved posterior and returns a `calculation_id` at once; `get_incrementality_test_design` polls it and returns a result whose own state is `available`, `unsupported`, `insufficient_evidence` or `no_feasible_design` (none an error; only `available` carries the detectable effect, model-implied effect, posterior-averaged power and per-duration candidates); `save_incrementality_test_design` turns an available result into a planned registry record, idempotently per calculation. A planned record has no measured lift and cannot calibrate a model; nothing launches an experiment or changes a budget. Time-holdout records (`type: time_holdout`) are listed and read like any other but are created only through save. Submit and save require `create:models`; polling requires `read:results`. These require backend support for the test-designs routes. 94 tools.
 - Current role coverage decisions, generated catalogue counts and executable synthetic
   workflow examples with negative drift gates. Guidance version 22 adds campaign facts,
   mapping, conditional budgets, experiment screening, actual-data reporting and native

@@ -204,6 +204,38 @@
     ]
   },
   {
+    "family": "experiment_design_read_marketer_reviewer",
+    "tools": [
+      "get_incrementality_test_design"
+    ],
+    "roles": [
+      "marketer",
+      "reviewer"
+    ],
+    "reason": "Both evidence roles read a submitted design and its result state. Only an available result carries numbers; the model-implied effect, the detectable effect and posterior-averaged power stay separate.",
+    "guidance": [
+      "campaigns"
+    ],
+    "examples": [],
+    "example_limitation": "Existing canonical domain guidance and the domain-wire fixtures cover this family. No separate role job is introduced; omitted operations require explicit full fallback."
+  },
+  {
+    "family": "experiment_design_marketer",
+    "tools": [
+      "design_incrementality_test",
+      "save_incrementality_test_design"
+    ],
+    "roles": [
+      "marketer"
+    ],
+    "reason": "Submitting a design calculation and saving an available result as a planned test create operational and registry state, so they sit with the marketer who records tests. Neither launches an experiment nor changes a budget.",
+    "guidance": [
+      "campaigns"
+    ],
+    "examples": [],
+    "example_limitation": "Existing canonical domain guidance and the domain-wire fixtures cover this family. No separate role job is introduced; omitted operations require explicit full fallback."
+  },
+  {
     "family": "incrementality_marketer",
     "tools": [
       "create_incrementality_test",

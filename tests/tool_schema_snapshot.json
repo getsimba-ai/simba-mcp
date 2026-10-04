@@ -2176,7 +2176,7 @@
       "checks": {
         "items": {
           "additionalProperties": true,
-          "description": "Built-in metric + maximum (or operator gte/between with minimum), or custom numeric gate with metric custom:<slug>, name, units, operator and applicable bounds. Boolean/manual checks use kind, operator equals and strict boolean expected. Manual expected must be true and sign-off is session-only. Rules over saved artifacts need no external evidence: saved diagnostics (r_squared, mape, durbin_watson, pareto_k_pct, normality_p, loo_cv; bounds may be negative for loo_cv and r_squared), retained-sampling counts (retained_chains, retained_draws_per_chain, ess_bulk_min, ess_tail_min, divergences; non-negative) and provenance status (provenance:holdout, provenance:prior; operator equals, expected review_required — blocked fails, an absent record is not_collected). Every threshold is the author's; an absent artifact never passes. At least one required gate per policy; at most 20 checks in total.",
+          "description": "Built-in metric + maximum (or operator gte/between with minimum), or custom numeric gate with metric custom:<slug>, name, units, operator and applicable bounds. Boolean/manual checks use kind, operator equals and strict boolean expected. Manual expected must be true and sign-off is session-only. Rules over saved artifacts need no external evidence: saved diagnostics (r_squared, mape, durbin_watson, pareto_k_pct, normality_p, loo_cv; bounds may be negative for loo_cv and r_squared), retained-sampling counts (retained_chains, retained_draws_per_chain, ess_bulk_min, ess_tail_min, divergences; non-negative) and provenance status (provenance:holdout, provenance:prior; operator equals, expected review_required \u2014 blocked fails, an absent record is not_collected). Every threshold is the author's; an absent artifact never passes. At least one required gate per policy; at most 20 checks in total.",
           "properties": {
             "metric": {
               "examples": [
@@ -3424,7 +3424,8 @@
             "enum": [
               "geo",
               "owned_media_ab",
-              "platform_lift"
+              "platform_lift",
+              "time_holdout"
             ],
             "type": "string"
           },
@@ -3558,13 +3559,14 @@
       },
       "record": {
         "additionalProperties": true,
-        "description": "One incrementality test as analysed in its own tool (Simba fits nothing here). type picks the design block: geo, owned_media_ab or platform_lift. Dates are YYYY-MM-DD; measured_through is the end of the carryover window (default end_date). result.lift_abs is the total lift in KPI units over the window; give its interval (two-sided, level e.g. 0.9) and/or sd. Null and negative lifts are valid. spend.incremental is the extra spend the test caused (signed).",
+        "description": "One incrementality test as analysed in its own tool (Simba fits nothing here). type picks the design block: geo, owned_media_ab or platform_lift. Dates are YYYY-MM-DD; measured_through is the end of the carryover window (default end_date). result.lift_abs is the total lift in KPI units over the window; give its interval (two-sided, level e.g. 0.9) and/or sd. Null and negative lifts are valid. spend.incremental is the extra spend the test caused (signed). The time_holdout type and block appear on records the server builds from a test-design calculation (save_incrementality_test_design); they are read and listed here but not accepted on create or import, and a status planned record carries no result.",
         "properties": {
           "type": {
             "enum": [
               "geo",
               "owned_media_ab",
-              "platform_lift"
+              "platform_lift",
+              "time_holdout"
             ],
             "type": "string"
           },
@@ -3787,6 +3789,25 @@
             "required": [
               "platform"
             ],
+            "type": "object"
+          },
+          "time_holdout": {
+            "description": "Server-built from a test design: the outcome in the holdout window is contrasted with the model's forecast.",
+            "properties": {
+              "counterfactual": {
+                "enum": [
+                  "model_forecast"
+                ],
+                "type": "string"
+              },
+              "analysis_method": {
+                "type": "string"
+              },
+              "carryover_periods": {
+                "minimum": 0,
+                "type": "integer"
+              }
+            },
             "type": "object"
           }
         },
@@ -4385,6 +4406,321 @@
       "model_hash"
     ],
     "title": "recommend_incrementality_testsArguments",
+    "type": "object"
+  },
+  "design_incrementality_test": {
+    "properties": {
+      "model_hash": {
+        "title": "Model Hash",
+        "type": "string"
+      },
+      "submission_key": {
+        "description": "Caller-generated 8-128 character identity for one intentional attempt. Reuse identical key and inputs after a lost response; a new key may consume another attempt.",
+        "title": "Submission Key",
+        "type": "string"
+      },
+      "channel": {
+        "title": "Channel",
+        "type": "string"
+      },
+      "design_type": {
+        "enum": [
+          "time_holdout",
+          "geo_split"
+        ],
+        "title": "Design Type",
+        "type": "string"
+      },
+      "intervention": {
+        "additionalProperties": true,
+        "description": "What changes in the channel's spend and when. start_date (YYYY-MM-DD) is on or after the model's last training period plus one, at most 13 weekly, 91 daily or 3 monthly periods ahead. durations lists 1-8 distinct candidate lengths in the model's cadence (1-52 periods); the backend evaluates each and selects one. spend_change is {mode: pause} (spend to zero), {mode: percent, pct} (pct in [-100, 500], not 0) or {mode: schedule, baseline: [...], intervention: [...]} (equal-length currency arrays covering the longest duration). baseline is {mode: recent_average, periods} (mean spend over the last 4-52 training periods) or {mode: schedule}; required for pause and percent.",
+        "properties": {
+          "start_date": {
+            "format": "date",
+            "type": "string"
+          },
+          "durations": {
+            "items": {
+              "maximum": 52,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "maxItems": 8,
+            "minItems": 1,
+            "type": "array"
+          },
+          "spend_change": {
+            "properties": {
+              "mode": {
+                "enum": [
+                  "pause",
+                  "percent",
+                  "schedule"
+                ],
+                "type": "string"
+              },
+              "pct": {
+                "type": "number"
+              },
+              "baseline": {
+                "items": {
+                  "type": "number"
+                },
+                "type": "array"
+              },
+              "intervention": {
+                "items": {
+                  "type": "number"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "mode"
+            ],
+            "type": "object"
+          },
+          "baseline": {
+            "properties": {
+              "mode": {
+                "enum": [
+                  "recent_average",
+                  "schedule"
+                ],
+                "type": "string"
+              },
+              "periods": {
+                "maximum": 52,
+                "minimum": 4,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "mode"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "start_date",
+          "durations",
+          "spend_change"
+        ],
+        "title": "Intervention",
+        "type": "object"
+      },
+      "inference": {
+        "anyOf": [
+          {
+            "additionalProperties": true,
+            "description": "How the planned analysis will be judged. alpha is the two-sided level in (0, 0.5] (default 0.10); target_power in [0.5, 0.99] (default 0.80) picks the shortest duration that reaches it. named_effect {value, estimand} asks for the power to detect an effect you name instead of, or as well as, the model's own implied effect: value is finite and non-zero, estimand is cumulative, mean_period, relative or iroas. Omitted defaults are echoed in the result.",
+            "properties": {
+              "alpha": {
+                "exclusiveMinimum": 0,
+                "maximum": 0.5,
+                "type": "number"
+              },
+              "target_power": {
+                "maximum": 0.99,
+                "minimum": 0.5,
+                "type": "number"
+              },
+              "named_effect": {
+                "properties": {
+                  "value": {
+                    "type": "number"
+                  },
+                  "estimand": {
+                    "enum": [
+                      "cumulative",
+                      "mean_period",
+                      "relative",
+                      "iroas"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "value",
+                  "estimand"
+                ],
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Inference"
+      },
+      "geo": {
+        "anyOf": [
+          {
+            "additionalProperties": true,
+            "description": "Required for design_type geo_split, ignored otherwise. panel names the market-level dataset: {kind: uploaded_file | pipeline_version, id, sha256}; the sha256 must match the stored bytes (400 panel_mismatch otherwise). columns maps {date, market, outcome, spend?} to the panel's column names. eligible_markets restricts the markets considered. treatment_share is [low, high], the share of the panel the treatment group may hold (default [0.2, 0.5]). windows gives {matching, calibration, validation} lengths in periods (defaults 26, 26, 26 at any cadence; validation is at least 26 periods).",
+            "properties": {
+              "panel": {
+                "properties": {
+                  "kind": {
+                    "enum": [
+                      "uploaded_file",
+                      "pipeline_version"
+                    ],
+                    "type": "string"
+                  },
+                  "id": {
+                    "type": "integer"
+                  },
+                  "sha256": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "id",
+                  "sha256"
+                ],
+                "type": "object"
+              },
+              "columns": {
+                "properties": {
+                  "date": {
+                    "type": "string"
+                  },
+                  "market": {
+                    "type": "string"
+                  },
+                  "outcome": {
+                    "type": "string"
+                  },
+                  "spend": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "date",
+                  "market",
+                  "outcome"
+                ],
+                "type": "object"
+              },
+              "eligible_markets": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "treatment_share": {
+                "items": {
+                  "type": "number"
+                },
+                "maxItems": 2,
+                "minItems": 2,
+                "type": "array"
+              },
+              "windows": {
+                "properties": {
+                  "matching": {
+                    "minimum": 1,
+                    "type": "integer"
+                  },
+                  "calibration": {
+                    "minimum": 1,
+                    "type": "integer"
+                  },
+                  "validation": {
+                    "minimum": 26,
+                    "type": "integer"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "required": [
+              "panel",
+              "columns"
+            ],
+            "type": "object"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Geo"
+      }
+    },
+    "required": [
+      "model_hash",
+      "submission_key",
+      "channel",
+      "design_type",
+      "intervention"
+    ],
+    "title": "design_incrementality_testArguments",
+    "type": "object"
+  },
+  "get_incrementality_test_design": {
+    "properties": {
+      "model_hash": {
+        "title": "Model Hash",
+        "type": "string"
+      },
+      "calculation_id": {
+        "title": "Calculation Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "model_hash",
+      "calculation_id"
+    ],
+    "title": "get_incrementality_test_designArguments",
+    "type": "object"
+  },
+  "save_incrementality_test_design": {
+    "properties": {
+      "model_hash": {
+        "title": "Model Hash",
+        "type": "string"
+      },
+      "calculation_id": {
+        "title": "Calculation Id",
+        "type": "string"
+      },
+      "project_id": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Project Id"
+      },
+      "name": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Name"
+      }
+    },
+    "required": [
+      "model_hash",
+      "calculation_id"
+    ],
+    "title": "save_incrementality_test_designArguments",
     "type": "object"
   }
 }

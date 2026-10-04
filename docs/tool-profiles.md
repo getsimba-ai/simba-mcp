@@ -8,10 +8,10 @@ Profiles select tools at server startup; they never grant backend permissions.
 
 | Profile | Current tools | Intended work |
 | --- | ---: | --- |
-| `full` | 91 | Mixed jobs and explicit fallback |
-| `data_scientist` | 91 | All data, modelling, Studies, review and planning work |
-| `marketer` | 51 | Actual-data/campaign reporting, saved evidence, comparisons, authorised plans and run curation |
-| `reviewer` | 49 | Scientific evidence/provenance, assessments, declarations and evidence-bound recommendations |
+| `full` | 94 | Mixed jobs and explicit fallback |
+| `data_scientist` | 94 | All data, modelling, Studies, review and planning work |
+| `marketer` | 54 | Actual-data/campaign reporting, saved evidence, comparisons, authorised plans and run curation |
+| `reviewer` | 50 | Scientific evidence/provenance, assessments, declarations and evidence-bound recommendations |
 
 <!-- current-role-coverage:end -->
 

@@ -57,10 +57,13 @@ from .tools.drafts import (
 from .tools.guidance import get_workflow_guidance
 from .tools.incrementality import (
     create_incrementality_test,
+    design_incrementality_test,
     get_incrementality_test,
+    get_incrementality_test_design,
     import_incrementality_tests,
     list_incrementality_tests,
     recommend_incrementality_tests,
+    save_incrementality_test_design,
 )
 from .tools.models import (
     create_model,
@@ -270,6 +273,9 @@ TOOLS = (
     get_incrementality_test,
     create_incrementality_test,
     import_incrementality_tests,
+    design_incrementality_test,
+    get_incrementality_test_design,
+    save_incrementality_test_design,
     list_uploads,
     get_upload,
     list_models,
@@ -437,6 +443,7 @@ __all__ = [
     "create_var_model",
     "declare_study_holdout_use",
     "delete_model",
+    "design_incrementality_test",
     "diff_quality_policies",
     "evaluate_study_run",
     "get_campaign_incrementality",
@@ -446,6 +453,7 @@ __all__ = [
     "get_data_report",
     "get_data_schema",
     "get_incrementality_test",
+    "get_incrementality_test_design",
     "get_launch_eligibility",
     "get_model",
     "get_model_results",
@@ -491,6 +499,7 @@ __all__ = [
     "run_optimizer",
     "run_pipeline",
     "run_scenario",
+    "save_incrementality_test_design",
     "save_model",
     "set_campaign_mapping",
     "set_contribution_groups",
