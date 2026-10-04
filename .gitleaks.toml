@@ -1,0 +1,27 @@
+title = "Simba MCP secret detection"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "simba-credential"
+description = "Simba API keys and OAuth tokens with a credential-sized suffix"
+regex = '''\b(simba_(?:sk|at|rt)_[A-Za-z0-9_-]{32,})\b'''
+secretGroup = 1
+keywords = ["simba_sk_", "simba_at_", "simba_rt_"]
+
+[[allowlists]]
+description = "Exact short synthetic API key prefix in the OAuth verifier test"
+targetRules = ["generic-api-key"]
+condition = "AND"
+paths = ['''^tests/test_oauth_mode\.py$''']
+regexTarget = "secret"
+regexes = ['''^simba_sk_12345678$''']
+
+[[allowlists]]
+description = "Source file SHA256 digests in historical synthetic evidence"
+targetRules = ["generic-api-key"]
+condition = "AND"
+paths = ['''^docs/selective-results(?:-followup)?-evidence\.json$''']
+regexTarget = "line"
+regexes = ['''^\s*"src/simba_mcp/(?:api_client|auth)\.py": "[a-f0-9]{64}",?\s*$''']
