@@ -1,10 +1,16 @@
 """Advisory routing boundaries under the real SDK and shared caller context."""
 
+import asyncio
+import os
+import sys
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
 
+import anyio
 import httpx
 import pytest
+from mcp import ClientSession, StdioServerParameters
+from mcp.client.stdio import stdio_client
 from pydantic import ValidationError
 from starlette.testclient import TestClient
 
@@ -114,6 +120,61 @@ async def test_malformed_backend_and_invalid_input_do_not_execute_tools():
     result = await recommend_workflow("", ctx)
     assert result["_status_code"] == 400
     assert client.workflow_request.await_count == 1
+
+
+@pytest.mark.anyio
+async def test_cancellation_stops_waiting_without_retry_or_recommendation():
+    started = asyncio.Event()
+    requests = []
+
+    async def handler(request):
+        requests.append(request)
+        started.set()
+        await asyncio.Event().wait()
+
+    client = SimbaAPIClient("https://example.invalid", "synthetic")
+    client._client = httpx.AsyncClient(
+        base_url=client.base_url, transport=httpx.MockTransport(handler)
+    )
+    ctx = SimpleNamespace(
+        request_context=SimpleNamespace(lifespan_context=runtime.AppContext(client, False))
+    )
+    try:
+        with anyio.fail_after(2):
+            task = asyncio.create_task(recommend_workflow("Explain ROI", ctx))
+            await started.wait()
+            task.cancel()
+            with pytest.raises(asyncio.CancelledError):
+                await task
+        assert len(requests) == 1
+    finally:
+        await client.close()
+
+
+@pytest.mark.anyio
+async def test_real_stdio_sdk_exposes_additive_tool():
+    parameters = StdioServerParameters(
+        command=sys.executable,
+        args=["-m", "simba_mcp"],
+        env={
+            **os.environ,
+            "SIMBA_API_KEY": "synthetic",
+            "SIMBA_API_URL": "https://example.invalid",
+            "SIMBA_TOOL_PROFILE": "full",
+        },
+    )
+    with anyio.fail_after(15):
+        async with (
+            stdio_client(parameters) as (read, write),
+            ClientSession(read, write) as session,
+        ):
+            await session.initialize()
+            tools = {tool.name: tool for tool in (await session.list_tools()).tools}
+            assert len(tools) == 95
+            routing = tools["recommend_workflow"]
+            assert routing.input_schema["required"] == ["request"]
+            assert routing.annotations.read_only_hint
+            assert not routing.annotations.idempotent_hint
 
 
 @pytest.mark.parametrize("profile", ["full", "reviewer", "marketer"])

@@ -111,3 +111,20 @@ def test_summary_does_not_treat_unreviewed_labels_or_repetitions_as_evidence():
     assert report["unreviewed_case_count"] == 1
     with pytest.raises(ValueError, match="one attempt"):
         summarise_routing([score, score])
+
+
+def test_selection_packet_is_separate_and_labels_are_not_self_verified():
+    from simba_mcp.evaluation.routing_cases import development_cases, selection_validation_cases
+
+    development = development_cases()
+    validation = selection_validation_cases()
+    assert len(validation) == 120
+    assert (
+        len({item.id for item in validation}) == len({item.request for item in validation}) == 120
+    )
+    assert not ({item.id for item in development} & {item.id for item in validation})
+    assert not ({item.request for item in development} & {item.request for item in validation})
+    assert all(
+        item.split == "selection_validation" and item.label_status == "proposed"
+        for item in validation
+    )

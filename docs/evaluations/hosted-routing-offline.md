@@ -28,8 +28,11 @@ independently reviewed. Their scores remain `NEEDS_REVIEW` even if output matche
 the proposed category. Metadata strings in grader test fixtures establish only
 mechanical validation, not actual reviewer authorship.
 
-The planned 120-case selection-validation packet is not yet available. Fresh
-final acceptance is also not available. Neither generated paraphrases nor the
+`routing-selection-v1` contains 120 separately authored public synthetic requests
+across the same ten category families. Its labels also remain proposed; development
+and selection packets have no identical requests or IDs, but share a development
+author and do not establish independent final acceptance. Fresh final acceptance
+is not available. Neither generated paraphrases nor the
 development packet can be relabelled as an independently authored final holdout.
 Version and hash cases before observing outputs; retain original scores and failed
 attempts. Any packet used to choose a threshold becomes selection evidence.
@@ -39,7 +42,7 @@ attempts. Any packet used to choose a threshold becomes selection evidence.
 | Gate | Status | Evidence and remaining work |
 | --- | --- | --- |
 | Fixed non-executable contract | PASS in targeted tests | Documented categories, strict backend envelope and visible-tool intersection |
-| Development breadth | PARTIAL | 80 distinct authored requests cover ten category families; representative production weighting unknown |
+| Development and selection breadth | PARTIAL | 80 development and 120 separate selection requests cover ten category families; representative production weighting unknown |
 | Independent labels | NOT RUN | Distinct recorded reviewer required for verified labels; actual review absent |
 | Grader state handling | PASS in regression tests | Correct/wrong, abstention, invalid/missing attempts and unreviewed labels remain distinct |
 | Aggregate accounting | PASS in regression tests | Eligible missing/error attempts remain in coverage denominator; unreviewed labels excluded from measured precision |
