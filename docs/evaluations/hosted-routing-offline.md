@@ -304,3 +304,28 @@ packet SHA-256 `ef309dae7b25717408b45b50101b9059130a628acb945fc3aa01df69fd14fa7d
 and source fingerprint `a868e2b0874086cb973613bdbafa9fc2d6d444ae4589b3df4e37a1c71eaf7602`.
 Actual hash-bound audit and manifest are retained privately. Earlier failed audits
 remain preserved. This establishes prospective synthetic calibration only.
+
+
+## Anthropic comparison protocol v3
+
+The first main-agent request in the v2 run was rejected by its provider before
+any successful response or task tool call. Its original report and uncertain
+reservation remain retained. The owner authorised switching to the existing
+Anthropic Messages harness. Protocol hosted-routing-v3 permits its supported
+Claude models only within an explicitly frozen paired eager comparison;
+standalone historical RLC retains its existing provider restriction.
+
+The prospective run uses the harness default claude-haiku-4-5-20251001 equally
+in both arms, with the same reviewed v2 packet and grader20, three repetitions,
+full eager catalogue and fixed case-order seed. The routing provider and question
+remain unchanged. This is a new comparison with carried cumulative spending,
+not a model-changing continuation or a cross-provider quality claim.
+
+Before payment, bind a new independent source review and real audit artifact to
+the unchanged packet. Preserve v2 reviews. Actual Anthropic access and complete
+paired outcomes remain separate from model-adapter unit tests.
+
+Independent v3 transition review passed238checks against source fingerprint
+`fae0d54ba73a675cbf4a62b06ad2d5a94190f5ec7eee67d70c1ee68b6096d0e0`.
+Packet/grader semantics remain unchanged. The actual audit and manifest are
+retained privately; historical v2 evidence remains byte-for-byte preserved.

@@ -442,8 +442,8 @@ async def run(args):
         raise ValueError(
             "RLC01 development suite cannot be combined with historical comparison modes"
         )
-    if rlc and (budget.model != GROK or args.mode != "eager"):
-        raise ValueError("RLC01 requires the explicit Grok eager route")
+    if rlc and (args.mode != "eager" or (budget.model != GROK and not routing_comparison)):
+        raise ValueError("RLC01 requires Grok or an explicitly frozen paired routing model")
     workflow_packet_path = getattr(args, "workflow_packet", None)
     if workflow_packet_path and not rlc:
         raise ValueError("Workflow packets require the prospective RLC workflow suite")
@@ -636,7 +636,7 @@ async def run(args):
             else {}
         )
         report["configuration"]["routing_comparison"] = {
-            "version": "hosted-routing-v2",
+            "version": "hosted-routing-v3",
             "backend_origin_sha256": fingerprint(routing_url),
             "model": routing_model,
             "question_version": routing_version,

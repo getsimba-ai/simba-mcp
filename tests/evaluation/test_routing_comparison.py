@@ -126,7 +126,12 @@ def synthetic(monkeypatch):
     async def session(_, tools, _prompt, dispatch, budget, checkpoint, **__):
         names = {tool["name"] for tool in tools}
         sessions.append(names)
-        reservation = budget.reserve({"model": command.GROK, "max_output_tokens": 100})
+        reservation = budget.reserve(
+            {
+                "model": budget.model,
+                "max_output_tokens" if budget.model == command.GROK else "max_tokens": 100,
+            }
+        )
         cost = budget.settle(
             {"input_tokens": 10, "output_tokens": 1, "cost_in_usd_ticks": 10000}, reservation
         )
@@ -334,3 +339,20 @@ async def test_review_mismatch_stops_before_provider(tmp_path, synthetic, field,
     with pytest.raises(ValueError):
         await command.run(args)
     assert not args.output.exists() and not synthetic[0] and not synthetic[1]
+
+
+@pytest.mark.anyio
+async def test_explicit_anthropic_model_is_same_in_both_routing_arms(
+    tmp_path, synthetic, monkeypatch
+):
+    args = arguments(tmp_path)
+    args.model = command.MODEL
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "synthetic-main-agent")
+    monkeypatch.setattr(command, "client", xai.client)
+    monkeypatch.setattr(command, "session", xai.session)
+    await command.run(args)
+    report = json.loads(args.output.read_text())
+    assert report["configuration"]["routing_comparison"]["version"] == "hosted-routing-v3"
+    assert report["budget"]["model"] == command.MODEL
+    assert len(synthetic[0]) == 4
+    assert report["budget"]["charged"] == pytest.approx(0.00008)
