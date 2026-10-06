@@ -4,6 +4,8 @@ import json
 import math
 from dataclasses import dataclass
 
+from ...guidance.routing import MODEL as DECISIONS_MODEL
+from ...guidance.routing import validate_request
 from .models import GROK, MODEL, model_configuration
 
 
@@ -63,6 +65,33 @@ class Budget:
             + usage["output_tokens"] * rates["output"]
         ) / 1e6
         return self._settle_cost(cost, reservation)
+
+    def reserve_decision(self, request, *, input_rate):
+        """Reserve in the same cumulative ledger as the main agent, before HTTP."""
+        if request.get("model") != DECISIONS_MODEL:
+            raise ValueError("Unsupported Decisions model")
+        validate_request(request.get("input"))
+        self._decision_rate(input_rate)
+        bound = 8000 * input_rate / 1e6
+        if self.prior + self.charged + self.reserved + bound > self.cap:
+            raise RuntimeError("Provider budget exhausted")
+        self.reserved += bound
+        return bound
+
+    def settle_decision(self, usage, reservation, *, input_rate):
+        """Missing/invalid usage retains the reservation; known overruns stop the run."""
+        self._decision_rate(input_rate)
+        tokens = usage.get("input_tokens") if isinstance(usage, dict) else None
+        if type(tokens) is not int or tokens < 0:
+            raise ValueError("Missing Decisions usage; reservation retained")
+        return self._settle_cost(tokens * input_rate / 1e6, reservation)
+
+    @staticmethod
+    def _decision_rate(value):
+        # Base published rate checked 6 October 2026. Operators must supply the
+        # actual organisation rate, including any regional processing premium.
+        if type(value) not in (int, float) or not math.isfinite(value) or value < 0.1:
+            raise ValueError("Explicit Decisions input price must be at least 0.10 USD/M")
 
     def _settle_cost(self, cost, reservation):
         self.charged += cost

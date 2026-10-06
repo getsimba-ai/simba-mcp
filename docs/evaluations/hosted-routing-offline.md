@@ -49,7 +49,7 @@ attempts. Any packet used to choose a threshold becomes selection evidence.
 | Uncertainty | PARTIAL | Wilson intervals for case proportions; complete-task paired uncertainty and confidence reliability not implemented |
 | Oracle isolation | PARTIAL | Case contract separates request and labels; provider path must be audited to send request only |
 | Trace/version freeze | PARTIAL | Case/result digests and grader version are recorded; prospective campaign/attempt integration outstanding |
-| Paid accounting | PARTIAL | Production unknown charges retain Redis reservations; cumulative evaluation ledger needs Decisions integration |
+| Paid accounting | PARTIAL | Shared host Budget now reserves/settles Decisions alongside main-agent work; missing usage remains reserved. Adapter mechanics pass offline; CLI/checkpoint/continuation integration remains outstanding |
 | External provider qualification | NOT RUN | Account access, actual schema/usage and latency not tested |
 | Paired complete tasks | NOT RUN | Planned 24 tasks, three repetitions per arm; main model, profile, fixtures and cache conditions held fixed |
 | Named-client acceptance | NOT RUN | Package, deployment, actual adoption and fallback behaviour require observed evidence |
@@ -67,3 +67,17 @@ authorisation. Carry billed failures and unknown charges across attempts and
 protocol versions. No provider or model expansion is implied by this protocol.
 Synthetic successful routing does not establish scientific validity, publication,
 deployment or complete-task improvement.
+
+The prospective `hosts.routing.RoutingDispatch` calls the real recommendation
+handler and configured backend. It does not call OpenAI directly or duplicate
+backend admission. Domain execution and grading continue through the existing
+fixture dispatch. The adapter checkpoints before submission, records elapsed time
+and response digests, and reports unknown usage as missing rather than zero.
+Complete-task totals include main-agent cache input and selector input; session
+wall time already contains routing, so it is not added twice.
+
+Pricing must be supplied explicitly for the actual organisation, including regional
+premiums. The [Decisions guide](https://developers.openai.com/api/docs/guides/decisions),
+checked 6 October 2026, lists a base input price of US$0.10 per million and says
+regional premiums apply. The ledger rejects a rate below that base. A successful
+mock settlement does not verify account pricing or provider access.
