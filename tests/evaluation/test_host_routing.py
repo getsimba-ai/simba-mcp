@@ -155,3 +155,17 @@ def test_combined_usage_includes_cache_and_selector_without_double_counting_late
     interrupted = complete_task_usage({**record, "stop": "session_error"}, [attempt])
     assert interrupted["total_input_tokens"] is None
     assert interrupted["total_cost_usd"] is None and not interrupted["accounting_complete"]
+
+
+@pytest.mark.parametrize("cost", [None, True, -1, float("nan")])
+def test_missing_or_invalid_main_billing_cannot_be_zero_cost(cost):
+    record = {
+        "responses": [{"usage": {"input_tokens": 10}}],
+        "stop": "end_turn",
+        "seconds": 1,
+    }
+    if cost is not None:
+        record["cost_usd"] = cost
+    usage = complete_task_usage(record, [])
+    assert usage["total_cost_usd"] is None
+    assert usage["accounting_complete"] is False

@@ -2,6 +2,7 @@
 
 import hashlib
 import json
+import sys
 from contextlib import asynccontextmanager
 from types import SimpleNamespace
 
@@ -12,6 +13,8 @@ from simba_mcp.api_client import SimbaAPIClient
 from simba_mcp.evaluation.experiments import source_fingerprint
 from simba_mcp.evaluation.hosts import __main__ as command
 from simba_mcp.evaluation.hosts import xai
+from simba_mcp.evaluation.hosts.routing_report import main as campaign_main
+from simba_mcp.evaluation.hosts.routing_report import routing_campaign_report
 from simba_mcp.evaluation.hosts.scenarios import tasks
 
 
@@ -110,7 +113,9 @@ def synthetic(monkeypatch):
 
 
 @pytest.mark.anyio
-async def test_two_arms_share_domain_catalogue_and_include_selector_cost(tmp_path, synthetic):
+async def test_two_arms_share_domain_catalogue_and_include_selector_cost(
+    tmp_path, synthetic, monkeypatch
+):
     args = arguments(tmp_path)
     await command.run(args)
     report = json.loads(args.output.read_text())
@@ -135,6 +140,22 @@ async def test_two_arms_share_domain_catalogue_and_include_selector_cost(tmp_pat
     assert report["routing_measurements"]["paired"]["total_input_tokens"]["estimate"] == -10
     assert report["experiment_inputs"]["purpose"] == "model_selection_validation"
     assert "synthetic-backend" not in args.output.read_text()
+    campaign = routing_campaign_report([args.output])
+    assert campaign["status"] == "descriptive_only"
+    assert campaign["campaign"]["attempt_count"] == 4
+    assert campaign["campaign"]["cumulative_spend_and_reservations_usd"] == pytest.approx(0.000024)
+    archived = args.output.read_bytes()
+    campaign_path = tmp_path / "campaign.json"
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["routing_report", "--report", str(args.output), "--output", str(campaign_path)],
+    )
+    campaign_main()
+    assert json.loads(campaign_path.read_text()) == campaign
+    with pytest.raises(ValueError, match="overwrite"):
+        campaign_main()
+    assert args.output.read_bytes() == archived and len(submitted) == 2
 
 
 @pytest.mark.anyio
@@ -189,6 +210,33 @@ async def test_routing_continuation_keeps_billed_failure_and_only_runs_unfinishe
     assert len(submitted) == 2
     # This file alone omits earlier completed rows; do not report a subset saving.
     assert resumed["routing_measurements"]["status"] == "incomplete"
+    campaign = routing_campaign_report([args.continue_from, args.output])
+    assert campaign["campaign"]["attempt_count"] == 5
+    assert campaign["campaign"]["restarted_trials"] == 1
+    assert campaign["campaign"]["attempt_outcomes"] == {"pass": 4, "execution_error": 1}
+    assert campaign["arms"]["baseline"]["recorded_trials"] == 2
+    assert campaign["arms"]["candidate"]["recorded_trials"] == 2
+    assert campaign["status"] == "incomplete" and campaign["paired"] is None
+    assert campaign["campaign"]["cumulative_spend_and_reservations_usd"] > args.prior_usd
+    with pytest.raises(ValueError, match="original report"):
+        routing_campaign_report([args.output])
+    for fault in ("prior", "chain", "completed"):
+        changed = json.loads(args.output.read_text())
+        if fault == "prior":
+            changed["budget"]["prior"] = 0
+        elif fault == "chain":
+            changed["configuration"]["continuation"]["previous_report_sha256"] = "0" * 64
+        else:
+            changed["configuration"]["continuation"]["completed_trials"] = []
+        # Bind modified configuration correctly, so lineage checks must reject it.
+        from simba_mcp.evaluation.experiments import fingerprint
+
+        changed["experiment_inputs"]["configuration"] = changed["configuration"]
+        changed["frozen_experiment"]["inputs_sha256"] = fingerprint(changed["experiment_inputs"])
+        tampered = tmp_path / (fault + ".json")
+        tampered.write_text(json.dumps(changed))
+        with pytest.raises(ValueError, match="continuation chain|lost spending"):
+            routing_campaign_report([args.continue_from, tampered])
 
 
 @pytest.mark.anyio

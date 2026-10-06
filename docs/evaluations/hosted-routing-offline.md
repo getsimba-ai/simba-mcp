@@ -108,8 +108,22 @@ results-only grader fields. Unknown in-flight requests remain charged against th
 cap when unfinished trials restart. Reports remain non-accepting until the packet,
 grading and independent outcome review gates pass. A continuation report that
 omits earlier completed trials reports missing pairs; it cannot establish a saving
-from the resumed subset. Combine the hash-bound campaign evidence before drawing
-a full comparison conclusion.
+from the resumed subset. Combine the ordered hash-bound campaign evidence with:
+
+```sh
+python -m simba_mcp.evaluation.hosts.routing_report \
+  --report original.json --report continued.json --output campaign.json
+```
+
+This reporting command makes no provider calls and refuses to overwrite output.
+Supply every report in chronological order, starting with the original. It checks
+frozen inputs/calibration, identical protocol, source-transition review bindings,
+exact predecessor file hashes, completed trial identities and carried spending.
+All interrupted attempts remain in the campaign ledger, attempt outcomes and
+measurements. Completed tasks cannot be repeated under a new report. Unknown
+attempt usage keeps the cumulative reservation and prevents a paired saving;
+restarting successfully cannot erase it. Missing main-agent billing also remains
+unknown rather than becoming zero cost. Scores and original files are preserved.
 
 ## Frozen task selection and reporting
 

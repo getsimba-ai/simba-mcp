@@ -6,6 +6,7 @@ in this comparison; domain calls continue through the existing fixture dispatch.
 """
 
 import asyncio
+import math
 import sys
 from contextlib import asynccontextmanager
 from time import perf_counter
@@ -128,7 +129,18 @@ def complete_task_usage(session, attempts):
     main_known = (
         bool(usage)
         and session.get("stop") in ("end_turn", "max_tokens", "turn_limit")
-        and all(type(row.get("input_tokens")) is int and row["input_tokens"] >= 0 for row in usage)
+        and type(session.get("cost_usd")) in (int, float)
+        and math.isfinite(session["cost_usd"])
+        and session["cost_usd"] >= 0
+        and all(
+            type(row.get("input_tokens")) is int
+            and row["input_tokens"] >= 0
+            and all(
+                type(row.get(key, 0)) is int and row.get(key, 0) >= 0
+                for key in ("cache_read_input_tokens", "cache_creation_input_tokens")
+            )
+            for row in usage
+        )
     )
     return {
         "routing": routing,
@@ -144,7 +156,7 @@ def complete_task_usage(session, attempts):
             else None
         ),
         "total_cost_usd": (
-            session.get("cost_usd", 0) + routing["cost_usd"]
+            session["cost_usd"] + routing["cost_usd"]
             if main_known and routing["cost_usd"] is not None
             else None
         ),

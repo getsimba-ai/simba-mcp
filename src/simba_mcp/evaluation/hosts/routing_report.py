@@ -1,11 +1,16 @@
 """Descriptive paired routing measurements; never provider or release acceptance."""
 
+import hashlib
+import json
 import math
 import random
 from collections import Counter, defaultdict
+from copy import deepcopy
+from pathlib import Path
 from statistics import mean, median
 
 from ..experiments import fingerprint
+from .routing import complete_task_usage
 
 METRICS = ("total_input_tokens", "total_cost_usd", "seconds")
 
@@ -199,3 +204,151 @@ def paired_routing_report(rows, families, *, samples, seed=20261006, resamples=1
     }
     report["weighting"] = "Equal families; mean tasks and paired repetitions within family"
     return report
+
+
+def routing_campaign_report(paths):
+    """Combine an exact ordered continuation chain, retaining every billed attempt.
+
+    This is reporting only. It never resumes sessions, settles reservations,
+    changes scores or grants provider/release acceptance.
+    """
+    from .workflow_packet import _reject_constant, _unique_object
+
+    records = []
+    for path in paths:
+        raw = Path(path).read_bytes()
+        report = json.loads(raw, object_pairs_hook=_unique_object, parse_constant=_reject_constant)
+        records.append((hashlib.sha256(raw).hexdigest(), report))
+    if not records:
+        raise ValueError("An ordered report chain is required")
+    first = records[0][1]
+    if first["configuration"].get("continuation"):
+        raise ValueError("Campaign requires the original report, not a resumed subset")
+    config = deepcopy(first["configuration"])
+    if "routing_comparison" not in config:
+        raise ValueError("Campaign requires routing comparison reports")
+    attempts = defaultdict(list)
+    completed = set()
+    previous_hash, previous = None, None
+    for report_hash, report in records:
+        frozen, inputs = report["frozen_experiment"], report["experiment_inputs"]
+        if (
+            frozen["inputs_sha256"] != fingerprint(inputs)
+            or frozen["calibration_sha256"] != fingerprint(report["calibration"])
+            or any(
+                inputs[key] != report[key]
+                for key in ("configuration", "tasks", "catalogue", "guidance")
+            )
+        ):
+            raise ValueError("Report changed its frozen inputs or calibration")
+        current_config = deepcopy(report["configuration"])
+        continuation = current_config.pop("continuation", None)
+        if current_config != config or any(
+            report[key] != first[key] for key in ("tasks", "catalogue", "guidance", "calibration")
+        ):
+            raise ValueError("Campaign changed its frozen protocol")
+        ledger = report["budget"]
+        if any(not _number(ledger.get(key)) for key in ("cap", "prior", "charged", "reserved")):
+            raise ValueError("Campaign ledger is invalid")
+        if ledger["cap"] != first["budget"]["cap"]:
+            raise ValueError("Campaign changed the authorised cap")
+        if previous is not None:
+            transition = (continuation or {}).get("source_transition", {})
+            if (
+                previous.get("status") != "stopped"
+                or (continuation or {}).get("previous_report_sha256") != previous_hash
+                or transition.get("verified") is not True
+                or not transition.get("rationale")
+                or transition.get("previous_report_sha256") != previous_hash
+                or transition.get("previous_source_sha256")
+                != previous["frozen_experiment"]["source_sha256"]
+                or transition.get("current_source_sha256") != frozen["source_sha256"]
+                or ledger["prior"] + 1e-9
+                < sum(previous["budget"][key] for key in ("prior", "charged", "reserved"))
+                or {(key[0], key[2], key[1]) for key in continuation.get("completed_trials", [])}
+                != completed
+            ):
+                raise ValueError("Campaign broke its continuation chain or lost spending")
+        seen = set()
+        for row in report["trials"]:
+            key = (row.get("case"), row.get("repetition"), row.get("view"))
+            if key in seen or key in completed:
+                raise ValueError("Campaign repeats a completed trial")
+            seen.add(key)
+            attempts[key].append(deepcopy(row))
+            if "trajectory" in row:
+                if row.get("outcome") not in (
+                    "pass",
+                    "fail",
+                    "review",
+                ) or "final_text" not in row.get("session", {}):
+                    raise ValueError("Campaign has incomplete terminal evidence")
+                completed.add(key)
+        previous_hash, previous = report_hash, report
+    combined = []
+    for histories in attempts.values():
+        row = deepcopy(histories[-1])
+        usage = [
+            complete_task_usage(attempt.get("session", {}), attempt.get("routing_attempts", []))
+            for attempt in histories
+        ]
+        known = all(item["accounting_complete"] for item in usage)
+        row["complete_task_usage"] = {
+            "accounting_complete": known,
+            **{
+                metric: sum(item[metric] for item in usage)
+                if known and all(_number(item.get(metric)) for item in usage)
+                else None
+                for metric in METRICS
+            },
+        }
+        row["routing_attempts"] = [
+            attempt for history in histories for attempt in history.get("routing_attempts", [])
+        ]
+        row["campaign_attempt_count"] = len(histories)
+        combined.append(row)
+    routing = config["routing_comparison"]
+    measured = paired_routing_report(
+        combined, routing["report_families"], samples=first["experiment_inputs"]["samples"]
+    )
+    measured["campaign"] = {
+        "report_sha256": [digest for digest, _ in records],
+        "attempt_count": sum(len(history) for history in attempts.values()),
+        "restarted_trials": sum(len(history) > 1 for history in attempts.values()),
+        "attempt_outcomes": dict(
+            Counter(
+                row.get("outcome", "execution_error")
+                for history in attempts.values()
+                for row in history
+            )
+        ),
+        "ledger": deepcopy(records[-1][1]["budget"]),
+        "cumulative_spend_and_reservations_usd": sum(
+            records[-1][1]["budget"][key] for key in ("prior", "charged", "reserved")
+        ),
+        "status": records[-1][1].get("status"),
+        "policy": "All attempts included; unknown interrupted usage prevents paired savings",
+    }
+    return measured
+
+
+def main():
+    """Report archived evidence without provider calls or overwriting artefacts."""
+    import argparse
+
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--report", type=Path, action="append", required=True, help="Report path, original first"
+    )
+    parser.add_argument("--output", type=Path, required=True)
+    args = parser.parse_args()
+    if args.output.exists():
+        raise ValueError("Refusing to overwrite campaign evidence")
+    result = routing_campaign_report(args.report)
+    with args.output.open("x", encoding="utf-8") as stream:
+        json.dump(result, stream, indent=2, sort_keys=True, allow_nan=False)
+        stream.write("\n")
+
+
+if __name__ == "__main__":
+    main()
