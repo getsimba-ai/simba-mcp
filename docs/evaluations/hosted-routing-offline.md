@@ -46,9 +46,9 @@ attempts. Any packet used to choose a threshold becomes selection evidence.
 | Independent labels | NOT RUN | Distinct recorded reviewer required for verified labels; actual review absent |
 | Grader state handling | PASS in regression tests | Correct/wrong, abstention, invalid/missing attempts and unreviewed labels remain distinct |
 | Aggregate accounting | PASS in regression tests | Eligible missing/error attempts remain in coverage denominator; unreviewed labels excluded from measured precision |
-| Uncertainty | PARTIAL | Wilson classification intervals and descriptive family-clustered paired task bootstrap exist; confidence reliability and live uncertainty remain unqualified |
-| Oracle isolation | PARTIAL | Case contract separates request and labels; provider path must be audited to send request only |
-| Trace/version freeze | PARTIAL | Case/result digests and grader version are recorded; prospective campaign/attempt integration outstanding |
+| Uncertainty | PARTIAL | Wilson classification intervals, fixed confidence-band observed accuracy and descriptive family-clustered paired task bootstrap exist; actual confidence reliability and live uncertainty remain unqualified |
+| Oracle isolation | PASS offline | Classification mode passes only request text into the real MCP handler. Mock transport verifies exact backend body; backend ProviderPool constructs only model/input/trusted questions, with its separate provider credential |
+| Trace/version freeze | PASS offline | Classification packets, question, source, calibration and price are frozen before any client opens; shared adapter checkpoints before submission; campaign lineage retains exact report hashes |
 | Paid accounting | PASS in synthetic regression tests | Shared host Budget reserves/settles Decisions alongside main-agent work. CLI continuation carries billed failures and unknown reservations, rejects lost prior spend, preserves original reports and skips completed trials. Actual provider billing remains unqualified |
 | External provider qualification | NOT RUN | Account access, actual schema/usage and latency not tested |
 | Paired complete tasks | NOT RUN | Frozen public 24-task selection packet and reporter pass offline checks; three repetitions per arm and actual providers remain unrun |
@@ -81,6 +81,52 @@ premiums. The [Decisions guide](https://developers.openai.com/api/docs/guides/de
 checked 6 October 2026, lists a base input price of US$0.10 per million and says
 regional premiums apply. The ledger rejects a rate below that base. A successful
 mock settlement does not verify account pricing or provider access.
+
+## Classification mode and review packet
+
+The existing host entry point supports an offline packet without opening provider
+or backend clients:
+
+```sh
+python -m simba_mcp.evaluation.hosts --routing-classification development \
+  --routing-dry-run --samples 1 --cap-usd 0 --output development-not-run.json
+```
+
+Use `selection_validation` for the separate 120-case packet. Every case remains
+`NOT_RUN`; proposed labels do not turn into measured correctness. Do not overwrite
+these reports or claim their mechanical generation qualifies a provider.
+
+Network mode requires an explicit `--routing-label-packet` containing a complete
+JSON list of reviewed `RoutingCase` objects and `--routing-calibration-review`.
+The review object has exactly `passed`, `reviewer`, `packet_sha256`,
+`grader_version` and `rationale`. Its packet digest is `fingerprint` of the
+validated case list; reviewer identity must be distinct from all case authors.
+Every case records verified label status and a distinct reviewer. These are
+recorded review assertions, not proof that review happened. Test fixture reviewer
+strings never count as actual review. Actual label and grader review remain pending.
+
+Keep `--samples 1`: repeated attempts are not independent classification cases.
+Supply the qualified backend origin, explicit account price and existing backend
+key environment input. Classification shares the existing Budget and real MCP
+handler/backend adapter; it does not open a main-agent model or call OpenAI directly.
+No label, expected choice, author or rationale is sent to the backend. The backend
+pool's body contains only model, submitted text and the trusted fixed question.
+Network mode spaces submissions by at least 6.1 seconds for default account
+admission, rather than exhausting the ten-per-minute limit. It never retries an
+attempt automatically. Stop files are checked before new submissions. Interrupted
+attempts retain reservations and `EXECUTION_ERROR`; later unsubmitted cases remain
+`NOT_RUN`. Classification continuation is not implemented: a new campaign must
+carry previous charged and reserved spend explicitly and retain the original report.
+
+The summary retains precision/coverage Wilson intervals, category confusions and
+ten fixed confidence bands with mean confidence and observed accuracy intervals.
+Alternative sufficient labels remain a set. Unreviewed labels, missing attempts
+and execution errors cannot populate accuracy bins. The provider documents a
+separate confidence field alongside option probabilities, so these are observed
+score bands, not multiclass probability calibration. The backend omits confidence
+on abstention, which limits this analysis to returned classifications. It cannot
+establish calibration below the deployed threshold or tune that threshold from
+unobserved scores. See the [answer interpretation guidance](https://developers.openai.com/api/docs/guides/decisions#interpret-the-answers), checked 6 October 2026.
 
 ## Paired runner configuration
 

@@ -28,6 +28,7 @@ from ..experiments import (
     verify_experiment,
 )
 from ..result_cases import FIXTURE_VERSION
+from ..routing import RoutingCase, grade_routing, summarise_routing
 from .anthropic import client, definitions, session
 from .budget import Budget
 from .models import GROK, MODEL, SONNET, model_configuration
@@ -49,7 +50,218 @@ from .scenarios import SyntheticDispatch, answer, rlc_tasks, role_tasks, tasks
 from .workflow_packet import load_workflow_packet
 
 
+def _routing_origin(value):
+    origin = urlsplit(value or "")
+    if (
+        origin.scheme not in ("http", "https")
+        or not origin.hostname
+        or origin.username
+        or origin.password
+        or origin.query
+        or origin.fragment
+        or origin.path not in ("", "/")
+        or (origin.scheme == "http" and origin.hostname not in ("localhost", "127.0.0.1", "::1"))
+    ):
+        raise ValueError("Routing backend requires an HTTPS origin or loopback HTTP origin")
+
+
+async def classify_routing(args):
+    """Classification-only mode in the existing runner, sharing its routing ledger.
+
+    Proposed labels can produce an offline NOT_RUN packet. Paid classification
+    requires independently recorded label/calibration review, never self-review.
+    """
+    from ...guidance.routing import MODEL as routing_model
+    from ...guidance.routing import VERSION, question
+    from ..routing_cases import development_cases, selection_validation_cases
+
+    if args.output.exists():
+        raise ValueError("Refusing to overwrite evidence")
+    if any(
+        getattr(args, option, None)
+        for option in (
+            "routing_comparison",
+            "workflow_suite",
+            "workflow_packet",
+            "continue_from",
+            "results_robust",
+            "role_comparison",
+            "results_baseline",
+        )
+    ):
+        raise ValueError("Classification cannot combine host comparison protocols")
+    if args.samples != 1:
+        raise ValueError("Classification records exactly one attempt per case; use samples=1")
+    split = args.routing_classification
+    cases = development_cases() if split == "development" else selection_validation_cases()
+    packet_path = getattr(args, "routing_label_packet", None)
+    if packet_path:
+        from .workflow_packet import _reject_constant, _unique_object
+
+        cases = [
+            RoutingCase.model_validate(row)
+            for row in json.loads(
+                packet_path.read_text(encoding="utf-8"),
+                object_pairs_hook=_unique_object,
+                parse_constant=_reject_constant,
+            )
+        ]
+    if (
+        not cases
+        or len({case.id for case in cases}) != len(cases)
+        or len({case.request for case in cases}) != len(cases)
+        or any(case.split != split for case in cases)
+    ):
+        raise ValueError("Classification packet requires unique cases in the selected split")
+    if getattr(args, "case", None):
+        raise ValueError("Classification must retain the full frozen packet")
+    dry = getattr(args, "routing_dry_run", False)
+    interval = getattr(args, "routing_minimum_interval", 6.1)
+    if type(interval) not in (int, float) or not math.isfinite(interval) or interval < 6.1:
+        raise ValueError(
+            "Classification interval must be at least 6.1 seconds for default admission"
+        )
+    budget = Budget(args.cap_usd, args.prior_usd)
+    packet_hash = fingerprint([case.model_dump() for case in cases])
+    calibration = {"passed": False, "status": "NOT_RUN"}
+    if not dry:
+        _routing_origin(args.routing_backend_url)
+        budget._decision_rate(args.routing_input_rate)
+        if not os.environ.get("SIMBA_ROUTING_EVAL_API_KEY"):
+            raise ValueError("Classification requires a qualified synthetic backend account")
+        review_path = getattr(args, "routing_calibration_review", None)
+        if not review_path or any(case.label_status != "verified" for case in cases):
+            raise ValueError(
+                "Paid classification requires independently reviewed labels and calibration"
+            )
+        calibration = json.loads(review_path.read_text(encoding="utf-8"))
+        from ..routing import GRADER_VERSION
+
+        if (
+            set(calibration)
+            != {"passed", "reviewer", "packet_sha256", "grader_version", "rationale"}
+            or calibration.get("passed") is not True
+            or calibration.get("packet_sha256") != packet_hash
+            or calibration.get("grader_version") != GRADER_VERSION
+            or not isinstance(calibration.get("reviewer"), str)
+            or not calibration["reviewer"].strip()
+            or calibration["reviewer"] in {case.author for case in cases}
+            or not isinstance(calibration.get("rationale"), str)
+            or not calibration["rationale"].strip()
+        ):
+            raise ValueError("Classification calibration review is not independently hash-bound")
+    inputs = {
+        "purpose": "routing_classification",
+        "split": split,
+        "packet": [case.model_dump() for case in cases],
+        "packet_sha256": packet_hash,
+        "model": routing_model,
+        "question_version": VERSION,
+        "question_sha256": fingerprint(question()),
+        "backend_origin_sha256": fingerprint(getattr(args, "routing_backend_url", None)),
+        "input_rate_usd_per_million": getattr(args, "routing_input_rate", None),
+        "authorised_budget": {"cap_usd": args.cap_usd, "prior_usd": args.prior_usd},
+        "dry_run": dry,
+        "minimum_interval_seconds": interval,
+    }
+    report = {
+        "status": "NOT_RUN" if dry else "running",
+        "inputs": inputs,
+        "calibration": calibration,
+        "frozen": {
+            "inputs_sha256": fingerprint(inputs),
+            "source_sha256": source_fingerprint(),
+            "calibration_sha256": fingerprint(calibration),
+        },
+        "trials": [
+            {"case_id": case.id, "routing_attempts": [], "score": grade_routing(case, None)}
+            for case in cases
+        ],
+    }
+
+    def save():
+        if (
+            report["frozen"]["inputs_sha256"] != fingerprint(inputs)
+            or report["frozen"]["source_sha256"] != source_fingerprint()
+            or report["frozen"]["calibration_sha256"] != fingerprint(calibration)
+        ):
+            raise ValueError("Classification frozen inputs changed")
+        report["budget"] = asdict(budget)
+        report["summary"] = summarise_routing([row["score"] for row in report["trials"]])
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        temporary = args.output.with_suffix(".tmp")
+        temporary.write_text(json.dumps(report, indent=2, allow_nan=False) + "\n", encoding="utf-8")
+        temporary.replace(args.output)
+
+    save()
+    if dry:
+        return
+    server = create_server("compact", profile="full")
+    visible = [tool.name for tool in await server.list_tools()]
+    active = None
+    try:
+        async with routing_backend_client(
+            args.routing_backend_url, os.environ["SIMBA_ROUTING_EVAL_API_KEY"]
+        ) as backend:
+            for index, (case, row) in enumerate(zip(cases, report["trials"], strict=True)):
+                if index:
+                    await asyncio.sleep(interval)
+                if getattr(args, "stop_file", None) and args.stop_file.exists():
+                    raise RuntimeError("Classification stopped before submission")
+
+                def checkpoint(attempts, row=row):
+                    row["routing_attempts"] = attempts
+                    save()
+
+                dispatch = RoutingDispatch(
+                    None,
+                    backend,
+                    budget,
+                    checkpoint,
+                    visible=visible,
+                    input_rate=args.routing_input_rate,
+                )
+                active = (case, row)
+                result, is_error = await dispatch("recommend_workflow", {"request": case.request})
+                # Remove only the MCP presentation fields; unexpected fields stay invalid.
+                envelope = {
+                    key: value
+                    for key, value in result.items()
+                    if key
+                    not in {
+                        "guidance",
+                        "suggested_tools",
+                        "profile_limited",
+                        "advisory_only",
+                        "next_action",
+                    }
+                }
+                row["score"] = grade_routing(
+                    case, envelope, error="backend_error" if is_error else None
+                )
+                save()
+                if is_error:
+                    raise RuntimeError("Classification backend refused; evidence retained")
+                active = None
+        report["status"] = "complete"
+    except BaseException as error:
+        report["status"] = "stopped"
+        report["error_type"] = type(error).__name__
+        if active is not None and active[1]["score"]["status"] == "NOT_RUN":
+            active[1]["score"] = grade_routing(active[0], None, error=type(error).__name__)
+        raise
+    finally:
+        save()
+
+
 async def run(args):
+    if getattr(args, "routing_classification", None):
+        return await classify_routing(args)
+    if any(
+        getattr(args, option, None)
+        for option in ("routing_dry_run", "routing_label_packet", "routing_calibration_review")
+    ):
+        raise ValueError("Classification settings require explicit classification mode")
     if args.output.exists():
         raise ValueError("Refusing to overwrite evidence; carry prior spend into a new run")
     budget = Budget(
@@ -103,20 +315,7 @@ async def run(args):
             raise ValueError("Routing comparison cannot combine separate comparison protocols")
         if not rlc or args.mode != "eager" or getattr(args, "case_order_seed", None) is None:
             raise ValueError("Routing comparison requires frozen RLC eager mode and an order seed")
-        origin = urlsplit(routing_url or "")
-        if (
-            origin.scheme not in ("http", "https")
-            or not origin.hostname
-            or origin.username
-            or origin.password
-            or origin.query
-            or origin.fragment
-            or origin.path not in ("", "/")
-            or (
-                origin.scheme == "http" and origin.hostname not in ("localhost", "127.0.0.1", "::1")
-            )
-        ):
-            raise ValueError("Routing backend requires an HTTPS origin or loopback HTTP origin")
+        _routing_origin(routing_url)
         budget._decision_rate(routing_rate)
         if not os.environ.get("SIMBA_ROUTING_EVAL_API_KEY"):
             raise ValueError("Routing comparison requires a qualified synthetic backend account")
@@ -827,6 +1026,28 @@ async def run(args):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--routing-classification", choices=("development", "selection_validation"))
+    parser.add_argument(
+        "--routing-minimum-interval",
+        type=float,
+        default=6.1,
+        help="Classification pacing in seconds; minimum 6.1 for default admission",
+    )
+    parser.add_argument(
+        "--routing-dry-run",
+        action="store_true",
+        help="Freeze NOT_RUN classification evidence without provider clients",
+    )
+    parser.add_argument(
+        "--routing-label-packet",
+        type=Path,
+        help="Full JSON list of RoutingCase labels, reviewed before paid calls",
+    )
+    parser.add_argument(
+        "--routing-calibration-review",
+        type=Path,
+        help="Independent packet/hash-bound grader review",
+    )
     parser.add_argument(
         "--routing-comparison",
         action="store_true",

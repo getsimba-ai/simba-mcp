@@ -109,8 +109,41 @@ def test_summary_does_not_treat_unreviewed_labels_or_repetitions_as_evidence():
     report = summarise_routing([score])
     assert report["routed_precision"]["rate"] is None
     assert report["unreviewed_case_count"] == 1
+    assert not report["category_confusions"]
+    assert all(
+        bin["observed_accuracy"]["denominator"] == 0
+        for bin in report["confidence_reliability"]["routed"]
+    )
     with pytest.raises(ValueError, match="one attempt"):
         summarise_routing([score, score])
+
+
+def test_confusion_and_confidence_bins_use_reviewed_labels_and_include_confident_errors():
+    scores = [
+        grade_routing(case(id="correct_case"), result()),
+        grade_routing(case(id="wrong_case"), result("mmm")),
+        grade_routing(case(id="missing_case"), None),
+        grade_routing(case(id="unreviewed_case", label_status="proposed", reviewer=None), result()),
+        grade_routing(case(id="abstained_case"), fallback("low_confidence")),
+    ]
+    report = summarise_routing(scores)
+    last = report["confidence_reliability"]["routed"][-1]
+    assert last["mean_confidence"] == 0.96
+    assert last["observed_accuracy"]["rate"] == 0.5
+    assert last["observed_accuracy"]["denominator"] == 2
+    assert report["category_confusions"] == [
+        {"expected_choices": ["results"], "selected_choice": "abstained", "count": 1},
+        {"expected_choices": ["results"], "selected_choice": "mmm", "count": 1},
+        {"expected_choices": ["results"], "selected_choice": "results", "count": 1},
+    ]
+
+
+def test_confidence_one_is_in_last_bin_and_alternatives_are_not_forced_into_one_label():
+    answer = {**result("priors"), "confidence": 1.0}
+    score = grade_routing(case(expected_choices=["results", "priors"]), answer)
+    report = summarise_routing([score])
+    assert report["confidence_reliability"]["routed"][-1]["observed_accuracy"]["rate"] == 1
+    assert report["category_confusions"][0]["expected_choices"] == ["priors", "results"]
 
 
 def test_selection_packet_is_separate_and_labels_are_not_self_verified():

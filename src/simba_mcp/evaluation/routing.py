@@ -56,6 +56,7 @@ def grade_routing(case: RoutingCase, result: dict | None, *, error: str | None =
         "label_status": case.label_status,
         "family": case.family,
         "eligible_single_domain": case.eligible_single_domain,
+        "expected_choices": list(case.expected_choices),
     }
     if error:
         return {**base, "status": "EXECUTION_ERROR", "reason": "execution_failed"}
@@ -69,6 +70,7 @@ def grade_routing(case: RoutingCase, result: dict | None, *, error: str | None =
     base["result_sha256"] = digest
     base["selected_choice"] = parsed.workflow
     base["confidence"] = parsed.confidence
+    base["outcome"] = parsed.outcome
     if case.label_status != "verified":
         return {**base, "status": "NEEDS_REVIEW", "reason": "unverified_label"}
     if parsed.outcome == "fallback":
@@ -109,6 +111,12 @@ def summarise_routing(scores):
     reviewed = [row for row in scores if row["label_status"] == "verified"]
     routed = [row for row in reviewed if row.get("routed")]
     eligible = [row for row in reviewed if row["eligible_single_domain"]]
+    classified = [row for row in reviewed if type(row.get("correct")) is bool]
+    confusion = Counter(
+        ("|".join(sorted(row["expected_choices"])), row.get("selected_choice") or "abstained")
+        for row in reviewed
+        if row.get("result_sha256")
+    )
     return {
         "grader_version": GRADER_VERSION,
         "counts": dict(Counter(row["status"] for row in scores)),
@@ -118,6 +126,46 @@ def summarise_routing(scores):
         ),
         "reviewed_case_count": len(reviewed),
         "unreviewed_case_count": len(scores) - len(reviewed),
+        "category_confusions": [
+            {"expected_choices": expected.split("|"), "selected_choice": selected, "count": count}
+            for (expected, selected), count in sorted(confusion.items())
+        ],
+        "confidence_reliability": {
+            "all_classified": _confidence_bins(classified),
+            "routed": _confidence_bins([row for row in classified if row.get("routed")]),
+            "limitations": (
+                "Observed accuracy by separate confidence score, not option-probability calibration. "
+                "Backend abstentions omit confidence; these bins condition on returned classifications. "
+                "Proposed labels, missing attempts and execution errors cannot populate accuracy bins."
+            ),
+        },
+        "score_sha256": fingerprint(scores),
         "acceptance": "NOT_ESTABLISHED",
         "boundary": "Routing classification only; not complete-task or scientific acceptance",
     }
+
+
+def _confidence_bins(rows):
+    """Ten fixed score bins; confidence is not equated to choice probability."""
+    binned = [[] for _ in range(10)]
+    for row in rows:
+        confidence = row.get("confidence")
+        if (
+            type(confidence) not in (int, float)
+            or not math.isfinite(confidence)
+            or not 0 <= confidence <= 1
+        ):
+            raise ValueError("Classified score requires bounded finite confidence")
+        binned[min(9, int(confidence * 10))].append(row)
+    return [
+        {
+            "lower": index / 10,
+            "upper": (index + 1) / 10,
+            "upper_inclusive": index == 9,
+            "mean_confidence": sum(row["confidence"] for row in members) / len(members)
+            if members
+            else None,
+            "observed_accuracy": _rate(sum(row["correct"] for row in members), len(members)),
+        }
+        for index, members in enumerate(binned)
+    ]
