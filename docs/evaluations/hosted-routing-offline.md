@@ -1,8 +1,8 @@
 # Hosted routing: offline protocol and audit
 
 Protocol: `hosted-routing-v1`. Question: `workflow-v1`. Grader:
-`routing-grader-v1`. This is preparation and contract evidence, not provider or
-complete-task acceptance.
+`routing-grader-v1`. This records offline preparation and bounded provider smoke
+evidence, not hosted or complete-task acceptance.
 
 ## Ownership and primary outcome
 
@@ -37,20 +37,42 @@ development packet can be relabelled as an independently authored final holdout.
 Version and hash cases before observing outputs; retain original scores and failed
 attempts. Any packet used to choose a threshold becomes selection evidence.
 
+## Independent review update, 6 October 2026
+
+The original proposed-label packets above remain historical artefacts. A distinct
+review agent labelled all 200 shuffled requests without reading authored labels,
+split assignments or provider outputs. It adjudicated eleven initially flagged
+cases against the fixed rubric and canonical guidance/tool contracts. No case
+remains dependent on owner input. Six cases retain justified alternative category
+sets; two other original labels changed before any classification scoring.
+Reviewed packets retain the original development/selection splits and authorship.
+They are frozen with packet-bound review manifests in private evaluation evidence.
+
+The same reviewer executed 22 mechanical checks of the actual scorer, including
+wrong answers, abstention, missing/error/unreviewed states, alternative labels,
+coverage denominators, confidence bins, digest sensitivity and Wilson intervals.
+No mechanical defect was found. This establishes independent agent review, not
+human acceptance, empirical confidence calibration or an independent final packet.
+
+One real Decisions smoke request through the MCP handler and backend service
+returned a valid results recommendation and 317 input tokens. Its transport and
+admission store were synthetic; this does not qualify deployed authentication,
+distributed Redis behaviour, complete-task quality or production latency.
+
 ## Audit gates
 
 | Gate | Status | Evidence and remaining work |
 | --- | --- | --- |
 | Fixed non-executable contract | PASS in targeted tests | Documented categories, strict backend envelope and visible-tool intersection |
 | Development and selection breadth | PARTIAL | 80 development and 120 separate selection requests cover ten category families; representative production weighting unknown |
-| Independent labels | NOT RUN | Distinct recorded reviewer required for verified labels; actual review absent |
+| Independent labels | PASS for reviewed packets | Actual blind agent review and fixed-rubric adjudication completed for all 200 cases before scoring; not human acceptance or final holdout authorship |
 | Grader state handling | PASS in regression tests | Correct/wrong, abstention, invalid/missing attempts and unreviewed labels remain distinct |
 | Aggregate accounting | PASS in regression tests | Eligible missing/error attempts remain in coverage denominator; unreviewed labels excluded from measured precision |
 | Uncertainty | PARTIAL | Wilson classification intervals, fixed confidence-band observed accuracy and descriptive family-clustered paired task bootstrap exist; actual confidence reliability and live uncertainty remain unqualified |
 | Oracle isolation | PASS offline | Classification mode passes only request text into the real MCP handler. Mock transport verifies exact backend body; backend ProviderPool constructs only model/input/trusted questions, with its separate provider credential |
 | Trace/version freeze | PASS offline | Classification packets, question, source, calibration and price are frozen before any client opens; shared adapter checkpoints before submission; campaign lineage retains exact report hashes |
 | Paid accounting | PASS in synthetic regression tests | Shared host Budget reserves/settles Decisions alongside main-agent work. CLI continuation carries billed failures and unknown reservations, rejects lost prior spend, preserves original reports and skips completed trials. Actual provider billing remains unqualified |
-| External provider qualification | NOT RUN | Account access, actual schema/usage and latency not tested |
+| External provider qualification | PARTIAL | One real smoke request validates account access, schema and usage; authenticated hosted path and broad live behaviour remain unqualified |
 | Paired complete tasks | NOT RUN | Frozen public 24-task selection packet and reporter pass offline checks; three repetitions per arm and actual providers remain unrun |
 | Named-client acceptance | NOT RUN | Package, deployment, actual adoption and fallback behaviour require observed evidence |
 
@@ -62,8 +84,8 @@ categories may be listed where justified before freezing the packet.
 ## Resumption and spend
 
 Prepare the source candidate, label-review packet, calibration report and trace
-format before any paid comparison. The proposed US$25 cumulative cap is pending
-authorisation. Carry billed failures and unknown charges across attempts and
+format before any paid comparison. The US$25 cumulative cap and independent
+review agent were explicitly authorised. Carry billed failures and unknown charges across attempts and
 protocol versions. No provider or model expansion is implied by this protocol.
 Synthetic successful routing does not establish scientific validity, publication,
 deployment or complete-task improvement.
