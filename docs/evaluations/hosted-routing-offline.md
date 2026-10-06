@@ -49,7 +49,7 @@ attempts. Any packet used to choose a threshold becomes selection evidence.
 | Uncertainty | PARTIAL | Wilson intervals for case proportions; complete-task paired uncertainty and confidence reliability not implemented |
 | Oracle isolation | PARTIAL | Case contract separates request and labels; provider path must be audited to send request only |
 | Trace/version freeze | PARTIAL | Case/result digests and grader version are recorded; prospective campaign/attempt integration outstanding |
-| Paid accounting | PARTIAL | Shared host Budget now reserves/settles Decisions alongside main-agent work; missing usage remains reserved. Adapter mechanics pass offline; CLI/checkpoint/continuation integration remains outstanding |
+| Paid accounting | PASS in synthetic regression tests | Shared host Budget reserves/settles Decisions alongside main-agent work. CLI continuation carries billed failures and unknown reservations, rejects lost prior spend, preserves original reports and skips completed trials. Actual provider billing remains unqualified |
 | External provider qualification | NOT RUN | Account access, actual schema/usage and latency not tested |
 | Paired complete tasks | NOT RUN | Planned 24 tasks, three repetitions per arm; main model, profile, fixtures and cache conditions held fixed |
 | Named-client acceptance | NOT RUN | Package, deployment, actual adoption and fallback behaviour require observed evidence |
@@ -81,3 +81,30 @@ premiums. The [Decisions guide](https://developers.openai.com/api/docs/guides/de
 checked 6 October 2026, lists a base input price of US$0.10 per million and says
 regional premiums apply. The ledger rejects a rate below that base. A successful
 mock settlement does not verify account pricing or provider access.
+
+## Paired runner configuration
+
+The existing `python -m simba_mcp.evaluation.hosts` entry point accepts
+`--routing-comparison`, `--routing-backend-url` and `--routing-input-rate`.
+This mode requires `--workflow-suite rlc01`, eager tools and a fixed
+`--case-order-seed`. Select the existing Grok model explicitly. Set
+`SIMBA_ROUTING_EVAL_API_KEY` for the qualified synthetic backend account and
+`XAI_API_KEY` for the main agent. These are environment inputs, never packet
+fields. HTTPS origins are required except for loopback HTTP; credentials in URLs
+and unrelated comparison protocols are rejected before a report or provider call.
+
+Both arms use the same eager domain tools and synthetic fixtures. The baseline
+omits only `recommend_workflow`; the candidate adds the optional advisory tool.
+Repetition order alternates arms, while task order uses the frozen seed. The
+configuration freezes the backend origin digest, question/version digest, explicit
+account price and catalogue policy. Actual adoption is recorded in
+`routing_attempts`; exposing the tool does not force its use or imply savings.
+
+Use the existing `--continue-from` and `--continuation-review` protocol after an
+interruption, writing a new output. Carry at least the previous ledger's prior,
+charged and reserved amounts through `--prior-usd`. A completed workflow trial
+uses its own terminal evidence contract; it is not required to contain the
+results-only grader fields. Unknown in-flight requests remain charged against the
+cap when unfinished trials restart. Reports remain non-accepting until the packet,
+grading and independent outcome review gates pass. The 24-task selection packet,
+paired uncertainty analysis and actual provider comparison remain outstanding.

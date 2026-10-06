@@ -1,4 +1,4 @@
-"""Run bounded synthetic host comparisons. Never connects to a live backend."""
+"""Run bounded synthetic host comparisons, optionally through a routing backend."""
 
 import argparse
 import asyncio
@@ -9,9 +9,11 @@ import os
 import random
 import secrets
 import time
+from contextlib import AsyncExitStack
 from copy import deepcopy
 from dataclasses import asdict
 from pathlib import Path
+from urllib.parse import urlsplit
 
 from ...guidance import read_guidance
 from ...measurements import provenance
@@ -41,6 +43,7 @@ from .result_selection import (
     validation_tasks,
 )
 from .roles import ROLE_CASES
+from .routing import RoutingDispatch, complete_task_usage, routing_backend_client
 from .scenarios import SyntheticDispatch, answer, rlc_tasks, role_tasks, tasks
 from .workflow_packet import load_workflow_packet
 
@@ -82,6 +85,42 @@ async def run(args):
     baseline_path = getattr(args, "results_baseline", None)
     robust = getattr(args, "results_robust", False)
     rlc = getattr(args, "workflow_suite", None) == "rlc01"
+    routing_comparison = getattr(args, "routing_comparison", False)
+    routing_url = getattr(args, "routing_backend_url", None)
+    routing_rate = getattr(args, "routing_input_rate", None)
+    if routing_comparison:
+        if any(
+            getattr(args, option, None)
+            for option in (
+                "role_comparison",
+                "results_baseline",
+                "results_robust",
+                "results_model_diagnostic",
+                "results_acceptance",
+            )
+        ):
+            raise ValueError("Routing comparison cannot combine separate comparison protocols")
+        if not rlc or args.mode != "eager" or getattr(args, "case_order_seed", None) is None:
+            raise ValueError("Routing comparison requires frozen RLC eager mode and an order seed")
+        origin = urlsplit(routing_url or "")
+        if (
+            origin.scheme not in ("http", "https")
+            or not origin.hostname
+            or origin.username
+            or origin.password
+            or origin.query
+            or origin.fragment
+            or origin.path not in ("", "/")
+            or (
+                origin.scheme == "http" and origin.hostname not in ("localhost", "127.0.0.1", "::1")
+            )
+        ):
+            raise ValueError("Routing backend requires an HTTPS origin or loopback HTTP origin")
+        budget._decision_rate(routing_rate)
+        if not os.environ.get("SIMBA_ROUTING_EVAL_API_KEY"):
+            raise ValueError("Routing comparison requires a qualified synthetic backend account")
+    elif routing_url is not None or routing_rate is not None:
+        raise ValueError("Routing settings require explicit routing comparison mode")
     session_timeout = getattr(args, "session_timeout_seconds", None)
     if session_timeout is not None and (not math.isfinite(session_timeout) or session_timeout <= 0):
         raise ValueError("Session timeout must be finite and positive")
@@ -296,6 +335,22 @@ async def run(args):
         }
     if workflow_packet is not None:
         report["configuration"]["workflow_packet"] = workflow_packet.freeze()
+    if routing_comparison:
+        from ...guidance.routing import MODEL as routing_model
+        from ...guidance.routing import VERSION as routing_version
+        from ...guidance.routing import question
+
+        report["configuration"]["routing_comparison"] = {
+            "version": "hosted-routing-v1",
+            "backend_origin_sha256": fingerprint(routing_url),
+            "model": routing_model,
+            "question_version": routing_version,
+            "question_sha256": fingerprint(question()),
+            "input_rate_usd_per_million": routing_rate,
+            "client_deadline_seconds": 3.25,
+            "arms": ["baseline", "candidate"],
+            "catalogue_policy": "Same eager domain catalogue; candidate adds advisory tool",
+        }
     if session_timeout is not None or rlc:
         report["configuration"]["session_timeout_seconds"] = (
             session_timeout if session_timeout is not None else 180.0
@@ -313,7 +368,11 @@ async def run(args):
     completed_trials = set()
     continuation_hash = None
     if continue_from:
-        if not robust or not guidance_arms or diagnostic or trial_filter:
+        if (
+            (not routing_comparison and (not robust or not guidance_arms))
+            or diagnostic
+            or trial_filter
+        ):
             raise ValueError("Continuation requires an unchanged robust paired comparison")
         previous_bytes = continue_from.read_bytes()
         previous = json.loads(previous_bytes)
@@ -355,7 +414,7 @@ async def run(args):
         valid_keys = {
             (case.id, view, rep)
             for case, _, _ in selected
-            for view in guidance_arms
+            for view in (["baseline", "candidate"] if routing_comparison else guidance_arms)
             for rep in range(args.samples)
         }
         completed_trials = {tuple(key) for key in previous_continuation.get("completed_trials", [])}
@@ -369,11 +428,15 @@ async def run(args):
             for row in previous["trials"]
             if "trajectory" in row
         )
+        result_case_ids = {case.id for case, _, _ in selected if isinstance(case, ResultTask)}
         for row in previous["trials"]:
+            terminal_fields = (
+                ("assertions", "passed", "outcome", "read_authorisation")
+                if row["case"] in result_case_ids
+                else ("fact_verdict", "passed", "outcome", "execution_trials")
+            )
             if "trajectory" in row and (
-                not all(
-                    key in row for key in ("assertions", "passed", "outcome", "read_authorisation")
-                )
+                not all(key in row for key in terminal_fields)
                 or "final_text" not in row.get("session", {})
             ):
                 raise ValueError("Continuation contains an incomplete terminal record")
@@ -392,7 +455,7 @@ async def run(args):
             "purpose": "development_smoke"
             if rlc and args.samples == 1
             else "model_selection_validation"
-            if diagnostic or selection_validation
+            if diagnostic or selection_validation or (routing_comparison and args.samples > 1)
             else "candidate_acceptance"
             if acceptance
             else "development",
@@ -458,7 +521,15 @@ async def run(args):
     save()
     try:
         verify()
-        async with host_client(os.environ[key_name]) as provider:
+        async with AsyncExitStack() as clients:
+            provider = await clients.enter_async_context(host_client(os.environ[key_name]))
+            backend_client = (
+                await clients.enter_async_context(
+                    routing_backend_client(routing_url, os.environ["SIMBA_ROUTING_EVAL_API_KEY"])
+                )
+                if routing_comparison
+                else None
+            )
             for rep, repetition in enumerate(schedule):
                 for case, prompt, expected in repetition:
                     result_case = isinstance(case, ResultTask)
@@ -476,6 +547,10 @@ async def run(args):
                             arms = [("eager", "candidate")]
                         if rep % 2:
                             arms.reverse()
+                    if routing_comparison:
+                        arms = [("eager", "baseline"), ("eager", "candidate")]
+                        if rep % 2:
+                            arms.reverse()
                     for mode, view in arms:
                         if (case.id, view, rep) in completed_trials:
                             continue
@@ -487,6 +562,10 @@ async def run(args):
                             else create_server("compact", profile=view)
                         )
                         visible = await arm_server.list_tools()
+                        if routing_comparison and view == "baseline":
+                            visible = [
+                                tool for tool in visible if tool.name != "recommend_workflow"
+                            ]
                         dispatch = SyntheticDispatch(
                             arm_server, case, allowed_tools=[t.name for t in visible]
                         )
@@ -530,6 +609,24 @@ async def run(args):
                                 else "catalogue"
                             )
                         report["trials"].append(row)
+                        if routing_comparison:
+                            row["routing_attempts"] = []
+                            if view == "candidate":
+
+                                def routing_checkpoint(attempts, row=row):
+                                    row["routing_attempts"] = attempts
+                                    save()
+                                    verify()
+
+                                dispatch = RoutingDispatch(
+                                    dispatch,
+                                    backend_client,
+                                    budget,
+                                    routing_checkpoint,
+                                    visible=[tool.name for tool in offered],
+                                    input_rate=routing_rate,
+                                    profile=tool_profile,
+                                )
                         if guidance_arms or rlc:
                             row["prompt"] = session_prompt
                             row["prompt_variant"] = "paraphrase" if paraphrased else "original"
@@ -537,6 +634,10 @@ async def run(args):
 
                         def checkpoint(record, row=row):
                             row["session"] = record
+                            if routing_comparison:
+                                row["complete_task_usage"] = complete_task_usage(
+                                    record, row["routing_attempts"]
+                                )
                             save()
                             verify()
 
@@ -680,7 +781,9 @@ async def run(args):
                     "Packet independence requires external review"
                     if workflow_packet is not None
                     else "Exposed synthetic cases",
-                    "Single arm",
+                    "Paired routing experiment; independent outcome review remains required"
+                    if routing_comparison
+                    else "Single arm",
                     "No production latency evidence",
                 ],
             }
@@ -704,6 +807,17 @@ async def run(args):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument(
+        "--routing-comparison",
+        action="store_true",
+        help="Optional hosted advisory tool versus baseline in frozen eager RLC mode",
+    )
+    parser.add_argument("--routing-backend-url", help="Qualified synthetic backend origin")
+    parser.add_argument(
+        "--routing-input-rate",
+        type=float,
+        help="Actual Decisions account input price in USD per million, including premiums",
+    )
     parser.add_argument(
         "--continue-from",
         type=Path,
