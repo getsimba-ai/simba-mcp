@@ -44,6 +44,7 @@ from .result_selection import (
 )
 from .roles import ROLE_CASES
 from .routing import RoutingDispatch, complete_task_usage, routing_backend_client
+from .routing_report import paired_routing_report
 from .scenarios import SyntheticDispatch, answer, rlc_tasks, role_tasks, tasks
 from .workflow_packet import load_workflow_packet
 
@@ -340,6 +341,15 @@ async def run(args):
         from ...guidance.routing import VERSION as routing_version
         from ...guidance.routing import question
 
+        packet_families = (
+            {
+                entry.contract.id: entry.family
+                for entry in workflow_packet.document.tasks
+                if entry.kind == "workflow" and entry.family
+            }
+            if workflow_packet is not None
+            else {}
+        )
         report["configuration"]["routing_comparison"] = {
             "version": "hosted-routing-v1",
             "backend_origin_sha256": fingerprint(routing_url),
@@ -350,6 +360,10 @@ async def run(args):
             "client_deadline_seconds": 3.25,
             "arms": ["baseline", "candidate"],
             "catalogue_policy": "Same eager domain catalogue; candidate adds advisory tool",
+            "report_families": {
+                c.id: packet_families.get(c.id) or getattr(c, "family", "") or c.id
+                for c, _, _ in selected
+            },
         }
     if session_timeout is not None or rlc:
         report["configuration"]["session_timeout_seconds"] = (
@@ -769,6 +783,12 @@ async def run(args):
         report["error_type"] = type(error).__name__
         raise
     finally:
+        if routing_comparison:
+            report["routing_measurements"] = paired_routing_report(
+                report["trials"],
+                report["configuration"]["routing_comparison"]["report_families"],
+                samples=args.samples,
+            )
         if rlc:
             report["assessment"] = {
                 "accepted": False,

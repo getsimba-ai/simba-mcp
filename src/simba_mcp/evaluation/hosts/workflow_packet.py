@@ -85,6 +85,7 @@ class ResultContract(StrictModel):
 
 class WorkflowEntry(StrictModel):
     kind: Literal["workflow"]
+    family: str = ""
     prompt: str = Field(min_length=1)
     expected: dict = Field(min_length=1)
     contract: Case

@@ -46,12 +46,12 @@ attempts. Any packet used to choose a threshold becomes selection evidence.
 | Independent labels | NOT RUN | Distinct recorded reviewer required for verified labels; actual review absent |
 | Grader state handling | PASS in regression tests | Correct/wrong, abstention, invalid/missing attempts and unreviewed labels remain distinct |
 | Aggregate accounting | PASS in regression tests | Eligible missing/error attempts remain in coverage denominator; unreviewed labels excluded from measured precision |
-| Uncertainty | PARTIAL | Wilson intervals for case proportions; complete-task paired uncertainty and confidence reliability not implemented |
+| Uncertainty | PARTIAL | Wilson classification intervals and descriptive family-clustered paired task bootstrap exist; confidence reliability and live uncertainty remain unqualified |
 | Oracle isolation | PARTIAL | Case contract separates request and labels; provider path must be audited to send request only |
 | Trace/version freeze | PARTIAL | Case/result digests and grader version are recorded; prospective campaign/attempt integration outstanding |
 | Paid accounting | PASS in synthetic regression tests | Shared host Budget reserves/settles Decisions alongside main-agent work. CLI continuation carries billed failures and unknown reservations, rejects lost prior spend, preserves original reports and skips completed trials. Actual provider billing remains unqualified |
 | External provider qualification | NOT RUN | Account access, actual schema/usage and latency not tested |
-| Paired complete tasks | NOT RUN | Planned 24 tasks, three repetitions per arm; main model, profile, fixtures and cache conditions held fixed |
+| Paired complete tasks | NOT RUN | Frozen public 24-task selection packet and reporter pass offline checks; three repetitions per arm and actual providers remain unrun |
 | Named-client acceptance | NOT RUN | Package, deployment, actual adoption and fallback behaviour require observed evidence |
 
 The scorer's confidence is never an authority signal. Review ambiguous development
@@ -106,5 +106,55 @@ charged and reserved amounts through `--prior-usd`. A completed workflow trial
 uses its own terminal evidence contract; it is not required to contain the
 results-only grader fields. Unknown in-flight requests remain charged against the
 cap when unfinished trials restart. Reports remain non-accepting until the packet,
-grading and independent outcome review gates pass. The 24-task selection packet,
-paired uncertainty analysis and actual provider comparison remain outstanding.
+grading and independent outcome review gates pass. A continuation report that
+omits earlier completed trials reports missing pairs; it cannot establish a saving
+from the resumed subset. Combine the hash-bound campaign evidence before drawing
+a full comparison conclusion.
+
+## Frozen task selection and reporting
+
+The packet is `docs/evaluations/packets/routing-task-selection-v1.json`, SHA-256
+`926cd3d610ccb16f602bfcd222a3538b244299d45d622a2215ee96e937aa2cab`.
+Use it with `--workflow-packet` alongside the routing flags. Three repetitions
+produce 144 main-agent sessions before any interrupted attempts. This is a public
+synthetic selection packet, assembled by the development agent from current
+role workflows, RLC tasks and the explicit prior-settings contract, with one new
+saved-VAR-failure read. It is neither independently authored nor a final holdout.
+Expected facts are frozen before provider execution; independent label and prose
+review remain unperformed. No customer records are included.
+
+| Family | Tasks |
+| --- | --- |
+| Reporting | 2 |
+| Campaigns | 8 |
+| Results | 4 |
+| Optimiser | 3 |
+| Studies | 3 |
+| MMM | 1 |
+| Priors | 1 |
+| VAR | 1 |
+| Mixed | 1 |
+
+These counts cover boundaries and recovery, not production frequency. Single-case
+families provide weak generalisation evidence. Some fixtures explicitly permit a
+synthetic creation or state change; the router itself cannot execute it. Task
+contracts separately assert that no unintended write occurs. Existing result
+fixture objects are copied into the packet so later source defaults cannot change
+the frozen evidence. All workflow contracts execute through the real MCP handler
+and strict mocked HTTP exchanges. Result grading remains under its existing owner.
+
+`hosts.routing_report` records each arm's expected/observed trial counts, outcome
+states, pending claim reviews, routing adoption/reasons, unknown accounting and
+p50/p95 observed latency, tokens and cost. Complete paired evidence produces
+selector-inclusive savings estimates; missing, duplicated, non-finite, unknown or
+unfinished trials prevent those estimates. Quality comparison is withheld while
+explanatory claims await review. Public reports always have `accepted: false`.
+
+Paired uncertainty uses a fixed-seed bootstrap over families, with repetitions
+resampled as pairs within each task. Task means are averaged within families;
+savings compare medians of those family measurements. Each family has equal
+weight, rather than allowing eight campaign tasks to dominate the estimate.
+The arm p50/p95 values are separately labelled descriptive session statistics.
+One family cannot produce an independence interval, and synthetic intervals do
+not establish scientific validity or production non-inferiority. The paired
+quality and efficiency thresholds still require prospective owner agreement.

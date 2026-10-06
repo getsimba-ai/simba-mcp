@@ -131,6 +131,8 @@ async def test_two_arms_share_domain_catalogue_and_include_selector_cost(tmp_pat
     ]
     assert report["budget"]["charged"] == pytest.approx(0.000024)
     assert report["assessment"]["accepted"] is False
+    assert report["routing_measurements"]["status"] == "descriptive_only"
+    assert report["routing_measurements"]["paired"]["total_input_tokens"]["estimate"] == -10
     assert report["experiment_inputs"]["purpose"] == "model_selection_validation"
     assert "synthetic-backend" not in args.output.read_text()
 
@@ -185,6 +187,8 @@ async def test_routing_continuation_keeps_billed_failure_and_only_runs_unfinishe
     assert args.continue_from.read_bytes() == original
     assert resumed["budget"]["prior"] == args.prior_usd
     assert len(submitted) == 2
+    # This file alone omits earlier completed rows; do not report a subset saving.
+    assert resumed["routing_measurements"]["status"] == "incomplete"
 
 
 @pytest.mark.anyio
