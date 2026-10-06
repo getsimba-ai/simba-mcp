@@ -115,8 +115,18 @@ Network mode spaces submissions by at least 6.1 seconds for default account
 admission, rather than exhausting the ten-per-minute limit. It never retries an
 attempt automatically. Stop files are checked before new submissions. Interrupted
 attempts retain reservations and `EXECUTION_ERROR`; later unsubmitted cases remain
-`NOT_RUN`. Classification continuation is not implemented: a new campaign must
-carry previous charged and reserved spend explicitly and retain the original report.
+`NOT_RUN`. Classification continuation uses the existing `--continue-from` and
+`--continuation-review` arguments, with a new output file. Carry the previous
+ledger's prior, charged and reserved amounts through `--prior-usd`. The source
+review binds the original report hash, previous/current source digests and a
+recorded rationale. Labels, calibration, question, price, pacing and cap remain
+frozen. Only unfinished or execution-error cases restart; completed classifications
+are preserved, including a valid abstention or wrong answer. Earlier attempts and
+scores remain in each case's history, and `attempt_score_counts` reports them
+separately from the latest one-per-case classification summary. A successful
+restart does not settle an earlier unknown reservation. Original reports remain
+unchanged and are checked before each checkpoint. Changed inputs, missing prior
+spend, unreviewed source transitions and fully completed runs cannot resume.
 
 The summary retains precision/coverage Wilson intervals, category confusions and
 ten fixed confidence bands with mean confidence and observed accuracy intervals.

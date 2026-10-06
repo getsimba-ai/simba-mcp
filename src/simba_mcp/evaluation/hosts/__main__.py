@@ -83,7 +83,6 @@ async def classify_routing(args):
             "routing_comparison",
             "workflow_suite",
             "workflow_packet",
-            "continue_from",
             "results_robust",
             "role_comparison",
             "results_baseline",
@@ -178,16 +177,86 @@ async def classify_routing(args):
             for case in cases
         ],
     }
+    original_path = getattr(args, "continue_from", None)
+    original_hash = None
+    if original_path:
+        if dry:
+            raise ValueError("Classification continuation requires a stopped network run")
+        from .workflow_packet import _reject_constant, _unique_object
+
+        original_bytes = original_path.read_bytes()
+        original_hash = hashlib.sha256(original_bytes).hexdigest()
+        previous = json.loads(
+            original_bytes, object_pairs_hook=_unique_object, parse_constant=_reject_constant
+        )
+        review_path = getattr(args, "continuation_review", None)
+        if review_path is None:
+            raise ValueError("Classification continuation requires source-transition review")
+        transition = json.loads(review_path.read_text(encoding="utf-8"))
+        old_inputs, new_inputs = deepcopy(previous["inputs"]), deepcopy(inputs)
+        old_inputs["authorised_budget"].pop("prior_usd")
+        new_inputs["authorised_budget"].pop("prior_usd")
+        previous_budget = previous["budget"]
+        if (
+            previous.get("status") != "stopped"
+            or old_inputs != new_inputs
+            or previous["calibration"] != calibration
+            or previous["frozen"]["inputs_sha256"] != fingerprint(previous["inputs"])
+            or previous["frozen"]["calibration_sha256"] != fingerprint(calibration)
+            or any(
+                type(previous_budget.get(key)) not in (int, float)
+                or not math.isfinite(previous_budget[key])
+                or previous_budget[key] < 0
+                for key in ("prior", "charged", "reserved")
+            )
+            or args.prior_usd + 1e-9
+            < sum(previous_budget[key] for key in ("prior", "charged", "reserved"))
+            or transition.get("verified") is not True
+            or not transition.get("rationale")
+            or transition.get("previous_report_sha256") != original_hash
+            or transition.get("previous_source_sha256") != previous["frozen"]["source_sha256"]
+            or transition.get("current_source_sha256") != report["frozen"]["source_sha256"]
+        ):
+            raise ValueError(
+                "Classification continuation changed frozen inputs, lost spending or broke review"
+            )
+        old_rows = previous["trials"]
+        if [row.get("case_id") for row in old_rows] != [case.id for case in cases] or any(
+            row["score"].get("case_id") != case.id
+            or row["score"].get("case_sha256") != fingerprint(case.model_dump())
+            for case, row in zip(cases, old_rows, strict=True)
+        ):
+            raise ValueError("Classification continuation changed case identities")
+        if all(row["score"]["status"] in ("PASS", "FAIL", "NEEDS_REVIEW") for row in old_rows):
+            raise ValueError("Classification continuation has no unfinished cases")
+        report["trials"] = deepcopy(old_rows)
+        report["continuation"] = {
+            "previous_report_sha256": original_hash,
+            "source_transition": transition,
+        }
 
     def save():
         if (
             report["frozen"]["inputs_sha256"] != fingerprint(inputs)
             or report["frozen"]["source_sha256"] != source_fingerprint()
             or report["frozen"]["calibration_sha256"] != fingerprint(calibration)
+            or (
+                original_path is not None
+                and hashlib.sha256(original_path.read_bytes()).hexdigest() != original_hash
+            )
         ):
             raise ValueError("Classification frozen inputs changed")
         report["budget"] = asdict(budget)
         report["summary"] = summarise_routing([row["score"] for row in report["trials"]])
+        from collections import Counter
+
+        report["attempt_score_counts"] = dict(
+            Counter(
+                score["status"]
+                for row in report["trials"]
+                for score in [*row.get("score_history", []), row["score"]]
+            )
+        )
         args.output.parent.mkdir(parents=True, exist_ok=True)
         temporary = args.output.with_suffix(".tmp")
         temporary.write_text(json.dumps(report, indent=2, allow_nan=False) + "\n", encoding="utf-8")
@@ -204,13 +273,20 @@ async def classify_routing(args):
             args.routing_backend_url, os.environ["SIMBA_ROUTING_EVAL_API_KEY"]
         ) as backend:
             for index, (case, row) in enumerate(zip(cases, report["trials"], strict=True)):
+                if row["score"]["status"] in ("PASS", "FAIL", "NEEDS_REVIEW"):
+                    continue
                 if index:
                     await asyncio.sleep(interval)
                 if getattr(args, "stop_file", None) and args.stop_file.exists():
                     raise RuntimeError("Classification stopped before submission")
 
-                def checkpoint(attempts, row=row):
-                    row["routing_attempts"] = attempts
+                previous_attempts = deepcopy(row["routing_attempts"])
+                if row["score"]["status"] != "NOT_RUN":
+                    row.setdefault("score_history", []).append(deepcopy(row["score"]))
+                    row["score"] = grade_routing(case, None)
+
+                def checkpoint(attempts, row=row, previous_attempts=previous_attempts):
+                    row["routing_attempts"] = previous_attempts + attempts
                     save()
 
                 dispatch = RoutingDispatch(

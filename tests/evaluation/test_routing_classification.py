@@ -1,5 +1,6 @@
 """Classification mode uses the existing adapter; synthetic review metadata only."""
 
+import hashlib
 import json
 from contextlib import asynccontextmanager
 from types import SimpleNamespace
@@ -8,7 +9,7 @@ import httpx
 import pytest
 
 from simba_mcp.api_client import SimbaAPIClient
-from simba_mcp.evaluation.experiments import fingerprint
+from simba_mcp.evaluation.experiments import fingerprint, source_fingerprint
 from simba_mcp.evaluation.hosts import __main__ as command
 from simba_mcp.evaluation.routing import GRADER_VERSION
 from simba_mcp.evaluation.routing_cases import development_cases
@@ -219,3 +220,90 @@ async def test_interrupted_submission_retains_reservation_and_distinguishes_unru
         0.0008
     )
     assert report["trials"][0]["routing_attempts"][0]["status"] == "interrupted"
+
+
+@pytest.mark.anyio
+async def test_continuation_skips_completed_cases_keeps_unknown_charge_and_checks_prior(
+    tmp_path, monkeypatch
+):
+    import asyncio
+
+    cases, labels, review = reviewed_packet(tmp_path)
+    args = arguments(
+        tmp_path,
+        routing_dry_run=False,
+        routing_label_packet=labels,
+        routing_calibration_review=review,
+    )
+    submitted = []
+
+    @asynccontextmanager
+    async def backend_client(url, key):
+        async def respond(request):
+            submitted.append(json.loads(request.content))
+            if len(submitted) == 2:
+                raise asyncio.CancelledError()
+            return httpx.Response(
+                200,
+                json={
+                    "schema_version": 1,
+                    "routing_version": "workflow-v1",
+                    "outcome": "recommended",
+                    "workflow": "mmm",
+                    "confidence": 0.96,
+                    "model": "gpt-6-luna",
+                    "input_tokens": 100,
+                },
+            )
+
+        backend = SimbaAPIClient(url, key)
+        backend._client = httpx.AsyncClient(
+            base_url=url, headers=backend._headers, transport=httpx.MockTransport(respond)
+        )
+        try:
+            yield backend
+        finally:
+            await backend.close()
+
+    async def no_wait(_):
+        return None
+
+    monkeypatch.setenv("SIMBA_ROUTING_EVAL_API_KEY", "synthetic-backend")
+    monkeypatch.setattr(command, "routing_backend_client", backend_client)
+    monkeypatch.setattr(command.asyncio, "sleep", no_wait)
+    with pytest.raises(asyncio.CancelledError):
+        await command.run(args)
+    original = args.output.read_bytes()
+    previous = json.loads(original)
+    transition = tmp_path / "transition.json"
+    transition.write_text(
+        json.dumps(
+            {
+                "verified": True,
+                "rationale": "Mechanical unchanged-source fixture only",
+                "previous_report_sha256": hashlib.sha256(original).hexdigest(),
+                "previous_source_sha256": previous["frozen"]["source_sha256"],
+                "current_source_sha256": source_fingerprint(),
+            }
+        )
+    )
+    args.continue_from = args.output
+    args.continuation_review = transition
+    args.output = tmp_path / "continued.json"
+    with pytest.raises(ValueError, match="lost spending"):
+        await command.run(args)
+    assert len(submitted) == 2 and not args.output.exists()
+    args.prior_usd = sum(previous["budget"][key] for key in ("prior", "charged", "reserved"))
+    assert args.prior_usd == pytest.approx(0.00081)
+    await command.run(args)
+    resumed = json.loads(args.output.read_text())
+    assert submitted == [
+        {"schema_version": 1, "request": cases[index].request} for index in (0, 1, 1)
+    ]
+    assert resumed["summary"]["counts"] == {"PASS": 2}
+    assert resumed["attempt_score_counts"] == {"PASS": 2, "EXECUTION_ERROR": 1}
+    assert len(resumed["trials"][1]["routing_attempts"]) == 2
+    assert resumed["trials"][1]["routing_attempts"][0]["cost_usd"] is None
+    assert resumed["budget"]["prior"] == args.prior_usd
+    assert resumed["budget"]["charged"] == pytest.approx(0.00001)
+    assert args.continue_from.read_bytes() == original
