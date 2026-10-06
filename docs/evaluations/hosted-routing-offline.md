@@ -54,6 +54,19 @@ coverage denominators, confidence bins, digest sensitivity and Wilson intervals.
 No mechanical defect was found. This establishes independent agent review, not
 human acceptance, empirical confidence calibration or an independent final packet.
 
+A subsequent independent audit of the complete-task selection packet found eight
+material defects before paid task execution. All 21 canonical workflow fixtures
+executed successfully, but four independent calibration expectations failed.
+Fixture execution success therefore does not establish grader validity. The
+original packet and audit remain preserved; paired execution is held for repair.
+
+The first repair rejects duplicate answer keys and non-finite constants/floats
+through shared strict JSON decoding. A false ROI followed by a correct duplicate
+ROI cannot disappear during parsing. Grader version 20 also recognises the exact
+old-artifact absence contract regardless of its broad domain family, retaining
+legacy versions 17-19 for historical semantic comparisons. This is prospective
+repair, not retrospective rescoring or complete-task calibration acceptance.
+
 One real Decisions smoke request through the MCP handler and backend service
 returned a valid results recommendation and 317 input tokens. Its transport and
 admission store were synthetic; this does not qualify deployed authentication,

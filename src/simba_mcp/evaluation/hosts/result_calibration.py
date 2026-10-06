@@ -14,7 +14,7 @@ GRADER_VERSION = 17
 
 
 def calibration_cases(*, grader_version=17):
-    if type(grader_version) is not int or grader_version not in (17, 18, 19):
+    if type(grader_version) is not int or grader_version not in (17, 18, 19, 20):
         raise ValueError("Unsupported result grader version")
     roi, diagnostic, marginal, decomposition, old = result_tasks()
     cases = [

@@ -27,6 +27,7 @@ from ..experiments import (
     source_fingerprint,
     verify_experiment,
 )
+from ..json_data import load_json
 from ..result_cases import FIXTURE_VERSION
 from ..routing import RoutingCase, grade_routing, summarise_routing
 from .anthropic import client, definitions, session
@@ -95,15 +96,9 @@ async def classify_routing(args):
     cases = development_cases() if split == "development" else selection_validation_cases()
     packet_path = getattr(args, "routing_label_packet", None)
     if packet_path:
-        from .workflow_packet import _reject_constant, _unique_object
-
         cases = [
             RoutingCase.model_validate(row)
-            for row in json.loads(
-                packet_path.read_text(encoding="utf-8"),
-                object_pairs_hook=_unique_object,
-                parse_constant=_reject_constant,
-            )
+            for row in load_json(packet_path.read_text(encoding="utf-8"))
         ]
     if (
         not cases
@@ -182,13 +177,9 @@ async def classify_routing(args):
     if original_path:
         if dry:
             raise ValueError("Classification continuation requires a stopped network run")
-        from .workflow_packet import _reject_constant, _unique_object
-
         original_bytes = original_path.read_bytes()
         original_hash = hashlib.sha256(original_bytes).hexdigest()
-        previous = json.loads(
-            original_bytes, object_pairs_hook=_unique_object, parse_constant=_reject_constant
-        )
+        previous = load_json(original_bytes)
         review_path = getattr(args, "continuation_review", None)
         if review_path is None:
             raise ValueError("Classification continuation requires source-transition review")
@@ -359,7 +350,7 @@ async def run(args):
     if tool_profile != "full" and getattr(args, "workflow_suite", None) != "rlc01":
         raise ValueError("Explicit tool profiles require the prospective RLC suite")
     grader_version = getattr(args, "grader_version", GRADER_VERSION)
-    if type(grader_version) is not int or grader_version not in (17, 18, 19):
+    if type(grader_version) is not int or grader_version not in (17, 18, 19, 20):
         raise ValueError("Unsupported result grader version")
     if grader_version != 17 and not (
         getattr(args, "workflow_suite", None) == "rlc01" or getattr(args, "workflow_packet", None)
@@ -970,7 +961,7 @@ async def run(args):
                                 contract, actual, set(), grader_version=grader_version
                             )
                             row["claim_review_required"] = (
-                                not claims_in_scope(contract, actual)
+                                not claims_in_scope(contract, actual, grader_version=grader_version)
                                 or not structured_answer_only(result.get("final_text", ""))
                                 or row["fact_verdict"] == "review"
                             )
@@ -1151,9 +1142,9 @@ def main():
     parser.add_argument(
         "--grader-version",
         type=int,
-        choices=(17, 18, 19),
+        choices=(17, 18, 19, 20),
         default=17,
-        help="17 preserves historical semantics; 18 enables canonical identity for prospective workflows",
+        help="17 preserves historical semantics; 18 adds canonical identity; 19 adds monthly evidence; 20 fixes contract-based absence equivalence",
     )
     parser.add_argument("--tool-profile", choices=PROFILE_NAMES, default="full")
     parser.add_argument(

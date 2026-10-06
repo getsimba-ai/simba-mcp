@@ -1,11 +1,11 @@
 """Public synthetic tasks and strict dispatch for controlled host comparisons."""
 
-import json
 import re
 
 from ...metadata import READ_ONLY
 from ..cases import cases
 from ..contracts import Case, Exchange, Step
+from ..json_data import load_json
 from ..runner import run_case
 
 
@@ -354,12 +354,12 @@ def answer(text):
     """Return facts and strict-format compliance separately; never hide format failures."""
     stripped = text.strip()
     try:
-        return json.loads(stripped), True
+        return load_json(stripped), True
     except ValueError:
         match = re.search(r"```(?:json)?\s*(.*?)```", stripped, re.DOTALL)
         if match:
             try:
-                return json.loads(match.group(1)), False
+                return load_json(match.group(1)), False
             except ValueError:
                 pass
     return None, False

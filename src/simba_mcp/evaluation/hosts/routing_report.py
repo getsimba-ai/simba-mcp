@@ -212,12 +212,12 @@ def routing_campaign_report(paths):
     This is reporting only. It never resumes sessions, settles reservations,
     changes scores or grants provider/release acceptance.
     """
-    from .workflow_packet import _reject_constant, _unique_object
+    from ..json_data import load_json
 
     records = []
     for path in paths:
         raw = Path(path).read_bytes()
-        report = json.loads(raw, object_pairs_hook=_unique_object, parse_constant=_reject_constant)
+        report = load_json(raw)
         records.append((hashlib.sha256(raw).hexdigest(), report))
     if not records:
         raise ValueError("An ordered report chain is required")

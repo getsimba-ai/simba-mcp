@@ -4,8 +4,6 @@ Data loading and freezing only: no provider, executor or acceptance decision.
 """
 
 import hashlib
-import json
-import math
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
@@ -14,6 +12,7 @@ from typing import Annotated, Literal
 from pydantic import Field, model_validator
 
 from ..contracts import Case, StrictModel
+from ..json_data import load_json
 from .result_selection import ResultTask
 
 MAX_PACKET_BYTES = 16 * 1024 * 1024
@@ -116,26 +115,6 @@ class PacketDocument(StrictModel):
         return self
 
 
-def _unique_object(pairs):
-    obj = {}
-    for key, value in pairs:
-        if key in obj:
-            raise ValueError("Duplicate JSON object key in workflow packet")
-        obj[key] = value
-    return obj
-
-
-def _reject_constant(value):
-    raise ValueError("Non-finite JSON value in workflow packet")
-
-
-def _finite_float(value):
-    parsed = float(value)
-    if not math.isfinite(parsed):
-        raise ValueError("Non-finite JSON value in workflow packet")
-    return parsed
-
-
 def _read(path):
     with path.open("rb") as stream:
         content = stream.read(MAX_PACKET_BYTES + 1)
@@ -182,11 +161,6 @@ class WorkflowPacket:
 def load_workflow_packet(path):
     path = Path(path).resolve()
     raw = _read(path)
-    data = json.loads(
-        raw,
-        object_pairs_hook=_unique_object,
-        parse_constant=_reject_constant,
-        parse_float=_finite_float,
-    )
+    data = load_json(raw)
     document = PacketDocument.model_validate(data)
     return WorkflowPacket(path, hashlib.sha256(raw).hexdigest(), document)

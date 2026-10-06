@@ -170,7 +170,7 @@ def test_version18_does_not_fill_missing_identity_when_mapping_is_ambiguous():
     )
 
 
-@pytest.mark.parametrize("version", [True, 17.0, 20, None])
+@pytest.mark.parametrize("version", [True, 17.0, 21, None])
 def test_invalid_versions_are_rejected(version):
     with pytest.raises(ValueError, match="grader version"):
         calibrate(grader_version=version)

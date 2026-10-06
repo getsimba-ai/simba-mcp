@@ -1,7 +1,8 @@
 """Bounded structured result grading, independent of dispatch and providers."""
 
-import json
 import re
+
+from ..json_data import load_json
 
 # This bounded vocabulary is prospective and task-specific. It is not an
 # entailment model: novel prose and extra claims always need independent review.
@@ -80,6 +81,15 @@ def literal_fields(task, facts):
     return isinstance(facts, dict) and all(facts.get(k) == v for k, v in task.expected.items())
 
 
+def _old_artifact_task(task, grader_version):
+    if grader_version >= 20:
+        return task.id == "result_old_artifact" and task.expected == {
+            "available": False,
+            "reason": "fitted_before_mroi_periods",
+        }
+    return (task.family or task.id) == "result_old_artifact"
+
+
 def semantic_facts(task, facts, supported_sections, *, grader_version=17):
     """Bounded equivalences, not a general language judge or fuzzy numeric scorer.
 
@@ -87,13 +97,13 @@ def semantic_facts(task, facts, supported_sections, *, grader_version=17):
     never coerce integers/strings. Unsupported explanations remain outside this
     structured-fact metric and require separate claim review.
     """
-    if type(grader_version) is not int or grader_version not in (17, 18, 19):
+    if type(grader_version) is not int or grader_version not in (17, 18, 19, 20):
         raise ValueError("Unsupported result grader version")
     facts, _ = _rlc_normalise(task, facts)
     if not isinstance(facts, dict):
         return False
     facts = dict(facts)
-    if (task.family or task.id) == "result_old_artifact" and "mroi_periods" in facts:
+    if _old_artifact_task(task, grader_version) and "mroi_periods" in facts:
         nested = facts["mroi_periods"]
         if not isinstance(nested, dict):
             return False
@@ -164,7 +174,7 @@ def semantic_facts(task, facts, supported_sections, *, grader_version=17):
     return True
 
 
-def claims_in_scope(task, facts):
+def claims_in_scope(task, facts, *, grader_version=17):
     """Unexpected structured claims require review, rather than silently passing.
 
     This is a schema boundary, not natural-language entailment. Free prose outside
@@ -176,7 +186,7 @@ def claims_in_scope(task, facts):
     allowed = set(task.expected)
     if _missing_diagnostic_task(task):
         allowed.add("convergence_established")
-    if (task.family or task.id) == "result_old_artifact" and "mroi_periods" in facts:
+    if _old_artifact_task(task, grader_version) and "mroi_periods" in facts:
         nested = facts["mroi_periods"]
         if not isinstance(nested, dict) or not set(nested) <= allowed:
             return False
@@ -218,6 +228,6 @@ def structured_answer_only(text):
     if fence:
         text = fence.group(1)
     try:
-        return isinstance(json.loads(text), (dict, list))
+        return isinstance(load_json(text), (dict, list))
     except ValueError:
         return False
