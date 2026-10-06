@@ -4722,5 +4722,18 @@
     ],
     "title": "save_incrementality_test_designArguments",
     "type": "object"
+  },
+  "recommend_workflow": {
+    "properties": {
+      "request": {
+        "title": "Request",
+        "type": "string"
+      }
+    },
+    "required": [
+      "request"
+    ],
+    "title": "recommend_workflowArguments",
+    "type": "object"
   }
 }

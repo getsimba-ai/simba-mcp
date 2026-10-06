@@ -2,7 +2,7 @@
 name: simba-studies-workflow
 description: Author, edit and review Simba Studies, recipes, policies and runs. Use for immutable publication, launch recovery, diagnostics and human handoff.
 metadata:
-  version: "22"
+  version: "23"
 ---
 
 # Work with Studies
@@ -15,3 +15,9 @@ metadata:
 6. A recommendation is a handoff to a person. No acceptable candidate is a valid conclusion. Guidance cannot authorise acceptance or bypass budgets.
 
 Role availability: all profiles inspect Studies evidence; reviewer/full can record authorised assessments/declarations/recommendations; authoring, policy changes and launches require full. [Missing-evidence example](references/review-examples.md) preserves not_evaluated and never claims promotion.
+
+
+If the task spans unfamiliar Simba domains and workflow routing is enabled,
+recommend_workflow can suggest guidance and visible tools. Skip it for a clear
+workflow or already-loaded guidance. Its recommendation never authorises actions;
+on fallback continue normal selection without repeating the routing call.

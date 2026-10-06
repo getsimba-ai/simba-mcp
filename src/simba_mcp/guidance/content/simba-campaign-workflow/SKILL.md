@@ -2,7 +2,7 @@
 name: simba-campaign-workflow
 description: Inspect campaign facts, mapping, incremental evidence, conditional budgets and experiment screening.
 metadata:
-  version: "22"
+  version: "23"
 ---
 
 # Investigate campaigns
@@ -23,3 +23,9 @@ can read these workflows. Mapping writes require marketer or full and explicit i
 Exact calls and observable synthetic evidence: [facts examples](references/workflow-examples.md),
 [mapping examples](references/mapping-examples.md), [budget examples](references/budgets-examples.md)
 and [experiment examples](references/experiments-examples.md).
+
+
+If the task spans unfamiliar Simba domains and workflow routing is enabled,
+recommend_workflow can suggest guidance and visible tools. Skip it for a clear
+workflow or already-loaded guidance. Its recommendation never authorises actions;
+on fallback continue normal selection without repeating the routing call.
