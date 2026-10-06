@@ -216,11 +216,11 @@ attempt usage keeps the cumulative reservation and prevents a paired saving;
 restarting successfully cannot erase it. Missing main-agent billing also remains
 unknown rather than becoming zero cost. Scores and original files are preserved.
 
-## Frozen task selection and reporting
+## Historical v1 task selection and reporting
 
-The packet is `docs/evaluations/packets/routing-task-selection-v1.json`, SHA-256
+The original, preserved packet is `docs/evaluations/packets/routing-task-selection-v1.json`, SHA-256
 `926cd3d610ccb16f602bfcd222a3538b244299d45d622a2215ee96e937aa2cab`.
-Use it with `--workflow-packet` alongside the routing flags. Three repetitions
+Prospective comparisons use the repaired v2 packet and review gates below; v1 is retained as historical evidence. Three repetitions
 produce 144 main-agent sessions before any interrupted attempts. This is a public
 synthetic selection packet, assembled by the development agent from current
 role workflows, RLC tasks and the explicit prior-settings contract, with one new
@@ -263,3 +263,44 @@ The arm p50/p95 values are separately labelled descriptive session statistics.
 One family cannot produce an independence interval, and synthetic intervals do
 not establish scientific validity or production non-inferiority. The paired
 quality and efficiency thresholds still require prospective owner agreement.
+
+
+## Prospective repaired task protocol v2
+
+The independent pre-execution audit of packet v1 found incomplete task prerequisites
+and answers, overly strict read ordering, inaccurate safe-read accounting, and
+JSON/absence grading defects. Preserve the original packet and historical reports;
+new complete-task comparisons use routing-task-selection-v2.json and grader20.
+This remains a public synthetic selection packet, not a fresh final holdout.
+
+Paired execution now requires --workflow-review and --workflow-review-artifact.
+The manifest must record a different reviewer from the packet author, a passed
+independent agent or human review, exact packet/source/grader hashes and the actual
+audit artifact hash. Both files and the packet are rechecked at every paid boundary.
+A mechanical test fixture cannot establish actual independent qualification.
+The frozen paired protocol is hosted-routing-v2; historical v1 reports remain
+readable and must not be rescored as prospective v2 evidence.
+
+Grader20 rejects duplicate JSON keys, non-finite values, Boolean/numeric
+contradictions and unsupported nested facts. Its old-artifact absence equivalence
+uses the declared contract; broad result-family categorisation cannot override it.
+Versions17 through19 preserve historical comparisons.
+
+Read-only snapshot tasks accept declared sufficient evidence alternatives and
+independent ordering. Requested result sections may be reordered or read in nonempty unique
+subsets of the declared authorised set; complete cumulative coverage is required.
+Campaign metric ordering preserves the exact declared metric set. Repeated safe reads count towards measured work
+without inflating evidence coverage. Stateful creation and recovery retain strict
+recorded order and cannot be replayed as harmless reads. Complete task answers
+include requested comparisons, evidence provenance and handoff limits.
+
+No paid complete-task run or improvement claim is established by these repairs.
+Actual independent review, complete paired execution, explanatory-claim review and
+fresh final acceptance remain required. Publication and deployed qualification
+remain separate from source CI or the local synthetic provider environment.
+
+Independent pre-paid agent review passed 194 checks against the repaired 24-task
+packet SHA-256 `ef309dae7b25717408b45b50101b9059130a628acb945fc3aa01df69fd14fa7d`
+and source fingerprint `a868e2b0874086cb973613bdbafa9fc2d6d444ae4589b3df4e37a1c71eaf7602`.
+Actual hash-bound audit and manifest are retained privately. Earlier failed audits
+remain preserved. This establishes prospective synthetic calibration only.

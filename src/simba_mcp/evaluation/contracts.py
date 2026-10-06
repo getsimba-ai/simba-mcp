@@ -43,6 +43,27 @@ class Case(StrictModel):
     id: str = Field(pattern=r"^[a-z][a-z0-9_]+$")
     purpose: str = Field(min_length=1)
     steps: list[Step] = Field(min_length=1)
+    execution: Literal["recorded", "snapshot_evidence"] = "recorded"
+    evidence_options: list[list[int]] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def snapshot_contract(self):
+        if self.execution == "recorded" and self.evidence_options:
+            raise ValueError("Alternative evidence requires snapshot execution")
+        if self.execution == "snapshot_evidence" and any(
+            not step.exchanges
+            or any(exchange.method != "GET" or exchange.fault for exchange in step.exchanges)
+            for step in self.steps
+        ):
+            raise ValueError("Snapshot evidence supports only independent GET exchanges")
+        if any(
+            not option
+            or len(option) != len(set(option))
+            or any(type(index) is not int or not 0 <= index < len(self.steps) for index in option)
+            for option in self.evidence_options
+        ):
+            raise ValueError("Evidence options require distinct valid step indices")
+        return self
 
 
 class Trial(StrictModel):

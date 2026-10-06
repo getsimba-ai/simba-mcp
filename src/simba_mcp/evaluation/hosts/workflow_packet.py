@@ -101,6 +101,9 @@ class PacketDocument(StrictModel):
     schema_version: int = Field(ge=1, le=1)
     packet_id: str = Field(pattern=r"^[a-zA-Z0-9][a-zA-Z0-9_-]+$")
     synthetic_only: bool
+    author: str = ""
+    provenance: str = ""
+    split: Literal["development", "selection_validation", "final_acceptance"] | None = None
     tasks: list[Annotated[WorkflowEntry | ResultEntry, Field(discriminator="kind")]] = Field(
         min_length=1, max_length=200
     )
@@ -164,3 +167,36 @@ def load_workflow_packet(path):
     data = load_json(raw)
     document = PacketDocument.model_validate(data)
     return WorkflowPacket(path, hashlib.sha256(raw).hexdigest(), document)
+
+
+class WorkflowReview(StrictModel):
+    passed: bool
+    reviewer: str = Field(min_length=1)
+    review_type: Literal["independent_agent", "human"]
+    packet_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+    source_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+    review_artifact_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+    grader_version: int
+    rationale: str = Field(min_length=1)
+
+
+def load_workflow_review(path, packet, *, source_sha256, grader_version, artifact_path=None):
+    """Bind actual recorded review to the exact packet, source and grader."""
+    raw = Path(path).read_bytes()
+    review = WorkflowReview.model_validate(load_json(raw))
+    if (
+        not review.passed
+        or not review.reviewer.strip()
+        or not packet.document.author.strip()
+        or review.reviewer == packet.document.author
+        or not packet.document.provenance.strip()
+        or packet.document.split != "selection_validation"
+        or review.packet_sha256 != packet.sha256
+        or review.source_sha256 != source_sha256
+        or review.grader_version != grader_version
+        or grader_version != 20
+        or artifact_path is None
+        or hashlib.sha256(_read(Path(artifact_path))).hexdigest() != review.review_artifact_sha256
+    ):
+        raise ValueError("Workflow review is not independently bound to selection packet/source")
+    return review.model_dump(), hashlib.sha256(raw).hexdigest()

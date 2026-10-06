@@ -90,6 +90,42 @@ def _old_artifact_task(task, grader_version):
     return (task.family or task.id) == "result_old_artifact"
 
 
+def _artifact_conflicts(facts, nested, grader_version):
+    return any(
+        key in facts
+        and (
+            facts[key] != nested.get(key)
+            or (
+                grader_version >= 20
+                and type(nested.get(key)) is bool
+                and facts[key] is not nested[key]
+            )
+        )
+        for key in ("available", "reason")
+    )
+
+
+def _fact_matches(actual, expected):
+    """Numeric JSON parity never makes a Boolean or nested claim equivalent."""
+    if isinstance(expected, dict):
+        return (
+            isinstance(actual, dict)
+            and set(actual) == set(expected)
+            and all(_fact_matches(actual[key], value) for key, value in expected.items())
+        )
+    if isinstance(expected, list):
+        return (
+            isinstance(actual, list)
+            and len(actual) == len(expected)
+            and all(_fact_matches(a, e) for a, e in zip(actual, expected, strict=True))
+        )
+    if isinstance(expected, bool):
+        return actual is expected
+    if type(expected) in (int, float):
+        return type(actual) in (int, float) and actual == expected
+    return type(actual) is type(expected) and actual == expected
+
+
 def semantic_facts(task, facts, supported_sections, *, grader_version=17):
     """Bounded equivalences, not a general language judge or fuzzy numeric scorer.
 
@@ -107,7 +143,7 @@ def semantic_facts(task, facts, supported_sections, *, grader_version=17):
         nested = facts["mroi_periods"]
         if not isinstance(nested, dict):
             return False
-        if any(k in facts and facts[k] != nested.get(k) for k in ("available", "reason")):
+        if _artifact_conflicts(facts, nested, grader_version):
             return False
         facts = nested
     if _missing_diagnostic_task(task):
@@ -163,7 +199,10 @@ def semantic_facts(task, facts, supported_sections, *, grader_version=17):
         facts["channel"] = task.channel
     for key, expected in task.expected.items():
         actual = facts.get(key)
-        if isinstance(expected, bool):
+        if grader_version >= 20:
+            if not _fact_matches(actual, expected):
+                return False
+        elif isinstance(expected, bool):
             if actual is not expected:
                 return False
         elif isinstance(expected, (int, float)):
@@ -188,7 +227,11 @@ def claims_in_scope(task, facts, *, grader_version=17):
         allowed.add("convergence_established")
     if _old_artifact_task(task, grader_version) and "mroi_periods" in facts:
         nested = facts["mroi_periods"]
-        if not isinstance(nested, dict) or not set(nested) <= allowed:
+        if (
+            not isinstance(nested, dict)
+            or not set(nested) <= allowed
+            or (grader_version >= 20 and _artifact_conflicts(facts, nested, grader_version))
+        ):
             return False
         allowed.add("mroi_periods")
     return set(facts) <= allowed

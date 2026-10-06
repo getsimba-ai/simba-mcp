@@ -48,7 +48,7 @@ from .roles import ROLE_CASES
 from .routing import RoutingDispatch, complete_task_usage, routing_backend_client
 from .routing_report import paired_routing_report
 from .scenarios import SyntheticDispatch, answer, rlc_tasks, role_tasks, tasks
-from .workflow_packet import load_workflow_packet
+from .workflow_packet import load_workflow_packet, load_workflow_review
 
 
 def _routing_origin(value):
@@ -448,6 +448,20 @@ async def run(args):
     if workflow_packet_path and not rlc:
         raise ValueError("Workflow packets require the prospective RLC workflow suite")
     workflow_packet = load_workflow_packet(workflow_packet_path) if workflow_packet_path else None
+    workflow_review = workflow_review_hash = None
+    workflow_review_path = getattr(args, "workflow_review", None)
+    if routing_comparison:
+        if workflow_packet is None or workflow_review_path is None:
+            raise ValueError("Paid routing comparison requires a reviewed workflow packet")
+        workflow_review, workflow_review_hash = load_workflow_review(
+            workflow_review_path,
+            workflow_packet,
+            source_sha256=source_fingerprint(),
+            grader_version=grader_version,
+            artifact_path=getattr(args, "workflow_review_artifact", None),
+        )
+    elif workflow_review_path is not None:
+        raise ValueError("Workflow review requires the explicit paired routing protocol")
     suite = (
         workflow_packet.triples()
         if workflow_packet
@@ -602,6 +616,11 @@ async def run(args):
         }
     if workflow_packet is not None:
         report["configuration"]["workflow_packet"] = workflow_packet.freeze()
+    if workflow_review is not None:
+        report["configuration"]["workflow_review"] = {
+            "review": workflow_review,
+            "file_sha256": workflow_review_hash,
+        }
     if routing_comparison:
         from ...guidance.routing import MODEL as routing_model
         from ...guidance.routing import VERSION as routing_version
@@ -617,7 +636,7 @@ async def run(args):
             else {}
         )
         report["configuration"]["routing_comparison"] = {
-            "version": "hosted-routing-v1",
+            "version": "hosted-routing-v2",
             "backend_origin_sha256": fingerprint(routing_url),
             "model": routing_model,
             "question_version": routing_version,
@@ -770,6 +789,16 @@ async def run(args):
     def verify():
         if workflow_packet is not None:
             workflow_packet.verify()
+        if workflow_review_path is not None and (
+            hashlib.sha256(workflow_review_path.read_bytes()).hexdigest() != workflow_review_hash
+        ):
+            raise ValueError("Workflow review changed after freezing")
+        if (
+            workflow_review is not None
+            and hashlib.sha256(args.workflow_review_artifact.read_bytes()).hexdigest()
+            != workflow_review["review_artifact_sha256"]
+        ):
+            raise ValueError("Workflow review artifact changed after freezing")
         stop_file = getattr(args, "stop_file", None)
         if stop_file and stop_file.exists():
             raise RuntimeError("Operator requested stop; checkpoint and reservations retained")
@@ -951,7 +980,7 @@ async def run(args):
                         )
                         row["passed"] = (
                             actual == expected
-                            and (result_case or dispatch.completed == len(case.steps))
+                            and (result_case or dispatch.evidence_satisfied)
                             and dispatch.errors == 0
                             and dispatch.unintended_writes == 0
                         )
@@ -960,6 +989,9 @@ async def run(args):
                             row["fact_verdict"] = fact_verdict(
                                 contract, actual, set(), grader_version=grader_version
                             )
+                            if grader_version == 20:
+                                row["answer_correct"] = row["fact_verdict"] == "pass"
+                                row["passed"] = row["passed"] and row["answer_correct"]
                             row["claim_review_required"] = (
                                 not claims_in_scope(contract, actual, grader_version=grader_version)
                                 or not structured_answer_only(result.get("final_text", ""))
@@ -1153,7 +1185,17 @@ def main():
         help="Reviewed synthetic JSON packet for prospective RLC; does not grant acceptance",
     )
     parser.add_argument(
+        "--workflow-review",
+        type=Path,
+        help="Actual independent task/grader review bound to the paired selection packet and source",
+    )
+    parser.add_argument(
         "--workflow-suite", choices=("rlc01",), help="Prospective 20-case development inventory"
+    )
+    parser.add_argument(
+        "--workflow-review-artifact",
+        type=Path,
+        help="Actual independent audit bytes bound by the workflow review",
     )
     parser.add_argument(
         "--session-timeout-seconds", type=float, help="Explicit per-session monotonic deadline"

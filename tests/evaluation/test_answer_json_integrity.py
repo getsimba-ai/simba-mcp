@@ -54,6 +54,10 @@ def test_prospective_absence_equivalence_uses_exact_contract_not_broad_family():
     assert claims_in_scope(task, nested, grader_version=20)
     contradictory = {"available": True, "mroi_periods": expected}
     assert not semantic_facts(task, contradictory, set(), grader_version=20)
+    assert not claims_in_scope(task, contradictory, grader_version=20)
+    invalid_boolean = {"available": 0, "mroi_periods": expected}
+    assert not semantic_facts(task, invalid_boolean, set(), grader_version=20)
+    assert not claims_in_scope(task, invalid_boolean, grader_version=20)
     extra_claim = {"mroi_periods": {**expected, "explanation": "This proves convergence"}}
     assert not claims_in_scope(task, extra_claim, grader_version=20)
     different = ResultTask(

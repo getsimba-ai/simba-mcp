@@ -6,7 +6,7 @@ from ...metadata import READ_ONLY
 from ..cases import cases
 from ..contracts import Case, Exchange, Step
 from ..json_data import load_json
-from ..runner import run_case
+from ..runner import contains, run_case
 
 
 def tasks():
@@ -312,7 +312,17 @@ class SyntheticDispatch:
         self.server, self.case = server, case
         self.allowed_tools = None if allowed_tools is None else frozenset(allowed_tools)
         self.completed = self.errors = self.unintended_writes = 0
+        self.unauthorised_reads = 0
+        self._completed_indices = set()
+        self._section_coverage = {}
         self.calls, self.trials = [], []
+
+    @property
+    def evidence_satisfied(self):
+        if self.case.execution == "recorded":
+            return self.completed == len(self.case.steps)
+        options = self.case.evidence_options or [list(range(len(self.case.steps)))]
+        return any(set(option) <= self._completed_indices for option in options)
 
     async def __call__(self, name, arguments):
         call = {"name": name, "arguments": arguments}
@@ -326,12 +336,85 @@ class SyntheticDispatch:
             result = await self.server.call_tool(name, arguments)
             self.errors += int(bool(result.is_error))
             return result.structured_content, bool(result.is_error)
-        if self.completed >= len(self.case.steps) or name != self.case.steps[self.completed].tool:
+        if self.case.execution == "snapshot_evidence":
+
+            def matches(step):
+                candidate = dict(arguments)
+                if name == "get_model_results" and "sections" in step.arguments:
+                    actual_sections = candidate.get("sections")
+                    if not isinstance(actual_sections, str):
+                        return False
+                    actual_parts = [part.strip() for part in actual_sections.split(",")]
+                    expected_parts = step.arguments["sections"].split(",")
+                    if (
+                        not all(actual_parts)
+                        or len(actual_parts) != len(set(actual_parts))
+                        or not set(actual_parts) <= set(expected_parts)
+                    ):
+                        return False
+                    candidate["sections"] = step.arguments["sections"]
+                if name == "get_campaign_report" and "metrics" in step.arguments:
+                    actual_metrics = candidate.get("metrics")
+                    if not isinstance(actual_metrics, list) or not all(
+                        isinstance(m, str) for m in actual_metrics
+                    ):
+                        return False
+                    if len(actual_metrics) != len(set(actual_metrics)) or set(
+                        actual_metrics
+                    ) != set(step.arguments["metrics"]):
+                        return False
+                    candidate["metrics"] = step.arguments["metrics"]
+                return contains(candidate, step.arguments)
+
+            matching = [
+                index
+                for index, step in enumerate(self.case.steps)
+                if name == step.tool and matches(step)
+            ]
+            index = next(
+                (index for index in matching if index not in self._completed_indices),
+                matching[0] if matching else None,
+            )
+        else:
+            index = (
+                self.completed
+                if self.completed < len(self.case.steps)
+                and name == self.case.steps[self.completed].tool
+                else None
+            )
+        if index is None:
             self.errors += 1
-            self.unintended_writes += int(name not in READ_ONLY)
+            self.unintended_writes += int(name not in READ_ONLY and name != "get_model_results")
+            if name == "get_model_results":
+                sections = arguments.get("sections", "") if isinstance(arguments, dict) else ""
+                self.unauthorised_reads += int(
+                    isinstance(sections, str)
+                    and "prediction_window" in {section.strip() for section in sections.split(",")}
+                )
             return {"error": "Outside authorised task sequence; do not repeat writes."}, True
-        step = self.case.steps[self.completed].model_copy(deep=True)
+        step = self.case.steps[index].model_copy(deep=True)
         step.arguments = arguments
+        if self.case.execution == "snapshot_evidence" and name == "get_model_results":
+            selected_sections = {s.strip() for s in arguments["sections"].split(",")}
+            step.expected = {
+                key: value for key, value in step.expected.items() if key in selected_sections
+            }
+            for exchange in step.exchanges:
+                if "sections" in exchange.query:
+                    exchange.query["sections"] = arguments["sections"]
+                    exchange.response = {
+                        key: value
+                        for key, value in exchange.response.items()
+                        if key in selected_sections
+                    }
+        if (
+            self.case.execution == "snapshot_evidence"
+            and name == "get_campaign_report"
+            and "metrics" in arguments
+        ):
+            for exchange in step.exchanges:
+                if "metrics" in exchange.query:
+                    exchange.query["metrics"] = ",".join(arguments["metrics"])
         observed = []
         trial = await run_case(
             Case(id=self.case.id, purpose=self.case.purpose, steps=[step]),
@@ -344,7 +427,16 @@ class SyntheticDispatch:
         call["execution_passed"] = trial.passed
         self.unintended_writes += trial.unintended_writes
         self.errors += int(not trial.passed)
-        self.completed += int(trial.passed)
+        if trial.passed:
+            complete = True
+            if self.case.execution == "snapshot_evidence" and name == "get_model_results":
+                coverage = self._section_coverage.setdefault(index, set())
+                coverage.update(selected_sections)
+                complete = set(self.case.steps[index].arguments["sections"].split(",")) <= coverage
+            if complete:
+                self._completed_indices.add(index)
+            self.completed = len(self._completed_indices)
+        call["evidence_step"] = index
         return (
             observed[-1] if observed else {"error": "Invalid arguments"}
         ), step.is_error or not trial.passed

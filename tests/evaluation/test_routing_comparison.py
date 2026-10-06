@@ -24,7 +24,51 @@ def anyio_backend():
 
 
 def arguments(tmp_path):
+    task, prompt, expected = tasks()[0]
+    packet = tmp_path / "packet.json"
+    packet.write_text(
+        json.dumps(
+            {
+                "schema_version": 1,
+                "packet_id": "mechanical-test-packet",
+                "synthetic_only": True,
+                "author": "synthetic-test-author",
+                "provenance": "Mechanical harness fixture, not actual independent review",
+                "split": "selection_validation",
+                "tasks": [
+                    {
+                        "kind": "workflow",
+                        "family": "results",
+                        "prompt": prompt,
+                        "expected": expected,
+                        "contract": task.model_dump(mode="json"),
+                    }
+                ],
+            }
+        )
+    )
+    review = tmp_path / "review.json"
+    artifact = tmp_path / "audit.json"
+    artifact.write_text('{"mechanical_fixture_only": true}')
+    review.write_text(
+        json.dumps(
+            {
+                "passed": True,
+                "reviewer": "synthetic-test-reviewer",
+                "review_type": "independent_agent",
+                "packet_sha256": hashlib.sha256(packet.read_bytes()).hexdigest(),
+                "source_sha256": source_fingerprint(),
+                "review_artifact_sha256": hashlib.sha256(artifact.read_bytes()).hexdigest(),
+                "grader_version": 20,
+                "rationale": "Mechanical harness only, not qualification evidence",
+            }
+        )
+    )
     return SimpleNamespace(
+        workflow_packet=packet,
+        workflow_review=review,
+        workflow_review_artifact=artifact,
+        grader_version=20,
         output=tmp_path / "comparison.json",
         cap_usd=1,
         prior_usd=0,
@@ -248,11 +292,45 @@ async def test_routing_continuation_keeps_billed_failure_and_only_runs_unfinishe
         {"routing_backend_url": "https://user:secret@example.invalid"},
         {"routing_backend_url": "http://example.invalid"},
         {"results_model_diagnostic": True},
+        {"workflow_review": None},
+        {"workflow_packet": None},
+        {"workflow_review_artifact": None},
+        {"grader_version": 17},
     ],
 )
 async def test_invalid_protocol_fails_before_provider_or_output(tmp_path, synthetic, change):
     args = arguments(tmp_path)
     vars(args).update(change)
+    with pytest.raises(ValueError):
+        await command.run(args)
+    assert not args.output.exists() and not synthetic[0] and not synthetic[1]
+
+
+@pytest.mark.anyio
+async def test_audit_bytes_must_match_review_before_provider(tmp_path, synthetic):
+    args = arguments(tmp_path)
+    args.workflow_review_artifact.write_text('{"changed": true}')
+    with pytest.raises(ValueError):
+        await command.run(args)
+    assert not args.output.exists() and not synthetic[0] and not synthetic[1]
+
+
+@pytest.mark.anyio
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("passed", False),
+        ("reviewer", "synthetic-test-author"),
+        ("packet_sha256", "0" * 64),
+        ("source_sha256", "0" * 64),
+        ("grader_version", 19),
+    ],
+)
+async def test_review_mismatch_stops_before_provider(tmp_path, synthetic, field, value):
+    args = arguments(tmp_path)
+    review = json.loads(args.workflow_review.read_text())
+    review[field] = value
+    args.workflow_review.write_text(json.dumps(review))
     with pytest.raises(ValueError):
         await command.run(args)
     assert not args.output.exists() and not synthetic[0] and not synthetic[1]
