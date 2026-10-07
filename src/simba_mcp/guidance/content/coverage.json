@@ -531,5 +531,28 @@
     ],
     "examples": [],
     "example_limitation": "Existing canonical domain guidance and domain-wire/full-lifecycle fixtures cover this family. No separate role job is introduced; omitted operations require explicit full fallback."
+  },
+  {
+    "family": "routing_marketer_reviewer",
+    "tools": [
+      "recommend_workflow"
+    ],
+    "roles": [
+      "marketer",
+      "reviewer"
+    ],
+    "reason": "Optional advisory workflow selection, no domain execution or permission decision. Suggestions retain the caller view.",
+    "guidance": [
+      "mmm",
+      "results",
+      "priors",
+      "optimiser",
+      "studies",
+      "var",
+      "campaigns",
+      "reporting"
+    ],
+    "examples": [],
+    "example_limitation": "Real SDK HTTP profile/caller tests and routing contract fixtures cover this tool; paid workflow acceptance remains separate."
   }
 ]

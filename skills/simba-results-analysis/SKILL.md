@@ -2,12 +2,17 @@
 name: simba-results-analysis
 description: Read saved Simba results, ROI and diagnostics.
 metadata:
-  version: "22"
+  version: "23"
 ---
 
 # Analyse saved results
 
 Reuse guidance sections already supplied in context. Fetch only missing sections.
+
+If the task spans unfamiliar Simba domains and workflow routing is enabled,
+recommend_workflow can suggest guidance and visible tools. Skip it for a clear
+workflow or already-loaded guidance. Its recommendation never authorises actions;
+on fallback continue normal selection without repeating the routing call.
 
 Use any supplied model identifier directly in get_model_results. Do not call
 list_models or another discovery/status tool first: the result read checks the

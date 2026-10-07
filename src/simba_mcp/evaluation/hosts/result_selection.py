@@ -362,7 +362,7 @@ class ResultSelectionDispatch:
     """Per-session fixture authority, compatible with hosts.anthropic.session."""
 
     def __init__(self, server, task, *, guidance=None, grader_version=17):
-        if type(grader_version) is not int or grader_version not in (17, 18, 19):
+        if type(grader_version) is not int or grader_version not in (17, 18, 19, 20, 21):
             raise ValueError("Unsupported result grader version")
         if task.period_evidence_granularity not in ("native", "month"):
             raise ValueError("Unsupported period evidence granularity")
@@ -767,7 +767,9 @@ class ResultSelectionDispatch:
             "facts": semantic_facts(
                 self.task, facts, self.supported_sections, grader_version=self.grader_version
             ),
-            "claims_in_scope": claims_in_scope(self.task, facts),
+            "claims_in_scope": claims_in_scope(
+                self.task, facts, grader_version=self.grader_version
+            ),
             "required_evidence": any(
                 option <= self.supported_sections for option in self.task.evidence_sets()
             ),

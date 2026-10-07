@@ -2,7 +2,7 @@
 name: simba-mmm-workflow
 description: Build a Simba MMM from uploaded or pipeline data. Use for data preparation, model creation and fit recovery; use results guidance for existing-model questions.
 metadata:
-  version: "22"
+  version: "23"
 ---
 
 # Build an MMM
@@ -19,3 +19,9 @@ For an existing model's results use the results topic via get_workflow_guidance 
 For advanced parameters or sections not covered here, read the [full tool contract](references/tool-reference.md) before calling.
 
 Role availability: authoring/building uses full/data_scientist. Marketer and reviewer stop before excluded calls and reconnect with an explicit full profile. Check existing dataset/schema prerequisites, declared roles and fit authority. [Synthetic build example](references/building-examples.md).
+
+
+If the task spans unfamiliar Simba domains and workflow routing is enabled,
+recommend_workflow can suggest guidance and visible tools. Skip it for a clear
+workflow or already-loaded guidance. Its recommendation never authorises actions;
+on fallback continue normal selection without repeating the routing call.

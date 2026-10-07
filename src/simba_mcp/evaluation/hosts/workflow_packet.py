@@ -4,8 +4,6 @@ Data loading and freezing only: no provider, executor or acceptance decision.
 """
 
 import hashlib
-import json
-import math
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
@@ -14,6 +12,7 @@ from typing import Annotated, Literal
 from pydantic import Field, model_validator
 
 from ..contracts import Case, StrictModel
+from ..json_data import load_json
 from .result_selection import ResultTask
 
 MAX_PACKET_BYTES = 16 * 1024 * 1024
@@ -85,6 +84,7 @@ class ResultContract(StrictModel):
 
 class WorkflowEntry(StrictModel):
     kind: Literal["workflow"]
+    family: str = ""
     prompt: str = Field(min_length=1)
     expected: dict = Field(min_length=1)
     contract: Case
@@ -101,6 +101,9 @@ class PacketDocument(StrictModel):
     schema_version: int = Field(ge=1, le=1)
     packet_id: str = Field(pattern=r"^[a-zA-Z0-9][a-zA-Z0-9_-]+$")
     synthetic_only: bool
+    author: str = ""
+    provenance: str = ""
+    split: Literal["development", "selection_validation", "final_acceptance"] | None = None
     tasks: list[Annotated[WorkflowEntry | ResultEntry, Field(discriminator="kind")]] = Field(
         min_length=1, max_length=200
     )
@@ -113,26 +116,6 @@ class PacketDocument(StrictModel):
         if len(ids) != len(set(ids)):
             raise ValueError("Packet task identifiers must be unique")
         return self
-
-
-def _unique_object(pairs):
-    obj = {}
-    for key, value in pairs:
-        if key in obj:
-            raise ValueError("Duplicate JSON object key in workflow packet")
-        obj[key] = value
-    return obj
-
-
-def _reject_constant(value):
-    raise ValueError("Non-finite JSON value in workflow packet")
-
-
-def _finite_float(value):
-    parsed = float(value)
-    if not math.isfinite(parsed):
-        raise ValueError("Non-finite JSON value in workflow packet")
-    return parsed
 
 
 def _read(path):
@@ -181,11 +164,39 @@ class WorkflowPacket:
 def load_workflow_packet(path):
     path = Path(path).resolve()
     raw = _read(path)
-    data = json.loads(
-        raw,
-        object_pairs_hook=_unique_object,
-        parse_constant=_reject_constant,
-        parse_float=_finite_float,
-    )
+    data = load_json(raw)
     document = PacketDocument.model_validate(data)
     return WorkflowPacket(path, hashlib.sha256(raw).hexdigest(), document)
+
+
+class WorkflowReview(StrictModel):
+    passed: bool
+    reviewer: str = Field(min_length=1)
+    review_type: Literal["independent_agent", "human"]
+    packet_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+    source_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+    review_artifact_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+    grader_version: int
+    rationale: str = Field(min_length=1)
+
+
+def load_workflow_review(path, packet, *, source_sha256, grader_version, artifact_path=None):
+    """Bind actual recorded review to the exact packet, source and grader."""
+    raw = Path(path).read_bytes()
+    review = WorkflowReview.model_validate(load_json(raw))
+    if (
+        not review.passed
+        or not review.reviewer.strip()
+        or not packet.document.author.strip()
+        or review.reviewer == packet.document.author
+        or not packet.document.provenance.strip()
+        or packet.document.split != "selection_validation"
+        or review.packet_sha256 != packet.sha256
+        or review.source_sha256 != source_sha256
+        or review.grader_version != grader_version
+        or grader_version not in (20, 21)
+        or artifact_path is None
+        or hashlib.sha256(_read(Path(artifact_path))).hexdigest() != review.review_artifact_sha256
+    ):
+        raise ValueError("Workflow review is not independently bound to selection packet/source")
+    return review.model_dump(), hashlib.sha256(raw).hexdigest()

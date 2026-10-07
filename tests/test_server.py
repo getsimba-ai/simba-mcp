@@ -25,6 +25,7 @@ EXPECTED_TOOLS = [
     "show_optimizer_allocation",
     "recommend_incrementality_tests",
     "get_workflow_guidance",
+    "recommend_workflow",
     "publish_recipe_draft",
     "get_recipe_revision_authoring",
     "get_recipe_draft_template",

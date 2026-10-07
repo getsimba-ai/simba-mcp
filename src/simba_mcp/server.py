@@ -114,6 +114,7 @@ from .tools.results import (
     _norm_channel,
     get_model_results,
 )
+from .tools.routing import recommend_workflow
 from .tools.scenarios import (
     get_optimizer_results,
     get_scenario_results,
@@ -339,6 +340,7 @@ TOOLS = (
     adopt_model_into_study,
     compare_study_runs,
     get_workflow_guidance,
+    recommend_workflow,
 )
 
 
@@ -386,11 +388,18 @@ def create_server(description_mode: str = "legacy", *, profile: str = "full") ->
             "Recommendations are not analyst acceptance. Poll the exact saved run ID; "
             "a successful HTTP response does not mean a run completed successfully."
         )
+    options["instructions"] += (
+        " For unfamiliar intent, recommend_workflow offers optional advisory guidance. "
+        "Skip it when the workflow is clear or guidance is already loaded. "
+        "On fallback continue normal tool selection without retrying the recommendation. "
+        "Routing never grants authority or scientific acceptance."
+    )
     # Optional OAuth resource-server mode (#59): an empty dict with MCP_OAUTH_ENABLED off,
     # so the kwargs are byte-identical to today's.
     options.update(server_auth_options(os.environ.get("SIMBA_API_URL", "http://localhost:5005")))
     options["extensions"] = [chart_apps()]
     instance = SimbaMCPServer(**options)
+    instance._simba_tool_names = tuple(tool.__name__ for tool in selected)
     for tool in selected:
         instance.add_tool(
             _wire_errors(tool),

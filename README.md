@@ -168,6 +168,10 @@ packaged source. Connecting the MCP endpoint does **not** install native Skills.
 
 See [installation, fallback lookup and maintenance](docs/workflow-guidance.md).
 
+Optional [hosted workflow recommendations](docs/hosted-workflow-routing.md) provide
+advisory guidance for unfamiliar intent. Paid classification is disabled by
+default and controlled by the backend. Clear tasks can use existing tools directly.
+
 Tool descriptions default to the full legacy catalogue. Set
 `SIMBA_TOOL_DESCRIPTIONS=compact` before starting the server to opt into shorter
 descriptions for model creation, results and optimisation. Names, schemas and

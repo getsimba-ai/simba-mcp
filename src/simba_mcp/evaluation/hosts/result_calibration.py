@@ -14,7 +14,7 @@ GRADER_VERSION = 17
 
 
 def calibration_cases(*, grader_version=17):
-    if type(grader_version) is not int or grader_version not in (17, 18, 19):
+    if type(grader_version) is not int or grader_version not in (17, 18, 19, 20, 21):
         raise ValueError("Unsupported result grader version")
     roi, diagnostic, marginal, decomposition, old = result_tasks()
     cases = [
@@ -75,7 +75,7 @@ def calibration_cases(*, grader_version=17):
             {"available": True, "mroi_periods": old.expected},
             set(),
             False,
-            True,
+            grader_version < 21,
         ),
         (
             "nested_extra_claim",
@@ -323,6 +323,46 @@ def calibration_cases(*, grader_version=17):
     )
     if grader_version >= 18:
         cases.extend(canonical_identity_cases())
+    if grader_version >= 21:
+        allocation = ResultTask(
+            "role_saved_allocation",
+            "Compare named deltas",
+            frozenset(),
+            {"runs": [1, 2], "spend_delta": 10, "revenue_delta": 20, "roi_delta": 0.5},
+        )
+        grouped = {
+            "runs": [1, 2],
+            "deltas": {key: value for key, value in allocation.expected.items() if key != "runs"},
+        }
+        cases.extend(
+            [
+                ("workflow_grouped_deltas", allocation, grouped, set(), True, True),
+                (
+                    "workflow_conflicting_delta",
+                    allocation,
+                    {**grouped, "spend_delta": 99},
+                    set(),
+                    False,
+                    False,
+                ),
+                (
+                    "workflow_unknown_grouped_claim",
+                    allocation,
+                    {**grouped, "deltas": {**grouped["deltas"], "causal": True}},
+                    set(),
+                    True,
+                    False,
+                ),
+                (
+                    "workflow_correct_facts_extra_claim",
+                    allocation,
+                    {**allocation.expected, "causal": True},
+                    set(),
+                    True,
+                    False,
+                ),
+            ]
+        )
     return [
         {
             "id": name,
@@ -392,7 +432,9 @@ def calibrate(*, grader_version=17):
         actual = semantic_facts(
             task, case["facts"], set(case["supported_sections"]), grader_version=grader_version
         )
-        bounded = claims_in_scope(task, case["facts"])
+        bounded = claims_in_scope(
+            task, case["facts"], grader_version=grader_version if grader_version >= 21 else 17
+        )
         verdict = fact_verdict(
             task, case["facts"], set(case["supported_sections"]), grader_version=grader_version
         )

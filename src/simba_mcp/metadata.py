@@ -8,6 +8,7 @@ READ_ONLY = frozenset(
         "show_decomposition",
         "show_optimizer_allocation",
         "get_workflow_guidance",
+        "recommend_workflow",
         "get_recipe_draft",
         "get_recipe_draft_template",
         "get_recipe_revision_authoring",
@@ -137,6 +138,6 @@ def annotations_for(name: str) -> ToolAnnotations:
     return ToolAnnotations(
         read_only_hint=name in READ_ONLY,
         destructive_hint=name in DESTRUCTIVE,
-        idempotent_hint=name in READ_ONLY | IDEMPOTENT_WRITES,
+        idempotent_hint=name in READ_ONLY | IDEMPOTENT_WRITES and name != "recommend_workflow",
         open_world_hint=name != "get_workflow_guidance",
     )
