@@ -371,6 +371,14 @@ class SyntheticDispatch:
                 for index, step in enumerate(self.case.steps)
                 if name == step.tool and matches(step)
             ]
+            matching.sort(key=lambda index: len(self.case.steps[index].arguments), reverse=True)
+            if matching:
+                specificity = len(self.case.steps[matching[0]].arguments)
+                matching = [
+                    index
+                    for index in matching
+                    if len(self.case.steps[index].arguments) == specificity
+                ]
             index = next(
                 (index for index in matching if index not in self._completed_indices),
                 matching[0] if matching else None,

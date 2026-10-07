@@ -329,3 +329,36 @@ Independent v3 transition review passed238checks against source fingerprint
 `fae0d54ba73a675cbf4a62b06ad2d5a94190f5ec7eee67d70c1ee68b6096d0e0`.
 Packet/grader semantics remain unchanged. The actual audit and manifest are
 retained privately; historical v2 evidence remains byte-for-byte preserved.
+
+
+## Anthropic transition and scoring hold, 7 October 2026
+
+The owner authorised the existing Anthropic harness after the xAI credential was
+rejected. Both comparison arms use `claude-haiku-4-5-20251001`; provider switching
+does not establish a comparison against Grok. Model access and real inference
+worked. CI passed on the transition commit `c2e7a63`.
+
+Selection classification completed 120 reviewed synthetic cases without changing
+the classifier: eligible coverage was 6/95 (6.3%), with six routed decisions all
+correct and a wide precision interval. This fails the proposed 60% coverage gate.
+Fallbacks are not necessarily wrong classifications, but provide no delivered
+recommendation. The packet is deliberately difficult synthetic selection evidence,
+not a usage-weighted sample or independent final holdout.
+
+The first Anthropic paired run stopped following independently reproduced grader
+and fixture defects. All 64 attempts and charges remain preserved; 63 terminal
+outputs received blind independent agent review. The routing tool was never
+called. Neither incomplete paired metrics nor retrospective adjudication establish
+token, speed or accuracy improvement. Cumulative campaign accounting is US$9.16
+against the approved US$25 cap, including retained uncertain earlier reservations.
+
+Prospective protocol v4/grader21 and packet
+`packets/routing-task-selection-v3.json` address sufficient grouped workflow facts,
+claim-review boundaries, explicit nullable fields, valid same-window campaign-list
+reads and terminal turn-limit reporting. Unknown explanations, extra claims and
+prose still require independent review. Versions17-20 and earlier packets/scores
+remain historical. Repairs passed 4,527 independent mechanical checks and 65 focused repository
+tests. A new source/packet/protocol freeze remains required before paid execution.
+The prospective selection run uses two paired repetitions, 96 sessions, within
+the remaining cumulative cap; one repetition would be development smoke only. Fresh final acceptance,
+published-package qualification and named-client observations remain unperformed.

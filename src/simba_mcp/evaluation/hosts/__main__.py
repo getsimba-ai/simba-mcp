@@ -350,7 +350,7 @@ async def run(args):
     if tool_profile != "full" and getattr(args, "workflow_suite", None) != "rlc01":
         raise ValueError("Explicit tool profiles require the prospective RLC suite")
     grader_version = getattr(args, "grader_version", GRADER_VERSION)
-    if type(grader_version) is not int or grader_version not in (17, 18, 19, 20):
+    if type(grader_version) is not int or grader_version not in (17, 18, 19, 20, 21):
         raise ValueError("Unsupported result grader version")
     if grader_version != 17 and not (
         getattr(args, "workflow_suite", None) == "rlc01" or getattr(args, "workflow_packet", None)
@@ -636,7 +636,7 @@ async def run(args):
             else {}
         )
         report["configuration"]["routing_comparison"] = {
-            "version": "hosted-routing-v3",
+            "version": "hosted-routing-v4",
             "backend_origin_sha256": fingerprint(routing_url),
             "model": routing_model,
             "question_version": routing_version,
@@ -989,9 +989,16 @@ async def run(args):
                             row["fact_verdict"] = fact_verdict(
                                 contract, actual, set(), grader_version=grader_version
                             )
-                            if grader_version == 20:
+                            if grader_version >= 20:
                                 row["answer_correct"] = row["fact_verdict"] == "pass"
-                                row["passed"] = row["passed"] and row["answer_correct"]
+                                row["passed"] = (
+                                    row["answer_correct"]
+                                    and dispatch.evidence_satisfied
+                                    and dispatch.errors == 0
+                                    and dispatch.unintended_writes == 0
+                                    if grader_version >= 21
+                                    else row["passed"] and row["answer_correct"]
+                                )
                             row["claim_review_required"] = (
                                 not claims_in_scope(contract, actual, grader_version=grader_version)
                                 or not structured_answer_only(result.get("final_text", ""))
@@ -1000,9 +1007,17 @@ async def run(args):
                             row["trajectory"] = dispatch.calls
                             row["execution_trials"] = [t.model_dump() for t in dispatch.trials]
                             row["literal_fields_match"] = literal_fields(contract, actual)
+                            definite_failure = (
+                                row["fact_verdict"] == "fail"
+                                or not dispatch.evidence_satisfied
+                                or dispatch.errors != 0
+                                or dispatch.unintended_writes != 0
+                                if grader_version >= 21
+                                else not row["passed"] or row["fact_verdict"] == "fail"
+                            )
                             row["outcome"] = (
                                 "fail"
-                                if not row["passed"] or row["fact_verdict"] == "fail"
+                                if definite_failure
                                 else "review"
                                 if row["claim_review_required"]
                                 else "pass"
@@ -1174,9 +1189,9 @@ def main():
     parser.add_argument(
         "--grader-version",
         type=int,
-        choices=(17, 18, 19, 20),
+        choices=(17, 18, 19, 20, 21),
         default=17,
-        help="17 preserves historical semantics; 18 adds canonical identity; 19 adds monthly evidence; 20 fixes contract-based absence equivalence",
+        help="17 preserves historical semantics; 18 adds canonical identity; 19 adds monthly evidence; 20 fixes contract-based absence equivalence; 21 accepts sufficient workflow facts with separate claim review",
     )
     parser.add_argument("--tool-profile", choices=PROFILE_NAMES, default="full")
     parser.add_argument(

@@ -194,7 +194,7 @@ def load_workflow_review(path, packet, *, source_sha256, grader_version, artifac
         or review.packet_sha256 != packet.sha256
         or review.source_sha256 != source_sha256
         or review.grader_version != grader_version
-        or grader_version != 20
+        or grader_version not in (20, 21)
         or artifact_path is None
         or hashlib.sha256(_read(Path(artifact_path))).hexdigest() != review.review_artifact_sha256
     ):

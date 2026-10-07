@@ -281,7 +281,13 @@ def routing_campaign_report(paths):
                     "pass",
                     "fail",
                     "review",
-                ) or "final_text" not in row.get("session", {}):
+                ) or (
+                    "final_text" not in row.get("session", {})
+                    and not (
+                        row.get("outcome") == "fail"
+                        and row.get("session", {}).get("stop") == "turn_limit"
+                    )
+                ):
                     raise ValueError("Campaign has incomplete terminal evidence")
                 completed.add(key)
         previous_hash, previous = report_hash, report

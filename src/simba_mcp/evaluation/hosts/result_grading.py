@@ -105,25 +105,93 @@ def _artifact_conflicts(facts, nested, grader_version):
     )
 
 
-def _fact_matches(actual, expected):
+def _fact_matches(actual, expected, *, allow_extra=False):
     """Numeric JSON parity never makes a Boolean or nested claim equivalent."""
     if isinstance(expected, dict):
         return (
             isinstance(actual, dict)
-            and set(actual) == set(expected)
-            and all(_fact_matches(actual[key], value) for key, value in expected.items())
+            and (set(expected) <= set(actual) if allow_extra else set(actual) == set(expected))
+            and all(
+                _fact_matches(actual[key], value, allow_extra=allow_extra)
+                for key, value in expected.items()
+            )
         )
     if isinstance(expected, list):
         return (
             isinstance(actual, list)
             and len(actual) == len(expected)
-            and all(_fact_matches(a, e) for a, e in zip(actual, expected, strict=True))
+            and all(
+                _fact_matches(a, e, allow_extra=allow_extra)
+                for a, e in zip(actual, expected, strict=True)
+            )
         )
     if isinstance(expected, bool):
         return actual is expected
     if type(expected) in (int, float):
         return type(actual) in (int, float) and actual == expected
     return type(actual) is type(expected) and actual == expected
+
+
+def _merge_compatible_claims(left, right):
+    """Merge compatible metadata, never discard disagreeing duplicate claims."""
+    if isinstance(left, dict) and isinstance(right, dict):
+        merged = dict(left)
+        for key, value in right.items():
+            if key in merged:
+                value, compatible = _merge_compatible_claims(merged[key], value)
+                if not compatible:
+                    return None, False
+            merged[key] = value
+        return merged, True
+    return left, _fact_matches(left, right)
+
+
+def _workflow_normalise_v21(task, facts):
+    """Declared workflow grouping only; extras and contradictions remain visible."""
+    if not isinstance(facts, dict):
+        return facts, True
+    containers = {
+        "role_saved_allocation": {"deltas"},
+        "role_campaign_facts": {"campaign_incrementality"},
+        "role_campaign_budget": {"marginal_evidence", "allocation_recommendation", "allocation"},
+    }.get(task.id, set())
+    result = {key: value for key, value in facts.items() if key not in containers}
+    for container in containers & facts.keys():
+        grouped = facts[container]
+        if (
+            container in ("allocation", "campaign_incrementality")
+            and isinstance(grouped, list)
+            and len(grouped) == 1
+        ):
+            grouped = grouped[0]
+        if not isinstance(grouped, dict):
+            return facts, False
+        extras = {}
+        for key, value in grouped.items():
+            if key not in task.expected:
+                extras[key] = value
+                continue
+            if key in result:
+                value, compatible = _merge_compatible_claims(result[key], value)
+                if not compatible:
+                    return facts, False
+            result[key] = value
+        if extras:
+            result[container] = extras
+    if task.id == "role_experiment_unsupported":
+        # Canonical transport message and next action, not arbitrary prose matching.
+        if result.get("reason") in (
+            "Backend request failed with unsupported_operation (HTTP 405)",
+            "unsupported_operation (HTTP 405)",
+            "The endpoint is unsupported (HTTP 405).",
+        ):
+            result["reason"] = "unsupported_operation"
+        if (
+            result.get("next_action")
+            == "handoff: Check whether this backend supports the requested operation."
+        ):
+            result["next_action"] = "handoff"
+    return result, True
 
 
 def semantic_facts(task, facts, supported_sections, *, grader_version=17):
@@ -133,8 +201,12 @@ def semantic_facts(task, facts, supported_sections, *, grader_version=17):
     never coerce integers/strings. Unsupported explanations remain outside this
     structured-fact metric and require separate claim review.
     """
-    if type(grader_version) is not int or grader_version not in (17, 18, 19, 20):
+    if type(grader_version) is not int or grader_version not in (17, 18, 19, 20, 21):
         raise ValueError("Unsupported result grader version")
+    if grader_version >= 21:
+        facts, scoped = _workflow_normalise_v21(task, facts)
+        if not scoped:
+            return False
     facts, _ = _rlc_normalise(task, facts)
     if not isinstance(facts, dict):
         return False
@@ -198,9 +270,11 @@ def semantic_facts(task, facts, supported_sections, *, grader_version=17):
     ):
         facts["channel"] = task.channel
     for key, expected in task.expected.items():
+        if grader_version >= 21 and key not in facts:
+            return False
         actual = facts.get(key)
         if grader_version >= 20:
-            if not _fact_matches(actual, expected):
+            if not _fact_matches(actual, expected, allow_extra=grader_version >= 21):
                 return False
         elif isinstance(expected, bool):
             if actual is not expected:
@@ -219,6 +293,10 @@ def claims_in_scope(task, facts, *, grader_version=17):
     This is a schema boundary, not natural-language entailment. Free prose outside
     the parsed answer is reported separately by the host runner.
     """
+    if grader_version >= 21:
+        facts, scoped = _workflow_normalise_v21(task, facts)
+        if not scoped:
+            return False
     facts, scoped = _rlc_normalise(task, facts)
     if not isinstance(facts, dict) or not scoped:
         return False
@@ -234,7 +312,14 @@ def claims_in_scope(task, facts, *, grader_version=17):
         ):
             return False
         allowed.add("mroi_periods")
-    return set(facts) <= allowed
+    return set(facts) <= allowed and (
+        grader_version < 21
+        or all(
+            _fact_matches(facts[key], expected)
+            for key, expected in task.expected.items()
+            if key in facts and isinstance(expected, (dict, list))
+        )
+    )
 
 
 def fact_verdict(task, facts, supported_sections, *, grader_version=17):
@@ -245,6 +330,18 @@ def fact_verdict(task, facts, supported_sections, *, grader_version=17):
     """
     if semantic_facts(task, facts, supported_sections, grader_version=grader_version):
         return "pass"
+    if grader_version >= 21:
+        facts, _ = _workflow_normalise_v21(task, facts)
+    if (
+        grader_version >= 21
+        and task.id == "role_experiment_unsupported"
+        and isinstance(facts, dict)
+        and facts.get("available") is False
+        and facts.get("next_action") == "handoff"
+        and isinstance(facts.get("reason"), str)
+        and facts["reason"].strip()
+    ):
+        return "review"
     facts, _ = _rlc_normalise(task, facts)
     if _missing_diagnostic_task(task) and isinstance(facts, dict):
         state = facts.get("convergence")

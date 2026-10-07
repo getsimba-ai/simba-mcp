@@ -352,7 +352,62 @@ async def test_explicit_anthropic_model_is_same_in_both_routing_arms(
     monkeypatch.setattr(command, "session", xai.session)
     await command.run(args)
     report = json.loads(args.output.read_text())
-    assert report["configuration"]["routing_comparison"]["version"] == "hosted-routing-v3"
+    assert report["configuration"]["routing_comparison"]["version"] == "hosted-routing-v4"
     assert report["budget"]["model"] == command.MODEL
     assert len(synthetic[0]) == 4
     assert report["budget"]["charged"] == pytest.approx(0.00008)
+
+
+@pytest.mark.anyio
+@pytest.mark.parametrize("version, expected_outcome", [(20, "fail"), (21, "review")])
+async def test_sufficient_workflow_facts_with_extra_claim_require_review(
+    tmp_path, synthetic, monkeypatch, version, expected_outcome
+):
+    args = arguments(tmp_path)
+    args.grader_version = version
+    review = json.loads(args.workflow_review.read_text())
+    review["grader_version"] = version
+    args.workflow_review.write_text(json.dumps(review))
+    original_session = synthetic[2]
+
+    async def with_metadata(provider, definitions, prompt, dispatch, budget, checkpoint, **kwargs):
+        record = await original_session(
+            provider, definitions, prompt, dispatch, budget, checkpoint, **kwargs
+        )
+        facts = json.loads(record["final_text"])
+        record["final_text"] = json.dumps({**facts, "additional_claim": "needs independent review"})
+        checkpoint(record)
+        return record
+
+    monkeypatch.setattr(xai, "session", with_metadata)
+    await command.run(args)
+    report = json.loads(args.output.read_text())
+    assert all(t["fact_verdict"] == "pass" for t in report["trials"])
+    assert all(t["outcome"] == expected_outcome for t in report["trials"])
+    assert all(t["claim_review_required"] for t in report["trials"])
+    assert all(not t["passed"] for t in report["trials"])
+
+
+@pytest.mark.anyio
+async def test_campaign_retains_terminal_turn_limit_failure(tmp_path, synthetic, monkeypatch):
+    args = arguments(tmp_path)
+    original_session = synthetic[2]
+
+    async def turn_limited(*positional, **kwargs):
+        record = await original_session(*positional, **kwargs)
+        record.pop("final_text")
+        record["stop"] = "turn_limit"
+        return record
+
+    monkeypatch.setattr(xai, "session", turn_limited)
+    await command.run(args)
+    campaign = routing_campaign_report([args.output])
+    assert campaign["campaign"]["attempt_count"] == 4
+    assert campaign["campaign"]["attempt_outcomes"] == {"fail": 4}
+    assert campaign["arms"]["baseline"]["outcomes"]["fail"] == 2
+    bad = json.loads(args.output.read_text())
+    bad["trials"][0]["session"]["stop"] = "unrecognised"
+    tampered = tmp_path / "unsupported-terminal.json"
+    tampered.write_text(json.dumps(bad))
+    with pytest.raises(ValueError, match="incomplete terminal evidence"):
+        routing_campaign_report([tampered])
