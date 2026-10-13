@@ -9,10 +9,10 @@
 ## Installation
 
 For job-specific startup catalogues, see [tool profiles](docs/tool-profiles.md).
-For independently installed native Skills or bounded MCP fallback, see
-[workflow guidance](docs/workflow-guidance.md). Connecting MCP does not install
-Skills. Current campaign, experiment-screening, chart and actual-data examples
-are packaged with that guidance; [candidate acceptance](docs/role-candidate-acceptance.md)
+For instructions that help your AI assistant choose tools and interpret results, see
+[AI workflow instructions](docs/workflow-guidance.md). Read them through MCP or
+install them as Skills in a compatible client. Connecting MCP does not install
+Skills. [Candidate acceptance](docs/role-candidate-acceptance.md)
 records tested configurations and remaining rollout checks.
 
 ```bash
@@ -153,9 +153,10 @@ Try these with any connected AI assistant:
 
 ## Agent Skills
 
-Workflow guidance is available as self-contained [native Skills](skills/) and through
-`get_workflow_guidance` for clients without native Skills. Both use the same versioned,
-packaged source. Connecting the MCP endpoint does **not** install native Skills.
+Skills give your assistant task-specific instructions for using Simba's MCP tools.
+Install the relevant [Skill folders](skills/) in a compatible client, or have the
+assistant read the same instructions through `get_workflow_guidance`. Connecting
+the MCP endpoint does **not** install Skills; installing Skills does not connect MCP.
 
 | Skill | Task |
 | --- | --- |
@@ -165,8 +166,11 @@ packaged source. Connecting the MCP endpoint does **not** install native Skills.
 | [simba-optimizer-runs](skills/simba-optimizer-runs/SKILL.md) | Budget constraints, objectives and saved runs |
 | [simba-studies-workflow](skills/simba-studies-workflow/SKILL.md) | Drafts, immutable revisions, launch recovery and review |
 | [simba-var-workflow](skills/simba-var-workflow/SKILL.md) | VAR creation, linking and long-run rollups |
+| [simba-campaign-workflow](skills/simba-campaign-workflow/SKILL.md) | Campaign facts, mappings, incremental attribution and experiment priorities |
+| [simba-data-reporting](skills/simba-data-reporting/SKILL.md) | Existing dataset discovery and actual KPI/spend reporting |
 
-See [installation, fallback lookup and maintenance](docs/workflow-guidance.md).
+See [how to choose, load, and install the instructions](docs/workflow-guidance.md).
+Contributors can use the separate [maintenance guide](docs/workflow-guidance-maintenance.md).
 
 Tool descriptions default to the full legacy catalogue. Set
 `SIMBA_TOOL_DESCRIPTIONS=compact` before starting the server to opt into shorter
