@@ -2,7 +2,7 @@
 name: simba-data-reporting
 description: Report actual KPI and spend from an existing stored dataset, preserving declared roles and source identity.
 metadata:
-  version: "22"
+  version: "23"
 ---
 
 # Report actual data
@@ -20,3 +20,9 @@ datasets already stored as uploads. All four profiles expose the required reads.
 
 Follow [executable examples](references/workflow-examples.md) for complete synthetic
 discovery/reporting and refusal/recovery paths.
+
+
+If the task spans unfamiliar Simba domains and workflow routing is enabled,
+recommend_workflow can suggest guidance and visible tools. Skip it for a clear
+workflow or already-loaded guidance. Its recommendation never authorises actions;
+on fallback continue normal selection without repeating the routing call.

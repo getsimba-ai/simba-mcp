@@ -283,3 +283,29 @@ def test_valid_windows_preserve_canonical_argument_types(tmp_path):
     task = load_workflow_packet(write(tmp_path, data)).triples()[0][0]
     assert task.evidence_window == window
     assert task.section_windows == {"channel_summary": window}
+
+
+@pytest.mark.anyio
+async def test_prospective_campaign_snapshot_accepts_declared_window_only():
+    from simba_mcp.evaluation.hosts.scenarios import SyntheticDispatch
+    from simba_mcp.server import create_server
+
+    packet = load_workflow_packet("docs/evaluations/packets/routing-task-selection-v3.json")
+    case = next(task for task, _, _ in packet.triples() if task.id == "role_campaign_facts")
+    for arguments in (
+        {"model_hash": "model-example"},
+        {"model_hash": "model-example", "start": "2026-09-01", "end": "2026-09-28"},
+    ):
+        dispatch = SyntheticDispatch(create_server(profile="full"), case)
+        result, error = await dispatch("list_campaigns", arguments)
+        assert not error and dispatch.errors == 0
+        assert result["campaigns"][0]["campaign_id"] == "campaign-example"
+        repeated, error = await dispatch("list_campaigns", arguments)
+        assert not error and dispatch.errors == 0
+        assert repeated == result
+    dispatch = SyntheticDispatch(create_server(profile="full"), case)
+    _, error = await dispatch(
+        "list_campaigns",
+        {"model_hash": "model-example", "start": "2026-08-01", "end": "2026-09-28"},
+    )
+    assert error and dispatch.errors == 1

@@ -9,10 +9,10 @@ can narrow that view per caller. Neither grants backend permissions.
 
 | Profile | Current tools | Intended work |
 | --- | ---: | --- |
-| `full` | 94 | Mixed jobs and explicit fallback |
-| `data_scientist` | 94 | All data, modelling, Studies, review and planning work |
-| `marketer` | 54 | Actual-data/campaign reporting, saved evidence, comparisons, authorised plans and run curation |
-| `reviewer` | 50 | Scientific evidence/provenance, assessments, declarations and evidence-bound recommendations |
+| `full` | 95 | Mixed jobs and explicit fallback |
+| `data_scientist` | 95 | All data, modelling, Studies, review and planning work |
+| `marketer` | 55 | Actual-data/campaign reporting, saved evidence, comparisons, authorised plans and run curation |
+| `reviewer` | 51 | Scientific evidence/provenance, assessments, declarations and evidence-bound recommendations |
 
 <!-- current-role-coverage:end -->
 

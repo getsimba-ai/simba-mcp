@@ -1,4 +1,4 @@
-"""Run bounded synthetic host comparisons. Never connects to a live backend."""
+"""Run bounded synthetic host comparisons, optionally through a routing backend."""
 
 import argparse
 import asyncio
@@ -9,9 +9,11 @@ import os
 import random
 import secrets
 import time
+from contextlib import AsyncExitStack
 from copy import deepcopy
 from dataclasses import asdict
 from pathlib import Path
+from urllib.parse import urlsplit
 
 from ...guidance import read_guidance
 from ...measurements import provenance
@@ -25,7 +27,9 @@ from ..experiments import (
     source_fingerprint,
     verify_experiment,
 )
+from ..json_data import load_json
 from ..result_cases import FIXTURE_VERSION
+from ..routing import RoutingCase, grade_routing, summarise_routing
 from .anthropic import client, definitions, session
 from .budget import Budget
 from .models import GROK, MODEL, SONNET, model_configuration
@@ -41,11 +45,290 @@ from .result_selection import (
     validation_tasks,
 )
 from .roles import ROLE_CASES
+from .routing import RoutingDispatch, complete_task_usage, routing_backend_client
+from .routing_report import paired_routing_report
 from .scenarios import SyntheticDispatch, answer, rlc_tasks, role_tasks, tasks
-from .workflow_packet import load_workflow_packet
+from .workflow_packet import load_workflow_packet, load_workflow_review
+
+
+def _routing_origin(value):
+    origin = urlsplit(value or "")
+    if (
+        origin.scheme not in ("http", "https")
+        or not origin.hostname
+        or origin.username
+        or origin.password
+        or origin.query
+        or origin.fragment
+        or origin.path not in ("", "/")
+        or (origin.scheme == "http" and origin.hostname not in ("localhost", "127.0.0.1", "::1"))
+    ):
+        raise ValueError("Routing backend requires an HTTPS origin or loopback HTTP origin")
+
+
+async def classify_routing(args):
+    """Classification-only mode in the existing runner, sharing its routing ledger.
+
+    Proposed labels can produce an offline NOT_RUN packet. Paid classification
+    requires independently recorded label/calibration review, never self-review.
+    """
+    from ...guidance.routing import MODEL as routing_model
+    from ...guidance.routing import VERSION, question
+    from ..routing_cases import development_cases, selection_validation_cases
+
+    if args.output.exists():
+        raise ValueError("Refusing to overwrite evidence")
+    if any(
+        getattr(args, option, None)
+        for option in (
+            "routing_comparison",
+            "workflow_suite",
+            "workflow_packet",
+            "results_robust",
+            "role_comparison",
+            "results_baseline",
+        )
+    ):
+        raise ValueError("Classification cannot combine host comparison protocols")
+    if args.samples != 1:
+        raise ValueError("Classification records exactly one attempt per case; use samples=1")
+    split = args.routing_classification
+    cases = development_cases() if split == "development" else selection_validation_cases()
+    packet_path = getattr(args, "routing_label_packet", None)
+    if packet_path:
+        cases = [
+            RoutingCase.model_validate(row)
+            for row in load_json(packet_path.read_text(encoding="utf-8"))
+        ]
+    if (
+        not cases
+        or len({case.id for case in cases}) != len(cases)
+        or len({case.request for case in cases}) != len(cases)
+        or any(case.split != split for case in cases)
+    ):
+        raise ValueError("Classification packet requires unique cases in the selected split")
+    if getattr(args, "case", None):
+        raise ValueError("Classification must retain the full frozen packet")
+    dry = getattr(args, "routing_dry_run", False)
+    interval = getattr(args, "routing_minimum_interval", 6.1)
+    if type(interval) not in (int, float) or not math.isfinite(interval) or interval < 6.1:
+        raise ValueError(
+            "Classification interval must be at least 6.1 seconds for default admission"
+        )
+    budget = Budget(args.cap_usd, args.prior_usd)
+    packet_hash = fingerprint([case.model_dump() for case in cases])
+    calibration = {"passed": False, "status": "NOT_RUN"}
+    if not dry:
+        _routing_origin(args.routing_backend_url)
+        budget._decision_rate(args.routing_input_rate)
+        if not os.environ.get("SIMBA_ROUTING_EVAL_API_KEY"):
+            raise ValueError("Classification requires a qualified synthetic backend account")
+        review_path = getattr(args, "routing_calibration_review", None)
+        if not review_path or any(case.label_status != "verified" for case in cases):
+            raise ValueError(
+                "Paid classification requires independently reviewed labels and calibration"
+            )
+        calibration = json.loads(review_path.read_text(encoding="utf-8"))
+        from ..routing import GRADER_VERSION
+
+        if (
+            set(calibration)
+            != {"passed", "reviewer", "packet_sha256", "grader_version", "rationale"}
+            or calibration.get("passed") is not True
+            or calibration.get("packet_sha256") != packet_hash
+            or calibration.get("grader_version") != GRADER_VERSION
+            or not isinstance(calibration.get("reviewer"), str)
+            or not calibration["reviewer"].strip()
+            or calibration["reviewer"] in {case.author for case in cases}
+            or not isinstance(calibration.get("rationale"), str)
+            or not calibration["rationale"].strip()
+        ):
+            raise ValueError("Classification calibration review is not independently hash-bound")
+    inputs = {
+        "purpose": "routing_classification",
+        "split": split,
+        "packet": [case.model_dump() for case in cases],
+        "packet_sha256": packet_hash,
+        "model": routing_model,
+        "question_version": VERSION,
+        "question_sha256": fingerprint(question()),
+        "backend_origin_sha256": fingerprint(getattr(args, "routing_backend_url", None)),
+        "input_rate_usd_per_million": getattr(args, "routing_input_rate", None),
+        "authorised_budget": {"cap_usd": args.cap_usd, "prior_usd": args.prior_usd},
+        "dry_run": dry,
+        "minimum_interval_seconds": interval,
+    }
+    report = {
+        "status": "NOT_RUN" if dry else "running",
+        "inputs": inputs,
+        "calibration": calibration,
+        "frozen": {
+            "inputs_sha256": fingerprint(inputs),
+            "source_sha256": source_fingerprint(),
+            "calibration_sha256": fingerprint(calibration),
+        },
+        "trials": [
+            {"case_id": case.id, "routing_attempts": [], "score": grade_routing(case, None)}
+            for case in cases
+        ],
+    }
+    original_path = getattr(args, "continue_from", None)
+    original_hash = None
+    if original_path:
+        if dry:
+            raise ValueError("Classification continuation requires a stopped network run")
+        original_bytes = original_path.read_bytes()
+        original_hash = hashlib.sha256(original_bytes).hexdigest()
+        previous = load_json(original_bytes)
+        review_path = getattr(args, "continuation_review", None)
+        if review_path is None:
+            raise ValueError("Classification continuation requires source-transition review")
+        transition = json.loads(review_path.read_text(encoding="utf-8"))
+        old_inputs, new_inputs = deepcopy(previous["inputs"]), deepcopy(inputs)
+        old_inputs["authorised_budget"].pop("prior_usd")
+        new_inputs["authorised_budget"].pop("prior_usd")
+        previous_budget = previous["budget"]
+        if (
+            previous.get("status") != "stopped"
+            or old_inputs != new_inputs
+            or previous["calibration"] != calibration
+            or previous["frozen"]["inputs_sha256"] != fingerprint(previous["inputs"])
+            or previous["frozen"]["calibration_sha256"] != fingerprint(calibration)
+            or any(
+                type(previous_budget.get(key)) not in (int, float)
+                or not math.isfinite(previous_budget[key])
+                or previous_budget[key] < 0
+                for key in ("prior", "charged", "reserved")
+            )
+            or args.prior_usd + 1e-9
+            < sum(previous_budget[key] for key in ("prior", "charged", "reserved"))
+            or transition.get("verified") is not True
+            or not transition.get("rationale")
+            or transition.get("previous_report_sha256") != original_hash
+            or transition.get("previous_source_sha256") != previous["frozen"]["source_sha256"]
+            or transition.get("current_source_sha256") != report["frozen"]["source_sha256"]
+        ):
+            raise ValueError(
+                "Classification continuation changed frozen inputs, lost spending or broke review"
+            )
+        old_rows = previous["trials"]
+        if [row.get("case_id") for row in old_rows] != [case.id for case in cases] or any(
+            row["score"].get("case_id") != case.id
+            or row["score"].get("case_sha256") != fingerprint(case.model_dump())
+            for case, row in zip(cases, old_rows, strict=True)
+        ):
+            raise ValueError("Classification continuation changed case identities")
+        if all(row["score"]["status"] in ("PASS", "FAIL", "NEEDS_REVIEW") for row in old_rows):
+            raise ValueError("Classification continuation has no unfinished cases")
+        report["trials"] = deepcopy(old_rows)
+        report["continuation"] = {
+            "previous_report_sha256": original_hash,
+            "source_transition": transition,
+        }
+
+    def save():
+        if (
+            report["frozen"]["inputs_sha256"] != fingerprint(inputs)
+            or report["frozen"]["source_sha256"] != source_fingerprint()
+            or report["frozen"]["calibration_sha256"] != fingerprint(calibration)
+            or (
+                original_path is not None
+                and hashlib.sha256(original_path.read_bytes()).hexdigest() != original_hash
+            )
+        ):
+            raise ValueError("Classification frozen inputs changed")
+        report["budget"] = asdict(budget)
+        report["summary"] = summarise_routing([row["score"] for row in report["trials"]])
+        from collections import Counter
+
+        report["attempt_score_counts"] = dict(
+            Counter(
+                score["status"]
+                for row in report["trials"]
+                for score in [*row.get("score_history", []), row["score"]]
+            )
+        )
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        temporary = args.output.with_suffix(".tmp")
+        temporary.write_text(json.dumps(report, indent=2, allow_nan=False) + "\n", encoding="utf-8")
+        temporary.replace(args.output)
+
+    save()
+    if dry:
+        return
+    server = create_server("compact", profile="full")
+    visible = [tool.name for tool in await server.list_tools()]
+    active = None
+    try:
+        async with routing_backend_client(
+            args.routing_backend_url, os.environ["SIMBA_ROUTING_EVAL_API_KEY"]
+        ) as backend:
+            for index, (case, row) in enumerate(zip(cases, report["trials"], strict=True)):
+                if row["score"]["status"] in ("PASS", "FAIL", "NEEDS_REVIEW"):
+                    continue
+                if index:
+                    await asyncio.sleep(interval)
+                if getattr(args, "stop_file", None) and args.stop_file.exists():
+                    raise RuntimeError("Classification stopped before submission")
+
+                previous_attempts = deepcopy(row["routing_attempts"])
+                if row["score"]["status"] != "NOT_RUN":
+                    row.setdefault("score_history", []).append(deepcopy(row["score"]))
+                    row["score"] = grade_routing(case, None)
+
+                def checkpoint(attempts, row=row, previous_attempts=previous_attempts):
+                    row["routing_attempts"] = previous_attempts + attempts
+                    save()
+
+                dispatch = RoutingDispatch(
+                    None,
+                    backend,
+                    budget,
+                    checkpoint,
+                    visible=visible,
+                    input_rate=args.routing_input_rate,
+                )
+                active = (case, row)
+                result, is_error = await dispatch("recommend_workflow", {"request": case.request})
+                # Remove only the MCP presentation fields; unexpected fields stay invalid.
+                envelope = {
+                    key: value
+                    for key, value in result.items()
+                    if key
+                    not in {
+                        "guidance",
+                        "suggested_tools",
+                        "profile_limited",
+                        "advisory_only",
+                        "next_action",
+                    }
+                }
+                row["score"] = grade_routing(
+                    case, envelope, error="backend_error" if is_error else None
+                )
+                save()
+                if is_error:
+                    raise RuntimeError("Classification backend refused; evidence retained")
+                active = None
+        report["status"] = "complete"
+    except BaseException as error:
+        report["status"] = "stopped"
+        report["error_type"] = type(error).__name__
+        if active is not None and active[1]["score"]["status"] == "NOT_RUN":
+            active[1]["score"] = grade_routing(active[0], None, error=type(error).__name__)
+        raise
+    finally:
+        save()
 
 
 async def run(args):
+    if getattr(args, "routing_classification", None):
+        return await classify_routing(args)
+    if any(
+        getattr(args, option, None)
+        for option in ("routing_dry_run", "routing_label_packet", "routing_calibration_review")
+    ):
+        raise ValueError("Classification settings require explicit classification mode")
     if args.output.exists():
         raise ValueError("Refusing to overwrite evidence; carry prior spend into a new run")
     budget = Budget(
@@ -67,7 +350,7 @@ async def run(args):
     if tool_profile != "full" and getattr(args, "workflow_suite", None) != "rlc01":
         raise ValueError("Explicit tool profiles require the prospective RLC suite")
     grader_version = getattr(args, "grader_version", GRADER_VERSION)
-    if type(grader_version) is not int or grader_version not in (17, 18, 19):
+    if type(grader_version) is not int or grader_version not in (17, 18, 19, 20, 21):
         raise ValueError("Unsupported result grader version")
     if grader_version != 17 and not (
         getattr(args, "workflow_suite", None) == "rlc01" or getattr(args, "workflow_packet", None)
@@ -82,6 +365,29 @@ async def run(args):
     baseline_path = getattr(args, "results_baseline", None)
     robust = getattr(args, "results_robust", False)
     rlc = getattr(args, "workflow_suite", None) == "rlc01"
+    routing_comparison = getattr(args, "routing_comparison", False)
+    routing_url = getattr(args, "routing_backend_url", None)
+    routing_rate = getattr(args, "routing_input_rate", None)
+    if routing_comparison:
+        if any(
+            getattr(args, option, None)
+            for option in (
+                "role_comparison",
+                "results_baseline",
+                "results_robust",
+                "results_model_diagnostic",
+                "results_acceptance",
+            )
+        ):
+            raise ValueError("Routing comparison cannot combine separate comparison protocols")
+        if not rlc or args.mode != "eager" or getattr(args, "case_order_seed", None) is None:
+            raise ValueError("Routing comparison requires frozen RLC eager mode and an order seed")
+        _routing_origin(routing_url)
+        budget._decision_rate(routing_rate)
+        if not os.environ.get("SIMBA_ROUTING_EVAL_API_KEY"):
+            raise ValueError("Routing comparison requires a qualified synthetic backend account")
+    elif routing_url is not None or routing_rate is not None:
+        raise ValueError("Routing settings require explicit routing comparison mode")
     session_timeout = getattr(args, "session_timeout_seconds", None)
     if session_timeout is not None and (not math.isfinite(session_timeout) or session_timeout <= 0):
         raise ValueError("Session timeout must be finite and positive")
@@ -136,12 +442,26 @@ async def run(args):
         raise ValueError(
             "RLC01 development suite cannot be combined with historical comparison modes"
         )
-    if rlc and (budget.model != GROK or args.mode != "eager"):
-        raise ValueError("RLC01 requires the explicit Grok eager route")
+    if rlc and (args.mode != "eager" or (budget.model != GROK and not routing_comparison)):
+        raise ValueError("RLC01 requires Grok or an explicitly frozen paired routing model")
     workflow_packet_path = getattr(args, "workflow_packet", None)
     if workflow_packet_path and not rlc:
         raise ValueError("Workflow packets require the prospective RLC workflow suite")
     workflow_packet = load_workflow_packet(workflow_packet_path) if workflow_packet_path else None
+    workflow_review = workflow_review_hash = None
+    workflow_review_path = getattr(args, "workflow_review", None)
+    if routing_comparison:
+        if workflow_packet is None or workflow_review_path is None:
+            raise ValueError("Paid routing comparison requires a reviewed workflow packet")
+        workflow_review, workflow_review_hash = load_workflow_review(
+            workflow_review_path,
+            workflow_packet,
+            source_sha256=source_fingerprint(),
+            grader_version=grader_version,
+            artifact_path=getattr(args, "workflow_review_artifact", None),
+        )
+    elif workflow_review_path is not None:
+        raise ValueError("Workflow review requires the explicit paired routing protocol")
     suite = (
         workflow_packet.triples()
         if workflow_packet
@@ -296,6 +616,40 @@ async def run(args):
         }
     if workflow_packet is not None:
         report["configuration"]["workflow_packet"] = workflow_packet.freeze()
+    if workflow_review is not None:
+        report["configuration"]["workflow_review"] = {
+            "review": workflow_review,
+            "file_sha256": workflow_review_hash,
+        }
+    if routing_comparison:
+        from ...guidance.routing import MODEL as routing_model
+        from ...guidance.routing import VERSION as routing_version
+        from ...guidance.routing import question
+
+        packet_families = (
+            {
+                entry.contract.id: entry.family
+                for entry in workflow_packet.document.tasks
+                if entry.kind == "workflow" and entry.family
+            }
+            if workflow_packet is not None
+            else {}
+        )
+        report["configuration"]["routing_comparison"] = {
+            "version": "hosted-routing-v4",
+            "backend_origin_sha256": fingerprint(routing_url),
+            "model": routing_model,
+            "question_version": routing_version,
+            "question_sha256": fingerprint(question()),
+            "input_rate_usd_per_million": routing_rate,
+            "client_deadline_seconds": 3.25,
+            "arms": ["baseline", "candidate"],
+            "catalogue_policy": "Same eager domain catalogue; candidate adds advisory tool",
+            "report_families": {
+                c.id: packet_families.get(c.id) or getattr(c, "family", "") or c.id
+                for c, _, _ in selected
+            },
+        }
     if session_timeout is not None or rlc:
         report["configuration"]["session_timeout_seconds"] = (
             session_timeout if session_timeout is not None else 180.0
@@ -313,7 +667,11 @@ async def run(args):
     completed_trials = set()
     continuation_hash = None
     if continue_from:
-        if not robust or not guidance_arms or diagnostic or trial_filter:
+        if (
+            (not routing_comparison and (not robust or not guidance_arms))
+            or diagnostic
+            or trial_filter
+        ):
             raise ValueError("Continuation requires an unchanged robust paired comparison")
         previous_bytes = continue_from.read_bytes()
         previous = json.loads(previous_bytes)
@@ -355,7 +713,7 @@ async def run(args):
         valid_keys = {
             (case.id, view, rep)
             for case, _, _ in selected
-            for view in guidance_arms
+            for view in (["baseline", "candidate"] if routing_comparison else guidance_arms)
             for rep in range(args.samples)
         }
         completed_trials = {tuple(key) for key in previous_continuation.get("completed_trials", [])}
@@ -369,11 +727,15 @@ async def run(args):
             for row in previous["trials"]
             if "trajectory" in row
         )
+        result_case_ids = {case.id for case, _, _ in selected if isinstance(case, ResultTask)}
         for row in previous["trials"]:
+            terminal_fields = (
+                ("assertions", "passed", "outcome", "read_authorisation")
+                if row["case"] in result_case_ids
+                else ("fact_verdict", "passed", "outcome", "execution_trials")
+            )
             if "trajectory" in row and (
-                not all(
-                    key in row for key in ("assertions", "passed", "outcome", "read_authorisation")
-                )
+                not all(key in row for key in terminal_fields)
                 or "final_text" not in row.get("session", {})
             ):
                 raise ValueError("Continuation contains an incomplete terminal record")
@@ -392,7 +754,7 @@ async def run(args):
             "purpose": "development_smoke"
             if rlc and args.samples == 1
             else "model_selection_validation"
-            if diagnostic or selection_validation
+            if diagnostic or selection_validation or (routing_comparison and args.samples > 1)
             else "candidate_acceptance"
             if acceptance
             else "development",
@@ -427,6 +789,16 @@ async def run(args):
     def verify():
         if workflow_packet is not None:
             workflow_packet.verify()
+        if workflow_review_path is not None and (
+            hashlib.sha256(workflow_review_path.read_bytes()).hexdigest() != workflow_review_hash
+        ):
+            raise ValueError("Workflow review changed after freezing")
+        if (
+            workflow_review is not None
+            and hashlib.sha256(args.workflow_review_artifact.read_bytes()).hexdigest()
+            != workflow_review["review_artifact_sha256"]
+        ):
+            raise ValueError("Workflow review artifact changed after freezing")
         stop_file = getattr(args, "stop_file", None)
         if stop_file and stop_file.exists():
             raise RuntimeError("Operator requested stop; checkpoint and reservations retained")
@@ -458,7 +830,15 @@ async def run(args):
     save()
     try:
         verify()
-        async with host_client(os.environ[key_name]) as provider:
+        async with AsyncExitStack() as clients:
+            provider = await clients.enter_async_context(host_client(os.environ[key_name]))
+            backend_client = (
+                await clients.enter_async_context(
+                    routing_backend_client(routing_url, os.environ["SIMBA_ROUTING_EVAL_API_KEY"])
+                )
+                if routing_comparison
+                else None
+            )
             for rep, repetition in enumerate(schedule):
                 for case, prompt, expected in repetition:
                     result_case = isinstance(case, ResultTask)
@@ -476,6 +856,10 @@ async def run(args):
                             arms = [("eager", "candidate")]
                         if rep % 2:
                             arms.reverse()
+                    if routing_comparison:
+                        arms = [("eager", "baseline"), ("eager", "candidate")]
+                        if rep % 2:
+                            arms.reverse()
                     for mode, view in arms:
                         if (case.id, view, rep) in completed_trials:
                             continue
@@ -487,6 +871,10 @@ async def run(args):
                             else create_server("compact", profile=view)
                         )
                         visible = await arm_server.list_tools()
+                        if routing_comparison and view == "baseline":
+                            visible = [
+                                tool for tool in visible if tool.name != "recommend_workflow"
+                            ]
                         dispatch = SyntheticDispatch(
                             arm_server, case, allowed_tools=[t.name for t in visible]
                         )
@@ -530,6 +918,24 @@ async def run(args):
                                 else "catalogue"
                             )
                         report["trials"].append(row)
+                        if routing_comparison:
+                            row["routing_attempts"] = []
+                            if view == "candidate":
+
+                                def routing_checkpoint(attempts, row=row):
+                                    row["routing_attempts"] = attempts
+                                    save()
+                                    verify()
+
+                                dispatch = RoutingDispatch(
+                                    dispatch,
+                                    backend_client,
+                                    budget,
+                                    routing_checkpoint,
+                                    visible=[tool.name for tool in offered],
+                                    input_rate=routing_rate,
+                                    profile=tool_profile,
+                                )
                         if guidance_arms or rlc:
                             row["prompt"] = session_prompt
                             row["prompt_variant"] = "paraphrase" if paraphrased else "original"
@@ -537,6 +943,10 @@ async def run(args):
 
                         def checkpoint(record, row=row):
                             row["session"] = record
+                            if routing_comparison:
+                                row["complete_task_usage"] = complete_task_usage(
+                                    record, row["routing_attempts"]
+                                )
                             save()
                             verify()
 
@@ -570,7 +980,7 @@ async def run(args):
                         )
                         row["passed"] = (
                             actual == expected
-                            and (result_case or dispatch.completed == len(case.steps))
+                            and (result_case or dispatch.evidence_satisfied)
                             and dispatch.errors == 0
                             and dispatch.unintended_writes == 0
                         )
@@ -579,17 +989,35 @@ async def run(args):
                             row["fact_verdict"] = fact_verdict(
                                 contract, actual, set(), grader_version=grader_version
                             )
+                            if grader_version >= 20:
+                                row["answer_correct"] = row["fact_verdict"] == "pass"
+                                row["passed"] = (
+                                    row["answer_correct"]
+                                    and dispatch.evidence_satisfied
+                                    and dispatch.errors == 0
+                                    and dispatch.unintended_writes == 0
+                                    if grader_version >= 21
+                                    else row["passed"] and row["answer_correct"]
+                                )
                             row["claim_review_required"] = (
-                                not claims_in_scope(contract, actual)
+                                not claims_in_scope(contract, actual, grader_version=grader_version)
                                 or not structured_answer_only(result.get("final_text", ""))
                                 or row["fact_verdict"] == "review"
                             )
                             row["trajectory"] = dispatch.calls
                             row["execution_trials"] = [t.model_dump() for t in dispatch.trials]
                             row["literal_fields_match"] = literal_fields(contract, actual)
+                            definite_failure = (
+                                row["fact_verdict"] == "fail"
+                                or not dispatch.evidence_satisfied
+                                or dispatch.errors != 0
+                                or dispatch.unintended_writes != 0
+                                if grader_version >= 21
+                                else not row["passed"] or row["fact_verdict"] == "fail"
+                            )
                             row["outcome"] = (
                                 "fail"
-                                if not row["passed"] or row["fact_verdict"] == "fail"
+                                if definite_failure
                                 else "review"
                                 if row["claim_review_required"]
                                 else "pass"
@@ -668,6 +1096,12 @@ async def run(args):
         report["error_type"] = type(error).__name__
         raise
     finally:
+        if routing_comparison:
+            report["routing_measurements"] = paired_routing_report(
+                report["trials"],
+                report["configuration"]["routing_comparison"]["report_families"],
+                samples=args.samples,
+            )
         if rlc:
             report["assessment"] = {
                 "accepted": False,
@@ -680,7 +1114,9 @@ async def run(args):
                     "Packet independence requires external review"
                     if workflow_packet is not None
                     else "Exposed synthetic cases",
-                    "Single arm",
+                    "Paired routing experiment; independent outcome review remains required"
+                    if routing_comparison
+                    else "Single arm",
                     "No production latency evidence",
                 ],
             }
@@ -704,6 +1140,39 @@ async def run(args):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--routing-classification", choices=("development", "selection_validation"))
+    parser.add_argument(
+        "--routing-minimum-interval",
+        type=float,
+        default=6.1,
+        help="Classification pacing in seconds; minimum 6.1 for default admission",
+    )
+    parser.add_argument(
+        "--routing-dry-run",
+        action="store_true",
+        help="Freeze NOT_RUN classification evidence without provider clients",
+    )
+    parser.add_argument(
+        "--routing-label-packet",
+        type=Path,
+        help="Full JSON list of RoutingCase labels, reviewed before paid calls",
+    )
+    parser.add_argument(
+        "--routing-calibration-review",
+        type=Path,
+        help="Independent packet/hash-bound grader review",
+    )
+    parser.add_argument(
+        "--routing-comparison",
+        action="store_true",
+        help="Optional hosted advisory tool versus baseline in frozen eager RLC mode",
+    )
+    parser.add_argument("--routing-backend-url", help="Qualified synthetic backend origin")
+    parser.add_argument(
+        "--routing-input-rate",
+        type=float,
+        help="Actual Decisions account input price in USD per million, including premiums",
+    )
     parser.add_argument(
         "--continue-from",
         type=Path,
@@ -720,9 +1189,9 @@ def main():
     parser.add_argument(
         "--grader-version",
         type=int,
-        choices=(17, 18, 19),
+        choices=(17, 18, 19, 20, 21),
         default=17,
-        help="17 preserves historical semantics; 18 enables canonical identity for prospective workflows",
+        help="17 preserves historical semantics; 18 adds canonical identity; 19 adds monthly evidence; 20 fixes contract-based absence equivalence; 21 accepts sufficient workflow facts with separate claim review",
     )
     parser.add_argument("--tool-profile", choices=PROFILE_NAMES, default="full")
     parser.add_argument(
@@ -731,7 +1200,17 @@ def main():
         help="Reviewed synthetic JSON packet for prospective RLC; does not grant acceptance",
     )
     parser.add_argument(
+        "--workflow-review",
+        type=Path,
+        help="Actual independent task/grader review bound to the paired selection packet and source",
+    )
+    parser.add_argument(
         "--workflow-suite", choices=("rlc01",), help="Prospective 20-case development inventory"
+    )
+    parser.add_argument(
+        "--workflow-review-artifact",
+        type=Path,
+        help="Actual independent audit bytes bound by the workflow review",
     )
     parser.add_argument(
         "--session-timeout-seconds", type=float, help="Explicit per-session monotonic deadline"

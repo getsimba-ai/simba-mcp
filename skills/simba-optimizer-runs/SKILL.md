@@ -2,7 +2,7 @@
 name: simba-optimizer-runs
 description: Set up Simba budget optimisation and inspect saved optimiser or scenario runs. Use for channel bounds, laydown, margins and decision-versus-comparison interpretation.
 metadata:
-  version: "22"
+  version: "23"
 ---
 
 # Optimise budgets
@@ -17,3 +17,9 @@ metadata:
 For advanced parameters or sections not covered here, read the [full tool contract](references/tool-reference.md) before calling.
 
 Role availability: marketer/full can submit explicitly authorised planning runs; reviewer inspects saved evidence. Use [saved-run comparison](references/saved.md) and [executable examples](references/saved-examples.md). Campaign daily-equivalent suggestions use the campaigns/budgets guidance section and create no optimiser run.
+
+
+If the task spans unfamiliar Simba domains and workflow routing is enabled,
+recommend_workflow can suggest guidance and visible tools. Skip it for a clear
+workflow or already-loaded guidance. Its recommendation never authorises actions;
+on fallback continue normal selection without repeating the routing call.

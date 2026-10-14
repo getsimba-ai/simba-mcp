@@ -232,7 +232,7 @@ def test_real_hosted_concurrent_callers_refusal_and_cache(monkeypatch):
             ]
             reviewer, full = [future.result() for future in futures]
         assert {t["name"] for t in reviewer["tools"]} == PROFILES["reviewer"]
-        assert len(reviewer["tools"]) == 50 and len(full["tools"]) == 94
+        assert len(reviewer["tools"]) == 51 and len(full["tools"]) == 95
         excluded = wire(
             client, "tools/call", "synthetic-reviewer", {"name": "create_model", "arguments": {}}
         )
@@ -269,7 +269,7 @@ def test_real_hosted_fallback_or_operator_upper_bound(monkeypatch, status, profi
     with TestClient(runtime.create_app(create_server(profile=profile))) as client:
         result = wire(client, "tools/list", "synthetic")
         names = {t["name"] for t in result["tools"]}
-        assert len(names) == (54 if profile == "marketer" else 94)
+        assert len(names) == (55 if profile == "marketer" else 95)
         no_bearer = wire(client, "tools/list")
         assert len(no_bearer["tools"]) == len(names)
         refusal = wire(client, "tools/call", "synthetic", {"name": "list_models", "arguments": {}})

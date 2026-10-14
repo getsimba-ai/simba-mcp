@@ -1,6 +1,7 @@
 """Caller-specific hosted tool views; backend permissions remain authoritative."""
 
 import asyncio
+import contextvars
 import hashlib
 import json
 import logging
@@ -21,6 +22,7 @@ logger = logging.getLogger(__name__)
 CACHE_SECONDS = 30.0
 LOOKUP_SECONDS = 5.0
 MAX_CACHE_ENTRIES = 1024
+CURRENT_PROFILE = contextvars.ContextVar("simba_current_profile", default="full")
 _cache: OrderedDict[tuple[str, str], tuple[float, str]] = OrderedDict()
 _lock = threading.Lock()
 _next_warning = 0.0
@@ -62,6 +64,14 @@ def _warn_fallback():
 
 def _tool_name(tool):
     return tool.get("name") if isinstance(tool, Mapping) else tool.name
+
+
+async def _with_profile(ctx, call_next, profile):
+    token = CURRENT_PROFILE.set(profile)
+    try:
+        return await call_next(ctx)
+    finally:
+        CURRENT_PROFILE.reset(token)
 
 
 class UserProfileMiddleware:
@@ -113,7 +123,7 @@ class UserProfileMiddleware:
                 return await call_next(ctx)
 
         if profile in {"full", "data_scientist"}:
-            return await call_next(ctx)
+            return await _with_profile(ctx, call_next, profile)
         allowed = PROFILES[profile]
         if ctx.method == "tools/call":
             params = ctx.params
@@ -141,9 +151,9 @@ class UserProfileMiddleware:
                     structured_content=payload,
                     is_error=True,
                 )
-            return await call_next(ctx)
+            return await _with_profile(ctx, call_next, profile)
 
-        result = await call_next(ctx)
+        result = await _with_profile(ctx, call_next, profile)
         if isinstance(result, dict):
             return {**result, "tools": [t for t in result["tools"] if _tool_name(t) in allowed]}
         return result.model_copy(update={"tools": [t for t in result.tools if t.name in allowed]})

@@ -35,6 +35,7 @@ Every registered tool has an explicit decision below. Full/data_scientist includ
 | quality_full_only: `create_quality_policy`, `retire_quality_policy` | excluded | excluded | Both roles inspect policies, comparisons and saved evidence. Reviewer/full record authorised assessments, evidence-use declarations and recommendations; policy changes need full. Guidance: studies. |
 | quality_reviewer: `evaluate_study_run`, `declare_study_holdout_use`, `assess_study_validation_pair`, `recommend_study_run` | excluded | included | Both roles inspect policies, comparisons and saved evidence. Reviewer/full record authorised assessments, evidence-use declarations and recommendations; policy changes need full. Guidance: studies. |
 | guidance_marketer_reviewer: `get_workflow_guidance` | included | included | Every role needs bounded packaged workflow guidance and explicit full fallback. Guidance does not authorise operations. Guidance: mmm, results, studies. |
+| routing_marketer_reviewer: `recommend_workflow` | included | included | Optional advisory workflow selection, no domain execution or permission decision. Suggestions retain the caller view. Guidance: mmm, results, priors, optimiser, studies, var, campaigns, reporting. |
 
 ## Example scope
 
@@ -67,3 +68,4 @@ Every registered tool has an explicit decision below. Full/data_scientist includ
 - quality_full_only: Existing canonical domain guidance and domain-wire/full-lifecycle fixtures cover this family. No separate role job is introduced; omitted operations require explicit full fallback.
 - quality_reviewer: Existing canonical domain guidance and domain-wire/full-lifecycle fixtures cover this family. No separate role job is introduced; omitted operations require explicit full fallback.
 - guidance_marketer_reviewer: Existing canonical domain guidance and domain-wire/full-lifecycle fixtures cover this family. No separate role job is introduced; omitted operations require explicit full fallback.
+- routing_marketer_reviewer: Real SDK HTTP profile/caller tests and routing contract fixtures cover this tool; paid workflow acceptance remains separate.

@@ -51,6 +51,7 @@ class AppContext:
     client: SimbaAPIClient
     # None preserves direct-handler contexts used by older integrations.
     serving_http: bool | None = None
+    tool_names: tuple[str, ...] | None = None
 
 
 @asynccontextmanager
@@ -90,7 +91,11 @@ async def app_lifespan(server: MCPServer) -> AsyncIterator[AppContext]:
         max_decoded_bytes=_response_byte_limit("SIMBA_API_MAX_DECODED_BYTES"),
     )
     try:
-        yield AppContext(client=client, serving_http=serving_http)
+        yield AppContext(
+            client=client,
+            serving_http=serving_http,
+            tool_names=getattr(server, "_simba_tool_names", None),
+        )
     finally:
         await client.close()
 

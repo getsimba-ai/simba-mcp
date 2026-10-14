@@ -8,6 +8,7 @@ EVIDENCE = frozenset(
         "show_decomposition",
         "show_optimizer_allocation",
         "get_workflow_guidance",
+        "recommend_workflow",
         "get_backend_capabilities",
         "get_data_schema",
         "get_data_report",
