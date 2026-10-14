@@ -785,7 +785,7 @@ into a project). The name is HTML-sanitized server-side and must be
 non-empty.
 
 The currency labels the model's spend and money outcomes everywhere
-(results, optimizer and scenario runs, PDFs). It changes nothing fitted,
+(results, optimiser and scenario runs, PDFs). It changes nothing fitted,
 so there is no refit. Only the model's owner may set it, and only on a
 completed model. Refused (409) for a model that is study evidence (change
 it in a revision of the recipe), for one whose campaign curves were built
@@ -1292,8 +1292,7 @@ Args:
               currency, and a different code is refused because nothing
               converts between currencies. On a model that declares none,
               a supported code labels this run; without one, money is a
-              bare number. Never guess one. A dated run needs the model's
-              declared currency (set it with rename_model).
+              bare number. Never guess one.
     bounds: Per-channel min/max budget allocation as PERCENTAGES (0-100).
             Every channel must appear. Example:
             {"TV_Impressions": {"lower": 5, "upper": 40},
@@ -1433,7 +1432,8 @@ Update Run · **writes, destructive**
 
 Rename / annotate a saved optimizer or scenario run.
 
-Runs are auto-named at creation (e.g. "$1.2M · 12mo · Jan 5");
+Runs are auto-named at creation (e.g. "GBP 1.2M · 12mo · Jan 5", or
+"1.2M · 12mo · Jan 5" when the model declares no currency);
 renaming makes run history carry the analysis ("holiday cut -10%",
 "stretch 130%"). Renaming permanently flips the run's auto_named flag
 to false so future auto-naming never overwrites it. Only the fields

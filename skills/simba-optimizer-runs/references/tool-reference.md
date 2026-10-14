@@ -42,8 +42,7 @@ Args:
               currency, and a different code is refused because nothing
               converts between currencies. On a model that declares none,
               a supported code labels this run; without one, money is a
-              bare number. Never guess one. A dated run needs the model's
-              declared currency (set it with rename_model).
+              bare number. Never guess one.
     bounds: Per-channel min/max budget allocation as PERCENTAGES (0-100).
             Every channel must appear. Example:
             {"TV_Impressions": {"lower": 5, "upper": 40},

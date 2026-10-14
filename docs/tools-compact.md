@@ -378,6 +378,7 @@ value), channels=[{name, activity_column, spend_column}]. Use exact dataset colu
 For new data validate get_data_schema first. Supply requested settings explicitly;
 never drop unsupported settings to make a fit succeed. Unspecified priors use smart
 defaults based on configured assumptions, not independent scientific evidence.
+Pass currency only when the user or the data states it; never guess one.
 
 sampler uses n_samples (posterior samples), tune (tuning iterations) and chains;
 draws is not a supported key. Media priors are a list of overrides, for example
@@ -657,7 +658,7 @@ into a project). The name is HTML-sanitized server-side and must be
 non-empty.
 
 The currency labels the model's spend and money outcomes everywhere
-(results, optimizer and scenario runs, PDFs). It changes nothing fitted,
+(results, optimiser and scenario runs, PDFs). It changes nothing fitted,
 so there is no refit. Only the model's owner may set it, and only on a
 completed model. Refused (409) for a model that is study evidence (change
 it in a revision of the recipe), for one whose campaign curves were built
@@ -1004,8 +1005,9 @@ uncertain writes through run history before resubmitting.
 
 Use exact ACTIVITY-COLUMN channel keys from channel_summary/get_scenario_template,
 not display names. total_budget is currency; bounds are percentages (0-100) of
-that total, not money. bounds, laydown_weights and period_cpm must name the same
-channels. bounds maps each channel to {"lower": 20, "upper": 100}, not an array.
+that total, not money. Leave currency out to use the model's declared one; a
+different code is refused, and nothing converts between currencies.
+bounds, laydown_weights and period_cpm must name the same channels. bounds maps each channel to {"lower": 20, "upper": 100}, not an array.
 Each laydown/CPM value is an array of length num_periods; CPMs are positive.
 gamma controls uncertainty aversion: zero maximises expected return.
 objective=revenue is default; profit needs a stored operating margin or
@@ -1129,7 +1131,8 @@ Update Run · **writes, destructive**
 
 Rename / annotate a saved optimizer or scenario run.
 
-Runs are auto-named at creation (e.g. "$1.2M · 12mo · Jan 5");
+Runs are auto-named at creation (e.g. "GBP 1.2M · 12mo · Jan 5", or
+"1.2M · 12mo · Jan 5" when the model declares no currency);
 renaming makes run history carry the analysis ("holiday cut -10%",
 "stretch 130%"). Renaming permanently flips the run's auto_named flag
 to false so future auto-naming never overwrites it. Only the fields

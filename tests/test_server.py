@@ -558,6 +558,36 @@ class TestRunOptimizerPayload:
         assert "sigma_penalty" not in payload
 
 
+class TestRenameModelForwarding:
+    """Simba #1305: rename_model sends a name, a currency or both, never an empty name."""
+
+    def _ctx_capturing(self):
+        from unittest.mock import AsyncMock, MagicMock
+
+        client = MagicMock()
+        client.rename_model = AsyncMock(return_value={"model_hash": "h"})
+        ctx = MagicMock()
+        ctx.request_context.lifespan_context.client = client
+        return ctx, client
+
+    @pytest.mark.anyio
+    @pytest.mark.parametrize(
+        ("args", "forwarded"),
+        [
+            ({"currency": "GBP"}, {"name": None, "currency": "GBP"}),
+            ({"name": "Q3 model"}, {"name": "Q3 model", "currency": None}),
+            ({"name": "Q3 model", "currency": "EUR"}, {"name": "Q3 model", "currency": "EUR"}),
+        ],
+    )
+    async def test_only_the_given_fields_are_forwarded(self, args, forwarded):
+        from simba_mcp.server import rename_model
+
+        ctx, client = self._ctx_capturing()
+        await rename_model("h", **args, ctx=ctx)
+        assert client.rename_model.call_args.args == ("h",)
+        assert client.rename_model.call_args.kwargs == forwarded
+
+
 class TestCreateModelPayload:
     """Payload construction for create_model architecture params
     (saturation_type / transform_order / link)."""
@@ -651,6 +681,17 @@ class TestCreateModelPayload:
         await create_model(**self.BASE_ARGS, control_reference=None, ctx=ctx)
         (payload,) = client.create_model.call_args.args
         assert "control_reference" not in payload["config"]
+
+    @pytest.mark.anyio
+    async def test_currency_lands_in_config(self):
+        """Simba #1305: a stated currency is a config key; none leaves config unchanged."""
+        from simba_mcp.server import create_model
+
+        ctx, client = self._ctx_capturing()
+        await create_model(**self.BASE_ARGS, currency="GBP", ctx=ctx)
+        (payload,) = client.create_model.call_args.args
+        assert payload["config"]["currency"] == "GBP"
+        assert "currency" not in payload
 
     @pytest.mark.anyio
     async def test_name_passthrough(self):

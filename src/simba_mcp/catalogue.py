@@ -24,6 +24,7 @@ value), channels=[{name, activity_column, spend_column}]. Use exact dataset colu
 For new data validate get_data_schema first. Supply requested settings explicitly;
 never drop unsupported settings to make a fit succeed. Unspecified priors use smart
 defaults based on configured assumptions, not independent scientific evidence.
+Pass currency only when the user or the data states it; never guess one.
 
 sampler uses n_samples (posterior samples), tune (tuning iterations) and chains;
 draws is not a supported key. Media priors are a list of overrides, for example
@@ -102,8 +103,9 @@ uncertain writes through run history before resubmitting.
 
 Use exact ACTIVITY-COLUMN channel keys from channel_summary/get_scenario_template,
 not display names. total_budget is currency; bounds are percentages (0-100) of
-that total, not money. bounds, laydown_weights and period_cpm must name the same
-channels. bounds maps each channel to {"lower": 20, "upper": 100}, not an array.
+that total, not money. Leave currency out to use the model's declared one; a
+different code is refused, and nothing converts between currencies.
+bounds, laydown_weights and period_cpm must name the same channels. bounds maps each channel to {"lower": 20, "upper": 100}, not an array.
 Each laydown/CPM value is an array of length num_periods; CPMs are positive.
 gamma controls uncertainty aversion: zero maximises expected return.
 objective=revenue is default; profit needs a stored operating margin or

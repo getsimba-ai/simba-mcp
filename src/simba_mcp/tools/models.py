@@ -515,7 +515,7 @@ async def rename_model(
     non-empty.
 
     The currency labels the model's spend and money outcomes everywhere
-    (results, optimizer and scenario runs, PDFs). It changes nothing fitted,
+    (results, optimiser and scenario runs, PDFs). It changes nothing fitted,
     so there is no refit. Only the model's owner may set it, and only on a
     completed model. Refused (409) for a model that is study evidence (change
     it in a revision of the recipe), for one whose campaign curves were built

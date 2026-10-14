@@ -23,8 +23,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
   declares the currency of a completed model without a refit, through the same
   `PATCH /api/v1/models/{hash}`. `create_model` takes an optional `currency` for
   the build. Supported codes are GBP, USD, EUR, CAD, AUD, NZD, CHF, SGD, HKD,
-  JPY, KWD, BHD and OMR. Both descriptions tell the agent never to guess one.
-  Requires a backend that accepts `currency` on that route.
+  JPY, KWD, BHD and OMR. Both descriptions, full and compact, tell the agent
+  never to guess one. Requires a backend that accepts `currency` on that route
+  (jellyfish#1318, #1305).
 
 ### Changed
 
@@ -32,7 +33,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
   not given: the run then uses the model's declared currency, a different code
   is refused, and a model that declares none prints bare numbers. Callers that
   pass the model's own code are unaffected. Requires a backend where the
-  optimize route's `currency` is optional.
+  `/optimize` route's `currency` is optional (jellyfish#1321, #1305); an older
+  backend answers 400 "Missing required fields: ['currency']".
 
 ## 0.17.0 (2026-10-04)
 
