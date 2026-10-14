@@ -86,6 +86,7 @@ CONTRACT = {
         "config.annual_discount_rate": "create_model.annual_discount_rate",
         "config.sampler": "create_model.sampler",
         "config.reporting_kernel": "create_model.reporting_kernel",
+        "config.currency": "create_model.currency",
         "operating_margin": "create_model.operating_margin",
         "operating_margin_column": "create_model.operating_margin_column",
         "name": "create_model.name",
@@ -99,6 +100,7 @@ CONTRACT = {
     },
     "PATCH /api/v1/models/{hash}": {
         "name": "rename_model.name",
+        "currency": "rename_model.currency",
     },
     "POST /api/v1/models/{hash}/save": {
         "name": "save_model.name",

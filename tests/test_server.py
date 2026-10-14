@@ -475,6 +475,17 @@ class TestRunOptimizerPayload:
         }
 
     @pytest.mark.anyio
+    async def test_currency_left_out_uses_the_models(self):
+        """#1305: without a currency the request carries none, so the backend uses the model's."""
+        from simba_mcp.server import run_optimizer
+
+        ctx, client = self._ctx_capturing()
+        args = {k: v for k, v in self.LEGACY_ARGS.items() if k != "currency"}
+        await run_optimizer(**args, ctx=ctx)
+        _, payload = client.run_optimizer.call_args.args
+        assert "currency" not in payload
+
+    @pytest.mark.anyio
     async def test_profit_objective_passthrough(self):
         from simba_mcp.server import run_optimizer
 

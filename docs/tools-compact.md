@@ -429,6 +429,7 @@ Full guidance: get_workflow_guidance(topic=mmm, section=tool-reference).
 | `channel_groups` | list of object (optional) |  | `null` |
 | `control_reference` | object (optional) |  | `null` |
 | `name` | string |  | `""` |
+| `currency` | string |  | `""` |
 | `operating_margin` | number (optional) |  | `null` |
 | `operating_margin_column` | string |  | `""` |
 | `attribution` | string |  | `""` |
@@ -649,20 +650,31 @@ Args:
 
 Rename Model · **writes, destructive**
 
-Rename a model.
+Rename a model and/or declare its money currency. Pass name, currency or both.
 
-Changes only the display name; the model's saved/unsaved state is
-untouched (use save_model to file it into a project). The name is
-HTML-sanitized server-side and must be non-empty.
+The model's saved/unsaved state is untouched (use save_model to file it
+into a project). The name is HTML-sanitized server-side and must be
+non-empty.
+
+The currency labels the model's spend and money outcomes everywhere
+(results, optimizer and scenario runs, PDFs). It changes nothing fitted,
+so there is no refit. Only the model's owner may set it, and only on a
+completed model. Refused (409) for a model that is study evidence (change
+it in a revision of the recipe), for one whose campaign curves were built
+in another currency, and for one with old-format settings. Never guess a
+currency: use the one the user or the data states.
 
 Args:
-    model_hash: Hash of the model to rename.
-    name: New display name.
+    model_hash: Hash of the model.
+    name: New display name; leave empty to keep the current one.
+    currency: Uppercase code: GBP, USD, EUR, CAD, AUD, NZD, CHF, SGD,
+              HKD, JPY, KWD, BHD or OMR. Leave empty to keep the current one.
 
 | Parameter | Type | Required | Default |
 |---|---|---|---|
 | `model_hash` | string | yes |  |
-| `name` | string | yes |  |
+| `name` | string |  | `""` |
+| `currency` | string |  | `""` |
 
 ### `save_model`
 
@@ -1019,10 +1031,10 @@ get_workflow_guidance(topic=optimiser, section=tool-reference).
 | `total_budget` | number | yes |  |
 | `num_periods` | integer | yes |  |
 | `gamma` | number | yes |  |
-| `currency` | string | yes |  |
 | `bounds` | object | yes |  |
 | `laydown_weights` | object | yes |  |
 | `period_cpm` | object | yes |  |
+| `currency` | string (optional) |  | `null` |
 | `objective` | string |  | `"revenue"` |
 | `forward_margin` | number (optional) |  | `null` |
 | `period_multiplier` | list of number (optional) |  | `null` |

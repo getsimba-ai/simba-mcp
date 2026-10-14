@@ -14,10 +14,10 @@ async def run_optimizer(
     total_budget: float,
     num_periods: int,
     gamma: float,
-    currency: str,
     bounds: dict,
     laydown_weights: dict,
     period_cpm: dict,
+    currency: str | None = None,
     objective: str = "revenue",
     forward_margin: float | None = None,
     period_multiplier: list[float] | None = None,
@@ -64,7 +64,12 @@ async def run_optimizer(
                return only (most aggressive); higher values penalize
                uncertainty harder (more conservative). The dashboard
                typically uses values in the 0-0.1 range.
-        currency: Currency code (e.g. "USD", "GBP").
+        currency: Optional. Leave it out: the run uses the model's declared
+                  currency, and a different code is refused because nothing
+                  converts between currencies. On a model that declares none,
+                  a supported code labels this run; without one, money is a
+                  bare number. Never guess one. A dated run needs the model's
+                  declared currency (set it with rename_model).
         bounds: Per-channel min/max budget allocation as PERCENTAGES (0-100).
                 Every channel must appear. Example:
                 {"TV_Impressions": {"lower": 5, "upper": 40},
@@ -110,11 +115,12 @@ async def run_optimizer(
         "total_budget": total_budget,
         "num_periods": num_periods,
         "gamma": gamma,
-        "currency": currency,
         "bounds": bounds,
         "laydown_weights": laydown_weights,
         "period_cpm": period_cpm,
     }
+    if currency:
+        payload["currency"] = currency
     if objective != "revenue":
         payload["objective"] = objective
     if forward_margin is not None:

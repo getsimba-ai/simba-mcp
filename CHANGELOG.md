@@ -18,6 +18,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
   backend authorisation remains definitive. Local stdio controls, tool schemas
   and profile membership are unchanged. Backend/UI rollout and named-client
   acceptance are separate deployment checks.
+- A model's money currency over MCP. `rename_model` takes an optional
+  `currency` and its `name` is now optional (send either or both): the owner
+  declares the currency of a completed model without a refit, through the same
+  `PATCH /api/v1/models/{hash}`. `create_model` takes an optional `currency` for
+  the build. Supported codes are GBP, USD, EUR, CAD, AUD, NZD, CHF, SGD, HKD,
+  JPY, KWD, BHD and OMR. Both descriptions tell the agent never to guess one.
+  Requires a backend that accepts `currency` on that route.
+
+### Changed
+
+- `run_optimizer`'s `currency` is optional and is left out of the request when
+  not given: the run then uses the model's declared currency, a different code
+  is refused, and a model that declares none prints bare numbers. Callers that
+  pass the model's own code are unaffected. Requires a backend where the
+  optimize route's `currency` is optional.
 
 ## 0.17.0 (2026-10-04)
 

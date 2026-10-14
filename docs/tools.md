@@ -476,6 +476,11 @@ Args:
           omitted. Either way the model starts unsaved — invisible to
           list_models unless include_unsaved=true — until save_model
           files it into a project.
+    currency: The model's money currency, as an uppercase code (GBP, USD,
+          EUR, CAD, AUD, NZD, CHF, SGD, HKD, JPY, KWD, BHD or OMR). Leave
+          empty when unknown: money then prints as bare numbers, and the
+          owner can declare it later with rename_model, without a refit.
+          Never guess one.
     operating_margin: Scalar operating margin as a decimal fraction in
           (0, 1], e.g. 0.18 = 18%. Mutually exclusive with
           operating_margin_column (the API 400s when both are given).
@@ -568,6 +573,7 @@ Returns the model_hash for status polling.
 | `channel_groups` | list of object (optional) |  | `null` |
 | `control_reference` | object (optional) |  | `null` |
 | `name` | string |  | `""` |
+| `currency` | string |  | `""` |
 | `operating_margin` | number (optional) |  | `null` |
 | `operating_margin_column` | string |  | `""` |
 | `attribution` | string |  | `""` |
@@ -772,20 +778,31 @@ Args:
 
 Rename Model · **writes, destructive**
 
-Rename a model.
+Rename a model and/or declare its money currency. Pass name, currency or both.
 
-Changes only the display name; the model's saved/unsaved state is
-untouched (use save_model to file it into a project). The name is
-HTML-sanitized server-side and must be non-empty.
+The model's saved/unsaved state is untouched (use save_model to file it
+into a project). The name is HTML-sanitized server-side and must be
+non-empty.
+
+The currency labels the model's spend and money outcomes everywhere
+(results, optimizer and scenario runs, PDFs). It changes nothing fitted,
+so there is no refit. Only the model's owner may set it, and only on a
+completed model. Refused (409) for a model that is study evidence (change
+it in a revision of the recipe), for one whose campaign curves were built
+in another currency, and for one with old-format settings. Never guess a
+currency: use the one the user or the data states.
 
 Args:
-    model_hash: Hash of the model to rename.
-    name: New display name.
+    model_hash: Hash of the model.
+    name: New display name; leave empty to keep the current one.
+    currency: Uppercase code: GBP, USD, EUR, CAD, AUD, NZD, CHF, SGD,
+              HKD, JPY, KWD, BHD or OMR. Leave empty to keep the current one.
 
 | Parameter | Type | Required | Default |
 |---|---|---|---|
 | `model_hash` | string | yes |  |
-| `name` | string | yes |  |
+| `name` | string |  | `""` |
+| `currency` | string |  | `""` |
 
 ### `save_model`
 
@@ -1271,7 +1288,12 @@ Args:
            return only (most aggressive); higher values penalize
            uncertainty harder (more conservative). The dashboard
            typically uses values in the 0-0.1 range.
-    currency: Currency code (e.g. "USD", "GBP").
+    currency: Optional. Leave it out: the run uses the model's declared
+              currency, and a different code is refused because nothing
+              converts between currencies. On a model that declares none,
+              a supported code labels this run; without one, money is a
+              bare number. Never guess one. A dated run needs the model's
+              declared currency (set it with rename_model).
     bounds: Per-channel min/max budget allocation as PERCENTAGES (0-100).
             Every channel must appear. Example:
             {"TV_Impressions": {"lower": 5, "upper": 40},
@@ -1319,10 +1341,10 @@ Args:
 | `total_budget` | number | yes |  |
 | `num_periods` | integer | yes |  |
 | `gamma` | number | yes |  |
-| `currency` | string | yes |  |
 | `bounds` | object | yes |  |
 | `laydown_weights` | object | yes |  |
 | `period_cpm` | object | yes |  |
+| `currency` | string (optional) |  | `null` |
 | `objective` | string |  | `"revenue"` |
 | `forward_margin` | number (optional) |  | `null` |
 | `period_multiplier` | list of number (optional) |  | `null` |

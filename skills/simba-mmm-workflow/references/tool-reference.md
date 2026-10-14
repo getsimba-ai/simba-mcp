@@ -141,6 +141,11 @@ Args:
           omitted. Either way the model starts unsaved — invisible to
           list_models unless include_unsaved=true — until save_model
           files it into a project.
+    currency: The model's money currency, as an uppercase code (GBP, USD,
+          EUR, CAD, AUD, NZD, CHF, SGD, HKD, JPY, KWD, BHD or OMR). Leave
+          empty when unknown: money then prints as bare numbers, and the
+          owner can declare it later with rename_model, without a refit.
+          Never guess one.
     operating_margin: Scalar operating margin as a decimal fraction in
           (0, 1], e.g. 0.18 = 18%. Mutually exclusive with
           operating_margin_column (the API 400s when both are given).
