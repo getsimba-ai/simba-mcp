@@ -479,6 +479,11 @@
         "title": "Name",
         "type": "string"
       },
+      "currency": {
+        "default": "",
+        "title": "Currency",
+        "type": "string"
+      },
       "operating_margin": {
         "anyOf": [
           {
@@ -913,13 +918,18 @@
         "type": "string"
       },
       "name": {
+        "default": "",
         "title": "Name",
+        "type": "string"
+      },
+      "currency": {
+        "default": "",
+        "title": "Currency",
         "type": "string"
       }
     },
     "required": [
-      "model_hash",
-      "name"
+      "model_hash"
     ],
     "title": "rename_modelArguments",
     "type": "object"
@@ -1149,10 +1159,6 @@
         "title": "Gamma",
         "type": "number"
       },
-      "currency": {
-        "title": "Currency",
-        "type": "string"
-      },
       "bounds": {
         "additionalProperties": true,
         "title": "Bounds",
@@ -1167,6 +1173,18 @@
         "additionalProperties": true,
         "title": "Period Cpm",
         "type": "object"
+      },
+      "currency": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Currency"
       },
       "objective": {
         "default": "revenue",
@@ -1242,7 +1260,6 @@
       "total_budget",
       "num_periods",
       "gamma",
-      "currency",
       "bounds",
       "laydown_weights",
       "period_cpm"

@@ -378,6 +378,7 @@ value), channels=[{name, activity_column, spend_column}]. Use exact dataset colu
 For new data validate get_data_schema first. Supply requested settings explicitly;
 never drop unsupported settings to make a fit succeed. Unspecified priors use smart
 defaults based on configured assumptions, not independent scientific evidence.
+Pass currency only when the user or the data states it; never guess one.
 
 sampler uses n_samples (posterior samples), tune (tuning iterations) and chains;
 draws is not a supported key. Media priors are a list of overrides, for example
@@ -429,6 +430,7 @@ Full guidance: get_workflow_guidance(topic=mmm, section=tool-reference).
 | `channel_groups` | list of object (optional) |  | `null` |
 | `control_reference` | object (optional) |  | `null` |
 | `name` | string |  | `""` |
+| `currency` | string |  | `""` |
 | `operating_margin` | number (optional) |  | `null` |
 | `operating_margin_column` | string |  | `""` |
 | `attribution` | string |  | `""` |
@@ -649,20 +651,31 @@ Args:
 
 Rename Model · **writes, destructive**
 
-Rename a model.
+Rename a model and/or declare its money currency. Pass name, currency or both.
 
-Changes only the display name; the model's saved/unsaved state is
-untouched (use save_model to file it into a project). The name is
-HTML-sanitized server-side and must be non-empty.
+The model's saved/unsaved state is untouched (use save_model to file it
+into a project). The name is HTML-sanitized server-side and must be
+non-empty.
+
+The currency labels the model's spend and money outcomes everywhere
+(results, optimiser and scenario runs, PDFs). It changes nothing fitted,
+so there is no refit. Only the model's owner may set it, and only on a
+completed model. Refused (409) for a model that is study evidence (change
+it in a revision of the recipe), for one whose campaign curves were built
+in another currency, and for one with old-format settings. Never guess a
+currency: use the one the user or the data states.
 
 Args:
-    model_hash: Hash of the model to rename.
-    name: New display name.
+    model_hash: Hash of the model.
+    name: New display name; leave empty to keep the current one.
+    currency: Uppercase code: GBP, USD, EUR, CAD, AUD, NZD, CHF, SGD,
+              HKD, JPY, KWD, BHD or OMR. Leave empty to keep the current one.
 
 | Parameter | Type | Required | Default |
 |---|---|---|---|
 | `model_hash` | string | yes |  |
-| `name` | string | yes |  |
+| `name` | string |  | `""` |
+| `currency` | string |  | `""` |
 
 ### `save_model`
 
@@ -992,8 +1005,9 @@ uncertain writes through run history before resubmitting.
 
 Use exact ACTIVITY-COLUMN channel keys from channel_summary/get_scenario_template,
 not display names. total_budget is currency; bounds are percentages (0-100) of
-that total, not money. bounds, laydown_weights and period_cpm must name the same
-channels. bounds maps each channel to {"lower": 20, "upper": 100}, not an array.
+that total, not money. Leave currency out to use the model's declared one; a
+different code is refused, and nothing converts between currencies.
+bounds, laydown_weights and period_cpm must name the same channels. bounds maps each channel to {"lower": 20, "upper": 100}, not an array.
 Each laydown/CPM value is an array of length num_periods; CPMs are positive.
 gamma controls uncertainty aversion: zero maximises expected return.
 objective=revenue is default; profit needs a stored operating margin or
@@ -1019,10 +1033,10 @@ get_workflow_guidance(topic=optimiser, section=tool-reference).
 | `total_budget` | number | yes |  |
 | `num_periods` | integer | yes |  |
 | `gamma` | number | yes |  |
-| `currency` | string | yes |  |
 | `bounds` | object | yes |  |
 | `laydown_weights` | object | yes |  |
 | `period_cpm` | object | yes |  |
+| `currency` | string (optional) |  | `null` |
 | `objective` | string |  | `"revenue"` |
 | `forward_margin` | number (optional) |  | `null` |
 | `period_multiplier` | list of number (optional) |  | `null` |
@@ -1117,7 +1131,8 @@ Update Run · **writes, destructive**
 
 Rename / annotate a saved optimizer or scenario run.
 
-Runs are auto-named at creation (e.g. "$1.2M · 12mo · Jan 5");
+Runs are auto-named at creation (e.g. "GBP 1.2M · 12mo · Jan 5", or
+"1.2M · 12mo · Jan 5" when the model declares no currency);
 renaming makes run history carry the analysis ("holiday cut -10%",
 "stretch 130%"). Renaming permanently flips the run's auto_named flag
 to false so future auto-naming never overwrites it. Only the fields

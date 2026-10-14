@@ -53,6 +53,7 @@ async def create_model(
     channel_groups: list[dict] | None = None,
     control_reference: dict | None = None,
     name: str = "",
+    currency: str = "",
     operating_margin: float | None = None,
     operating_margin_column: str = "",
     attribution: str = "",
@@ -202,6 +203,11 @@ async def create_model(
               omitted. Either way the model starts unsaved — invisible to
               list_models unless include_unsaved=true — until save_model
               files it into a project.
+        currency: The model's money currency, as an uppercase code (GBP, USD,
+              EUR, CAD, AUD, NZD, CHF, SGD, HKD, JPY, KWD, BHD or OMR). Leave
+              empty when unknown: money then prints as bare numbers, and the
+              owner can declare it later with rename_model, without a refit.
+              Never guess one.
         operating_margin: Scalar operating margin as a decimal fraction in
               (0, 1], e.g. 0.18 = 18%. Mutually exclusive with
               operating_margin_column (the API 400s when both are given).
@@ -308,6 +314,8 @@ async def create_model(
         payload["config"]["sampler"] = sampler
     if reporting_kernel:
         payload["config"]["reporting_kernel"] = reporting_kernel
+    if currency:
+        payload["config"]["currency"] = currency
     if multiplier_column:
         payload["multiplier_column"] = multiplier_column
     if priors:
@@ -496,20 +504,31 @@ async def get_contribution_groups(
 
 async def rename_model(
     model_hash: str,
-    name: str,
+    name: str = "",
+    currency: str = "",
     ctx: Context[AppContext, Any] = None,
 ) -> APIResult:
-    """Rename a model.
+    """Rename a model and/or declare its money currency. Pass name, currency or both.
 
-    Changes only the display name; the model's saved/unsaved state is
-    untouched (use save_model to file it into a project). The name is
-    HTML-sanitized server-side and must be non-empty.
+    The model's saved/unsaved state is untouched (use save_model to file it
+    into a project). The name is HTML-sanitized server-side and must be
+    non-empty.
+
+    The currency labels the model's spend and money outcomes everywhere
+    (results, optimiser and scenario runs, PDFs). It changes nothing fitted,
+    so there is no refit. Only the model's owner may set it, and only on a
+    completed model. Refused (409) for a model that is study evidence (change
+    it in a revision of the recipe), for one whose campaign curves were built
+    in another currency, and for one with old-format settings. Never guess a
+    currency: use the one the user or the data states.
 
     Args:
-        model_hash: Hash of the model to rename.
-        name: New display name.
+        model_hash: Hash of the model.
+        name: New display name; leave empty to keep the current one.
+        currency: Uppercase code: GBP, USD, EUR, CAD, AUD, NZD, CHF, SGD,
+                  HKD, JPY, KWD, BHD or OMR. Leave empty to keep the current one.
     """
-    return await _client(ctx).rename_model(model_hash, name)
+    return await _client(ctx).rename_model(model_hash, name=name or None, currency=currency or None)
 
 
 async def save_model(

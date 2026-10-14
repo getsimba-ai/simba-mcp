@@ -38,7 +38,11 @@ Args:
            return only (most aggressive); higher values penalize
            uncertainty harder (more conservative). The dashboard
            typically uses values in the 0-0.1 range.
-    currency: Currency code (e.g. "USD", "GBP").
+    currency: Optional. Leave it out: the run uses the model's declared
+              currency, and a different code is refused because nothing
+              converts between currencies. On a model that declares none,
+              a supported code labels this run; without one, money is a
+              bare number. Never guess one.
     bounds: Per-channel min/max budget allocation as PERCENTAGES (0-100).
             Every channel must appear. Example:
             {"TV_Impressions": {"lower": 5, "upper": 40},

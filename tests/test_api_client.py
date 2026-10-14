@@ -150,6 +150,16 @@ class TestAPIClientEndpoints:
         assert _json.loads(requests[0]["body"]) == {"name": "Q3 base"}
 
     @pytest.mark.anyio
+    async def test_rename_model_declares_a_currency(self, client_with_mock):
+        """#1305: the same PATCH declares the model's currency; only the fields given are sent."""
+        import json as _json
+
+        client, requests = client_with_mock
+        await client.rename_model("abc123", currency="GBP")
+        assert requests[0]["method"] == "PATCH"
+        assert _json.loads(requests[0]["body"]) == {"currency": "GBP"}
+
+    @pytest.mark.anyio
     async def test_save_model_path(self, client_with_mock):
         """#575: POST /models/{hash}/save; project_id omitted when None."""
         import json as _json

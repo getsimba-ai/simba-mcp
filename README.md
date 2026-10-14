@@ -140,7 +140,7 @@ Try these with any connected AI assistant:
 > "Show me the model diagnostics and channel contributions for model a1b2c3d4."
 
 **Optimize budget:**
-> "Run a budget optimization on model a1b2c3d4 with $1M total budget over 12 months. Set TV bounds to 5-40% and Search to 10-50%. Use uniform laydown weights."
+> "Run a budget optimization on model a1b2c3d4 with a total budget of 1M in the model's currency over 12 months. Set TV bounds to 5-40% and Search to 10-50%. Use uniform laydown weights."
 
 **Response curves:**
 > "Show me the response curves for model a1b2c3d4. At what spend level does TV hit diminishing returns?"

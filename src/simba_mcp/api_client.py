@@ -508,9 +508,16 @@ class SimbaAPIClient:
             json={"contribution_groups": groups},
         )
 
-    async def rename_model(self, model_hash: str, name: str) -> dict:
-        """Rename a model (#575). Does not save it."""
-        return await self._request("PATCH", f"/api/v1/models/{model_hash}", json={"name": name})
+    async def rename_model(
+        self, model_hash: str, name: str | None = None, currency: str | None = None
+    ) -> dict:
+        """Rename a model (#575) and/or declare its currency. Does not save it."""
+        body: dict = {}
+        if name is not None:
+            body["name"] = name
+        if currency is not None:
+            body["currency"] = currency
+        return await self._request("PATCH", f"/api/v1/models/{model_hash}", json=body)
 
     async def save_model(self, model_hash: str, name: str, project_id: int | None = None) -> dict:
         """Save a model into a project under a display name (#575)."""
