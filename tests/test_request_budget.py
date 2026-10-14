@@ -95,7 +95,17 @@ async def test_retry_after_outside_budget_refuses_without_second_send():
 
 @pytest.mark.anyio
 @pytest.mark.parametrize(
-    "fault", [httpx.ConnectTimeout, httpx.PoolTimeout, httpx.ReadTimeout, 429, 500, 503]
+    "fault",
+    [
+        httpx.ConnectTimeout,
+        httpx.PoolTimeout,
+        httpx.ReadTimeout,
+        httpx.ReadError,
+        httpx.RemoteProtocolError,
+        429,
+        500,
+        503,
+    ],
 )
 async def test_read_faults_retry_but_mutations_send_once(fault, monkeypatch):
     monkeypatch.setattr("simba_mcp.api_client.random.uniform", lambda *_: 0)
@@ -119,6 +129,115 @@ async def test_read_faults_retry_but_mutations_send_once(fault, monkeypatch):
         assert len(calls) == 1
         assert json.loads(calls[0].content) == {"submission_key": "exact"}
         assert "reconcile" in result["_next_action"].lower()
+    finally:
+        await instance.close()
+
+
+class _DisconnectingStream(httpx.AsyncByteStream):
+    def __init__(self):
+        self.closed = False
+
+    async def __aiter__(self):
+        yield b'{"partial":'
+        raise httpx.ReadError("synthetic disconnect")
+
+    async def aclose(self):
+        self.closed = True
+
+
+@pytest.mark.anyio
+async def test_disconnect_mid_read_closes_stream_retries_get_and_reuses_client(monkeypatch):
+    """A mid-body disconnect closes that stream, retries a safe read, and leaves the client usable.
+
+    The final read is a new call after the recovered GET and the single-send mutation
+    failure. It is not the automatic retry of the disconnected GET.
+    """
+    monkeypatch.setattr("simba_mcp.api_client.random.uniform", lambda *_: 0)
+    calls = []
+    disconnected = []
+    seen = {"GET": 0, "POST": 0}
+
+    def handler(request):
+        calls.append(request)
+        seen[request.method] = seen.get(request.method, 0) + 1
+        if request.method == "GET" and seen["GET"] == 1:
+            stream = _DisconnectingStream()
+            disconnected.append(stream)
+            return httpx.Response(200, stream=stream)
+        if request.method == "POST" and seen["POST"] == 1:
+            stream = _DisconnectingStream()
+            disconnected.append(stream)
+            return httpx.Response(200, stream=stream)
+        return httpx.Response(200, json={"ok": True})
+
+    instance = client(handler)
+    shared = instance._client
+    try:
+        assert await instance.get_schema() == {"ok": True}
+        assert instance._client is shared and not shared.is_closed
+        assert sum(item.method == "GET" for item in calls) == 2
+        assert disconnected[0].closed
+        assert instance._admission.active == 0
+        assert not instance._admission.callers
+        calls.clear()
+        result = await instance.create_model({"submission_key": "exact"})
+        assert result["_status_code"] >= 400
+        assert len(calls) == 1
+        assert "reconcile" in result["_next_action"].lower()
+        assert disconnected[1].closed
+        assert instance._admission.active == 0
+        assert await instance.get_schema() == {"ok": True}
+        assert instance._client is shared and not shared.is_closed
+        assert sum(item.method == "GET" for item in calls) == 1
+    finally:
+        await instance.close()
+
+
+@pytest.mark.anyio
+async def test_cooperative_cancel_at_parse_boundary_releases_permit_without_retry(monkeypatch):
+    """Cancellation after the real parser, at its await boundary, releases admission.
+
+    The wrapper runs ``_parse_response`` and then waits. Cancellation must not
+    return the parsed payload, retry the read, close the shared client, or leave
+    the response stream open. A synchronous ``json.loads`` is still not itself
+    cancellable; this locks the await that follows it.
+    """
+    entered = asyncio.Event()
+    calls = []
+    seen = {}
+
+    def handler(request):
+        calls.append(request)
+        return httpx.Response(200, json={"ok": True})
+
+    original = SimbaAPIClient._parse_response
+
+    async def parsing(self, response, body=None):
+        seen["parsed"] = await original(self, response, body)
+        seen["response"] = response
+        entered.set()
+        await asyncio.Event().wait()
+        return seen["parsed"]
+
+    monkeypatch.setattr(SimbaAPIClient, "_parse_response", parsing)
+    instance = client(handler, total_seconds=10)
+    shared = instance._client
+    task = asyncio.create_task(instance.get_schema())
+    try:
+        await asyncio.wait_for(entered.wait(), timeout=1)
+        assert seen["parsed"] == {"ok": True}
+        task.cancel()
+        with pytest.raises(asyncio.CancelledError):
+            await asyncio.wait_for(task, timeout=1)
+        assert len(calls) == 1
+        assert seen["response"].is_closed
+        assert instance._client is shared and not shared.is_closed
+        assert instance._admission.active == 0
+        assert not instance._admission.callers
+        monkeypatch.setattr(SimbaAPIClient, "_parse_response", original)
+        assert await instance.get_schema() == {"ok": True}
+        assert len(calls) == 2
+        assert instance._client is shared
     finally:
         await instance.close()
 
